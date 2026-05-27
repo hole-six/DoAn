@@ -1,0 +1,10 @@
+{
+  "name": "doan",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/stop-dev.js && node scripts/dev.js",
+    "stop-dev": "node scripts/stop-dev.js",
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev"
+  }
+}

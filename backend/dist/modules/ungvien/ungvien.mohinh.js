@@ -18,6 +18,7 @@ const ungVienSchema = new mongoose_1.Schema({
     ngaySinh: Date,
     gioiTinh: { type: String, enum: exports.gioiTinhUngVien },
     diaChi: String,
+    anhDaiDien: String,
     tomTat: String,
     kinhNghiem: { type: Number, default: 0 },
     viTriMongMuon: String,

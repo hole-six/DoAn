@@ -15,21 +15,44 @@ type ViecLamItem = {
   loai: string
   capBac: string
   kyNang: string[]
+  moTa: string
+  yeuCau: string
   ngay: string
   featured: boolean
 }
 
-const danhMucIT = ['React', 'NodeJS', 'TypeScript', 'Python', 'Java', 'DevOps', 'MongoDB', 'Docker', 'UI/UX']
+const danhMucIT = ['React', 'NodeJS', 'TypeScript', 'Python', 'Java', 'DevOps', 'MongoDB', 'Docker', 'UI/UX', 'AWS', 'VueJS', 'Flutter', 'QA']
 
 function formatLuong(min?: number, max?: number) {
   if (!min && !max) return 'Thỏa thuận'
   return `${min?.toLocaleString('vi-VN') ?? '?'} - ${max?.toLocaleString('vi-VN') ?? '?'} VND`
 }
 
+function normalize(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/reactjs/g, 'react')
+    .replace(/node\.?js/g, 'nodejs')
+    .replace(/vue\.?js/g, 'vuejs')
+    .replace(/da nang|dn/g, 'danang')
+    .replace(/ho chi minh|hcm|tp hcm|tphcm|sai gon|saigon/g, 'hochiminh')
+    .replace(/[^a-z0-9+#.]+/g, ' ')
+    .trim()
+}
+
+function includesNormalized(source: string, query: string) {
+  const normalizedSource = normalize(source)
+  const normalizedQuery = normalize(query)
+  return !normalizedQuery || normalizedSource.includes(normalizedQuery)
+}
+
 export default function TimKiemViecLam() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [tuKhoa, setTuKhoa] = useState(searchParams.get('tuKhoa') ?? '')
-  const [diaDiem, setDiaDiem] = useState(searchParams.get('diaDiem') ?? 'Đà Nẵng')
+  const [diaDiem, setDiaDiem] = useState(searchParams.get('diaDiem') ?? '')
   const [viecLam, setViecLam] = useState<ViecLamItem[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
@@ -37,7 +60,7 @@ export default function TimKiemViecLam() {
 
   useEffect(() => {
     setTuKhoa(searchParams.get('tuKhoa') ?? '')
-    setDiaDiem(searchParams.get('diaDiem') ?? 'Đà Nẵng')
+    setDiaDiem(searchParams.get('diaDiem') ?? '')
   }, [searchParams])
 
   useEffect(() => {
@@ -57,9 +80,11 @@ export default function TimKiemViecLam() {
             luong: formatLuong(job.luongMin, job.luongMax),
             loai: job.loaiHinh ?? 'toan_thoi_gian',
             capBac: job.capBac ?? 'junior',
-            kyNang: (job.kyNang ?? []).map((skill: any) => skill.tenKyNang ?? skill.maKyNang?.tenKyNang).filter(Boolean).slice(0, 6),
+            kyNang: (job.kyNang ?? []).map((skill: any) => skill.tenKyNang ?? skill.maKyNang?.tenKyNang).filter(Boolean).slice(0, 8),
+            moTa: job.moTa ?? '',
+            yeuCau: job.yeuCau ?? '',
             ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
-            featured: index < 2,
+            featured: index < 3,
           }))
         setViecLam(items)
         setDangTai(false)
@@ -85,11 +110,8 @@ export default function TimKiemViecLam() {
   }
 
   const ketQua = viecLam.filter(job => {
-    const q = tuKhoa.trim().toLowerCase()
-    const location = diaDiem.trim().toLowerCase()
-    const matchKeyword = !q || job.tieuDe.toLowerCase().includes(q) || job.congTy.toLowerCase().includes(q) || job.kyNang.some(skill => skill.toLowerCase().includes(q))
-    const matchLocation = !location || job.diaDiem.toLowerCase().includes(location)
-    return matchKeyword && matchLocation
+    const text = `${job.tieuDe} ${job.congTy} ${job.capBac} ${job.loai} ${job.kyNang.join(' ')} ${job.moTa} ${job.yeuCau}`
+    return includesNormalized(text, tuKhoa) && includesNormalized(job.diaDiem, diaDiem)
   })
 
   return (
@@ -121,6 +143,7 @@ export default function TimKiemViecLam() {
         <aside className="jobs-real-filter">
           <div><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></div>
           <button onClick={() => setSearchParams({ diaDiem: 'Đà Nẵng' })}><MapPin size={15} /> Đà Nẵng</button>
+          <button onClick={() => setSearchParams({ diaDiem: 'Remote' })}><MapPin size={15} /> Remote</button>
           <button onClick={() => setSearchParams({ tuKhoa: 'React' })}><Filter size={15} /> React</button>
           <button onClick={() => setSearchParams({ tuKhoa: 'NodeJS' })}><Filter size={15} /> NodeJS</button>
           <button onClick={() => setSearchParams({ tuKhoa: 'Senior' })}><Filter size={15} /> Senior</button>
@@ -131,7 +154,7 @@ export default function TimKiemViecLam() {
           <div className="jobs-real-heading">
             <div>
               <h2>{dangTai ? 'Đang tải việc làm' : `Tìm thấy ${ketQua.length} việc làm`}</h2>
-              <p>Dữ liệu lấy từ API `/tintuyendung`, lọc theo từ khóa và địa điểm.</p>
+              <p>Dữ liệu lấy từ API `/tintuyendung`, tìm không phân biệt dấu, cách viết ReactJS/React, NodeJS/Node.js và Đà Nẵng/Da Nang.</p>
             </div>
           </div>
           {loi && <div className="jobs-real-error">{loi}</div>}

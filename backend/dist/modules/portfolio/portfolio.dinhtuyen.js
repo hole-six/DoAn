@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.dinhTuyenPortfolio = void 0;
+const express_1 = require("express");
+const batloibatdongbo_js_1 = require("../../dungchung/batloibatdongbo.js");
+const portfolio_dieukhien_js_1 = require("./portfolio.dieukhien.js");
+exports.dinhTuyenPortfolio = (0, express_1.Router)();
+exports.dinhTuyenPortfolio.get('/', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.layDanhSach));
+exports.dinhTuyenPortfolio.post('/', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.taoMoi));
+exports.dinhTuyenPortfolio.get('/:ma', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.layTheoMa));
+exports.dinhTuyenPortfolio.patch('/:ma', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.capNhat));
+exports.dinhTuyenPortfolio.post('/:ma/preview', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.preview));
+exports.dinhTuyenPortfolio.get('/:ma/export', (0, batloibatdongbo_js_1.batLoiBatDongBo)(portfolio_dieukhien_js_1.dieuKhienPortfolio.exportHtml));

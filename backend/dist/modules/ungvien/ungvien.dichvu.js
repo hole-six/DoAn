@@ -22,6 +22,7 @@ function chuanHoaUngVien(taiLieu) {
         ngaySinh: duLieu.ngaySinh,
         gioiTinh: duLieu.gioiTinh,
         diaChi: duLieu.diaChi,
+        anhDaiDien: duLieu.anhDaiDien,
         tomTat: duLieu.tomTat,
         kinhNghiem: duLieu.kinhNghiem,
         viTriMongMuon: duLieu.viTriMongMuon,

@@ -8,6 +8,15 @@ import {
 } from 'lucide-react'
 import effortBg from './assets/EffortBackground.png'
 import './ungdung.css'
+import './realtime.css'
+
+// ✨ Import Real-time Components
+import { ThongBaoCenter } from './components/ThongBaoCenter'
+import { ChatBox } from './components/ChatBox'
+import { PWAInstallPrompt } from './components/PWAInstallPrompt'
+import { OfflineIndicator } from './components/OfflineIndicator'
+import { khoiTaoSocket } from './lib/socket'
+import { dangKyPushSubscription, langNgheNotificationClick as langNghePushClick } from './lib/pushNotifications'
 
 // ─── Dữ liệu tĩnh ────────────────────────────────────────────────────────────
 
@@ -714,6 +723,7 @@ import DashboardUngVien, {
   UngTuyenPage,
   ViecDaLuuPage,
 } from './pages/ungvien/UngVienHeThong'
+import PortfolioGeneratorPage from './pages/ungvien/PortfolioGenerator'
 import DashboardNhaTuyenDung, {
   AnalyticsNhaTuyenDungPage,
   BangGiaNhaTuyenDungPage,
@@ -739,8 +749,30 @@ import {
 import TrangDangXayDungPage from './pages/TrangDangXayDung'
 
 export default function UngDung() {
+  // ✨ Initialize real-time features
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    
+    if (token) {
+      // Initialize Socket.IO
+      khoiTaoSocket(token)
+      
+      // Register push notifications
+      dangKyPushSubscription().catch(console.error)
+      
+      // Listen for notification clicks
+      langNghePushClick()
+    }
+  }, [])
+
   return (
     <BrowserRouter>
+      {/* ✨ Real-time UI Components */}
+      <PWAInstallPrompt />
+      <OfflineIndicator />
+      <ThongBaoCenter />
+      <ChatBox />
+      
       <Routes>
         {/* Public routes với Header + Footer */}
         <Route element={<BoDinhTuyen />}>
@@ -767,6 +799,7 @@ export default function UngDung() {
         <Route path="/ung-vien" element={<DashboardShell vaiTro="ungvien" />}>
           <Route index element={<DashboardUngVien />} />
           <Route path="ho-so" element={<HoSoUngVienPage />} />
+          <Route path="portfolio" element={<PortfolioGeneratorPage />} />
           <Route path="viec-da-luu" element={<ViecDaLuuPage />} />
           <Route path="ung-tuyen" element={<UngTuyenPage />} />
           <Route path="lich-phong-van" element={<LichPhongVanPage />} />

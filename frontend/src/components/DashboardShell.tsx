@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, Navigate, NavLink, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard, Briefcase, Users, Calendar, Bell,
   Settings, LogOut, Menu, X, Building2, BarChart2,
   FileText, Star, Shield, UserCheck, BookOpen,
 } from 'lucide-react'
 import logoWeb from '../assets/logoweb.png'
+import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 
 const techIcons = [
   'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg',
@@ -22,6 +23,7 @@ interface Props { vaiTro: VaiTro }
 const menuUngVien = [
   { to: '/ung-vien', icon: LayoutDashboard, label: 'Tổng quan', end: true },
   { to: '/ung-vien/ho-so', icon: FileText, label: 'Hồ sơ năng lực' },
+  { to: '/ung-vien/portfolio', icon: FileText, label: 'Portfolio HTML' },
   { to: '/ung-vien/viec-da-luu', icon: Star, label: 'Việc đã lưu' },
   { to: '/ung-vien/ung-tuyen', icon: Briefcase, label: 'Hồ sơ ứng tuyển' },
   { to: '/ung-vien/lich-phong-van', icon: Calendar, label: 'Lịch phỏng vấn' },
@@ -59,11 +61,14 @@ const nhanMap = { ungvien: 'Ứng viên', nhatuyendung: 'Nhà tuyển dụng', q
 export default function DashboardShell({ vaiTro }: Props) {
   const [open, setOpen] = useState(false)
   const menu = menuMap[vaiTro]
-  const nguoiDung = JSON.parse(localStorage.getItem('itjob_nguoidung') ?? 'null')
+  const nguoiDung = layNguoiDung()
+  const vaiTroCanCo = vaiTro === 'ungvien' ? 'ung_vien' : vaiTro === 'nhatuyendung' ? 'nha_tuyen_dung' : 'admin'
+
+  if (!nguoiDung) return <Navigate to="/dang-nhap" replace />
+  if (nguoiDung.vaiTro !== vaiTroCanCo) return <Navigate to={duongDanTheoVaiTro[nguoiDung.vaiTro]} replace />
 
   const dangXuat = () => {
-    localStorage.removeItem('itjob_token')
-    localStorage.removeItem('itjob_nguoidung')
+    xoaPhienDangNhap()
   }
 
   return (

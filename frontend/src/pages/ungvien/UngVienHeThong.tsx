@@ -14,6 +14,7 @@ import {
   Trash2,
   XCircle,
 } from 'lucide-react'
+import CvStudio from './CvStudio'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
@@ -230,6 +231,7 @@ export function HoSoUngVienPage() {
   if (data.loading || !profile) return <Page title="Hồ sơ năng lực" desc="Đang tải..."><div className="uv-panel">Đang tải...</div></Page>
   return <Page title="Hồ sơ năng lực" desc="Quản lý hồ sơ cá nhân, kỹ năng, portfolio và CV năng lực." action={<button className="primary-button" onClick={() => setCv({ tieuDe: 'CV mới', cvChinh: false, congKhai: true, hocVan: [], kinhNghiemLam: [], chungChi: [], duAn: [] })}><Plus size={16} /> Thêm CV</button>}>
     <ErrorBox message={error || data.error} />
+    <CvStudio data={data} onReload={data.reload} />
     <form className="uv-panel uv-form" onSubmit={saveProfile}>
       <PanelHead title="Thông tin cá nhân" />
       <Field label="Vị trí mong muốn"><input value={profile.viTriMongMuon ?? ''} onChange={e => setProfile({ ...profile, viTriMongMuon: e.target.value })} /></Field>

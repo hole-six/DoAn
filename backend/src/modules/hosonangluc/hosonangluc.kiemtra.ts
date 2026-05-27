@@ -14,6 +14,13 @@ export const kiemTraTaoHoSoNangLuc = z.object({
   kinhNghiemLam: z.array(kiemTraMucThongTin).optional(),
   chungChi: z.array(kiemTraMucThongTin).optional(),
   duAn: z.array(kiemTraMucThongTin).optional(),
+  anhDaiDien: z.string().optional(),
+  templateCv: z.string().optional(),
+  mauChinh: z.string().optional(),
+  mauPhu: z.string().optional(),
+  font: z.string().optional(),
+  markdownGoc: z.string().optional(),
+  ghiChuAi: z.string().optional(),
   cvChinh: z.boolean().optional(),
   congKhai: z.boolean().optional(),
 })

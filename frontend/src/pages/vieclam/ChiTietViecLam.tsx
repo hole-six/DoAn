@@ -1,112 +1,215 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { MapPin, DollarSign, Clock, Bookmark, Share2, Building2, Users, Globe, Briefcase } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { Bookmark, Briefcase, Building2, Clock, DollarSign, Globe, MapPin, Share2, Users } from 'lucide-react'
+import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 
-const viecLamMau = {
-  id: 1,
-  tieuDe: 'Senior ReactJS Developer',
-  congTy: 'FPT Software',
-  logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/200px-FPT_logo_2010.svg.png',
-  diaDiem: 'Hải Châu, Đà Nẵng',
-  luong: '$1,500 – $2,500',
-  loai: 'Full-time',
-  capBac: 'Senior',
-  kyNang: ['ReactJS', 'TypeScript', 'Redux', 'Senior', 'Full-time'],
-  moTa: `Chúng tôi đang tìm kiếm một Senior ReactJS Developer tài năng để gia nhập đội ngũ phát triển sản phẩm của FPT Software. Bạn sẽ đóng vai trò then chốt trong việc xây dựng và duy trì các ứng dụng web phức tạp, hiệu suất cao cho các khách hàng toàn cầu.`,
-  yeuCau: [
-    'Ít nhất 4 năm kinh nghiệm làm việc thực tế với ReactJS và JavaScript/TypeScript.',
-    'Hiểu biết sâu sắc về React core principles (Virtual DOM, Component Lifecycle, Hooks, State Management).',
-    'Kinh nghiệm làm việc với Redux, Context API hoặc các state management tools khác.',
-    'Thành thạo HTML5, CSS3, SASS/LESS và các framework CSS (Tailwind, Material UI).',
-    'Kỹ năng giao tiếp tiếng Anh tốt.',
-  ],
-  quyenLoi: [
-    'Mức lương cạnh tranh: $1,500 – $2,500 tùy năng lực, review lương 2 lần/năm.',
-    'Thưởng dự án, thưởng tháng 13 và các dịp lễ tết.',
-    'Bảo hiểm sức khỏe FPT Care cao cấp cho bản thân và gia đình.',
-    'Môi trường làm việc quốc tế, cơ hội onsite tại Nhật Bản, Mỹ, Châu Âu.',
-    'Cung cấp thiết bị làm việc hiện đại (Macbook Pro).',
-  ],
-  congTyInfo: {
-    nganh: 'Outsourcing & Product',
-    quyMo: '10,000+ nhân viên',
-    diaChi: 'FPT Complex, Nam Kỳ Khởi Nghĩa, Ngũ Hành Sơn, Đà Nẵng',
-    website: 'fpt-software.com',
-  },
-  viecLamLienQuan: [
-    { id: 2, tieuDe: 'Frontend Lead (ReactJS)', congTy: 'Axon Active', luong: 'Lên đến $3,000', diaDiem: 'Đà Nẵng' },
-    { id: 3, tieuDe: 'Senior Frontend Engineer', congTy: 'Mgm Technology', luong: 'Thỏa thuận', diaDiem: 'Đà Nẵng' },
-    { id: 4, tieuDe: 'React Developer (Mid/Senior)', congTy: 'Enclave', luong: '$1,000 – $2,000', diaDiem: 'Đà Nẵng' },
-  ],
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
+const logoDuPhong = 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT'
+
+type TinTuyenDung = {
+  id: string
+  maNhaTuyenDung: string
+  nhaTuyenDung?: {
+    id: string
+    tenCongTy: string
+    logo?: string
+  }
+  tieuDe: string
+  yeuCauKinhNghiem?: string
+  diaChi?: string
+  luongMin?: number
+  luongMax?: number
+  loaiHinh?: string
+  capBac?: string
+  hanNop?: string
+  soLuong?: number
+  moTa?: string
+  yeuCau?: string
+  quyenLoi?: string
+  luotXem?: number
+  trangThai?: string
+  ngayDang?: string
+  kyNang?: Array<{ tenKyNang?: string }>
+}
+
+type CongTy = {
+  id: string
+  tenCongTy: string
+  logo?: string
+  diaChi?: string
+  website?: string
+  quyMo?: number
+  nganh?: string
+  moTa?: string
+}
+
+function layJson(path: string) {
+  return fetch(`${API_URL}${path}`).then(async res => {
+    const body = await res.json()
+    if (!res.ok) throw new Error(body.thongBao ?? 'Không tải được dữ liệu')
+    return body.duLieu
+  })
+}
+
+function formatLuong(min?: number, max?: number) {
+  if (!min && !max) return 'Thỏa thuận'
+  return `${min?.toLocaleString('vi-VN') ?? '?'} - ${max?.toLocaleString('vi-VN') ?? '?'} VND`
+}
+
+function formatQuyMo(quyMo?: number) {
+  if (!quyMo) return 'Đang cập nhật'
+  if (quyMo >= 1000) return `${quyMo.toLocaleString('vi-VN')}+ nhân viên`
+  return `${quyMo} nhân viên`
+}
+
+function tachDong(value?: string) {
+  return (value ?? '')
+    .split(/\n|\. /)
+    .map(item => item.trim())
+    .filter(Boolean)
 }
 
 export default function ChiTietViecLam() {
-  const viec = viecLamMau
+  const { id } = useParams()
   const [tab, setTab] = useState<'mo-ta' | 'cong-ty'>('mo-ta')
+  const [viec, setViec] = useState<TinTuyenDung | null>(null)
+  const [congTy, setCongTy] = useState<CongTy | null>(null)
+  const [viecLienQuan, setViecLienQuan] = useState<TinTuyenDung[]>([])
+  const [daUngTuyen, setDaUngTuyen] = useState(false)
+  const [thongBaoUngTuyen, setThongBaoUngTuyen] = useState('')
+  const [dangUngTuyen, setDangUngTuyen] = useState(false)
+  const [dangTai, setDangTai] = useState(true)
+  const [loi, setLoi] = useState('')
+
+  useEffect(() => {
+    let active = true
+    setDangTai(true)
+    layJson(`/tintuyendung/${id}`)
+      .then(async job => {
+        const [company, jobs] = await Promise.all([
+          layJson(`/nhatuyendung/${job.maNhaTuyenDung}`),
+          layJson('/tintuyendung'),
+        ])
+        if (!active) return
+        setViec(job)
+        setCongTy(company)
+        setViecLienQuan((jobs ?? [])
+          .filter((item: TinTuyenDung) => item.id !== job.id && item.trangThai === 'dang_mo')
+          .filter((item: TinTuyenDung) => item.maNhaTuyenDung === job.maNhaTuyenDung || item.capBac === job.capBac)
+          .slice(0, 5))
+        setLoi('')
+
+        const nguoiDung = layNguoiDung()
+        if (nguoiDung?.vaiTro === 'ung_vien') {
+          const [ungVienList, ungTuyenList] = await Promise.all([
+            apiCoXacThuc('/ungvien').catch(() => []),
+            apiCoXacThuc('/hosoungtuyen').catch(() => []),
+          ])
+          const ungVien = (ungVienList ?? []).find((item: any) => item.maNguoiDung === nguoiDung.id)
+          setDaUngTuyen((ungTuyenList ?? []).some((item: any) => item.maUngVien === ungVien?.id && item.maTinTuyenDung === job.id && item.trangThai !== 'da_rut'))
+        } else {
+          setDaUngTuyen(false)
+        }
+      })
+      .catch(error => setLoi(error instanceof Error ? error.message : 'Không tải được chi tiết việc làm'))
+      .finally(() => active && setDangTai(false))
+    return () => { active = false }
+  }, [id])
+
+  const kyNang = useMemo(() => (viec?.kyNang ?? []).map(skill => skill.tenKyNang).filter(Boolean) as string[], [viec])
+  const yeuCau = tachDong(viec?.yeuCau)
+  const quyenLoi = tachDong(viec?.quyenLoi)
+  const tenCongTy = congTy?.tenCongTy ?? viec?.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng'
+  const logo = congTy?.logo ?? viec?.nhaTuyenDung?.logo ?? logoDuPhong
+
+  const ungTuyenNgay = async () => {
+    const nguoiDung = layNguoiDung()
+    if (!nguoiDung) {
+      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(window.location.pathname)}`
+      return
+    }
+
+    if (nguoiDung.vaiTro !== 'ung_vien') {
+      setThongBaoUngTuyen('Chỉ tài khoản ứng viên mới được ứng tuyển. Bạn đang đăng nhập vai trò khác.')
+      window.setTimeout(() => { window.location.href = duongDanTheoVaiTro[nguoiDung.vaiTro] }, 900)
+      return
+    }
+
+    if (!viec) return
+    setDangUngTuyen(true)
+    setThongBaoUngTuyen('')
+
+    try {
+      const [ungVienList, ungTuyenList] = await Promise.all([
+        apiCoXacThuc('/ungvien'),
+        apiCoXacThuc('/hosoungtuyen'),
+      ])
+      const ungVien = (ungVienList ?? []).find((item: any) => item.maNguoiDung === nguoiDung.id)
+      if (!ungVien) {
+        setThongBaoUngTuyen('Bạn cần hoàn thiện hồ sơ ứng viên trước khi ứng tuyển.')
+        window.setTimeout(() => { window.location.href = '/ung-vien/ho-so' }, 900)
+        return
+      }
+
+      const daNop = (ungTuyenList ?? []).some((item: any) => item.maUngVien === ungVien.id && item.maTinTuyenDung === viec.id && item.trangThai !== 'da_rut')
+      if (daNop) {
+        setDaUngTuyen(true)
+        setThongBaoUngTuyen('Bạn đã ứng tuyển tin này.')
+        return
+      }
+
+      await apiCoXacThuc('/hosoungtuyen/ung-tuyen-nhanh', {
+        method: 'POST',
+        body: JSON.stringify({
+          maTinTuyenDung: viec.id,
+          diemKhopKyNang: 75,
+          thuXinViec: `Tôi quan tâm tới vị trí ${viec.tieuDe} tại ${tenCongTy} và mong muốn được trao đổi thêm.`,
+        }),
+      })
+      setDaUngTuyen(true)
+      setThongBaoUngTuyen('Ứng tuyển thành công. Hồ sơ đã được gửi tới nhà tuyển dụng.')
+    } catch (err) {
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không ứng tuyển được')
+    } finally {
+      setDangUngTuyen(false)
+    }
+  }
+
+  if (dangTai) return <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>Đang tải chi tiết việc làm...</main>
+  if (loi || !viec) return <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center', color: '#991b1b' }}>{loi || 'Không tìm thấy việc làm'}</main>
 
   return (
     <main style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
-      {/* Banner với gradient overlay */}
       <div style={{ position: 'relative', height: 280, overflow: 'hidden', background: 'linear-gradient(135deg, #0b1c30 0%, #1e3a5f 100%)' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'url(https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15 }} />
-        
-        {/* Logo + Title overlay */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
-            <div style={{
-              width: 88, height: 88, background: '#fff',
-              border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', flexShrink: 0,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            }}>
-              <img src={viec.logo} alt={viec.congTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+            <div style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+              <img src={logo} alt={tenCongTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.currentTarget as HTMLImageElement).src = logoDuPhong }} />
             </div>
             <div style={{ flex: 1 }}>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 4, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>
-                {viec.tieuDe}
-              </h1>
-              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{viec.congTy}</p>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 4, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>{viec.tieuDe}</h1>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{tenCongTy}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Meta bar + Tabs */}
       <div style={{ background: '#fff', borderBottom: '1px solid #ebebeb' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, padding: '14px 0 0', fontSize: 13, color: '#6b7280' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#16a34a', fontWeight: 700 }}>
-              <DollarSign size={14} /> {viec.luong}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <MapPin size={13} /> {viec.diaDiem}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Briefcase size={13} /> {viec.loai}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Clock size={13} /> {viec.capBac}
-            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#16a34a', fontWeight: 700 }}><DollarSign size={14} /> {formatLuong(viec.luongMin, viec.luongMax)}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={13} /> {viec.diaChi ?? 'Đà Nẵng'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Briefcase size={13} /> {viec.loaiHinh ?? 'toan_thoi_gian'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={13} /> {viec.capBac ?? 'junior'}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Users size={13} /> {viec.soLuong ?? 1} vị trí</span>
           </div>
-
           <div style={{ display: 'flex', gap: 0, marginTop: 8 }}>
             {[
               { key: 'mo-ta', label: 'Mô tả công việc' },
               { key: 'cong-ty', label: 'Về công ty' },
             ].map(t => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key as typeof tab)}
-                style={{
-                  padding: '12px 20px', border: 'none', background: 'transparent',
-                  cursor: 'pointer', fontSize: 14, fontWeight: 600,
-                  color: tab === t.key ? '#e11d48' : '#6b7280',
-                  borderBottom: tab === t.key ? '2px solid #e11d48' : '2px solid transparent',
-                  marginBottom: -1,
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                }}
-              >
+              <button key={t.key} onClick={() => setTab(t.key as typeof tab)} style={{ padding: '12px 20px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: tab === t.key ? '#e11d48' : '#6b7280', borderBottom: tab === t.key ? '2px solid #e11d48' : '2px solid transparent', marginBottom: -1, fontFamily: "'Inter', system-ui, sans-serif" }}>
                 {t.label}
               </button>
             ))}
@@ -114,97 +217,37 @@ export default function ChiTietViecLam() {
         </div>
       </div>
 
-      {/* Content */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
-        
-        {/* Main content */}
         <div style={{ display: 'grid', gap: 16 }}>
           {tab === 'mo-ta' && (
             <>
-              {/* Tags */}
               <div style={{ background: '#fff', borderRadius: 8, padding: '16px 20px' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {viec.kyNang.map(kn => (
-                    <span key={kn} style={{
-                      background: '#f0f0f0',
-                      borderRadius: 6,
-                      padding: '6px 14px',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: '#374151',
-                    }}>{kn}</span>
-                  ))}
+                  {[...kyNang, viec.capBac, viec.loaiHinh].filter(Boolean).map(kn => <span key={kn} style={{ background: '#f0f0f0', borderRadius: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600, color: '#374151' }}>{kn}</span>)}
                 </div>
               </div>
-
-              {/* Actions */}
               <div style={{ background: '#fff', borderRadius: 8, padding: '20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button style={{
-                  flex: 1,
-                  minWidth: 200,
-                  background: '#0058be',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '12px 24px',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                }}>
-                  Ứng tuyển ngay
+                <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Inter', system-ui, sans-serif" }}>
+                  {dangUngTuyen ? 'Đang ứng tuyển...' : daUngTuyen ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </button>
-                <button style={{
-                  background: '#f3f4f6',
-                  color: '#374151',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 8,
-                  padding: '12px 20px',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                }}>
-                  <Bookmark size={16} /> Lưu
-                </button>
-                <button style={{
-                  background: '#f3f4f6',
-                  color: '#374151',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 8,
-                  padding: '12px 20px',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                }}>
-                  <Share2 size={16} /> Chia sẻ
-                </button>
+                <button style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Bookmark size={16} /> Lưu</button>
+                <button style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Share2 size={16} /> Chia sẻ</button>
               </div>
-
-              {/* Description sections */}
+              {thongBaoUngTuyen && <div style={{ background: '#fff', borderRadius: 8, padding: '14px 18px', border: '1px solid #dbe4f0', color: daUngTuyen ? '#166534' : '#334155', fontWeight: 700 }}>{thongBaoUngTuyen}</div>}
               <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>📋 Mô tả công việc</h2>
-                <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.8 }}>{viec.moTa}</p>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>Mô tả công việc</h2>
+                <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.8 }}>{viec.moTa ?? 'Tin tuyển dụng chưa cập nhật mô tả.'}</p>
               </div>
-
               <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>✅ Yêu cầu công việc</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>Yêu cầu công việc</h2>
                 <ul style={{ fontSize: 14, color: '#374151', lineHeight: 1.8, paddingLeft: 20 }}>
-                  {viec.yeuCau.map((y, i) => <li key={i} style={{ marginBottom: 8 }}>{y}</li>)}
+                  {(yeuCau.length ? yeuCau : ['Chưa cập nhật yêu cầu chi tiết.']).map((item, index) => <li key={index} style={{ marginBottom: 8 }}>{item}</li>)}
                 </ul>
               </div>
-
               <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
-                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>🎁 Quyền lợi</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>Quyền lợi</h2>
                 <ul style={{ fontSize: 14, color: '#374151', lineHeight: 1.8, paddingLeft: 20 }}>
-                  {viec.quyenLoi.map((q, i) => <li key={i} style={{ marginBottom: 8 }}>{q}</li>)}
+                  {(quyenLoi.length ? quyenLoi : ['Chưa cập nhật quyền lợi chi tiết.']).map((item, index) => <li key={index} style={{ marginBottom: 8 }}>{item}</li>)}
                 </ul>
               </div>
             </>
@@ -212,13 +255,13 @@ export default function ChiTietViecLam() {
 
           {tab === 'cong-ty' && (
             <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: '#0b1c30' }}>Về {viec.congTy}</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: '#0b1c30' }}>Về {tenCongTy}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 24px', marginBottom: 24 }}>
                 {[
-                  { label: 'Ngành nghề', val: viec.congTyInfo.nganh },
-                  { label: 'Quy mô', val: viec.congTyInfo.quyMo },
-                  { label: 'Website', val: viec.congTyInfo.website },
-                  { label: 'Địa chỉ', val: viec.congTyInfo.diaChi },
+                  { label: 'Ngành nghề', val: congTy?.nganh ?? 'Công nghệ thông tin' },
+                  { label: 'Quy mô', val: formatQuyMo(congTy?.quyMo) },
+                  { label: 'Website', val: congTy?.website ?? 'Đang cập nhật' },
+                  { label: 'Địa chỉ', val: congTy?.diaChi ?? viec.diaChi ?? 'Đà Nẵng' },
                 ].map(item => (
                   <div key={item.label} style={{ borderBottom: '1px dashed #e5e7eb', paddingBottom: 12 }}>
                     <p style={{ fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>{item.label}</p>
@@ -226,47 +269,29 @@ export default function ChiTietViecLam() {
                   </div>
                 ))}
               </div>
-              <Link
-                to={`/cong-ty/1`}
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  padding: '10px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: '#0058be',
-                  textDecoration: 'none',
-                }}
-              >
-                Xem trang công ty →
-              </Link>
+              <p style={{ fontSize: 14, color: '#374151', lineHeight: 1.8, marginBottom: 18 }}>{congTy?.moTa ?? 'Công ty chưa cập nhật mô tả.'}</p>
+              <Link to={`/cong-ty/${viec.maNhaTuyenDung}`} style={{ display: 'block', textAlign: 'center', padding: '10px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 14, fontWeight: 700, color: '#0058be', textDecoration: 'none' }}>Xem trang công ty</Link>
             </div>
           )}
         </div>
 
-        {/* Sidebar */}
         <div style={{ position: 'sticky', top: 90 }}>
-          {/* Company card */}
           <div style={{ background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <div style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#fff' }}>
-                <img src={viec.logo} alt={viec.congTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                <img src={logo} alt={tenCongTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.currentTarget as HTMLImageElement).src = logoDuPhong }} />
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{viec.congTy}</h3>
-                <Link to={`/cong-ty/1`} style={{ color: '#0058be', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
-                  Xem công ty →
-                </Link>
+                <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{tenCongTy}</h3>
+                <Link to={`/cong-ty/${viec.maNhaTuyenDung}`} style={{ color: '#0058be', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Xem công ty</Link>
               </div>
             </div>
             <div style={{ display: 'grid', gap: 10, fontSize: 13, color: '#6b7280' }}>
               {[
-                { icon: Building2, label: viec.congTyInfo.nganh },
-                { icon: Users, label: viec.congTyInfo.quyMo },
-                { icon: MapPin, label: viec.congTyInfo.diaChi },
-                { icon: Globe, label: viec.congTyInfo.website },
+                { icon: Building2, label: congTy?.nganh ?? 'Công nghệ thông tin' },
+                { icon: Users, label: formatQuyMo(congTy?.quyMo) },
+                { icon: MapPin, label: congTy?.diaChi ?? viec.diaChi ?? 'Đà Nẵng' },
+                { icon: Globe, label: congTy?.website ?? 'Đang cập nhật' },
               ].map(({ icon: Icon, label }) => (
                 <div key={label} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                   <Icon size={15} style={{ marginTop: 2, flexShrink: 0, color: '#0058be' }} />
@@ -276,37 +301,21 @@ export default function ChiTietViecLam() {
             </div>
           </div>
 
-          {/* Related jobs */}
           <div style={{ background: '#fff', borderRadius: 8, padding: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#0b1c30' }}>Việc làm tương tự</h3>
-            <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Các vị trí liên quan</p>
+            <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 12 }}>Các vị trí liên quan từ API</p>
             <div style={{ borderTop: '1px solid #f0f0f0' }}>
-              {viec.viecLamLienQuan.map(v => (
-                <Link
-                  key={v.id}
-                  to={`/viec-lam/${v.id}`}
-                  style={{
-                    display: 'block',
-                    padding: '14px 0',
-                    borderBottom: '1px solid #f0f0f0',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#0b1c30', lineHeight: 1.4 }}>
-                    {v.tieuDe}
-                  </h4>
-                  <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{v.congTy}</p>
+              {viecLienQuan.map(item => (
+                <Link key={item.id} to={`/viec-lam/${item.id}`} style={{ display: 'block', padding: '14px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: 'inherit' }}>
+                  <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#0b1c30', lineHeight: 1.4 }}>{item.tieuDe}</h4>
+                  <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{item.nhaTuyenDung?.tenCongTy ?? tenCongTy}</p>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#374151' }}>
-                      {v.diaDiem}
-                    </span>
-                    <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#16a34a' }}>
-                      {v.luong}
-                    </span>
+                    <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#374151' }}>{item.diaChi ?? 'Đà Nẵng'}</span>
+                    <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#16a34a' }}>{formatLuong(item.luongMin, item.luongMax)}</span>
                   </div>
                 </Link>
               ))}
+              {viecLienQuan.length === 0 && <p style={{ padding: '14px 0', color: '#6b7280', fontSize: 14 }}>Chưa có việc liên quan.</p>}
             </div>
           </div>
         </div>

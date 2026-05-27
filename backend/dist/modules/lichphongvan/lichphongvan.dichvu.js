@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuLichPhongVan = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-require("../hosoungtuyen/hosoungtuyen.mohinh.js");
+const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
+const hosoungtuyen_mohinh_js_1 = require("../hosoungtuyen/hosoungtuyen.mohinh.js");
 require("../nhatuyendung/nhatuyendung.mohinh.js");
 require("../tintuyendung/tintuyendung.mohinh.js");
 const lichphongvan_mohinh_js_1 = require("./lichphongvan.mohinh.js");
@@ -54,12 +55,52 @@ exports.dichVuLichPhongVan = {
     },
     async taoMoi(duLieu) {
         const ketQua = await lichphongvan_mohinh_js_1.LichPhongVan.create(duLieu);
-        return this.layTheoMa(String(ketQua._id));
+        const lichMoi = await this.layTheoMa(String(ketQua._id));
+        // Gửi thông báo cho ứng viên
+        try {
+            const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(duLieu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung');
+            if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
+                const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
+                await (0, thongbao_helper_js_1.thongBaoMoiPhongVan)({
+                    maUngVien: String(hoSo.maUngVien._id),
+                    tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
+                    viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
+                    thoiGian: duLieu.thoiGianBatDau,
+                    diaChi: duLieu.diaChi || 'Chưa xác định',
+                    maLichPhongVan: String(ketQua._id),
+                });
+            }
+        }
+        catch (error) {
+            console.error('Loi gui thong bao moi phong van:', error);
+        }
+        return lichMoi;
     },
     async capNhat(ma, duLieu) {
+        const lichCu = await lichphongvan_mohinh_js_1.LichPhongVan.findById(ma);
         const ketQua = await populate(lichphongvan_mohinh_js_1.LichPhongVan.findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true }));
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay lich phong van de cap nhat', 404);
+        // Gửi thông báo nếu thời gian thay đổi
+        if (lichCu && duLieu.thoiGianBatDau && lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
+            try {
+                const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(lichCu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung');
+                if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
+                    const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
+                    await (0, thongbao_helper_js_1.thongBaoLichPhongVanThayDoi)({
+                        maUngVien: String(hoSo.maUngVien._id),
+                        tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
+                        viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
+                        thoiGianMoi: duLieu.thoiGianBatDau,
+                        lyDo: duLieu.ghiChu,
+                        maLichPhongVan: ma,
+                    });
+                }
+            }
+            catch (error) {
+                console.error('Loi gui thong bao thay doi lich:', error);
+            }
+        }
         return chuanHoaLich(ketQua);
     },
     async xoa(ma) {

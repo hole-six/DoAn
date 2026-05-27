@@ -8,6 +8,7 @@ exports.kiemTraTaoUngVien = zod_1.z.object({
     ngaySinh: zod_1.z.coerce.date().optional(),
     gioiTinh: zod_1.z.enum(ungvien_mohinh_js_1.gioiTinhUngVien).optional(),
     diaChi: zod_1.z.string().optional(),
+    anhDaiDien: zod_1.z.string().optional(),
     tomTat: zod_1.z.string().optional(),
     kinhNghiem: zod_1.z.number().int().min(0).optional(),
     viTriMongMuon: zod_1.z.string().optional(),

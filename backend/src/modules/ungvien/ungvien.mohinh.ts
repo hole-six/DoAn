@@ -26,6 +26,7 @@ const ungVienSchema = new Schema(
     ngaySinh: Date,
     gioiTinh: { type: String, enum: gioiTinhUngVien },
     diaChi: String,
+    anhDaiDien: String,
     tomTat: String,
     kinhNghiem: { type: Number, default: 0 },
     viTriMongMuon: String,

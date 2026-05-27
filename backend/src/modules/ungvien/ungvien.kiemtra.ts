@@ -6,6 +6,7 @@ export const kiemTraTaoUngVien = z.object({
   ngaySinh: z.coerce.date().optional(),
   gioiTinh: z.enum(gioiTinhUngVien).optional(),
   diaChi: z.string().optional(),
+  anhDaiDien: z.string().optional(),
   tomTat: z.string().optional(),
   kinhNghiem: z.number().int().min(0).optional(),
   viTriMongMuon: z.string().optional(),

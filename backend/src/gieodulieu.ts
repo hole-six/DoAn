@@ -26,6 +26,35 @@ async function gieoKyNang() {
     { tenKyNang: 'MongoDB', loaiKyNang: 'database' },
     { tenKyNang: 'Docker', loaiKyNang: 'devops' },
     { tenKyNang: 'UI/UX', loaiKyNang: 'thiet_ke' },
+    { tenKyNang: 'Python', loaiKyNang: 'backend' },
+    { tenKyNang: 'Java', loaiKyNang: 'backend' },
+    { tenKyNang: 'Spring Boot', loaiKyNang: 'backend' },
+    { tenKyNang: 'AWS', loaiKyNang: 'devops' },
+    { tenKyNang: 'Kubernetes', loaiKyNang: 'devops' },
+    { tenKyNang: 'VueJS', loaiKyNang: 'frontend' },
+    { tenKyNang: 'Angular', loaiKyNang: 'frontend' },
+    { tenKyNang: 'Flutter', loaiKyNang: 'mobile' },
+    { tenKyNang: 'React Native', loaiKyNang: 'mobile' },
+    { tenKyNang: 'PostgreSQL', loaiKyNang: 'database' },
+    { tenKyNang: 'Redis', loaiKyNang: 'database' },
+    { tenKyNang: 'QA Automation', loaiKyNang: 'kiem_thu' },
+    { tenKyNang: 'Business Analyst', loaiKyNang: 'phan_tich' },
+    { tenKyNang: 'Product Management', loaiKyNang: 'quan_ly' },
+    { tenKyNang: 'Next.js', loaiKyNang: 'frontend' },
+    { tenKyNang: 'GraphQL', loaiKyNang: 'backend' },
+    { tenKyNang: 'NestJS', loaiKyNang: 'backend' },
+    { tenKyNang: 'Go', loaiKyNang: 'backend' },
+    { tenKyNang: 'PHP', loaiKyNang: 'backend' },
+    { tenKyNang: 'Laravel', loaiKyNang: 'backend' },
+    { tenKyNang: '.NET', loaiKyNang: 'backend' },
+    { tenKyNang: 'C#', loaiKyNang: 'backend' },
+    { tenKyNang: 'MySQL', loaiKyNang: 'database' },
+    { tenKyNang: 'SQL Server', loaiKyNang: 'database' },
+    { tenKyNang: 'Elasticsearch', loaiKyNang: 'database' },
+    { tenKyNang: 'Android', loaiKyNang: 'mobile' },
+    { tenKyNang: 'iOS', loaiKyNang: 'mobile' },
+    { tenKyNang: 'Data Analyst', loaiKyNang: 'du_lieu' },
+    { tenKyNang: 'Machine Learning', loaiKyNang: 'du_lieu' },
   ] as const
 
   for (const muc of duLieuMau) {
@@ -189,11 +218,264 @@ async function gieoDanhGiaCongTy(maNguoiDungUngVien: unknown, maNguoiDungNhaTuye
         diem: 5,
         noiDung: 'Quy trinh phong van ro rang, nha tuyen dung phan hoi nhanh va chia se ky ve ky vong cong viec.',
         anDanh: false,
-        daDuyet: false,
+        daDuyet: true,
       },
     },
     { upsert: true },
   )
+}
+
+async function gieoNhieuCongTyVaTin(
+  kyNang: Awaited<ReturnType<typeof gieoKyNang>>,
+  maNguoiDungUngVien: unknown,
+) {
+  const matKhauDaBam = await bcrypt.hash(matKhauMau, 10)
+  const ungVien = await (UngVien as any).findOne({ maNguoiDung: maNguoiDungUngVien }).orFail()
+  const layKyNang = (ten: string) => kyNang.find((muc) => muc.tenKyNang === ten)
+
+  const congTyMau = [
+    {
+      id: '6a144e312015c44edfb77e70',
+      email: 'fpt.danang@itjob.vn',
+      hoTen: 'FPT Software Da Nang HR',
+      soDienThoai: '0901000001',
+      tenCongTy: 'FPT Software Da Nang',
+      maSoThue: '0101601092',
+      diaChi: 'FPT Complex, Nam Ky Khoi Nghia, Ngu Hanh Son, Da Nang',
+      website: 'https://fptsoftware.com',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/240px-FPT_logo_2010.svg.png',
+      quyMo: 3500,
+      nganh: 'Outsourcing, Automotive, AI, Cloud',
+      moTa: 'FPT Software Da Nang la trung tam phat trien phan mem quy mo lon, cung cap dich vu chuyen doi so, automotive, cloud va AI cho khach hang toan cau.\nMoi truong lam viec co nhieu du an quoc te, lo trinh phat trien ro rang va co hoi di onsite.',
+      jobs: [
+        ['Senior ReactJS Developer', 'Da Nang', 45000000, 70000000, 'hybrid', 'senior', ['React', 'TypeScript', 'NodeJS']],
+        ['Java Backend Engineer', 'Da Nang', 35000000, 60000000, 'toan_thoi_gian', 'middle', ['Java', 'Spring Boot', 'PostgreSQL']],
+        ['DevOps Engineer AWS/Kubernetes', 'Da Nang', 50000000, 85000000, 'hybrid', 'senior', ['AWS', 'Kubernetes', 'Docker']],
+        ['Fresher Frontend Developer React', 'Da Nang', 12000000, 20000000, 'toan_thoi_gian', 'fresher', ['React', 'TypeScript']],
+        ['Intern Software Engineer', 'Da Nang', 5000000, 8000000, 'thuc_tap', 'intern', ['Java', 'React']],
+      ],
+    },
+    {
+      email: 'kms@itjob.vn',
+      hoTen: 'KMS Technology HR',
+      soDienThoai: '0901000002',
+      tenCongTy: 'KMS Technology',
+      maSoThue: '0311234561',
+      diaChi: 'Hai Chau, Da Nang',
+      website: 'https://kms-technology.com',
+      logo: 'https://logo.clearbit.com/kms-technology.com',
+      quyMo: 1200,
+      nganh: 'Software Engineering, Product Development',
+      moTa: 'KMS Technology phat trien san pham va dich vu phan mem cho thi truong My, tap trung vao engineering excellence, automation va delivery chat luong cao.',
+      jobs: [
+        ['QA Automation Engineer', 'Da Nang', 25000000, 45000000, 'hybrid', 'middle', ['QA Automation', 'TypeScript']],
+        ['NodeJS Backend Developer', 'Da Nang', 30000000, 55000000, 'hybrid', 'middle', ['NodeJS', 'MongoDB', 'Redis']],
+        ['Next.js Fullstack Engineer', 'Ho Chi Minh City', 40000000, 75000000, 'hybrid', 'senior', ['Next.js', 'React', 'GraphQL']],
+        ['Data Analyst BI', 'Da Nang', 22000000, 40000000, 'toan_thoi_gian', 'junior', ['Data Analyst', 'SQL Server']],
+      ],
+    },
+    {
+      email: 'axon@itjob.vn',
+      hoTen: 'Axon Active HR',
+      soDienThoai: '0901000003',
+      tenCongTy: 'Axon Active',
+      maSoThue: '0409988771',
+      diaChi: 'Thanh Khe, Da Nang',
+      website: 'https://www.axonactive.com',
+      logo: 'https://logo.clearbit.com/axonactive.com',
+      quyMo: 700,
+      nganh: 'Agile Offshore Development',
+      moTa: 'Axon Active xay dung doi ngu Agile cho cac san pham tai chinh, logistics va enterprise software, voi van hoa trao quyen va hoc hoi lien tuc.',
+      jobs: [
+        ['Scrum Team Fullstack Developer', 'Da Nang', 35000000, 65000000, 'toan_thoi_gian', 'senior', ['React', 'Java', 'Spring Boot']],
+        ['Business Analyst IT', 'Da Nang', 25000000, 45000000, 'hybrid', 'middle', ['Business Analyst', 'UI/UX']],
+        ['Go Microservices Engineer', 'Remote / Da Nang', 50000000, 90000000, 'tu_xa', 'senior', ['Go', 'Kubernetes', 'PostgreSQL']],
+      ],
+    },
+    {
+      email: 'enouvo@itjob.vn',
+      hoTen: 'Enouvo IT Solutions HR',
+      soDienThoai: '0901000004',
+      tenCongTy: 'Enouvo IT Solutions',
+      maSoThue: '0407778889',
+      diaChi: 'Ngu Hanh Son, Da Nang',
+      website: 'https://enouvo.com',
+      logo: 'https://logo.clearbit.com/enouvo.com',
+      quyMo: 180,
+      nganh: 'Product, Mobile, SaaS',
+      moTa: 'Enouvo phat trien cac san pham web, mobile va SaaS cho startup va doanh nghiep, ket hop khong gian coworking va cong dong cong nghe tai Da Nang.',
+      jobs: [
+        ['Flutter Mobile Developer', 'Da Nang', 22000000, 42000000, 'hybrid', 'middle', ['Flutter', 'UI/UX']],
+        ['Product Designer UI/UX', 'Da Nang', 20000000, 38000000, 'toan_thoi_gian', 'middle', ['UI/UX', 'Product Management']],
+        ['React Native Mobile Developer', 'Da Nang', 28000000, 52000000, 'hybrid', 'middle', ['React Native', 'TypeScript']],
+        ['iOS Developer Swift', 'Remote', 35000000, 65000000, 'tu_xa', 'senior', ['iOS']],
+      ],
+    },
+    {
+      email: 'mgm@itjob.vn',
+      hoTen: 'MGM Technology Partners HR',
+      soDienThoai: '0901000005',
+      tenCongTy: 'MGM Technology Partners Vietnam',
+      maSoThue: '0405566778',
+      diaChi: 'Hai Chau, Da Nang',
+      website: 'https://www.mgm-tp.com',
+      logo: 'https://logo.clearbit.com/mgm-tp.com',
+      quyMo: 450,
+      nganh: 'Enterprise Web Application',
+      moTa: 'MGM Technology Partners Vietnam phat trien cac he thong web enterprise cho khach hang Duc, tap trung vao clean code, long-term product maintenance va domain phuc tap.',
+      jobs: [
+        ['Angular Frontend Engineer', 'Da Nang', 30000000, 55000000, 'hybrid', 'middle', ['Angular', 'TypeScript']],
+        ['Senior Java Engineer', 'Da Nang', 45000000, 80000000, 'hybrid', 'senior', ['Java', 'Spring Boot', 'PostgreSQL']],
+        ['.NET Backend Developer C#', 'Da Nang', 32000000, 58000000, 'toan_thoi_gian', 'middle', ['.NET', 'C#', 'SQL Server']],
+      ],
+    },
+    {
+      email: 'vng@itjob.vn',
+      hoTen: 'VNG HR',
+      soDienThoai: '0901000006',
+      tenCongTy: 'VNG Corporation',
+      maSoThue: '0304567890',
+      diaChi: 'District 7, Ho Chi Minh City',
+      website: 'https://vng.com.vn',
+      logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/VNG_Corporation_logo.svg/240px-VNG_Corporation_logo.svg.png',
+      quyMo: 5000,
+      nganh: 'Internet, Gaming, Fintech',
+      moTa: 'VNG la tap doan cong nghe internet hang dau Viet Nam, phat trien cac nen tang nguoi dung lon trong linh vuc social, payment, gaming va cloud.',
+      jobs: [
+        ['Senior Backend Engineer Go/NodeJS', 'Ho Chi Minh City', 60000000, 100000000, 'hybrid', 'senior', ['NodeJS', 'Redis', 'Kubernetes']],
+        ['React Native Engineer', 'Ho Chi Minh City', 40000000, 75000000, 'hybrid', 'senior', ['React Native', 'TypeScript']],
+        ['Machine Learning Engineer', 'Ho Chi Minh City', 55000000, 95000000, 'hybrid', 'senior', ['Python', 'Machine Learning']],
+        ['Elasticsearch Platform Developer', 'Ho Chi Minh City', 45000000, 80000000, 'toan_thoi_gian', 'middle', ['Elasticsearch', 'Java']],
+      ],
+    },
+    {
+      email: 'cloudops@itjob.vn',
+      hoTen: 'CloudOps Asia HR',
+      soDienThoai: '0901000007',
+      tenCongTy: 'CloudOps Asia',
+      maSoThue: '0402223334',
+      diaChi: 'Remote / Da Nang',
+      website: 'https://cloudops.example.com',
+      logo: 'https://placehold.co/160x160/0f766e/ffffff?text=CO',
+      quyMo: 120,
+      nganh: 'Cloud, DevOps, Platform Engineering',
+      moTa: 'CloudOps Asia tu van va van hanh ha tang cloud cho cac cong ty SaaS trong khu vuc APAC, manh ve AWS, Kubernetes, observability va automation.',
+      jobs: [
+        ['Platform Engineer', 'Remote / Da Nang', 45000000, 85000000, 'tu_xa', 'senior', ['AWS', 'Kubernetes', 'Docker']],
+        ['Backend Developer Python', 'Remote', 35000000, 65000000, 'tu_xa', 'middle', ['Python', 'PostgreSQL', 'Redis']],
+        ['NestJS API Developer', 'Remote', 30000000, 55000000, 'tu_xa', 'middle', ['NestJS', 'NodeJS', 'GraphQL']],
+      ],
+    },
+    {
+      email: 'designstudio@itjob.vn',
+      hoTen: 'DesignStudio DN HR',
+      soDienThoai: '0901000008',
+      tenCongTy: 'DesignStudio DN',
+      maSoThue: '0403334445',
+      diaChi: 'Son Tra, Da Nang',
+      website: 'https://designstudio.example.com',
+      logo: 'https://placehold.co/160x160/be123c/ffffff?text=DS',
+      quyMo: 75,
+      nganh: 'Product Design, UX Research',
+      moTa: 'DesignStudio DN la studio thiet ke san pham so cho fintech, travel va e-commerce, lam viec sat voi product team de dua nghien cuu nguoi dung vao UI thuc te.',
+      jobs: [
+        ['Senior Product Designer', 'Da Nang', 30000000, 60000000, 'hybrid', 'senior', ['UI/UX', 'Product Management']],
+        ['Frontend Developer VueJS', 'Da Nang', 25000000, 45000000, 'toan_thoi_gian', 'middle', ['VueJS', 'TypeScript']],
+        ['PHP Laravel Developer', 'Da Nang', 22000000, 42000000, 'toan_thoi_gian', 'middle', ['PHP', 'Laravel', 'MySQL']],
+        ['Android Developer Kotlin', 'Da Nang', 26000000, 50000000, 'hybrid', 'middle', ['Android']],
+      ],
+    },
+  ]
+
+  for (const [index, congTy] of congTyMau.entries()) {
+    await (NguoiDung as any).updateOne(
+      { email: congTy.email },
+      {
+        $set: {
+          email: congTy.email,
+          matKhau: matKhauDaBam,
+          hoTen: congTy.hoTen,
+          soDienThoai: congTy.soDienThoai,
+          vaiTro: 'nha_tuyen_dung',
+          trangThai: 'hoat_dong',
+        },
+      },
+      { upsert: true },
+    )
+
+    const nguoiDung = await (NguoiDung as any).findOne({ email: congTy.email }).orFail()
+    const dieuKienCongTy = congTy.id ? { _id: congTy.id } : { maNguoiDung: nguoiDung._id }
+
+    await (NhaTuyenDung as any).updateOne(
+      dieuKienCongTy,
+      {
+        $set: {
+          maNguoiDung: nguoiDung._id,
+          tenCongTy: congTy.tenCongTy,
+          maSoThue: congTy.maSoThue,
+          moTa: congTy.moTa,
+          diaChi: congTy.diaChi,
+          website: congTy.website,
+          logo: congTy.logo,
+          quyMo: congTy.quyMo,
+          nganh: congTy.nganh,
+          trangThaiDuyet: 'da_duyet',
+          ngayDuyet: new Date(),
+        },
+        ...(congTy.id ? { $setOnInsert: { _id: congTy.id } } : {}),
+      },
+      { upsert: true },
+    )
+
+    const nhaTuyenDung = await (NhaTuyenDung as any).findOne(dieuKienCongTy).orFail()
+
+    for (const [jobIndex, job] of congTy.jobs.entries()) {
+      const [tieuDe, diaChi, luongMin, luongMax, loaiHinh, capBac, danhSachKyNang] = job as [string, string, number, number, string, string, string[]]
+      await (TinTuyenDung as any).updateOne(
+        { maNhaTuyenDung: nhaTuyenDung._id, tieuDe },
+        {
+          $set: {
+            maNhaTuyenDung: nhaTuyenDung._id,
+            tieuDe,
+            yeuCauKinhNghiem: capBac === 'senior' ? '4+ nam kinh nghiem voi san pham production.' : '2+ nam kinh nghiem o vi tri tuong duong.',
+            diaChi,
+            luongMin,
+            luongMax,
+            loaiHinh,
+            capBac,
+            hanNop: new Date('2026-12-31'),
+            soLuong: jobIndex + 1,
+            moTa: `Tham gia phat trien san pham va du an tai ${congTy.tenCongTy}, lam viec cung team engineering co quy trinh review code, CI/CD va trao doi truc tiep voi stakeholder.`,
+            yeuCau: `Nam vung ${danhSachKyNang.join(', ')}. Co kha nang phan tich yeu cau, viet code de bao tri va giao tiep tot trong team.`,
+            quyenLoi: 'Luong canh tranh, bao hiem day du, review dinh ky, ngan sach hoc tap va thiet bi lam viec.',
+            luotXem: 120 + index * 37 + jobIndex * 19,
+            trangThai: 'dang_mo',
+            ngayDang: new Date(Date.now() - (index + jobIndex + 1) * 24 * 60 * 60 * 1000),
+            kyNang: danhSachKyNang
+              .map((tenKyNang) => layKyNang(tenKyNang))
+              .filter(Boolean)
+              .map((muc) => ({ maKyNang: muc!._id, batBuoc: true })),
+          },
+        },
+        { upsert: true },
+      )
+    }
+
+    await (DanhGiaCongTy as any).updateOne(
+      { maUngVien: ungVien._id, maNhaTuyenDung: nhaTuyenDung._id },
+      {
+        $set: {
+          maUngVien: ungVien._id,
+          maNhaTuyenDung: nhaTuyenDung._id,
+          diem: 5 - (index % 3) * 0.5,
+          noiDung: `Quy trinh tuyen dung cua ${congTy.tenCongTy} ro rang, trao doi ky ve cong viec va phan hoi nhanh sau phong van.`,
+          anDanh: false,
+          daDuyet: true,
+        },
+      },
+      { upsert: true },
+    )
+  }
 }
 
 async function gieoDuLieuUngVienDayDu(maNguoiDungUngVien: unknown, maNguoiDungNhaTuyenDung: unknown) {
@@ -344,6 +626,8 @@ async function gieoDuLieuMau() {
     gieoNhaTuyenDungVaTin(nguoiDung.nhaTuyenDung._id, kyNang),
   ])
   await gieoDanhGiaCongTy(nguoiDung.ungVien._id, nguoiDung.nhaTuyenDung._id)
+  await gieoNhieuCongTyVaTin(kyNang, nguoiDung.ungVien._id)
+  await gieoNhaTuyenDungVaTin(nguoiDung.nhaTuyenDung._id, kyNang)
   await gieoDuLieuUngVienDayDu(nguoiDung.ungVien._id, nguoiDung.nhaTuyenDung._id)
 
   console.log('Da gieo du lieu mau thanh cong')

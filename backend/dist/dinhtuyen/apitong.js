@@ -10,7 +10,9 @@ const lichphongvan_dinhtuyen_js_1 = require("../modules/lichphongvan/lichphongva
 const lichsuhosoungtuyen_dinhtuyen_js_1 = require("../modules/lichsuhosoungtuyen/lichsuhosoungtuyen.dinhtuyen.js");
 const nguoidung_dinhtuyen_js_1 = require("../modules/nguoidung/nguoidung.dinhtuyen.js");
 const nhatuyendung_dinhtuyen_js_1 = require("../modules/nhatuyendung/nhatuyendung.dinhtuyen.js");
+const portfolio_dinhtuyen_js_1 = require("../modules/portfolio/portfolio.dinhtuyen.js");
 const thongbao_dinhtuyen_js_1 = require("../modules/thongbao/thongbao.dinhtuyen.js");
+const tinnhan_dinhtuyen_js_1 = require("../modules/tinnhan/tinnhan.dinhtuyen.js");
 const tintuyendung_dinhtuyen_js_1 = require("../modules/tintuyendung/tintuyendung.dinhtuyen.js");
 const ungvien_dinhtuyen_js_1 = require("../modules/ungvien/ungvien.dinhtuyen.js");
 const xacthuc_dinhtuyen_js_1 = require("../modules/xacthuc/xacthuc.dinhtuyen.js");
@@ -26,7 +28,9 @@ exports.apiTong.use('/nhatuyendung', nhatuyendung_dinhtuyen_js_1.dinhTuyenNhaTuy
 exports.apiTong.use('/tintuyendung', tintuyendung_dinhtuyen_js_1.dinhTuyenTinTuyenDung);
 exports.apiTong.use('/danhmuckynang', danhmuckynang_dinhtuyen_js_1.dinhTuyenDanhMucKyNang);
 exports.apiTong.use('/hosoungtuyen', hosoungtuyen_dinhtuyen_js_1.dinhTuyenHoSoUngTuyen);
+exports.apiTong.use('/portfolio', portfolio_dinhtuyen_js_1.dinhTuyenPortfolio);
 exports.apiTong.use('/lichsuhosoungtuyen', lichsuhosoungtuyen_dinhtuyen_js_1.dinhTuyenLichSuHoSoUngTuyen);
 exports.apiTong.use('/lichphongvan', lichphongvan_dinhtuyen_js_1.dinhTuyenLichPhongVan);
 exports.apiTong.use('/thongbao', thongbao_dinhtuyen_js_1.dinhTuyenThongBao);
+exports.apiTong.use('/tinnhan', tinnhan_dinhtuyen_js_1.dinhTuyenTinNhan);
 exports.apiTong.use('/danhgiacongty', danhgiacongty_dinhtuyen_js_1.dinhTuyenDanhGiaCongTy);

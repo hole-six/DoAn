@@ -15,6 +15,13 @@ const hoSoNangLucSchema = new mongoose_1.Schema({
     kinhNghiemLam: [mucThongTinSchema],
     chungChi: [mucThongTinSchema],
     duAn: [mucThongTinSchema],
+    anhDaiDien: String,
+    templateCv: { type: String, default: 'classic-blue' },
+    mauChinh: { type: String, default: '#2563eb' },
+    mauPhu: { type: String, default: '#0f172a' },
+    font: { type: String, default: 'Inter' },
+    markdownGoc: String,
+    ghiChuAi: String,
     cvChinh: { type: Boolean, default: false },
     congKhai: { type: Boolean, default: true },
 }, {

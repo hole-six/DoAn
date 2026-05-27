@@ -15,6 +15,13 @@ exports.kiemTraTaoHoSoNangLuc = zod_1.z.object({
     kinhNghiemLam: zod_1.z.array(kiemTraMucThongTin).optional(),
     chungChi: zod_1.z.array(kiemTraMucThongTin).optional(),
     duAn: zod_1.z.array(kiemTraMucThongTin).optional(),
+    anhDaiDien: zod_1.z.string().optional(),
+    templateCv: zod_1.z.string().optional(),
+    mauChinh: zod_1.z.string().optional(),
+    mauPhu: zod_1.z.string().optional(),
+    font: zod_1.z.string().optional(),
+    markdownGoc: zod_1.z.string().optional(),
+    ghiChuAi: zod_1.z.string().optional(),
     cvChinh: zod_1.z.boolean().optional(),
     congKhai: zod_1.z.boolean().optional(),
 });

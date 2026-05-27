@@ -1,5 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import '../hosoungtuyen/hosoungtuyen.mohinh.js'
+import { thongBaoMoiPhongVan, thongBaoLichPhongVanThayDoi } from '../thongbao/thongbao.helper.js'
+import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
 import '../tintuyendung/tintuyendung.mohinh.js'
 import { LichPhongVan } from './lichphongvan.mohinh.js'
@@ -51,13 +52,55 @@ export const dichVuLichPhongVan = {
     if (!duLieu) throw new LoiUngDung('Khong tim thay lich phong van', 404)
     return chuanHoaLich(duLieu)
   },
-  async taoMoi(duLieu: unknown) {
+  async taoMoi(duLieu: any) {
     const ketQua = await (LichPhongVan as any).create(duLieu)
-    return this.layTheoMa(String(ketQua._id))
+    const lichMoi = await this.layTheoMa(String(ketQua._id))
+    
+    // Gửi thông báo cho ứng viên
+    try {
+      const hoSo = await (HoSoUngTuyen as any).findById(duLieu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung')
+      if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
+        const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung')
+        await thongBaoMoiPhongVan({
+          maUngVien: String(hoSo.maUngVien._id),
+          tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
+          viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
+          thoiGian: duLieu.thoiGianBatDau,
+          diaChi: duLieu.diaChi || 'Chưa xác định',
+          maLichPhongVan: String(ketQua._id),
+        })
+      }
+    } catch (error) {
+      console.error('Loi gui thong bao moi phong van:', error)
+    }
+    
+    return lichMoi
   },
-  async capNhat(ma: string, duLieu: unknown) {
+  async capNhat(ma: string, duLieu: any) {
+    const lichCu = await (LichPhongVan as any).findById(ma)
     const ketQua = await populate((LichPhongVan as any).findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true }))
     if (!ketQua) throw new LoiUngDung('Khong tim thay lich phong van de cap nhat', 404)
+    
+    // Gửi thông báo nếu thời gian thay đổi
+    if (lichCu && duLieu.thoiGianBatDau && lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
+      try {
+        const hoSo = await (HoSoUngTuyen as any).findById(lichCu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung')
+        if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
+          const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung')
+          await thongBaoLichPhongVanThayDoi({
+            maUngVien: String(hoSo.maUngVien._id),
+            tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
+            viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
+            thoiGianMoi: duLieu.thoiGianBatDau,
+            lyDo: duLieu.ghiChu,
+            maLichPhongVan: ma,
+          })
+        }
+      } catch (error) {
+        console.error('Loi gui thong bao thay doi lich:', error)
+      }
+    }
+    
     return chuanHoaLich(ketQua)
   },
   async xoa(ma: string) {

@@ -5,3 +5,7 @@ const express_1 = require("express");
 const xacthuc_dieukhien_js_1 = require("./xacthuc.dieukhien.js");
 exports.dinhTuyenXacThuc = (0, express_1.Router)();
 exports.dinhTuyenXacThuc.post('/dang-nhap', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangNhap);
+exports.dinhTuyenXacThuc.post('/dang-nhap-google', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangNhapGoogle);
+exports.dinhTuyenXacThuc.post('/lam-moi-token', xacthuc_dieukhien_js_1.dieuKhienXacThuc.lamMoiToken);
+exports.dinhTuyenXacThuc.get('/toi', xacthuc_dieukhien_js_1.dieuKhienXacThuc.toi);
+exports.dinhTuyenXacThuc.post('/dang-xuat', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangXuat);

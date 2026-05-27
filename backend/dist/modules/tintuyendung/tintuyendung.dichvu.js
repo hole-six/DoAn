@@ -32,7 +32,11 @@ function chuanHoaTin(taiLieu) {
         luotXem: duLieu.luotXem,
         trangThai: duLieu.trangThai,
         ngayDang: duLieu.ngayDang,
-        kyNang: duLieu.kyNang,
+        kyNang: (duLieu.kyNang ?? []).map((muc) => ({
+            maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
+            tenKyNang: muc.maKyNang?.tenKyNang,
+            batBuoc: muc.batBuoc,
+        })),
         ngayTao: duLieu.ngayTao,
         ngayCapNhat: duLieu.ngayCapNhat,
     };
@@ -42,19 +46,26 @@ exports.dichVuTinTuyenDung = {
         const danhSach = await tintuyendung_mohinh_js_1.TinTuyenDung
             .find()
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
+            .populate('kyNang.maKyNang', 'tenKyNang')
             .sort({ ngayTao: -1 })
             .limit(300);
         return danhSach.map(chuanHoaTin);
     },
     async layTheoMa(ma) {
-        const duLieu = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(ma).populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet');
+        const duLieu = await tintuyendung_mohinh_js_1.TinTuyenDung
+            .findById(ma)
+            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
+            .populate('kyNang.maKyNang', 'tenKyNang');
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung', 404);
         return chuanHoaTin(duLieu);
     },
     async taoMoi(duLieu) {
         const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create(duLieu);
-        return chuanHoaTin(await tintuyendung_mohinh_js_1.TinTuyenDung.findById(ketQua._id).populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet'));
+        return chuanHoaTin(await tintuyendung_mohinh_js_1.TinTuyenDung
+            .findById(ketQua._id)
+            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
+            .populate('kyNang.maKyNang', 'tenKyNang'));
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
@@ -64,13 +75,17 @@ exports.dichVuTinTuyenDung = {
         };
         const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
             .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet');
+            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
+            .populate('kyNang.maKyNang', 'tenKyNang');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de cap nhat', 404);
         return chuanHoaTin(ketQua);
     },
     async xoa(ma) {
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.findByIdAndDelete(ma).populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet');
+        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
+            .findByIdAndDelete(ma)
+            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
+            .populate('kyNang.maKyNang', 'tenKyNang');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de xoa', 404);
         return chuanHoaTin(ketQua);

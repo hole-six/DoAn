@@ -3,10 +3,12 @@ import jwt from 'jsonwebtoken'
 import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
-import type { kiemTraDangNhap } from './xacthuc.kiemtra.js'
+import type { kiemTraDangNhap, kiemTraDangNhapGoogle, kiemTraLamMoiToken } from './xacthuc.kiemtra.js'
 import type { z } from 'zod'
 
 type DuLieuDangNhap = z.infer<typeof kiemTraDangNhap>
+type DuLieuLamMoiToken = z.infer<typeof kiemTraLamMoiToken>
+type DuLieuDangNhapGoogle = z.infer<typeof kiemTraDangNhapGoogle>
 type NguoiDungDangNhap = {
   _id: unknown
   email: string
@@ -15,6 +17,13 @@ type NguoiDungDangNhap = {
   soDienThoai?: string
   vaiTro: string
   trangThai: string
+}
+
+type TokenPayload = {
+  sub: string
+  vaiTro: string
+  email: string
+  loai?: string
 }
 
 function taoNguoiDungCongKhai(nguoiDung: {
@@ -32,6 +41,33 @@ function taoNguoiDungCongKhai(nguoiDung: {
     soDienThoai: nguoiDung.soDienThoai,
     vaiTro: nguoiDung.vaiTro,
     trangThai: nguoiDung.trangThai,
+  }
+}
+
+function taoToken(nguoiDungCongKhai: ReturnType<typeof taoNguoiDungCongKhai>) {
+  const payload = {
+    sub: nguoiDungCongKhai.id,
+    vaiTro: nguoiDungCongKhai.vaiTro,
+    email: nguoiDungCongKhai.email,
+  }
+
+  const accessToken = jwt.sign(
+    { ...payload, loai: 'access' },
+    bienMoiTruong.khoaJwt,
+    { expiresIn: '15m' },
+  )
+  const refreshToken = jwt.sign(
+    { ...payload, loai: 'refresh' },
+    bienMoiTruong.khoaJwtLamMoi,
+    { expiresIn: '30d' },
+  )
+
+  return {
+    accessToken,
+    refreshToken,
+    token: accessToken,
+    expiresIn: 15 * 60,
+    tokenType: 'Bearer',
   }
 }
 
@@ -57,18 +93,105 @@ export async function dangNhap(duLieu: DuLieuDangNhap) {
   }
 
   const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung)
-  const token = jwt.sign(
-    {
-      sub: nguoiDungCongKhai.id,
-      vaiTro: nguoiDungCongKhai.vaiTro,
-      email: nguoiDungCongKhai.email,
-    },
-    bienMoiTruong.khoaJwt,
-    { expiresIn: '7d' },
-  )
-
   return {
-    token,
+    ...taoToken(nguoiDungCongKhai),
+    nguoiDung: nguoiDungCongKhai,
+  }
+}
+
+export async function lamMoiToken(duLieu: DuLieuLamMoiToken) {
+  let payload: TokenPayload
+  try {
+    payload = jwt.verify(duLieu.refreshToken, bienMoiTruong.khoaJwtLamMoi) as TokenPayload
+  } catch {
+    throw new LoiUngDung('Refresh token khong hop le hoac da het han', 401)
+  }
+
+  if (payload.loai !== 'refresh') {
+    throw new LoiUngDung('Refresh token khong hop le', 401)
+  }
+
+  const nguoiDung = await (NguoiDung as any).findById(payload.sub) as NguoiDungDangNhap | null
+  if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    throw new LoiUngDung('Tai khoan khong con hieu luc', 401)
+  }
+
+  const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung)
+  return {
+    ...taoToken(nguoiDungCongKhai),
+    nguoiDung: nguoiDungCongKhai,
+  }
+}
+
+export async function layNguoiDungTuAccessToken(authorization?: string) {
+  const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : ''
+  if (!token) throw new LoiUngDung('Thieu access token', 401)
+
+  let payload: TokenPayload
+  try {
+    payload = jwt.verify(token, bienMoiTruong.khoaJwt) as TokenPayload
+  } catch {
+    throw new LoiUngDung('Access token khong hop le hoac da het han', 401)
+  }
+
+  if (payload.loai && payload.loai !== 'access') {
+    throw new LoiUngDung('Access token khong hop le', 401)
+  }
+
+  const nguoiDung = await (NguoiDung as any).findById(payload.sub) as NguoiDungDangNhap | null
+  if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    throw new LoiUngDung('Tai khoan khong con hieu luc', 401)
+  }
+
+  return taoNguoiDungCongKhai(nguoiDung)
+}
+
+async function xacThucGoogleCredential(credential: string) {
+  if (!bienMoiTruong.googleClientId) {
+    throw new LoiUngDung('Chua cau hinh GOOGLE_CLIENT_ID tren backend', 503)
+  }
+
+  const phanHoi = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`)
+  const googleUser = await phanHoi.json() as Record<string, string>
+
+  if (!phanHoi.ok || googleUser.aud !== bienMoiTruong.googleClientId || googleUser.email_verified !== 'true') {
+    throw new LoiUngDung('Google credential khong hop le', 401)
+  }
+
+  return googleUser
+}
+
+export async function dangNhapGoogle(duLieu: DuLieuDangNhapGoogle) {
+  const googleUser = await xacThucGoogleCredential(duLieu.credential)
+  const email = googleUser.email.toLowerCase().trim()
+  const matKhauHeThong = await bcrypt.hash(`google:${googleUser.sub}:${bienMoiTruong.khoaJwt}`, 10)
+
+  const nguoiDung = await (NguoiDung as any).findOneAndUpdate(
+    { email },
+    {
+      $setOnInsert: {
+        email,
+        matKhau: matKhauHeThong,
+        hoTen: googleUser.name || email,
+        soDienThoai: '',
+        vaiTro: duLieu.vaiTro ?? 'ung_vien',
+        trangThai: 'hoat_dong',
+      },
+    },
+    { upsert: true, returnDocument: 'after' },
+  ) as NguoiDungDangNhap
+
+  if (nguoiDung.trangThai !== 'hoat_dong') {
+    throw new LoiUngDung('Tai khoan khong o trang thai hoat dong', 403)
+  }
+
+  if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro) {
+    throw new LoiUngDung('Tai khoan Google nay da duoc gan vai tro khac', 403)
+  }
+
+  const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung)
+  return {
+    ...taoToken(nguoiDungCongKhai),
     nguoiDung: nguoiDungCongKhai,
   }
 }
