@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Company Profile - DanangIT Elite</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#2170e4",
+                        "primary-fixed": "#dae2fd",
+                        "tertiary-container": "#191c1e",
+                        "surface-bright": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "on-secondary-fixed-variant": "#004395",
+                        "surface-container-highest": "#d3e4fe",
+                        "outline": "#76777d",
+                        "on-primary-fixed": "#131b2e",
+                        "on-background": "#0b1c30",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#45464d",
+                        "surface-container": "#e5eeff",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-white": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline-variant": "#c6c6cd",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container-low": "#eff4ff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "tertiary-fixed": "#e0e3e5",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#dce9ff",
+                        "primary-container": "#131b2e",
+                        "on-primary-container": "#7c839b",
+                        "error-rose": "#e11d48",
+                        "on-tertiary-container": "#818486",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#bec6e0",
+                        "inverse-surface": "#213145",
+                        "surface-variant": "#d3e4fe",
+                        "on-secondary-fixed": "#001a42",
+                        "on-surface": "#0b1c30",
+                        "success-emerald": "#10b981",
+                        "primary-fixed-dim": "#bec6e0",
+                        "secondary-fixed": "#d8e2ff",
+                        "primary": "#000000",
+                        "warning-amber": "#f59e0b",
+                        "on-secondary-container": "#fefcff",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#565e74",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#000000",
+                        "error-container": "#ffdad6",
+                        "secondary": "#0058be",
+                        "on-tertiary-fixed-variant": "#444749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Montserrat"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Montserrat"],
+                        "display-lg-mobile": ["Montserrat"],
+                        "body-lg": ["Inter"],
+                        "display-lg": ["Montserrat"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        .deep-soft-shadow {
+            box-shadow: 0 10px 40px -10px rgba(0, 88, 190, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col font-body-md">
+<!-- Top Navigation Bar -->
+<nav class="bg-surface-white dark:bg-tertiary-container fixed top-0 w-full z-50 border-b border-outline-variant dark:border-outline shadow-sm">
+<div class="flex justify-between items-center h-20 px-margin-desktop max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-on-background dark:text-surface-bright">
+                DanangIT Elite
+            </div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-medium hover:text-secondary-container dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:scale-95" href="#">Jobs</a>
+<a class="text-secondary dark:text-secondary-fixed-dim font-bold border-b-2 border-secondary dark:border-secondary-fixed-dim pb-1 hover:text-secondary-container dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:scale-95" href="#">Companies</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-medium hover:text-secondary-container dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:scale-95" href="#">Blog</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container font-medium hover:text-secondary-container dark:hover:text-secondary-fixed transition-colors duration-200 cursor-pointer active:scale-95" href="#">About Us</a>
+</div>
+<div class="hidden md:flex gap-4 items-center">
+<button class="font-label-md text-label-md text-on-background hover:text-secondary transition-colors">Login</button>
+<button class="bg-secondary text-surface-white px-6 py-2 rounded-xl font-label-md text-label-md hover:bg-secondary-container transition-colors shadow-sm">Employers</button>
+</div>
+<!-- Mobile Menu Icon (Simplified for structure) -->
+<button class="md:hidden text-on-background">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-20">
+<!-- Company Banner & Header -->
+<section class="w-full relative bg-surface-white border-b border-outline-variant">
+<!-- Banner Image -->
+<div class="h-64 md:h-80 w-full overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A bright, modern corporate office interior with floor-to-ceiling windows overlooking a city skyline. The space features sleek minimalist furniture, subtle blue lighting accents aligning with the brand palette, and a clean, airy atmosphere. Professional, high-end tech environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfKsQarCpMvaM1F75s6s0xZKSD3kVtBjA0rkoOWx0aDIW3P1Lw6-uYEf_cxtu4RI9ki-I5wedc9-UgMDtVgKTzJ71DKA9pFn2BJRIx-jvZJfLQ-L_W8WfqIbpcXxYlSKLHAV2DDvgTnAfFOTq6qzuKFADNZhc94HLVPfiPx--eDCUPAOFBvCDzSvE2XUD-_WhPzwLYAoknxtwOYQffFMf9NM9v-Tl1vf69s0rPBUD2acbhrCUwSOKxWOOsAb0LmbL0nk-zwcEOaoyD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+</div>
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop relative">
+<!-- Profile Block (Pulls up into banner) -->
+<div class="flex flex-col md:flex-row items-start md:items-end gap-6 -mt-16 md:-mt-20 pb-8">
+<!-- Logo -->
+<div class="w-32 h-32 md:w-40 md:h-40 rounded-xl bg-surface-white shadow-md border border-outline-variant p-4 flex items-center justify-center flex-shrink-0 relative z-10">
+<img class="max-w-full max-h-full object-contain" data-alt="A clean, abstract geometric logo design in shades of deep navy and electric blue on a pure white background. Minimalist and corporate, representing a modern technology firm. High contrast and professional." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPewA1WQHCJuVK-yUPVUy7HHI5n4w0G6bjZBokrFXfFOFR_fTxVgMBQAswWOz68JorohgPdM29QPkLl3aGGEdussOXrvTYcYy7l5Pw00aUc3ap1kxMj1k_GoFAQ-Z0_vDlepZ07MQ-fWlvCi-dOAUeOvjeuXEI8C4cJ02Y5p5OPHtS9ENhryeC7zbs1ss3J4ICCRs_-ciUGvaElfdhS5-yu6no_V71Faip9Ovz5QKdBQvfRnEtZTd8YUKECtF-SM5IvpyZNP-gjv0B"/>
+</div>
+<!-- Basic Info -->
+<div class="flex-grow pt-4 md:pt-0 pb-2">
+<h1 class="font-headline-lg text-headline-lg md:text-display-lg text-on-background mb-2">Nexus Tech Solutions</h1>
+<div class="flex flex-wrap gap-4 text-on-surface-variant font-body-md text-body-md">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+<span>Da Nang, Vietnam</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span>200 - 500 Employees</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[20px]">language</span>
+<a class="text-secondary hover:underline" href="#">nexustech.vn</a>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none bg-secondary text-surface-white px-8 py-3 rounded-xl font-label-md text-label-md hover:bg-secondary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">bookmark_add</span>
+                            Follow
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Content Grid Layout -->
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Left Column: Main Content (Tabs) -->
+<div class="md:col-span-8 space-y-8">
+<!-- Tab Navigation (Bento style container) -->
+<div class="bg-surface-white rounded-xl border border-outline-variant p-2 flex gap-2 overflow-x-auto no-scrollbar">
+<button class="px-6 py-2 rounded-lg bg-surface-container-low text-secondary font-label-md text-label-md whitespace-nowrap">Giới thiệu công ty</button>
+<button class="px-6 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-lowest font-label-md text-label-md whitespace-nowrap transition-colors">Việc làm đang tuyển (5)</button>
+<button class="px-6 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-lowest font-label-md text-label-md whitespace-nowrap transition-colors">Đánh giá từ nhân viên</button>
+</div>
+<!-- Tab Content: Giới thiệu -->
+<div class="bg-surface-white rounded-xl border border-outline-variant p-8 space-y-6">
+<h2 class="font-headline-md text-headline-md text-on-background">About Us</h2>
+<div class="font-body-md text-body-md text-on-surface-variant space-y-4">
+<p>Nexus Tech Solutions is a premier software development firm based in the heart of Da Nang. We specialize in building scalable, high-performance cloud applications for global enterprise clients. Our mission is to engineer excellence through clean code and innovative architecture.</p>
+<p>We pride ourselves on a culture of continuous learning, offering our engineers opportunities to work with cutting-edge technologies in a collaborative, agile environment. Our core domains include Fintech, Healthcare Tech, and Enterprise Resource Planning.</p>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background pt-4 border-t border-outline-variant">Tech Stack</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-low text-on-secondary-fixed-variant px-3 py-1 rounded-lg font-label-sm text-label-sm border border-primary-fixed">React</span>
+<span class="bg-surface-container-low text-on-secondary-fixed-variant px-3 py-1 rounded-lg font-label-sm text-label-sm border border-primary-fixed">Node.js</span>
+<span class="bg-surface-container-low text-on-secondary-fixed-variant px-3 py-1 rounded-lg font-label-sm text-label-sm border border-primary-fixed">AWS</span>
+<span class="bg-surface-container-low text-on-secondary-fixed-variant px-3 py-1 rounded-lg font-label-sm text-label-sm border border-primary-fixed">TypeScript</span>
+<span class="bg-surface-container-low text-on-secondary-fixed-variant px-3 py-1 rounded-lg font-label-sm text-label-sm border border-primary-fixed">Docker</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-background pt-4 border-t border-outline-variant">Office Gallery</h3>
+<div class="grid grid-cols-2 gap-4">
+<img class="rounded-lg h-40 w-full object-cover border border-outline-variant" data-alt="A sleek, modern open-plan office space featuring ergonomic chairs, dual-monitor workstations, and large windows letting in abundant natural light. The aesthetic is clean, professional, and high-tech, using whites and cool grays." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI5cTOLr_yn9CKaZx8PwKzcmddgi5XlGp4Pe0_xtv3JxSyyfXZGQicntC6muxrdz-Sb6252xWxguBQRgq1n1iIbWRrysXMaFShklsDdtR_u69nDWlucf-yrnlKND9yxW6eOBYVkcBWdTCr4FUbOCYksQDfi085eRw_wwXWmcmghTKUUFo9wA18vYmwA2r9AMO-E6DFJlUVw-YIciArLyvvs0cLnf950H1wZ8llreVDhKTtoZSDQGalPZhBmmai--63_R5ERwTbC2Mk"/>
+<img class="rounded-lg h-40 w-full object-cover border border-outline-variant" data-alt="A collaborative meeting area in a tech office, showing a glass whiteboard, comfortable modern seating in deep blue, and minimalist decor. The lighting is bright and inviting, perfect for a modern corporate environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvX_xPUyQ_PR2MkRdhr5Q---ZVl7u2Xe003-HS6DtEEYMuAvBRq-IyuWDxKOVsApSaTWYuMlm0484p8qfITFkedy5fAD9ShjajeClsFPQW4uYdvP6SrDFkBSOvDQYBREi4n5Uwu8AS_Ru7jNeja4_mBacu-1GazCmbwd2X1Ngd7DczKq4Dgi0bQ_-9SqDc5GXTy8RUuTR2DgFJ8NyMAXTxakFrnjT8RCkzrvCON1Ig30kDvltOXZmFXmoSHt7fKXYKnllfrAmDRylM"/>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar Info -->
+<div class="md:col-span-4 space-y-6">
+<!-- Quick Info Card -->
+<div class="bg-surface-white rounded-xl border border-outline-variant p-6 space-y-6 deep-soft-shadow">
+<h3 class="font-headline-sm text-headline-sm text-on-background">Company Overview</h3>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">calendar_today</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Founded</p>
+<p class="font-body-md text-body-md text-on-background font-medium">2015</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">category</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Industry</p>
+<p class="font-body-md text-body-md text-on-background font-medium">IT Services &amp; IT Consulting</p>
+</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-0.5">location_city</span>
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Headquarters</p>
+<p class="font-body-md text-body-md text-on-background font-medium">Hai Chau Dist, Da Nang</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full bg-surface-container-low dark:bg-tertiary-container border-t border-outline-variant dark:border-outline mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-margin-desktop max-w-container-max mx-auto space-y-4 md:space-y-0">
+<div class="font-headline-sm text-headline-sm font-bold text-secondary dark:text-secondary-fixed">
+                DanangIT Elite
+            </div>
+<div class="font-body-sm text-body-sm text-on-surface dark:text-on-tertiary-fixed text-center">
+                © 2024 DanangIT Elite. All rights reserved. Premium IT Recruitment Solutions.
+            </div>
+<div class="flex gap-6 font-body-sm text-body-sm">
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-secondary dark:hover:text-secondary-fixed transition-colors underline-offset-4 hover:underline" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-secondary dark:hover:text-secondary-fixed transition-colors underline-offset-4 hover:underline" href="#">Terms of Service</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-secondary dark:hover:text-secondary-fixed transition-colors underline-offset-4 hover:underline" href="#">Contact Us</a>
+<a class="text-on-surface-variant dark:text-on-tertiary-container hover:text-secondary dark:hover:text-secondary-fixed transition-colors underline-offset-4 hover:underline" href="#">Cookie Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

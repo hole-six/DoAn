@@ -1,0 +1,635 @@
+{
+  "info": {
+    "name": "IT Recruitment System API",
+    "description": "API endpoints cho hệ thống tuyển dụng IT Đà Nẵng",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register Candidate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.token).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"auth_token\", jsonData.token);",
+                  "    pm.environment.set(\"user_id\", jsonData.user._id);",
+                  "    console.log(\"✅ Token saved:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lehoa.dev@gmail.com\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"fullName\": \"Lê Hòa\",\n  \"phone\": \"0336487534\",\n  \"role\": \"candidate\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/auth/register/candidate",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["auth", "register", "candidate"]
+            },
+            "description": "Đăng ký tài khoản ứng viên mới"
+          }
+        },
+        {
+          "name": "Register Employer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"auth_token\", jsonData.token);",
+                  "    pm.environment.set(\"user_id\", jsonData.user._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hr@fptsoft.com\",\n  \"password\": \"Password123!\",\n  \"confirmPassword\": \"Password123!\",\n  \"companyName\": \"FPT Software Da Nang\",\n  \"contactPerson\": \"Nguyễn Văn A\",\n  \"phone\": \"0901234567\",\n  \"role\": \"employer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/auth/register/employer",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["auth", "register", "employer"]
+            },
+            "description": "Đăng ký tài khoản nhà tuyển dụng"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.token).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"auth_token\", jsonData.token);",
+                  "    pm.environment.set(\"user_id\", jsonData.user._id);",
+                  "    console.log(\"✅ Login successful. Token saved.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lehoa.dev@gmail.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/auth/login",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Đăng nhập vào hệ thống"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/auth/logout",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Đăng xuất khỏi hệ thống"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💼 Job Postings",
+      "item": [
+        {
+          "name": "Get All Jobs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has jobs array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.jobs).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 500ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/jobs?page=1&limit=10",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["jobs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "location",
+                  "value": "Đà Nẵng",
+                  "disabled": true
+                },
+                {
+                  "key": "level",
+                  "value": "Senior",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lấy danh sách tất cả việc làm với phân trang"
+          }
+        },
+        {
+          "name": "Get Job By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Job has required fields\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.job).to.have.property('_id');",
+                  "    pm.expect(jsonData.job).to.have.property('title');",
+                  "    pm.expect(jsonData.job).to.have.property('company');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/jobs/{{job_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["jobs", "{{job_id}}"]
+            },
+            "description": "Lấy thông tin chi tiết một việc làm"
+          }
+        },
+        {
+          "name": "Create Job",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Job created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.job).to.exist;",
+                  "    pm.expect(jsonData.job._id).to.exist;",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"job_id\", jsonData.job._id);",
+                  "    console.log(\"✅ Job created. ID:\", jsonData.job._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Fullstack Developer (React/NodeJS)\",\n  \"description\": \"Chúng tôi đang tìm kiếm Senior Fullstack Developer có kinh nghiệm với React và NodeJS để tham gia đội ngũ phát triển sản phẩm công nghệ cao.\",\n  \"requirements\": [\n    \"3+ năm kinh nghiệm với React và NodeJS\",\n    \"Thành thạo TypeScript\",\n    \"Kinh nghiệm với MongoDB\",\n    \"Có kinh nghiệm làm việc với AWS\"\n  ],\n  \"responsibilities\": [\n    \"Phát triển và maintain các tính năng mới\",\n    \"Code review và mentor junior developers\",\n    \"Tham gia thiết kế kiến trúc hệ thống\"\n  ],\n  \"salary\": {\n    \"min\": 2000,\n    \"max\": 3500,\n    \"currency\": \"USD\"\n  },\n  \"location\": \"Hải Châu, Đà Nẵng\",\n  \"level\": \"Senior\",\n  \"type\": \"Full-time\",\n  \"tags\": [\"React\", \"NodeJS\", \"MongoDB\", \"AWS\"],\n  \"benefits\": [\n    \"Lương thưởng cạnh tranh\",\n    \"Bảo hiểm đầy đủ\",\n    \"Làm việc hybrid\"\n  ],\n  \"deadline\": \"2026-06-30\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/jobs",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["jobs"]
+            },
+            "description": "Tạo tin tuyển dụng mới (chỉ dành cho Employer)"
+          }
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Fullstack Developer (React/NodeJS) - Updated\",\n  \"salary\": {\n    \"min\": 2200,\n    \"max\": 3800,\n    \"currency\": \"USD\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/jobs/{{job_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["jobs", "{{job_id}}"]
+            },
+            "description": "Cập nhật thông tin tin tuyển dụng"
+          }
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/jobs/{{job_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["jobs", "{{job_id}}"]
+            },
+            "description": "Xóa tin tuyển dụng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Applications",
+      "item": [
+        {
+          "name": "Apply for Job",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Application submitted\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.application).to.exist;",
+                  "    pm.expect(jsonData.application.status).to.equal(\"pending\");",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"application_id\", jsonData.application._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": \"{{job_id}}\",\n  \"coverLetter\": \"Kính gửi Quý công ty,\\n\\nTôi rất quan tâm đến vị trí Senior Fullstack Developer tại công ty. Với hơn 3 năm kinh nghiệm làm việc với React và NodeJS, tôi tin rằng mình có thể đóng góp tích cực cho đội ngũ phát triển của công ty.\\n\\nTrân trọng,\\nLê Hòa\",\n  \"resumeUrl\": \"https://example.com/resume-lehoa.pdf\",\n  \"expectedSalary\": 2500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/applications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["applications"]
+            },
+            "description": "Ứng tuyển vào một vị trí"
+          }
+        },
+        {
+          "name": "Get My Applications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Applications array exists\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.applications).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/applications/my-applications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["applications", "my-applications"]
+            },
+            "description": "Xem danh sách đơn ứng tuyển của tôi"
+          }
+        },
+        {
+          "name": "Get Applications for Job",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/applications/job/{{job_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["applications", "job", "{{job_id}}"]
+            },
+            "description": "Xem danh sách ứng viên cho một tin tuyển dụng (Employer)"
+          }
+        },
+        {
+          "name": "Update Application Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"reviewing\",\n  \"notes\": \"Hồ sơ phù hợp, sẽ liên hệ phỏng vấn\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/applications/{{application_id}}/status",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["applications", "{{application_id}}", "status"]
+            },
+            "description": "Cập nhật trạng thái đơn ứng tuyển"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Companies",
+      "item": [
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/companies?page=1&limit=10",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["companies"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lấy danh sách công ty"
+          }
+        },
+        {
+          "name": "Get Company By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/companies/{{company_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["companies", "{{company_id}}"]
+            },
+            "description": "Xem thông tin chi tiết công ty"
+          }
+        },
+        {
+          "name": "Update Company Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"FPT Software Da Nang\",\n  \"description\": \"Công ty phần mềm hàng đầu Việt Nam\",\n  \"field\": \"Outsourcing & Cloud\",\n  \"size\": \"1000+\",\n  \"location\": \"Ngũ Hành Sơn, Đà Nẵng\",\n  \"website\": \"https://fptsoftware.com\",\n  \"benefits\": [\n    \"Lương thưởng cạnh tranh\",\n    \"Bảo hiểm đầy đủ\",\n    \"Đào tạo nâng cao\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/companies/{{company_id}}",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["companies", "{{company_id}}"]
+            },
+            "description": "Cập nhật thông tin công ty"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Interviews",
+      "item": [
+        {
+          "name": "Schedule Interview",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"applicationId\": \"{{application_id}}\",\n  \"candidateId\": \"{{candidate_id}}\",\n  \"jobId\": \"{{job_id}}\",\n  \"scheduledDate\": \"2026-06-15T10:00:00.000Z\",\n  \"duration\": 60,\n  \"type\": \"online\",\n  \"meetingLink\": \"https://meet.google.com/abc-defg-hij\",\n  \"notes\": \"Phỏng vấn kỹ thuật vòng 1 - React & NodeJS\",\n  \"interviewers\": [\n    {\n      \"name\": \"Nguyễn Văn A\",\n      \"position\": \"Tech Lead\",\n      \"email\": \"tech.lead@company.com\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/interviews",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["interviews"]
+            },
+            "description": "Lên lịch phỏng vấn"
+          }
+        },
+        {
+          "name": "Get My Interviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/interviews/my-interviews",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["interviews", "my-interviews"]
+            },
+            "description": "Xem lịch phỏng vấn của tôi"
+          }
+        },
+        {
+          "name": "Update Interview Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"feedback\": \"Ứng viên có kỹ năng tốt, phù hợp với vị trí\",\n  \"rating\": 4.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/interviews/{{interview_id}}/status",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["interviews", "{{interview_id}}", "status"]
+            },
+            "description": "Cập nhật trạng thái phỏng vấn"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications"]
+            },
+            "description": "Lấy danh sách thông báo"
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}{{api_version}}/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}{{api_version}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            },
+            "description": "Đánh dấu thông báo đã đọc"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const token = pm.environment.get(\"auth_token\");",
+          "",
+          "if (!token && !pm.request.url.path.includes('auth')) {",
+          "    console.log(\"⚠️ No auth token found. Please login first.\");",
+          "}"
+        ]
+      }
+    }
+  ]
+}
