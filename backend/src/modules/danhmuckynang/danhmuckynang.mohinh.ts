@@ -1,6 +1,20 @@
 import { Schema, model } from 'mongoose'
 
-export const loaiKyNang = ['ngon_ngu', 'frontend', 'backend', 'database', 'devops', 'testing', 'thiet_ke', 'ky_nang_mem'] as const
+export const loaiKyNang = [
+  'ngon_ngu',
+  'frontend',
+  'backend',
+  'database',
+  'devops',
+  'testing',
+  'kiem_thu',
+  'thiet_ke',
+  'ky_nang_mem',
+  'mobile',
+  'du_lieu',
+  'phan_tich',
+  'quan_ly',
+] as const
 
 const danhMucKyNangSchema = new Schema(
   {

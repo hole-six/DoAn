@@ -1,5 +1,6 @@
 import { WifiOff, Wifi } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import AppIcon from './AppIcon'
 
 export function OfflineIndicator() {
   const [online, setOnline] = useState(navigator.onLine)
@@ -48,7 +49,7 @@ export function OfflineIndicator() {
         animation: 'slideDown 0.3s ease-out',
       }}
     >
-      {online ? <Wifi size={20} /> : <WifiOff size={20} />}
+      <AppIcon icon={online ? Wifi : WifiOff} size={20} />
       <div style={{ fontSize: 14, fontWeight: 500 }}>
         {online ? 'Đã kết nối internet' : 'Không có kết nối internet'}
       </div>

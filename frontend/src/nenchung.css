@@ -1,7 +1,220 @@
+@import "tailwindcss";
+
+/* ========================================================================== */
+/* BUTTON RESET FIX — CSS reset "button { border: none; background: none }"  */
+/* override Tailwind utilities. Dùng @layer để đảm bảo đúng cascade order.   */
+/* ========================================================================== */
+
+@layer base {
+  /* Bỏ reset cứng cho button để Tailwind utilities hoạt động bình thường */
+  button {
+    background: revert;
+    border: revert;
+    padding: revert;
+    cursor: pointer;
+  }
+}
+
+/* ========================================================================== */
+/* SHARED BUTTON UTILITIES — dùng chung toàn hệ thống                        */
+/* Khai báo tĩnh ở đây vì Tailwind v4 không scan dynamic clsx() strings      */
+/* ========================================================================== */
+
+/* Nút chính — xanh đậm */
+.btn-primary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #062a4d;
+  background-color: #062a4d;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(6, 42, 77, 0.28);
+  transition: background-color 0.15s, border-color 0.15s;
+  cursor: pointer;
+}
+.btn-primary:hover { background-color: #041b33; border-color: #041b33; }
+.btn-primary:disabled { opacity: 0.6; pointer-events: none; }
+@media (min-width: 640px) { .btn-primary { width: auto; } }
+
+/* Nút phụ — trắng viền */
+.btn-subtle {
+  display: inline-flex;
+  min-height: 2.75rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  cursor: pointer;
+}
+.btn-subtle:hover { border-color: #062a4d; background-color: #f8fafc; color: #062a4d; }
+.btn-subtle:disabled { opacity: 0.6; pointer-events: none; }
+@media (min-width: 640px) { .btn-subtle { width: auto; } }
+
+/* Nút nguy hiểm — đỏ */
+.btn-danger {
+  display: inline-flex;
+  min-height: 2.75rem;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #b91c1c;
+  background-color: #b91c1c;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-danger:hover { background-color: #991b1b; }
+.btn-danger:disabled { opacity: 0.6; pointer-events: none; }
+@media (min-width: 640px) { .btn-danger { width: auto; } }
+
+/* Nút icon nhỏ — dùng trong table actions */
+.btn-icon {
+  display: inline-flex;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  min-width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid #062a4d;
+  background-color: #062a4d;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.btn-icon:hover { background-color: #041b33; }
+.btn-icon.danger { border-color: #b91c1c; background-color: #b91c1c; }
+.btn-icon.danger:hover { background-color: #991b1b; }
+.btn-icon.approve { border-color: #062a4d; background-color: #062a4d; }
+
+/* Nút primary cho ứng viên — xanh đậm, bo tròn xl */
+.btn-primary-uv {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid #062a4d;
+  background-color: #062a4d;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(6, 42, 77, 0.22);
+  transition: background-color 0.15s, transform 0.1s;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-primary-uv:hover { background-color: #0b5c91; border-color: #0b5c91; }
+.btn-primary-uv:active { transform: scale(0.97); }
+.btn-primary-uv:disabled { cursor: not-allowed; opacity: 0.6; }
+/* Variant cyan — dùng trên hero banner tối */
+.btn-primary-uv.cyan {
+  border-color: #22d3ee;
+  background-color: #06b6d4;
+}
+.btn-primary-uv.cyan:hover { background-color: #22d3ee; border-color: #22d3ee; }
+/* Variant emerald */
+.btn-primary-uv.emerald {
+  border-color: #059669;
+  background-color: #059669;
+}
+.btn-primary-uv.emerald:hover { background-color: #047857; }
+
+
+.ap-btn-icon {
+  display: inline-flex;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  min-width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid #062a4d;
+  background-color: #062a4d;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.ap-btn-icon:hover { background-color: #041b33; }
+.ap-btn-icon.danger { border-color: #b91c1c; background-color: #b91c1c; }
+.ap-btn-icon.danger:hover { background-color: #991b1b; }
+.ap-btn-icon.approve { border-color: #062a4d; background-color: #062a4d; }
+.ap-btn-icon.approve:hover { background-color: #041b33; }
+
+
+.page-btn {
+  display: inline-flex;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  min-width: 2.25rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 900;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.page-btn:hover { border-color: #062a4d; background-color: #eff6ff; }
+.page-btn:disabled { pointer-events: none; background-color: #ffffff; color: #cbd5e1; opacity: 0.7; }
+.page-btn.active,
+.page-btn-active {
+  border-color: #062a4d;
+  background-color: #062a4d;
+  color: #ffffff;
+}
+.page-btn.active:hover,
+.page-btn-active:hover {
+  background-color: #041b33;
+}
+
+
+
 :root {
   color: #0b1c30;
   background: #f8f9ff;
-  font-family: Poppins, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -17,7 +230,7 @@ html {
 }
 
 body {
-  font-family: Poppins, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 500;
   margin: 0;
   min-width: 320px;
@@ -48,10 +261,10 @@ button {
    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 */
 
-/* Prevent horizontal scroll */
+/* Prevent horizontal scroll on page level only — clip không tạo scroll context mới */
 html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
   width: 100%;
 }
 

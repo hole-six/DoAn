@@ -35,6 +35,7 @@ function chuanHoaTin(taiLieu) {
         kyNang: (duLieu.kyNang ?? []).map((muc) => ({
             maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
             tenKyNang: muc.maKyNang?.tenKyNang,
+            loaiKyNang: muc.maKyNang?.loaiKyNang,
             batBuoc: muc.batBuoc,
         })),
         ngayTao: duLieu.ngayTao,
@@ -46,7 +47,7 @@ exports.dichVuTinTuyenDung = {
         const danhSach = await tintuyendung_mohinh_js_1.TinTuyenDung
             .find()
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang')
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
             .sort({ ngayTao: -1 })
             .limit(300);
         return danhSach.map(chuanHoaTin);
@@ -55,7 +56,7 @@ exports.dichVuTinTuyenDung = {
         const duLieu = await tintuyendung_mohinh_js_1.TinTuyenDung
             .findById(ma)
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang');
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung', 404);
         return chuanHoaTin(duLieu);
@@ -65,7 +66,7 @@ exports.dichVuTinTuyenDung = {
         return chuanHoaTin(await tintuyendung_mohinh_js_1.TinTuyenDung
             .findById(ketQua._id)
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang'));
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang'));
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
@@ -76,7 +77,7 @@ exports.dichVuTinTuyenDung = {
         const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
             .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang');
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de cap nhat', 404);
         return chuanHoaTin(ketQua);
@@ -85,7 +86,7 @@ exports.dichVuTinTuyenDung = {
         const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
             .findByIdAndDelete(ma)
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang');
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de xoa', 404);
         return chuanHoaTin(ketQua);

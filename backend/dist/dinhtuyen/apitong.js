@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.apiTong = void 0;
 const express_1 = require("express");
+const canhbaoquantri_dinhtuyen_js_1 = require("../modules/canhbaoquantri/canhbaoquantri.dinhtuyen.js");
 const danhgiacongty_dinhtuyen_js_1 = require("../modules/danhgiacongty/danhgiacongty.dinhtuyen.js");
 const danhmuckynang_dinhtuyen_js_1 = require("../modules/danhmuckynang/danhmuckynang.dinhtuyen.js");
 const hosonangluc_dinhtuyen_js_1 = require("../modules/hosonangluc/hosonangluc.dinhtuyen.js");
@@ -21,6 +22,7 @@ exports.apiTong.get('/trangthai', (_yeuCau, phanHoi) => {
     phanHoi.json({ thongBao: 'API san sang', thoiGian: new Date().toISOString() });
 });
 exports.apiTong.use('/nguoidung', nguoidung_dinhtuyen_js_1.dinhTuyenNguoiDung);
+exports.apiTong.use('/canhbaoquantri', canhbaoquantri_dinhtuyen_js_1.dinhTuyenCanhBaoQuanTri);
 exports.apiTong.use('/xacthuc', xacthuc_dinhtuyen_js_1.dinhTuyenXacThuc);
 exports.apiTong.use('/ungvien', ungvien_dinhtuyen_js_1.dinhTuyenUngVien);
 exports.apiTong.use('/hosonangluc', hosonangluc_dinhtuyen_js_1.dinhTuyenHoSoNangLuc);

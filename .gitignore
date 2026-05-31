@@ -25,6 +25,10 @@ dist-ssr
 build
 *.local
 
+# Uploaded files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

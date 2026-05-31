@@ -40,40 +40,112 @@ function chuanHoaUngVien(taiLieu) {
 }
 exports.dichVuUngVien = {
     async layDanhSach() {
-        const danhSach = await ungvien_mohinh_js_1.UngVien
-            .find()
-            .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-            .sort({ ngayTao: -1 })
-            .limit(200);
-        return danhSach.map(chuanHoaUngVien);
+        try {
+            const danhSach = await ungvien_mohinh_js_1.UngVien
+                .find()
+                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+                .sort({ ngayTao: -1 })
+                .limit(200);
+            return danhSach.map(chuanHoaUngVien);
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi lấy danh sách ứng viên:', error);
+            throw error;
+        }
     },
     async layTheoMa(ma) {
-        const duLieu = await ungvien_mohinh_js_1.UngVien
-            .findById(ma)
-            .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-        if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ung vien', 404);
-        return chuanHoaUngVien(duLieu);
+        try {
+            const duLieu = await ungvien_mohinh_js_1.UngVien
+                .findById(ma)
+                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
+            if (!duLieu) {
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
+            }
+            return chuanHoaUngVien(duLieu);
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi lấy hồ sơ ứng viên:', error);
+            throw error;
+        }
+    },
+    async layTheoMaNguoiDung(maNguoiDung) {
+        try {
+            const duLieu = await ungvien_mohinh_js_1.UngVien
+                .findOne({ maNguoiDung })
+                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
+            if (!duLieu) {
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
+            }
+            return chuanHoaUngVien(duLieu);
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi lấy hồ sơ theo mã người dùng:', error);
+            throw error;
+        }
     },
     async taoMoi(duLieu) {
-        const ketQua = await ungvien_mohinh_js_1.UngVien.create(duLieu);
-        return this.layTheoMa(String(ketQua._id));
+        try {
+            const ketQua = await ungvien_mohinh_js_1.UngVien.create(duLieu);
+            console.log('✅ Tạo hồ sơ ứng viên thành công:', ketQua._id);
+            return this.layTheoMa(String(ketQua._id));
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi tạo hồ sơ ứng viên:', error);
+            throw error;
+        }
     },
-    async capNhat(ma, duLieu) {
-        const ketQua = await ungvien_mohinh_js_1.UngVien
-            .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-            .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-        if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ung vien de cap nhat', 404);
-        return chuanHoaUngVien(ketQua);
+    async capNhat(ma, duLieu, maNguoiDungHienTai) {
+        try {
+            // Kiểm tra quyền nếu có maNguoiDungHienTai
+            if (maNguoiDungHienTai) {
+                const ungVien = await ungvien_mohinh_js_1.UngVien.findById(ma);
+                if (!ungVien) {
+                    throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
+                }
+                if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
+                    throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403);
+                }
+            }
+            const ketQua = await ungvien_mohinh_js_1.UngVien
+                .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
+                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
+            if (!ketQua) {
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên để cập nhật', 404);
+            }
+            console.log('✅ Cập nhật hồ sơ ứng viên thành công:', ma);
+            return chuanHoaUngVien(ketQua);
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi cập nhật hồ sơ ứng viên:', error);
+            throw error;
+        }
     },
-    async xoa(ma) {
-        const ketQua = await ungvien_mohinh_js_1.UngVien.findByIdAndDelete(ma);
-        if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ung vien de xoa', 404);
-        return chuanHoaUngVien(ketQua);
+    async xoa(ma, maNguoiDungHienTai) {
+        try {
+            // Kiểm tra quyền nếu có maNguoiDungHienTai
+            if (maNguoiDungHienTai) {
+                const ungVien = await ungvien_mohinh_js_1.UngVien.findById(ma);
+                if (!ungVien) {
+                    throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
+                }
+                if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
+                    throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403);
+                }
+            }
+            const ketQua = await ungvien_mohinh_js_1.UngVien.findByIdAndDelete(ma);
+            if (!ketQua) {
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên để xóa', 404);
+            }
+            console.log('✅ Xóa hồ sơ ứng viên thành công:', ma);
+            return chuanHoaUngVien(ketQua);
+        }
+        catch (error) {
+            console.error('❌ Lỗi khi xóa hồ sơ ứng viên:', error);
+            throw error;
+        }
     },
 };

@@ -1,183 +1,221 @@
-import { Bell, Check, CheckCheck, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { khoiTaoSocket, langNgheEvent, boLangNgheEvent } from '../lib/socket'
+import { Bell, Check, CheckCheck, ExternalLink, X } from 'lucide-react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useThongBao, type ThongBao, type ToastThongBao } from '../contexts/ThongBaoContext'
+import AppIcon from './AppIcon'
+// ─── Màu sắc theo loại ────────────────────────────────────────────────────────
 
-interface ThongBao {
-  _id: string
-  loai: string
-  tieuDe: string
-  noiDung: string
-  lienKet?: string
-  mucDoUuTien?: string
-  icon?: string
-  mauSac?: string
-  daDoc: boolean
-  ngayTao: string
+const mauTheoLoai: Record<string, string> = {
+  he_thong: '#3b82f6',
+  ho_so_ung_tuyen: '#10b981',
+  lich_phong_van: '#f59e0b',
+  ket_qua_phong_van: '#ef4444',
+  tin_nhan: '#8b5cf6',
+  tin_tuyen_dung: '#06b6d4',
+  cong_ty: '#f97316',
 }
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
+const iconTheoLoai: Record<string, string> = {
+  he_thong: '⚙️',
+  ho_so_ung_tuyen: '📄',
+  lich_phong_van: '📅',
+  ket_qua_phong_van: '🎯',
+  tin_nhan: '💬',
+  tin_tuyen_dung: '💼',
+  cong_ty: '🏢',
+}
+
+function layMau(loai: string, mauTuy?: string) {
+  return mauTuy || mauTheoLoai[loai] || '#6b7280'
+}
+
+function layIcon(loai: string, iconTuy?: string) {
+  return iconTuy || iconTheoLoai[loai] || '🔔'
+}
+
+function dinhDangThoiGian(ngay: string) {
+  const now = new Date()
+  const date = new Date(ngay)
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 1) return 'Vừa xong'
+  if (minutes < 60) return `${minutes} phút trước`
+  if (hours < 24) return `${hours} giờ trước`
+  if (days < 7) return `${days} ngày trước`
+  return date.toLocaleDateString('vi-VN')
+}
+
+// ─── Toast notification ───────────────────────────────────────────────────────
+
+export function ThongBaoToastContainer() {
+  const { toasts, xoaToast } = useThongBao()
+  const navigate = useNavigate()
+
+  if (toasts.length === 0) return null
+
+  return (
+    <div style={{
+      position: 'fixed', top: 80, right: 20,
+      display: 'flex', flexDirection: 'column', gap: 10,
+      zIndex: 9999, maxWidth: 360,
+    }}>
+      {toasts.map((toast: ToastThongBao) => (
+        <div
+          key={toast.toastId}
+          className="thongbao-toast"
+          style={{ borderLeft: `4px solid ${layMau(toast.loai, toast.mauSac)}` }}
+        >
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <span style={{ fontSize: 22, flexShrink: 0 }}>{layIcon(toast.loai, toast.icon)}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 3 }}>
+                {toast.tieuDe}
+              </div>
+              <div style={{ fontSize: 13, color: '#6b7280', lineHeight: 1.4 }}>
+                {toast.noiDung}
+              </div>
+              {toast.lienKet && (
+                <button
+                  onClick={() => { navigate(toast.lienKet!); xoaToast(toast.toastId) }}
+                  style={{
+                    marginTop: 6, background: 'none', border: 'none',
+                    color: layMau(toast.loai, toast.mauSac), cursor: 'pointer',
+                    fontSize: 12, fontWeight: 600, padding: 0,
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  Xem ngay <AppIcon icon={ExternalLink} size={12} />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => xoaToast(toast.toastId)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: 2, color: '#9ca3af', flexShrink: 0,
+              }}
+            >
+              <AppIcon icon={X} size={14} />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Notification item ────────────────────────────────────────────────────────
+
+function ThongBaoItem({ tb, onDoc }: { tb: ThongBao; onDoc: (id: string) => void }) {
+  const navigate = useNavigate()
+  const mau = layMau(tb.loai, tb.mauSac)
+  const icon = layIcon(tb.loai, tb.icon)
+
+  const xuLyClick = () => {
+    if (!tb.daDoc) onDoc(tb._id)
+    if (tb.lienKet) navigate(tb.lienKet)
+  }
+
+  return (
+    <div
+      onClick={xuLyClick}
+      className="thongbao-item"
+      style={{ background: tb.daDoc ? 'white' : '#faf5ff' }}
+    >
+      {/* Icon */}
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+        background: `${mau}18`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 18,
+      }}>
+        {icon}
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 13, fontWeight: tb.daDoc ? 400 : 600,
+          color: '#111827', marginBottom: 3, lineHeight: 1.4,
+        }}>
+          {tb.tieuDe}
+        </div>
+        <div style={{
+          fontSize: 12, color: '#6b7280', marginBottom: 4,
+          overflow: 'hidden', textOverflow: 'ellipsis',
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        }}>
+          {tb.noiDung}
+        </div>
+        <div style={{ fontSize: 11, color: '#9ca3af' }}>
+          {dinhDangThoiGian(tb.ngayTao)}
+        </div>
+
+        {/* Action buttons */}
+        {tb.hanhDong && tb.hanhDong.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+            {tb.hanhDong.map((hd, idx) => (
+              <button
+                key={idx}
+                onClick={e => { e.stopPropagation(); navigate(hd.url) }}
+                style={{
+                  padding: '4px 12px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                  cursor: 'pointer', border: 'none',
+                  background: hd.loai === 'primary' ? mau : hd.loai === 'danger' ? '#ef4444' : '#f3f4f6',
+                  color: hd.loai === 'secondary' ? '#374151' : 'white',
+                }}
+              >
+                {hd.nhan}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Unread dot + mark read */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+        {!tb.daDoc && (
+          <>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: mau }} />
+            <button
+              onClick={e => { e.stopPropagation(); onDoc(tb._id) }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#9ca3af' }}
+              title="Đánh dấu đã đọc"
+            >
+              <AppIcon icon={Check} size={14} />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── ThongBaoCenter ───────────────────────────────────────────────────────────
 
 export function ThongBaoCenter() {
   const [moPopup, setMoPopup] = useState(false)
-  const [thongBaoList, setThongBaoList] = useState<ThongBao[]>([])
-  const [soLuongChuaDoc, setSoLuongChuaDoc] = useState(0)
-  const [dangTai, setDangTai] = useState(false)
+  const { danhSach, soLuongChuaDoc, dangTai, danhDauDaDoc, danhDauTatCaDaDoc, taiThongBao } = useThongBao()
 
-  // Lấy token từ localStorage
-  const token = localStorage.getItem('accessToken')
-
-  useEffect(() => {
-    if (!token) return
-
-    // Khởi tạo Socket.IO
-    khoiTaoSocket(token)
-
-    // Lắng nghe thông báo mới
-    const xuLyThongBaoMoi = (thongBao: ThongBao) => {
-      console.log('📬 Thông báo mới:', thongBao)
-      setThongBaoList((prev) => [thongBao, ...prev])
-      setSoLuongChuaDoc((prev) => prev + 1)
-      
-      // Hiển thị browser notification
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(thongBao.tieuDe, {
-          body: thongBao.noiDung,
-          icon: '/favicon.svg',
-        })
-      }
-    }
-
-    langNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
-
-    // Tải danh sách thông báo
-    taiThongBao()
-    demChuaDoc()
-
-    return () => {
-      boLangNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
-    }
-  }, [token])
-
-  const taiThongBao = async () => {
-    setDangTai(true)
-    try {
-      const response = await fetch(`${API_URL}/thongbao?limit=20&sort=-ngayTao`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await response.json()
-      setThongBaoList(data.duLieu || [])
-    } catch (error) {
-      console.error('Lỗi tải thông báo:', error)
-    } finally {
-      setDangTai(false)
-    }
-  }
-
-  const demChuaDoc = async () => {
-    try {
-      const response = await fetch(`${API_URL}/thongbao/dem-chua-doc`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await response.json()
-      setSoLuongChuaDoc(data.duLieu?.soLuong || 0)
-    } catch (error) {
-      console.error('Lỗi đếm thông báo:', error)
-    }
-  }
-
-  const danhDauDaDoc = async (id: string) => {
-    try {
-      await fetch(`${API_URL}/thongbao/${id}/danh-dau-da-doc`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      
-      setThongBaoList((prev) =>
-        prev.map((tb) => (tb._id === id ? { ...tb, daDoc: true } : tb))
-      )
-      setSoLuongChuaDoc((prev) => Math.max(0, prev - 1))
-    } catch (error) {
-      console.error('Lỗi đánh dấu đã đọc:', error)
-    }
-  }
-
-  const danhDauTatCaDaDoc = async () => {
-    try {
-      await fetch(`${API_URL}/thongbao/danh-dau-tat-ca-da-doc`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      
-      setThongBaoList((prev) => prev.map((tb) => ({ ...tb, daDoc: true })))
-      setSoLuongChuaDoc(0)
-    } catch (error) {
-      console.error('Lỗi đánh dấu tất cả:', error)
-    }
-  }
-
-  const layMauSacTheoLoai = (loai: string) => {
-    const mauSac: Record<string, string> = {
-      he_thong: '#3b82f6',
-      ho_so_ung_tuyen: '#10b981',
-      lich_phong_van: '#f59e0b',
-      ket_qua_phong_van: '#ef4444',
-      tin_nhan: '#8b5cf6',
-      tin_tuyen_dung: '#06b6d4',
-    }
-    return mauSac[loai] || '#6b7280'
-  }
-
-  const dinhDangThoiGian = (ngay: string) => {
-    const now = new Date()
-    const date = new Date(ngay)
-    const diff = now.getTime() - date.getTime()
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-
-    if (minutes < 1) return 'Vừa xong'
-    if (minutes < 60) return `${minutes} phút trước`
-    if (hours < 24) return `${hours} giờ trước`
-    if (days < 7) return `${days} ngày trước`
-    return date.toLocaleDateString('vi-VN')
+  const xuLyMo = () => {
+    setMoPopup(!moPopup)
+    if (!moPopup) taiThongBao()
   }
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Bell Icon */}
+      {/* Bell button */}
       <button
-        onClick={() => setMoPopup(!moPopup)}
-        style={{
-          position: 'relative',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 8,
-          borderRadius: 8,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        onClick={xuLyMo}
+        aria-label="Thông báo"
+        className="thongbao-bell-btn"
       >
-        <Bell size={20} color="#64748b" />
+        <AppIcon icon={Bell} size={20} />
         {soLuongChuaDoc > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: 4,
-              right: 4,
-              background: '#ef4444',
-              color: 'white',
-              borderRadius: '50%',
-              width: 18,
-              height: 18,
-              fontSize: 11,
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <span className="thongbao-badge">
             {soLuongChuaDoc > 9 ? '9+' : soLuongChuaDoc}
           </span>
         )}
@@ -186,76 +224,46 @@ export function ThongBaoCenter() {
       {/* Popup */}
       {moPopup && (
         <>
+          {/* Backdrop */}
           <div
             onClick={() => setMoPopup(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 999,
-            }}
+            style={{ position: 'fixed', inset: 0, zIndex: 998 }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              top: 'calc(100% + 8px)',
-              right: 0,
-              width: 400,
-              maxWidth: '90vw',
-              background: 'white',
-              borderRadius: 12,
-              boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-              zIndex: 1000,
-              maxHeight: '80vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
+
+          <div className="thongbao-popup">
             {/* Header */}
-            <div
-              style={{
-                padding: '16px 20px',
-                borderBottom: '1px solid #e5e7eb',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-                Thông báo
-              </h3>
-              <div style={{ display: 'flex', gap: 8 }}>
+            <div style={{
+              padding: '14px 18px', borderBottom: '1px solid #f3f4f6',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Thông báo</h3>
+                {soLuongChuaDoc > 0 && (
+                  <p style={{ margin: 0, fontSize: 12, color: '#7c3aed' }}>
+                    {soLuongChuaDoc} chưa đọc
+                  </p>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                 {soLuongChuaDoc > 0 && (
                   <button
                     onClick={danhDauTatCaDaDoc}
                     style={{
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 4,
-                      color: '#3b82f6',
-                      fontSize: 13,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 4,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#7c3aed', fontSize: 12, fontWeight: 600,
+                      display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px',
+                      borderRadius: 6,
                     }}
                   >
-                    <CheckCheck size={16} />
-                    Đánh dấu tất cả
+                    <AppIcon icon={CheckCheck} size={14} />
+                    Đọc tất cả
                   </button>
                 )}
                 <button
                   onClick={() => setMoPopup(false)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 4,
-                  }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#9ca3af' }}
                 >
-                  <X size={18} color="#64748b" />
+                  <AppIcon icon={X} size={16} />
                 </button>
               </div>
             </div>
@@ -263,94 +271,17 @@ export function ThongBaoCenter() {
             {/* List */}
             <div style={{ overflowY: 'auto', flex: 1 }}>
               {dangTai ? (
-                <div style={{ padding: 40, textAlign: 'center', color: '#9ca3af' }}>
-                  Đang tải...
+                <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
+                  <div className="chat-spinner" />
                 </div>
-              ) : thongBaoList.length === 0 ? (
+              ) : danhSach.length === 0 ? (
                 <div style={{ padding: 40, textAlign: 'center', color: '#9ca3af' }}>
-                  Không có thông báo
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>🔔</div>
+                  <p style={{ margin: 0, fontSize: 14 }}>Không có thông báo nào</p>
                 </div>
               ) : (
-                thongBaoList.map((tb) => (
-                  <div
-                    key={tb._id}
-                    onClick={() => {
-                      if (!tb.daDoc) danhDauDaDoc(tb._id)
-                      if (tb.lienKet) window.location.href = tb.lienKet
-                    }}
-                    style={{
-                      padding: '12px 20px',
-                      borderBottom: '1px solid #f3f4f6',
-                      cursor: 'pointer',
-                      background: tb.daDoc ? 'white' : '#eff6ff',
-                      display: 'flex',
-                      gap: 12,
-                      transition: 'background 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#f9fafb'
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = tb.daDoc ? 'white' : '#eff6ff'
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        background: tb.daDoc ? 'transparent' : layMauSacTheoLoai(tb.loai),
-                        marginTop: 6,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: tb.daDoc ? 400 : 600,
-                          color: '#111827',
-                          marginBottom: 4,
-                        }}
-                      >
-                        {tb.tieuDe}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 13,
-                          color: '#6b7280',
-                          marginBottom: 4,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical',
-                        }}
-                      >
-                        {tb.noiDung}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#9ca3af' }}>
-                        {dinhDangThoiGian(tb.ngayTao)}
-                      </div>
-                    </div>
-                    {!tb.daDoc && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          danhDauDaDoc(tb._id)
-                        }}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: 4,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Check size={16} color="#3b82f6" />
-                      </button>
-                    )}
-                  </div>
+                danhSach.map(tb => (
+                  <ThongBaoItem key={tb._id} tb={tb} onDoc={danhDauDaDoc} />
                 ))
               )}
             </div>

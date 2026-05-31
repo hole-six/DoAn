@@ -1,5 +1,6 @@
 import { Download, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import AppIcon from './AppIcon'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -61,7 +62,7 @@ export function PWAInstallPrompt() {
           zIndex: 9999,
         }}>
           <div style={{ width: 48, height: 48, borderRadius: 12, background: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Download size={24} color="white" />
+            <AppIcon icon={Download} size={24} style={{ color: 'white' }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 4 }}>Cai dat ung dung</div>
@@ -71,7 +72,7 @@ export function PWAInstallPrompt() {
             Cai dat
           </button>
           <button onClick={xuLyDong} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
-            <X size={20} color="#9ca3af" />
+            <AppIcon icon={X} size={20} style={{ color: '#9ca3af' }} />
           </button>
         </div>
       )}
@@ -97,7 +98,7 @@ export function PWAInstallPrompt() {
             Cap nhat
           </button>
           <button onClick={() => setNeedRefresh(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
-            <X size={18} color="white" />
+            <AppIcon icon={X} size={18} style={{ color: 'white' }} />
           </button>
         </div>
       )}

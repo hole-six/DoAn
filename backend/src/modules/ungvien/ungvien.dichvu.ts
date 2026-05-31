@@ -39,41 +39,122 @@ function chuanHoaUngVien(taiLieu: any) {
 
 export const dichVuUngVien = {
   async layDanhSach() {
-    const danhSach = await (UngVien as any)
-      .find()
-      .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-      .sort({ ngayTao: -1 })
-      .limit(200)
-    return danhSach.map(chuanHoaUngVien)
+    try {
+      const danhSach = await (UngVien as any)
+        .find()
+        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+        .sort({ ngayTao: -1 })
+        .limit(200)
+      return danhSach.map(chuanHoaUngVien)
+    } catch (error) {
+      console.error('❌ Lỗi khi lấy danh sách ứng viên:', error)
+      throw error
+    }
   },
 
   async layTheoMa(ma: string) {
-    const duLieu = await (UngVien as any)
-      .findById(ma)
-      .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (!duLieu) throw new LoiUngDung('Khong tim thay ung vien', 404)
-    return chuanHoaUngVien(duLieu)
+    try {
+      const duLieu = await (UngVien as any)
+        .findById(ma)
+        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+      
+      if (!duLieu) {
+        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+      }
+      
+      return chuanHoaUngVien(duLieu)
+    } catch (error) {
+      console.error('❌ Lỗi khi lấy hồ sơ ứng viên:', error)
+      throw error
+    }
+  },
+
+  async layTheoMaNguoiDung(maNguoiDung: string) {
+    try {
+      const duLieu = await (UngVien as any)
+        .findOne({ maNguoiDung })
+        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+      
+      if (!duLieu) {
+        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+      }
+      
+      return chuanHoaUngVien(duLieu)
+    } catch (error) {
+      console.error('❌ Lỗi khi lấy hồ sơ theo mã người dùng:', error)
+      throw error
+    }
   },
 
   async taoMoi(duLieu: unknown) {
-    const ketQua = await (UngVien as any).create(duLieu)
-    return this.layTheoMa(String(ketQua._id))
+    try {
+      const ketQua = await (UngVien as any).create(duLieu)
+      console.log('✅ Tạo hồ sơ ứng viên thành công:', ketQua._id)
+      return this.layTheoMa(String(ketQua._id))
+    } catch (error) {
+      console.error('❌ Lỗi khi tạo hồ sơ ứng viên:', error)
+      throw error
+    }
   },
 
-  async capNhat(ma: string, duLieu: unknown) {
-    const ketQua = await (UngVien as any)
-      .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-      .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ung vien de cap nhat', 404)
-    return chuanHoaUngVien(ketQua)
+  async capNhat(ma: string, duLieu: unknown, maNguoiDungHienTai?: string) {
+    try {
+      // Kiểm tra quyền nếu có maNguoiDungHienTai
+      if (maNguoiDungHienTai) {
+        const ungVien = await (UngVien as any).findById(ma)
+        if (!ungVien) {
+          throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+        }
+        
+        if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
+          throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403)
+        }
+      }
+      
+      const ketQua = await (UngVien as any)
+        .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
+        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+      
+      if (!ketQua) {
+        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên để cập nhật', 404)
+      }
+      
+      console.log('✅ Cập nhật hồ sơ ứng viên thành công:', ma)
+      return chuanHoaUngVien(ketQua)
+    } catch (error) {
+      console.error('❌ Lỗi khi cập nhật hồ sơ ứng viên:', error)
+      throw error
+    }
   },
 
-  async xoa(ma: string) {
-    const ketQua = await (UngVien as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ung vien de xoa', 404)
-    return chuanHoaUngVien(ketQua)
+  async xoa(ma: string, maNguoiDungHienTai?: string) {
+    try {
+      // Kiểm tra quyền nếu có maNguoiDungHienTai
+      if (maNguoiDungHienTai) {
+        const ungVien = await (UngVien as any).findById(ma)
+        if (!ungVien) {
+          throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+        }
+        
+        if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
+          throw new LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403)
+        }
+      }
+      
+      const ketQua = await (UngVien as any).findByIdAndDelete(ma)
+      if (!ketQua) {
+        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên để xóa', 404)
+      }
+      
+      console.log('✅ Xóa hồ sơ ứng viên thành công:', ma)
+      return chuanHoaUngVien(ketQua)
+    } catch (error) {
+      console.error('❌ Lỗi khi xóa hồ sơ ứng viên:', error)
+      throw error
+    }
   },
 }

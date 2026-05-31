@@ -4,10 +4,10 @@
   "description": "API cho website quản lý tuyển dụng việc làm CNTT tại Đà Nẵng",
   "main": "dist/maychu.js",
   "scripts": {
-    "dev": "tsx watch src/maychu.ts",
+    "dev": "node scripts/chay-dev.cjs",
     "build": "tsc",
     "start": "node dist/maychu.js",
-    "seed": "tsx src/gieodulieu.ts"
+    "seed": "node --use-system-ca ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts"
   },
   "keywords": [],
   "author": "",

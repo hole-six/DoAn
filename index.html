@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Le Hoa - Fullstack Developer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm 20mm;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background: #e8e8e8;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .cv-container {
+            max-width: 210mm;
+            margin: 20px auto;
+            background: #fff;
+            padding: 40px 50px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                margin: 0;
+                padding: 0;
+            }
+
+            .cv-container {
+                max-width: 210mm;
+                margin: 0;
+                padding: 40px 50px;
+                box-shadow: none;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            /* Prevent breaking inside important elements */
+            .section,
+            .project,
+            .skills-category,
+            .bullet-list>li,
+            .skills-sub>li {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            /* Keep headers with content */
+            .section-title,
+            .project-name,
+            .skills-category {
+                page-break-after: avoid;
+                break-after: avoid;
+            }
+
+            /* Keep personal info together */
+            .personal-info {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            /* Prevent orphans and widows */
+            p,
+            li {
+                orphans: 3;
+                widows: 3;
+            }
+        }
+
+        /* ========== RESPONSIVE DESIGN ========== */
+
+        /* Tablet */
+        @media screen and (max-width: 1024px) {
+            .cv-container {
+                padding: 30px 35px;
+                margin: 15px;
+            }
+
+            .cv-name {
+                font-size: 32pt;
+            }
+
+            .cv-title {
+                font-size: 12pt;
+            }
+
+            .action-buttons {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 13px;
+            }
+        }
+
+        /* Mobile Landscape & Small Tablet */
+        @media screen and (max-width: 768px) {
+            .cv-container {
+                padding: 25px 20px;
+                margin: 10px;
+            }
+
+            .cv-name {
+                font-size: 28pt;
+                letter-spacing: 1px;
+            }
+
+            .cv-title {
+                font-size: 11pt;
+            }
+
+            .personal-info {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .personal-info .photo {
+                width: 120px;
+                height: 150px;
+                margin-bottom: 15px;
+            }
+
+            .personal-details {
+                width: 100%;
+            }
+
+            .personal-details strong {
+                min-width: 90px;
+            }
+
+            .section-title {
+                font-size: 13pt;
+            }
+
+            .project-details,
+            .project-responsibilities,
+            .project-tech {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .project-details .label,
+            .project-responsibilities .label,
+            .project-tech .label {
+                font-weight: 700;
+                margin-top: 8px;
+            }
+
+            .action-buttons {
+                flex-direction: row;
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                justify-content: center;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 12px;
+                flex: 1;
+            }
+        }
+
+        /* Mobile Portrait */
+        @media screen and (max-width: 480px) {
+            body {
+                font-size: 10pt;
+            }
+
+            .cv-container {
+                padding: 20px 15px;
+                margin: 5px;
+            }
+
+            .cv-name {
+                font-size: 24pt;
+                letter-spacing: 0.5px;
+            }
+
+            .cv-title {
+                font-size: 10pt;
+                letter-spacing: 0.5px;
+            }
+
+            .personal-info .photo {
+                width: 100px;
+                height: 125px;
+            }
+
+            .personal-details {
+                font-size: 10pt;
+            }
+
+            .personal-details strong {
+                min-width: 80px;
+                font-size: 9.5pt;
+            }
+
+            .section-title {
+                font-size: 12pt;
+            }
+
+            .section-content {
+                font-size: 10pt;
+            }
+
+            .bullet-list {
+                padding-left: 18px;
+            }
+
+            .project-name {
+                font-size: 10.5pt;
+            }
+
+            .project-details,
+            .project-responsibilities,
+            .project-tech {
+                font-size: 9.5pt;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
+                bottom: 10px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 11px;
+                width: 100%;
+            }
+        }
+
+        /* Extra Small Mobile */
+        @media screen and (max-width: 360px) {
+            .cv-container {
+                padding: 15px 10px;
+            }
+
+            .cv-name {
+                font-size: 20pt;
+            }
+
+            .cv-title {
+                font-size: 9pt;
+            }
+
+            .personal-info .photo {
+                width: 90px;
+                height: 110px;
+            }
+
+            .personal-details {
+                font-size: 9pt;
+            }
+
+            .personal-details strong {
+                display: block;
+                margin-bottom: 2px;
+            }
+        }
+
+        /* ========== HEADER ========== */
+        .cv-name {
+            font-size: 36pt;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #000;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .cv-title {
+            font-size: 13pt;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #000;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        /* ========== PERSONAL INFO ========== */
+        .personal-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .personal-info .photo {
+            width: 100px;
+            height: 120px;
+            background: #ddd;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9pt;
+            color: #888;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .personal-info .photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .personal-details {
+            font-size: 11pt;
+            line-height: 1.7;
+        }
+
+        .personal-details strong {
+            font-weight: 700;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        /* ========== SECTIONS ========== */
+        .section {
+            margin-bottom: 22px;
+        }
+
+        .section-title {
+            font-size: 14pt;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #000;
+            margin-bottom: 10px;
+        }
+
+        /* ========== BULLET LISTS ========== */
+        .bullet-list {
+            padding-left: 22px;
+            margin-bottom: 6px;
+        }
+
+        .bullet-list li {
+            margin-bottom: 3px;
+            line-height: 1.5;
+        }
+
+        .bullet-list .sub-list {
+            padding-left: 20px;
+            list-style-type: circle;
+        }
+
+        .bullet-list .sub-list li {
+            margin-bottom: 2px;
+        }
+
+        /* ========== SKILLS ========== */
+        .skills-category {
+            font-weight: 700;
+            margin-bottom: 4px;
+            margin-top: 8px;
+        }
+
+        .skills-sub {
+            padding-left: 22px;
+            list-style-type: disc;
+        }
+
+        .skills-sub li {
+            margin-bottom: 2px;
+        }
+
+        .skills-sub-inner {
+            padding-left: 20px;
+            list-style-type: circle;
+        }
+
+        .skills-sub-inner li {
+            margin-bottom: 2px;
+        }
+
+        /* ========== PROJECT SECTION ========== */
+        .project {
+            margin-bottom: 26px;
+            page-break-inside: avoid;
+        }
+
+        .project-name {
+            font-size: 11.5pt;
+            font-weight: 700;
+            font-style: italic;
+            color: #000;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #000;
+            margin-bottom: 14px;
+        }
+
+        .project-details {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 4px 16px;
+            margin-bottom: 8px;
+            font-size: 10.5pt;
+        }
+
+        .project-details .label {
+            font-weight: 700;
+        }
+
+        .project-details .value {
+            font-weight: 400;
+        }
+
+        .project-responsibilities {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 4px 16px;
+            margin-bottom: 8px;
+            font-size: 10.5pt;
+        }
+
+        .project-responsibilities .label {
+            font-weight: 700;
+        }
+
+        .project-responsibilities ul {
+            padding-left: 18px;
+            margin: 0;
+        }
+
+        .project-responsibilities ul li {
+            margin-bottom: 2px;
+        }
+
+        .project-tech {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 3px 16px;
+            font-size: 10.5pt;
+        }
+
+        .project-tech .label {
+            font-weight: 700;
+        }
+
+        /* ========== LINKS ========== */
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========== PAGE BREAK HELPER ========== */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* ========== BUTTONS ========== */
+        .action-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 999;
+        }
+
+        .btn {
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-download {
+            background: #0066cc;
+        }
+
+        .btn-download:hover {
+            background: #0052a3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========== HEADER ========== -->
+    <div class="cv-container">
+
+        <!-- ========== HEADER ========== -->
+        <div class="cv-name">HOA LE</div>
+        <div class="cv-title">FULLSTACK WEB DEVELOPER</div>
+
+        <!-- ========== PERSONAL INFO ========== -->
+        <div class="personal-info">
+            <div class="photo"><img src="profile (2).jpg" alt="Le Hoa"></div>
+            <div class="personal-details">
+                <div><strong>Full Name:</strong> Lê Hòa.</div>
+                <div><strong>Phone:</strong> (+84) 336 487 534.</div>
+                <div><strong>Email:</strong> hoadt122@gmail.com</div>
+                <div><strong>Facebook:</strong> facebook.com/hoadt122</div>
+                <div><strong>GitHub:</strong> <a href="htt  ps://github.com/hole-six/">github.com/hole-six</a></div>
+                <div><strong>Portfolio:</strong> <a href="https://hole-six.site/">hole-six.site</a>
+                </div>
+                <div><strong>Location:</strong> Liên Chiểu District, Da Nang City.</div>
+            </div>
+        </div>
+
+        <!-- ========== EXPERIENCE SUMMARY ========== -->
+        <div class="section">
+            <div class="section-title">Experience Summary</div>
+            <ul class="bullet-list">
+                <li>Full-stack Web Developer focusing on building scalable web products with clean architecture and
+                    great user experience.</li>
+                <li>Experienced with modern Frontend (ReactJS, NextJS) combined with Backend (PHP/Laravel, MVC, RESTful
+                    API).</li>
+                <li>Hands-on experience with real enterprise projects:
+                    <ul class="sub-list">
+                        <li>ERP system with large-scale data and multi-user management at HiWeb.vn</li>
+                        <li>University portal (Hệ thống "Một Cửa") at ĐH Sư Phạm Kỹ Thuật ĐN</li>
+                    </ul>
+                </li>
+                <li>Freelance Web Developer with 5,000+ followers fanpage – providing end-to-end website solutions.</li>
+                <li>System-oriented mindset: prioritizing clean, maintainable, production-ready code.</li>
+                <li>Working with Agile process and strong teamwork collaboration.</li>
+            </ul>
+        </div>
+
+        <!-- ========== SKILLS ========== -->
+        <div class="section">
+            <div class="section-title">Skills</div>
+
+            <div class="skills-category">● Soft Skills</div>
+            <ul class="skills-sub">
+                <li>Excellent communication, positive attitude, teamwork.</li>
+                <li>Fast learning and self-training for working in challenges.</li>
+                <li>English: good reading/writing technical documentation, basic communication.</li>
+                <li>Working in high pressure and solving problems quickly.</li>
+                <li>Logical thinking, structured planning and execution.</li>
+            </ul>
+
+            <div class="skills-category">● Programming Skills</div>
+            <ul class="skills-sub">
+                <li>Frontend
+                    <ul class="skills-sub-inner">
+                        <li>Languages: JavaScript, TypeScript, HTML, CSS.</li>
+                        <li>Framework/Platform: ReactJS, NextJS.</li>
+                        <li>UI/UX: Responsive design, component-based architecture.</li>
+                    </ul>
+                </li>
+                <li>Backend
+                    <ul class="skills-sub-inner">
+                        <li>Languages: PHP, Node.js, Python.</li>
+                        <li>Framework: Laravel (MVC, RESTful API).</li>
+                        <li>Skills: Authentication & Authorization, Role-based access control, Database optimization.
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <br>
+                <li>Others
+                    <ul class="skills-sub-inner">
+                        <li>Platforms: Windows, Linux.</li>
+                        <li>Tools: Git, GitHub, Hosting/Domain/VPS deployment.</li>
+                        <li>Additional languages (learned & understood): C#, C, Java, Dart.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ========== EDUCATION ========== -->
+        <div class="section">
+            <div class="section-title">Education</div>
+            <p>Da Nang University of Technology and Education (ĐH Sư Phạm Kỹ Thuật - ĐH Đà Nẵng), Major in Information
+                Technology. (2022 – 2026)</p>
+        </div>
+
+        <!-- ========== BLOG / TECHNICAL WRITING ========== -->
+        <div class="section">
+            <div class="section-title">Blog / Technical Writing</div>
+            <p style="margin-bottom: 8px;">Author of technical blog posts on <a
+                    href="https://viblo.asia/">Viblo.asia</a> – sharing in-depth knowledge about modern web development:
+            </p>
+            <ul class="bullet-list">
+                <li><a
+                        href="https://viblo.asia/p/advanced-react-hooks-build-a-complete-application-with-modern-react-architecture-13VM9q0DVY7">Advanced
+                        React Hooks: Build a Complete Application with Modern React Architecture</a></li>
+                <li><a href="https://viblo.asia/p/react-performance-optimization-lZL9XeweJQK">React Performance
+                        Optimization – Memoization, Lazy Loading & Code Splitting</a></li>
+                <li><a href="https://viblo.asia/p/reactjs-advanced-state-management-oKLnqKBZJQO">ReactJS Advanced State
+                        Management – Context + Reducer Pattern</a></li>
+                <li><a href="https://viblo.asia/p/nextjs-la-gi-vi-sao-react-developer-nen-hoc-nextjs-gdJzvmbvJz5">Next.js
+                        là gì? Vì sao React Developer nên học Next.js</a></li>
+                <li><a
+                        href="https://viblo.asia/p/reactjs-la-gi-vi-sao-frontend-developer-hien-dai-khong-the-bo-qua-react-kNLr382WVgA">ReactJS
+                        là gì? Vì sao Frontend Developer hiện đại không thể bỏ qua React</a></li>
+            </ul>
+        </div>
+
+        <!-- ========== EXPERIENCE BY PROJECTS ========== -->
+        <div class="section">
+            <div class="section-title">Experience by Projects</div>
+
+            <!-- PROJECT 1: HiWeb ERP System -->
+            <div class="project">
+                <div class="project-name">Project Name: ERP SYSTEM – HIWEB.VN COMPANY (TNHH HiWeb.vn)</div>
+                <div class="project-details">
+                    <span class="label">Duration</span>
+                    <span class="value">: 2025 – Present</span>
+                    <span class="label">Position</span>
+                    <span class="value">: Fullstack Developer</span>
+                    <span class="label">Description</span>
+                    <span class="value">: HiWeb provides Hosting, Domain, VPS and web infrastructure solutions. The ERP
+                        system manages large-scale data for multi-user enterprise operations with high scalability
+                        requirements.</span>
+                </div>
+                <div class="project-responsibilities">
+                    <span class="label">Responsibilities</span>
+                    <div>
+                        <ul>
+                            <li>Develop modern frontend interfaces using ReactJS and NextJS.</li>
+                            <li>Build backend with PHP/Laravel following MVC and RESTful API patterns.</li>
+                            <li>Implement Authentication & Authorization with role-based access control.</li>
+                            <li>Handle complex business logic and large database optimization.</li>
+                            <li>Design scalable system architecture for multi-user ERP.</li>
+                            <li>Collaborate with team to develop extensible, high-load modules.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-tech">
+                    <span class="label">OS</span>
+                    <span>: Windows, Linux</span>
+                    <span class="label">Languages</span>
+                    <span>: JavaScript, PHP</span>
+                    <span class="label">Framework</span>
+                    <span>: ReactJS, NextJS, Laravel</span>
+                    <span class="label">Techniques</span>
+                    <span>: RESTful API, MVC, Git, SEO optimization</span>
+                    <span class="label">Work Location</span>
+                    <span>: Da Nang, Vietnam.</span>
+                    <span class="label">Links</span>
+                    <span>: <a href="https://id.hiweb.vn">id.hiweb.vn</a> | <a
+                            href="https://hiweb.vn">hiweb.vn</a></span>
+                </div>
+            </div>
+
+            <!-- PROJECT 2: University Website -->
+            <div class="project">
+                <div class="project-name">Project Name: UNIVERSITY PORTAL & "MỘT CỬA" SYSTEM – ĐH Sư Phạm Kỹ Thuật ĐN
+                </div>
+                <div class="project-details">
+                    <span class="label">Duration</span>
+                    <span class="value">: During university study (2022 – 2026)</span>
+                    <span class="label">Position</span>
+                    <span class="value">: Web Developer – University Development Team</span>
+                    <span class="label">Description</span>
+                    <span class="value">: Participated in designing, developing and operating the university's official
+                        website. Built the "Một Cửa" (One-Stop) system to digitize administrative procedures for
+                        students, reducing manual processing time.</span>
+                </div>
+                <div class="project-responsibilities">
+                    <span class="label">Responsibilities</span>
+                    <div>
+                        <ul>
+                            <li>Develop website using MVC architecture with .NET / ASP.NET MVC.</li>
+                            <li>Maintain, upgrade and operate the university's web system.</li>
+                            <li>Build online document request and processing status management features.</li>
+                            <li>Implement user role management (students – staff).</li>
+                            <li>Connect data with the university's internal systems.</li>
+                            <li>Improve system performance and stability.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-tech">
+                    <span class="label">OS</span>
+                    <span>: Windows</span>
+                    <span class="label">Languages</span>
+                    <span>: C#</span>
+                    <span class="label">Framework</span>
+                    <span>: .NET, ASP.NET MVC</span>
+                    <span class="label">Techniques</span>
+                    <span>: MVC, Git, Role-based access control</span>
+                    <span class="label">Work Location</span>
+                    <span>: Da Nang, Vietnam.</span>
+                    <span class="label">Links</span>
+                    <span>: <a href="https://qldt.ute.udn.vn/">qldt.ute.udn.vn</a> (University Portal System)</span>
+                </div>
+            </div>
+
+            <!-- PROJECT 3: Freelance -->
+            <div class="project">
+                <div class="project-name">Project Name: FREELANCE WEB DEVELOPMENT – Self-employed</div>
+                <div class="project-details">
+                    <span class="label">Duration</span>
+                    <span class="value">: 2022 – Present</span>
+                    <span class="label">Position</span>
+                    <span class="value">: Freelance Full-stack Web Developer</span>
+                    <span class="label">Description</span>
+                    <span class="value">: Managing a fanpage (5,000+ followers) providing end-to-end website design &
+                        development services. Delivering e-commerce, landing pages, business websites, and personal
+                        brand sites for individuals and small businesses.</span>
+                </div>
+                <div class="project-responsibilities">
+                    <span class="label">Responsibilities</span>
+                    <div>
+                        <ul>
+                            <li>Consult clients on website solutions matching their business needs.</li>
+                            <li>Design and develop websites from scratch to completion (full-stack).</li>
+                            <li>Build e-commerce sites, landing pages, service/business websites.</li>
+                            <li>Frontend: UI/UX, responsive design, user experience optimization.</li>
+                            <li>Backend: data processing, business logic, admin panels.</li>
+                            <li>Handle hosting, domain, VPS setup, deployment and handover.</li>
+                            <li>SEO optimization and understanding Google ranking criteria.</li>
+                            <li>Maintain, upgrade and scale systems per client requirements.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="project-tech">
+                    <span class="label">OS</span>
+                    <span>: Windows, Linux</span>
+                    <span class="label">Languages</span>
+                    <span>: JavaScript, PHP, HTML, CSS</span>
+                    <span class="label">Framework</span>
+                    <span>: ReactJS, NextJS, Laravel</span>
+                    <span class="label">Techniques</span>
+                    <span>: SEO, Responsive Design, Git, Ads management</span>
+                    <span class="label">Work Location</span>
+                    <span>: Da Nang, Vietnam (Remote).</span>
+                    <span class="label">Links</span>
+                    <span>: <a href="https://wavestore.id.vn">wavestore.id.vn</a> | <a
+                            href="https://websitegiare.netlify.app/">websitegiare.netlify.app</a> | <a
+                            href="https://beauty-storevn.netlify.app/">beauty-storevn.netlify.app</a> | <a
+                            href="https://ruoujagermaistervungtau.com">ruoujagermaistervungtau.com</a></span>
+                    <span class="label">GitHub</span>
+                    <span>: <a href="https://github.com/hole-six">github.com/hole-six</a> (Official) | <a
+                            href="https://github.com/hole-six/wave-stores">wave-stores</a> | <a
+                            href="https://github.com/hole-six/LandingPageRuouForCustomer">LandingPageRuouForCustomer</a></span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons no-print">
+        <button class="btn" onclick="window.print()">📄 PRINT / SAVE PDF</button>
+        <button class="btn btn-download" onclick="downloadPDF()">⬇️ DOWNLOAD PDF</button>
+    </div>
+
+    <script>
+        // Convert ảnh local sang Base64 để html2canvas có thể render được
+        function toBase64(img) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth || img.width;
+                canvas.height = img.naturalHeight || img.height;
+                const ctx = canvas.getContext('2d');
+                try {
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', 0.98));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }
+
+        async function convertImagesToBase64() {
+            const images = document.querySelectorAll('.cv-container img');
+            const origSrcs = [];
+
+            for (const img of images) {
+                origSrcs.push(img.src);
+                // Nếu ảnh chưa phải base64
+                if (!img.src.startsWith('data:')) {
+                    try {
+                        // Tạo một Image mới để đảm bảo ảnh đã load
+                        await new Promise((resolve) => {
+                            if (img.complete && img.naturalWidth > 0) {
+                                resolve();
+                            } else {
+                                img.onload = resolve;
+                                img.onerror = resolve;
+                            }
+                        });
+                        const base64 = await toBase64(img);
+                        img.src = base64;
+                    } catch (e) {
+                        console.warn('Không thể convert ảnh sang base64:', e);
+                    }
+                }
+            }
+            return { images, origSrcs };
+        }
+
+        async function downloadPDF() {
+            if (typeof html2pdf === 'undefined') {
+                alert('Đang tải thư viện PDF... Vui lòng thử lại sau 2 giây!');
+                return;
+            }
+
+            const element = document.querySelector('.cv-container');
+
+            // Lưu lại style gốc
+            const originalMargin = element.style.margin;
+            const originalBoxShadow = element.style.boxShadow;
+            const originalBodyBg = document.body.style.background;
+
+            // Reset style để html2canvas chụp đúng
+            element.style.margin = '0';
+            element.style.boxShadow = 'none';
+            document.body.style.background = '#fff';
+            window.scrollTo(0, 0);
+
+            // Convert tất cả ảnh sang Base64 trước khi xuất PDF
+            const { images, origSrcs } = await convertImagesToBase64();
+
+            const opt = {
+                margin: 0,
+                filename: 'CV_LeHoa_Fullstack_Developer.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    letterRendering: true,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Khôi phục lại src gốc của ảnh
+                images.forEach((img, i) => {
+                    img.src = origSrcs[i];
+                });
+
+                // Khôi phục lại style gốc
+                element.style.margin = originalMargin;
+                element.style.boxShadow = originalBoxShadow;
+                document.body.style.background = originalBodyBg;
+            });
+        }
+    </script>
+
+    <!-- Load html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+</body>
+
+</html>

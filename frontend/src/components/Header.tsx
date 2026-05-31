@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Bell, LogOut, Menu, User, X } from 'lucide-react'
+import { LogIn, LogOut, Menu, UserPlus, X } from 'lucide-react'
 import logoWeb from '../assets/logoweb.png'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
+import AppIcon from './AppIcon'
+import { ThongBaoCenter } from './ThongBaoCenter'
 
 const techLogos = [
   { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
@@ -19,6 +21,12 @@ const techLogos = [
   { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
 ]
 
+const vaiTroLabel = {
+  ung_vien: 'Ứng viên',
+  nha_tuyen_dung: 'Nhà tuyển dụng',
+  admin: 'Quản trị viên',
+} as const
+
 export default function Header() {
   const [menuMo, setMenuMo] = useState(false)
   const [nguoiDung, setNguoiDung] = useState(layNguoiDung())
@@ -34,33 +42,57 @@ export default function Header() {
   }, [])
 
   const dashboardPath = nguoiDung ? duongDanTheoVaiTro[nguoiDung.vaiTro] : '/dang-nhap'
-  const tenHienThi = nguoiDung?.hoTen?.trim() || nguoiDung?.email
+  const tenHienThi = nguoiDung?.hoTen?.trim() || nguoiDung?.email || 'Tài khoản'
+
+  const actionTheoVaiTro = !nguoiDung
+    ? { to: '/dang-nhap', eyebrow: 'Dành cho nhà tuyển dụng', label: 'Đăng tin tuyển dụng' }
+    : nguoiDung.vaiTro === 'nha_tuyen_dung'
+      ? { to: '/nha-tuyen-dung/tao-tin', eyebrow: 'Nhà tuyển dụng', label: 'Đăng tin tuyển dụng' }
+      : nguoiDung.vaiTro === 'admin'
+        ? { to: '/quan-tri/dashboard', eyebrow: 'Quản trị hệ thống', label: 'Vào admin' }
+        : { to: '/ung-vien', eyebrow: 'Ứng viên', label: 'Hồ sơ của tôi' }
 
   const dangXuat = () => {
     xoaPhienDangNhap()
     setNguoiDung(null)
+    setMenuMo(false)
   }
+
+  const mobileLinks = [
+    { to: '/', label: 'Trang chủ' },
+    { to: '/viec-lam', label: 'Việc làm IT' },
+    { to: '/cong-ty', label: 'Công ty' },
+    { to: '/luong', label: 'Báo cáo lương' },
+    { to: '/blog', label: 'Blog' },
+    actionTheoVaiTro,
+    ...(nguoiDung
+      ? [{ to: dashboardPath, label: `Dashboard ${vaiTroLabel[nguoiDung.vaiTro]}` }]
+      : [
+          { to: '/dang-nhap', label: 'Đăng nhập' },
+          { to: '/dang-ky', label: 'Đăng ký' },
+        ]),
+  ]
 
   return (
     <header className="site-header-rong">
-      <div style={{ background: 'linear-gradient(90deg, #1e293b 0%, #0f172a 100%)', borderBottom: '1px solid rgba(151,190,255,0.15)', overflow: 'hidden', height: 48, display: 'flex', alignItems: 'center' }}>
-        <div style={{ display: 'flex', animation: 'marquee-tech 30s linear infinite', gap: 40, paddingLeft: '0%' }}>
-          {[...techLogos, ...techLogos, ...techLogos].map((tech, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap', opacity: 0.85 }}>
-              <img src={tech.icon} alt={tech.name} style={{ width: 24, height: 24, filter: 'brightness(0) invert(1)' }} />
-              <span style={{ color: '#cbd5e1', fontSize: 13, fontWeight: 600 }}>{tech.name}</span>
+      <div className="tech-strip-rong" aria-hidden="true">
+        <div className="tech-strip-track">
+          {[...techLogos, ...techLogos].map((tech, idx) => (
+            <div key={`${tech.name}-${idx}`} className="tech-strip-item">
+              <img src={tech.icon} alt="" />
+              <span>{tech.name}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="nav-bar-rong">
-        <Link to="/" className="brand">
+        <Link to="/" className="brand" aria-label="ITJob">
           <img src={logoWeb} alt="ITJob" className="logo-thuonghieu" />
         </Link>
 
-        <nav>
-          <NavLink to="/">Trang chủ</NavLink>
+        <nav aria-label="Điều hướng chính">
+          <NavLink to="/" end>Trang chủ</NavLink>
           <NavLink to="/viec-lam">Việc làm IT</NavLink>
           <NavLink to="/cong-ty">Công ty</NavLink>
           <NavLink to="/luong">Báo cáo lương</NavLink>
@@ -68,55 +100,56 @@ export default function Header() {
         </nav>
 
         <div className="nav-actions-rong">
-          <Link to={nguoiDung?.vaiTro === 'nha_tuyen_dung' ? '/nha-tuyen-dung/dashboard' : '/dang-nhap'} className="nav-cta-rong">
-            <span>Dành cho nhà tuyển dụng</span>
-            <strong>Đăng tin tuyển dụng</strong>
+          <Link to={actionTheoVaiTro.to} className="nav-cta-rong">
+            <span>{actionTheoVaiTro.eyebrow}</span>
+            <strong>{actionTheoVaiTro.label}</strong>
           </Link>
-          <button className="nav-icon-rong" aria-label="Thông báo">
-            <Bell size={20} />
-          </button>
+
           {nguoiDung ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Link to={dashboardPath} className="nav-icon-rong" aria-label="Tài khoản" title={tenHienThi}>
-                <User size={18} />
-                <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 12, fontWeight: 800 }}>{tenHienThi}</span>
+            <>
+              <div className="nav-notification-rong">
+                <ThongBaoCenter />
+              </div>
+              <Link to={dashboardPath} className="nav-user-rong" title={tenHienThi}>
+                <span className="avatar-rong">{tenHienThi.slice(0, 2).toUpperCase()}</span>
+                <span>
+                  <small>{vaiTroLabel[nguoiDung.vaiTro]}</small>
+                  <strong>{tenHienThi}</strong>
+                </span>
               </Link>
               <button className="nav-icon-rong" aria-label="Đăng xuất" onClick={dangXuat} title="Đăng xuất">
-                <LogOut size={18} />
+                <AppIcon icon={LogOut} size={19} />
               </button>
-            </div>
+            </>
           ) : (
-            <Link to="/dang-nhap" className="nav-icon-rong" aria-label="Tài khoản">
-              <User size={20} />
-            </Link>
+            <>
+              <Link to="/dang-nhap" className="nav-pill-rong">
+                <AppIcon icon={LogIn} size={17} />
+                Đăng nhập
+              </Link>
+              <Link to="/dang-ky" className="nav-pill-rong strong">
+                <AppIcon icon={UserPlus} size={17} />
+                Đăng ký
+              </Link>
+            </>
           )}
+
           <button className="menu-button" aria-label="Menu" onClick={() => setMenuMo(!menuMo)}>
-            {menuMo ? <X size={20} /> : <Menu size={20} />}
+            <AppIcon icon={menuMo ? X : Menu} size={20} />
           </button>
         </div>
       </div>
 
       {menuMo && (
-        <div style={{ background: 'rgba(4,14,40,0.98)', borderTop: '1px solid rgba(151,190,255,0.2)', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            { to: '/', label: 'Trang chủ' },
-            { to: '/viec-lam', label: 'Việc làm IT' },
-            { to: '/cong-ty', label: 'Công ty' },
-            { to: '/luong', label: 'Báo cáo lương' },
-            { to: '/blog', label: 'Blog' },
-            ...(nguoiDung
-              ? [{ to: dashboardPath, label: `Tài khoản: ${tenHienThi}` }]
-              : [
-                  { to: '/dang-nhap', label: 'Đăng nhập' },
-                  { to: '/dang-ky', label: 'Đăng ký' },
-                ]),
-          ].map(item => (
-            <Link key={item.to} to={item.to} style={{ color: '#dfebff', padding: '10px 0', fontWeight: 600 }} onClick={() => setMenuMo(false)}>
+        <div className="mobile-menu-rong">
+          {mobileLinks.map(item => (
+            <Link key={`${item.to}-${item.label}`} to={item.to} onClick={() => setMenuMo(false)}>
               {item.label}
             </Link>
           ))}
           {nguoiDung && (
-            <button onClick={() => { dangXuat(); setMenuMo(false) }} style={{ color: '#fecaca', padding: '10px 0', fontWeight: 700, background: 'none', border: 0, textAlign: 'left' }}>
+            <button onClick={dangXuat}>
+              <AppIcon icon={LogOut} size={17} />
               Đăng xuất
             </button>
           )}

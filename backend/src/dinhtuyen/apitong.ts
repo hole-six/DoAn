@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { dinhTuyenCanhBaoQuanTri } from '../modules/canhbaoquantri/canhbaoquantri.dinhtuyen.js'
 import { dinhTuyenDanhGiaCongTy } from '../modules/danhgiacongty/danhgiacongty.dinhtuyen.js'
 import { dinhTuyenDanhMucKyNang } from '../modules/danhmuckynang/danhmuckynang.dinhtuyen.js'
 import { dinhTuyenHoSoNangLuc } from '../modules/hosonangluc/hosonangluc.dinhtuyen.js'
@@ -21,6 +22,7 @@ apiTong.get('/trangthai', (_yeuCau, phanHoi) => {
 })
 
 apiTong.use('/nguoidung', dinhTuyenNguoiDung)
+apiTong.use('/canhbaoquantri', dinhTuyenCanhBaoQuanTri)
 apiTong.use('/xacthuc', dinhTuyenXacThuc)
 apiTong.use('/ungvien', dinhTuyenUngVien)
 apiTong.use('/hosonangluc', dinhTuyenHoSoNangLuc)

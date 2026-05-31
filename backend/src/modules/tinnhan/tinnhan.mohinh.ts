@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose'
 // CONVERSATION MODEL (Cuộc hội thoại)
 // ============================================
 
-export const loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support'] as const
+export const loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'] as const
 
 const cuocTroChuyenSchema = new Schema(
   {
@@ -13,6 +13,14 @@ const cuocTroChuyenSchema = new Schema(
     
     // Type
     loai: { type: String, enum: loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
+
+    // Tên nhóm (dùng cho nhom_cong_dong)
+    tenNhom: { type: String },
+    moTaNhom: { type: String },
+    anhNhom: { type: String },
+
+    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
+    quanTriNhom: [{ type: Schema.Types.ObjectId, ref: 'NguoiDung' }],
     
     // Context (nếu chat về hồ sơ ứng tuyển cụ thể)
     maHoSoUngTuyen: { type: Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },

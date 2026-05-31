@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
 import {
-  Search, MapPin, Briefcase,
+  Search, Briefcase,
   TrendingUp, Star, FileText, Sparkles, ChevronRight,
   Building2, Users, Award, Zap, Globe, Shield,
   ArrowRight, CheckCircle,
@@ -9,14 +9,18 @@ import {
 import effortBg from './assets/EffortBackground.png'
 import './ungdung.css'
 import './realtime.css'
+import './components/chat-notification.css'
 
 // ✨ Import Real-time Components
-import { ThongBaoCenter } from './components/ThongBaoCenter'
 import { ChatBox } from './components/ChatBox'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { OfflineIndicator } from './components/OfflineIndicator'
 import { khoiTaoSocket } from './lib/socket'
 import { dangKyPushSubscription, langNgheNotificationClick as langNghePushClick } from './lib/pushNotifications'
+import { ChatProvider } from './contexts/ChatContext'
+import { ThongBaoProvider } from './contexts/ThongBaoContext'
+import { ThongBaoToastContainer } from './components/ThongBaoCenter'
+import { layAccessToken } from './lib/auth'
 
 // ─── Dữ liệu tĩnh ────────────────────────────────────────────────────────────
 
@@ -99,52 +103,52 @@ const nhaTuyenDung = [
 const tinTuyenDung = [
   {
     id: 1,
-    tieuDe: '[Đà Nẵng] Senior/Leader AI Engineer',
+    tieuDe: '[Đà Nẵng] Senior Backend Engineer (Node.js)',
     congTy: 'VNEXT SOFTWARE',
     logo: 'https://placehold.co/80x80/fff3e8/f97316?text=VN',
     diaDiem: 'Tại văn phòng · Đà Nẵng',
-    luong: '1,000 – 2,000 USD',
-    loaiViec: 'Kỹ sư AI / Machine Learning',
-    kyNang: ['AI', 'MLOps', 'Python'],
+    luong: '30.000.000 - 45.000.000 VND',
+    loaiViec: 'backend',
+    kyNang: ['Node.js', 'PostgreSQL', 'Redis'],
     badge: 'SUPER HOT',
     ngayDang: '1 ngày trước',
     featured: true,
   },
   {
     id: 2,
-    tieuDe: 'Remote AI Engineer Deep Learning Algorithm',
+    tieuDe: 'Frontend Engineer React/TypeScript',
     congTy: 'VisionTech Global',
     logo: 'https://placehold.co/80x80/e0f2fe/2563eb?text=VT',
     diaDiem: 'Làm từ xa · TP Hồ Chí Minh',
-    luong: "You'll love it",
-    loaiViec: 'Kỹ sư AI / Machine Learning',
-    kyNang: ['AI', 'Data Science', 'Embedded'],
+    luong: '25.000.000 - 38.000.000 VND',
+    loaiViec: 'frontend',
+    kyNang: ['React', 'TypeScript', 'Tailwind CSS'],
     badge: 'SUPER HOT',
     ngayDang: '3 ngày trước',
     featured: true,
   },
   {
     id: 3,
-    tieuDe: '[Remote] Mid-Level AI/ML Engineer',
+    tieuDe: '[Remote] DevOps Engineer (AWS/Kubernetes)',
     congTy: 'Edge8',
     logo: 'https://placehold.co/80x80/111827/ffffff?text=E8',
     diaDiem: 'Làm từ xa · Hà Nội',
-    luong: "You'll love it",
-    loaiViec: 'Kỹ sư AI / Machine Learning',
-    kyNang: ['AI', 'scikit-learn', 'PyTorch'],
+    luong: '35.000.000 - 55.000.000 VND',
+    loaiViec: 'devops',
+    kyNang: ['AWS', 'Kubernetes', 'CI/CD'],
     badge: null,
     ngayDang: '4 ngày trước',
     featured: false,
   },
   {
     id: 4,
-    tieuDe: 'Senior Full-stack Python Developer',
+    tieuDe: 'Senior Full-stack Developer (React/Node.js)',
     congTy: 'CodeLink',
     logo: 'https://placehold.co/80x80/ecfeff/0891b2?text=CL',
     diaDiem: 'Linh hoạt · TP Hồ Chí Minh',
-    luong: "You'll love it",
-    loaiViec: 'Lập trình viên Fullstack',
-    kyNang: ['Python', 'NodeJS', 'Ruby', 'AI'],
+    luong: '32.000.000 - 48.000.000 VND',
+    loaiViec: 'fullstack',
+    kyNang: ['React', 'Node.js', 'MongoDB'],
     badge: 'HOT',
     ngayDang: '13 ngày trước',
     featured: false,
@@ -262,13 +266,11 @@ function useTrangChuData() {
 
 function HeroTrangChu() {
   const [tuKhoa, setTuKhoa] = useState('')
-  const [diaDiem, setDiaDiem] = useState('')
   const navigate = useNavigate()
 
   const timKiem = () => {
     const params = new URLSearchParams()
     if (tuKhoa.trim()) params.set('tuKhoa', tuKhoa.trim())
-    if (diaDiem.trim()) params.set('diaDiem', diaDiem.trim())
     navigate(`/viec-lam${params.toString() ? `?${params.toString()}` : ''}`)
   }
 
@@ -293,25 +295,15 @@ function HeroTrangChu() {
             <Search size={18} />
             <input
               type="text"
-              placeholder="Tên công việc, kỹ năng, công ty..."
+              placeholder="Tên công ty, ngành nghề, kỹ năng..."
               value={tuKhoa}
               onChange={e => setTuKhoa(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') timKiem() }}
             />
           </label>
-          <label>
-            <MapPin size={18} />
-            <input
-              type="text"
-              placeholder="Địa điểm làm việc"
-              value={diaDiem}
-              onChange={e => setDiaDiem(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') timKiem() }}
-            />
-          </label>
           <button className="primary-button large" onClick={timKiem}>
             <Search size={18} />
-            Tìm việc ngay
+            Tìm kiếm
           </button>
         </div>
 
@@ -443,6 +435,19 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
 
 function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
   const items = jobs?.length ? jobs : tinTuyenDung.map(item => ({ ...item, id: String(item.id) }))
+  const nhanBadge = (badge: string | null) => {
+    if (!badge) return null
+    return badge === 'SUPER HOT' ? 'Ưu tiên' : 'Nổi bật'
+  }
+
+  const dinhDangLoaiViec = (loaiViec: string) =>
+    loaiViec
+      .replaceAll('_', ' ')
+      .split(' ')
+      .filter(Boolean)
+      .map(tu => tu.charAt(0).toUpperCase() + tu.slice(1))
+      .join(' ')
+
   return (
     <section className="section">
       <div className="section-title">
@@ -463,20 +468,14 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
             key={tin.id}
             className={`vl-card${tin.featured ? ' vl-card--featured' : ''}`}
           >
-            {/* Badge HOT / SUPER HOT */}
-            {tin.badge && (
+            {nhanBadge(tin.badge) && (
               <span className={`vl-badge${tin.badge === 'SUPER HOT' ? ' vl-badge--super' : ''}`}>
-                {tin.badge === 'SUPER HOT' ? '🔥 SUPER HOT' : 'HOT'}
+                {nhanBadge(tin.badge)}
               </span>
             )}
 
-            {/* Thời gian đăng */}
             <p className="vl-time">Đăng {tin.ngayDang}</p>
-
-            {/* Tiêu đề */}
             <h3 className="vl-title">{tin.tieuDe}</h3>
-
-            {/* Công ty */}
             <div className="vl-company">
               <img
                 className="vl-logo"
@@ -486,20 +485,15 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
               />
               <span className="vl-company-name">{tin.congTy}</span>
             </div>
-
-            {/* Lương */}
-            <p className="vl-salary">💵 {tin.luong}</p>
-
-            {/* Divider nét đứt */}
-            <hr className="vl-divider" />
-
-            {/* Meta */}
-            <div className="vl-meta">
-              <span>💼 {tin.loaiViec}</span>
-              <span>📍 {tin.diaDiem}</span>
+            <div className="vl-salary-wrap">
+              <span className="vl-label">Mức lương</span>
+              <p className="vl-salary">{tin.luong}</p>
             </div>
-
-            {/* Tags */}
+            <hr className="vl-divider" />
+            <div className="vl-meta">
+              <span><strong>Ngành:</strong> {dinhDangLoaiViec(tin.loaiViec)}</span>
+              <span><strong>Khu vực:</strong> {tin.diaDiem}</span>
+            </div>
             <div className="vl-tags">
               {tin.kyNang.map(kn => (
                 <span key={kn} className="vl-tag">{kn}</span>
@@ -549,7 +543,7 @@ const techCategories = [
 
 function SectionTechStack() {
   return (
-    <section className="section" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)' }}>
+    <section className="section section-tech-stack">
       <div className="section-title">
         <div>
           <p className="eyebrow">Công nghệ phổ biến</p>
@@ -559,55 +553,17 @@ function SectionTechStack() {
       </div>
 
       {techCategories.map(cat => (
-        <div key={cat.category} style={{ marginBottom: 40 }}>
-          <h3 style={{
-            fontSize: 18,
-            fontWeight: 700,
-            color: '#1e293b',
-            marginBottom: 16,
-            textAlign: 'center',
-          }}>
-            {cat.category}
-          </h3>
-          <div style={{
-            overflow: 'hidden',
-            background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 5%, rgba(255,255,255,1) 95%, rgba(255,255,255,0) 100%)',
-            padding: '20px 0',
-            borderRadius: 16,
-          }}>
-            <div style={{
-              display: 'flex',
-              animation: 'marquee-tech 20s linear infinite',
-              gap: 30,
-              paddingLeft: '100%',
-            }}>
+        <div key={cat.category} className="tech-category">
+          <h3>{cat.category}</h3>
+          <div className="tech-marquee">
+            <div className="tech-marquee-track">
               {[...cat.techs, ...cat.techs, ...cat.techs, ...cat.techs].map((tech, idx) => (
-                <div key={idx} style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 10,
-                  minWidth: 80,
-                  padding: '16px 20px',
-                  background: '#ffffff',
-                  borderRadius: 12,
-                  border: '1px solid rgba(226,232,240,0.8)',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                  transition: 'all 0.3s ease',
-                }}>
+                <div key={idx} className="tech-marquee-item">
                   <img
                     src={tech.icon}
                     alt={tech.name}
-                    style={{ width: 40, height: 40 }}
                   />
-                  <span style={{
-                    color: '#475569',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {tech.name}
-                  </span>
+                  <span>{tech.name}</span>
                 </div>
               ))}
             </div>
@@ -683,17 +639,11 @@ function SectionCTA() {
 
 function TrangChu() {
   const data = useTrangChuData()
-  const stats = [
-    { icon: Briefcase, so: `${data.jobs.length}+`, nhan: 'Viá»‡c lÃ m IT Ä‘ang má»Ÿ' },
-    { icon: Building2, so: `${data.companies.length}+`, nhan: 'CÃ´ng ty Ä‘Ã£ xÃ¡c thá»±c' },
-    { icon: Users, so: data.loading ? '...' : '3', nhan: 'Vai trÃ² há»‡ thá»‘ng' },
-    { icon: Award, so: '100%', nhan: 'Dá»¯ liá»‡u tá»« API' },
-  ]
+
   return (
     <main className="app-page">
       <HeroTrangChu />
       <ThanhTinhNang />
-      <SectionThongKe stats={stats} />
       <SectionNhaTuyenDung companies={data.companies} />
       <SectionTinTuyenDung jobs={data.jobs} />
       <SectionTechStack />
@@ -751,7 +701,7 @@ import TrangDangXayDungPage from './pages/TrangDangXayDung'
 export default function UngDung() {
   // ✨ Initialize real-time features
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
+    const token = layAccessToken()
     
     if (token) {
       // Initialize Socket.IO
@@ -767,11 +717,13 @@ export default function UngDung() {
 
   return (
     <BrowserRouter>
-      {/* ✨ Real-time UI Components */}
-      <PWAInstallPrompt />
-      <OfflineIndicator />
-      <ThongBaoCenter />
-      <ChatBox />
+      <ThongBaoProvider>
+        <ChatProvider>
+          {/* ✨ Real-time UI Components */}
+          <PWAInstallPrompt />
+          <OfflineIndicator />
+          <ThongBaoToastContainer />
+          <ChatBox />
       
       <Routes>
         {/* Public routes với Header + Footer */}
@@ -837,6 +789,8 @@ export default function UngDung() {
 
         <Route path="*" element={<TrangDangXayDungPage ten="404 – Không tìm thấy" />} />
       </Routes>
+        </ChatProvider>
+      </ThongBaoProvider>
     </BrowserRouter>
   )
 }

@@ -34,6 +34,7 @@ function chuanHoaTin(taiLieu: any) {
     kyNang: (duLieu.kyNang ?? []).map((muc: any) => ({
       maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
       tenKyNang: muc.maKyNang?.tenKyNang,
+      loaiKyNang: muc.maKyNang?.loaiKyNang,
       batBuoc: muc.batBuoc,
     })),
     ngayTao: duLieu.ngayTao,
@@ -46,7 +47,7 @@ export const dichVuTinTuyenDung = {
     const danhSach = await (TinTuyenDung as any)
       .find()
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang')
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
       .sort({ ngayTao: -1 })
       .limit(300)
 
@@ -57,7 +58,7 @@ export const dichVuTinTuyenDung = {
     const duLieu = await (TinTuyenDung as any)
       .findById(ma)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang')
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
     if (!duLieu) throw new LoiUngDung('Khong tim thay tin tuyen dung', 404)
     return chuanHoaTin(duLieu)
   },
@@ -67,7 +68,7 @@ export const dichVuTinTuyenDung = {
     return chuanHoaTin(await (TinTuyenDung as any)
       .findById(ketQua._id)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang'))
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang'))
   },
 
   async capNhat(ma: string, duLieuNhan: unknown) {
@@ -79,7 +80,7 @@ export const dichVuTinTuyenDung = {
     const ketQua = await (TinTuyenDung as any)
       .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang')
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
 
     if (!ketQua) throw new LoiUngDung('Khong tim thay tin tuyen dung de cap nhat', 404)
     return chuanHoaTin(ketQua)
@@ -89,7 +90,7 @@ export const dichVuTinTuyenDung = {
     const ketQua = await (TinTuyenDung as any)
       .findByIdAndDelete(ma)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang')
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
     if (!ketQua) throw new LoiUngDung('Khong tim thay tin tuyen dung de xoa', 404)
     return chuanHoaTin(ketQua)
   },

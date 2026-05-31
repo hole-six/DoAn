@@ -1,41 +1,38 @@
-type SocketLike = {
-  connected: boolean
-  id?: string
-  on: (event: string, callback: (...args: any[]) => void) => void
-  off: (event: string, callback?: (...args: any[]) => void) => void
-  emit: (event: string, data?: any) => void
-  disconnect: () => void
-}
+import { io, Socket } from 'socket.io-client'
 
-function taoSocketNoop(): SocketLike {
-  const listeners = new Map<string, Set<(...args: any[]) => void>>()
-  return {
-    connected: false,
-    on(event, callback) {
-      const set = listeners.get(event) ?? new Set()
-      set.add(callback)
-      listeners.set(event, set)
-    },
-    off(event, callback) {
-      if (!callback) {
-        listeners.delete(event)
-        return
-      }
-      listeners.get(event)?.delete(callback)
-    },
-    emit(event, data) {
-      listeners.get(event)?.forEach(callback => callback(data))
-    },
-    disconnect() {
-      listeners.clear()
-    },
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? import.meta.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:5000'
+
+let socket: Socket | null = null
+
+export function khoiTaoSocket(token: string): Socket {
+  if (socket?.connected) return socket
+
+  // Ngắt kết nối cũ nếu có
+  if (socket) {
+    socket.disconnect()
+    socket = null
   }
-}
 
-let socket: SocketLike | null = null
+  socket = io(SOCKET_URL, {
+    auth: { token },
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  })
 
-export function khoiTaoSocket(_token: string): SocketLike {
-  if (!socket) socket = taoSocketNoop()
+  socket.on('connect', () => {
+    console.log('✅ Socket.IO connected:', socket?.id)
+  })
+
+  socket.on('disconnect', (reason) => {
+    console.log('❌ Socket.IO disconnected:', reason)
+  })
+
+  socket.on('connect_error', (err) => {
+    console.warn('⚠️ Socket.IO connect error:', err.message)
+  })
+
   return socket
 }
 
@@ -44,7 +41,7 @@ export function ngatketnoisocket() {
   socket = null
 }
 
-export function laySocket(): SocketLike | null {
+export function laySocket(): Socket | null {
   return socket
 }
 
@@ -57,5 +54,13 @@ export function guiEvent(event: string, data?: any) {
 }
 
 export function boLangNgheEvent(event: string, callback?: (...args: any[]) => void) {
-  socket?.off(event, callback)
+  if (callback) {
+    socket?.off(event, callback)
+  } else {
+    socket?.off(event)
+  }
+}
+
+export function kiemTraKetNoi(): boolean {
+  return socket?.connected ?? false
 }

@@ -1,8 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Brain, FileUp, ImagePlus, LayoutTemplate, Save, Wand2 } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { Brain, FileUp, ImagePlus, Plus, Save, Trash2 } from 'lucide-react'
 import { apiCoXacThuc } from '../../lib/auth'
+import { toast } from '../../lib/toast'
 
 type CvItem = { tieuDe?: string; donVi?: string; thoiGian?: string; moTa?: string }
+type LinkItem = { nhan?: string; url?: string }
+type SkillGroup = { nhom?: string; muc?: string[] }
+type ProjectDetail = {
+  tenDuAn?: string
+  thoiGian?: string
+  viTri?: string
+  moTa?: string
+  trachNhiem?: string[]
+  heDieuHanh?: string
+  ngonNgu?: string
+  framework?: string
+  kyThuat?: string
+  diaDiem?: string
+  lienKet?: LinkItem[]
+}
 type CvData = {
   id?: string
   maUngVien?: string
@@ -11,8 +28,22 @@ type CvData = {
   kinhNghiemLam: CvItem[]
   chungChi: CvItem[]
   duAn: CvItem[]
-  cvChinh: boolean
-  congKhai: boolean
+  hoTenHienThi?: string
+  chucDanh?: string
+  soDienThoai?: string
+  emailLienHe?: string
+  facebook?: string
+  github?: string
+  portfolioUrl?: string
+  diaDiem?: string
+  tomTatKinhNghiem: string[]
+  kyNangMem: string[]
+  kyNangLapTrinh: SkillGroup[]
+  baiVietKyThuat: LinkItem[]
+  duAnChiTiet: ProjectDetail[]
+  fileCvTen?: string
+  fileCvLoai?: string
+  fileCvData?: string
   anhDaiDien?: string
   templateCv?: string
   mauChinh?: string
@@ -20,276 +51,378 @@ type CvData = {
   font?: string
   markdownGoc?: string
   ghiChuAi?: string
+  cvChinh: boolean
+  congKhai: boolean
 }
-
-type TemplateCv = {
-  id: string
-  ten: string
-  layout: 'split' | 'hero' | 'timeline' | 'compact' | 'editorial' | 'minimal'
-  mauChinh: string
-  mauPhu: string
-  font: string
-}
-
-const palettes = [
-  ['#2563eb', '#0f172a'], ['#059669', '#10231c'], ['#dc2626', '#1f2937'], ['#7c3aed', '#18181b'],
-  ['#0891b2', '#164e63'], ['#ea580c', '#111827'], ['#be123c', '#312e81'], ['#0d9488', '#134e4a'],
-]
-const layouts: TemplateCv['layout'][] = ['split', 'hero', 'timeline', 'compact', 'editorial', 'minimal']
-const templates: TemplateCv[] = layouts.flatMap((layout, layoutIndex) => palettes.map(([mauChinh, mauPhu], index) => ({
-  id: `${layout}-${index + 1}`,
-  ten: `${layout[0].toUpperCase()}${layout.slice(1)} ${index + 1}`,
-  layout,
-  mauChinh,
-  mauPhu,
-  font: layoutIndex % 3 === 0 ? 'Inter' : layoutIndex % 3 === 1 ? 'System' : 'Georgia',
-})))
 
 const emptyCv: CvData = {
-  tieuDe: 'CV Developer chuyen nghiep',
+  tieuDe: 'CV Fullstack Developer',
   hocVan: [],
   kinhNghiemLam: [],
   chungChi: [],
   duAn: [],
+  tomTatKinhNghiem: [],
+  kyNangMem: [],
+  kyNangLapTrinh: [],
+  baiVietKyThuat: [],
+  duAnChiTiet: [],
   cvChinh: true,
   congKhai: true,
-  templateCv: templates[0].id,
-  mauChinh: templates[0].mauChinh,
-  mauPhu: templates[0].mauPhu,
-  font: templates[0].font,
+  templateCv: 'it-a4-pro',
+  mauChinh: '#0f172a',
+  mauPhu: '#000000',
+  font: 'Inter',
   markdownGoc: '',
 }
 
-function parseMarkdown(markdown: string) {
-  const groups: Record<string, string[]> = {}
-  let current = 'tomTat'
-  markdown.split(/\r?\n/).forEach(line => {
-    const heading = line.match(/^#{1,3}\s+(.+)/)
-    if (heading) {
-      current = heading[1].toLowerCase()
-      groups[current] = groups[current] ?? []
-      return
-    }
-    if (line.trim()) groups[current] = [...(groups[current] ?? []), line.replace(/^[-*]\s+/, '').trim()]
-  })
-  const toItems = (keys: string[]) => Object.entries(groups)
-    .filter(([name]) => keys.some(k => name.includes(k)))
-    .flatMap(([, lines]) => lines)
-    .map(line => ({ tieuDe: line, donVi: '', thoiGian: '', moTa: '' }))
-  return {
-    tomTat: (groups.tomtat ?? groups['about me'] ?? groups.summary ?? []).join(' '),
-    kinhNghiemLam: toItems(['experience', 'kinh nghiệm', 'work']),
-    duAn: toItems(['project', 'dự án']),
-    hocVan: toItems(['education', 'học vấn']),
-    chungChi: toItems(['cert', 'chứng chỉ']),
-  }
+const inputCls = 'min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-[#0b5c91] focus:ring-4 focus:ring-[#0b5c91]/10'
+const textareaCls = 'min-h-24 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-[#0b5c91] focus:ring-4 focus:ring-[#0b5c91]/10'
+const panelCls = 'rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)]'
+const primaryBtn = 'btn-primary-uv'
+const secondaryBtn = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-black text-slate-800 transition hover:border-[#0b5c91]/30 hover:text-[#0b5c91]'
+
+function splitLines(value?: string) {
+  return (value ?? '').split('\n').map(item => item.trim()).filter(Boolean)
 }
 
-function fieldStyle(): React.CSSProperties {
-  return { width: '100%', border: '1px solid #d6e0ee', borderRadius: 8, padding: '10px 12px', fontSize: 14 }
+function joinLines(value?: string[]) {
+  return (value ?? []).join('\n')
 }
 
-function sectionTitle(label: string) {
-  return <h3 style={{ margin: '10px 0 8px', fontSize: 15, color: '#0f172a' }}>{label}</h3>
-}
-
-function itemText(items: CvItem[]) {
-  return items.length ? items : [{ tieuDe: 'Chua cap nhat', donVi: '', thoiGian: '', moTa: '' }]
-}
-
-function updateList(list: CvItem[], index: number, patch: Partial<CvItem>) {
+function updateList<T>(list: T[], index: number, patch: Partial<T>) {
   return list.map((item, i) => i === index ? { ...item, ...patch } : item)
+}
+
+function SectionTitle({ title, desc }: { title: string; desc?: string }) {
+  return (
+    <div className="mb-3">
+      <h3 className="text-base font-black text-slate-950">{title}</h3>
+      {desc && <p className="mt-0.5 text-xs font-semibold text-slate-500">{desc}</p>}
+    </div>
+  )
+}
+
+function CvTextList({ title, value, onChange, placeholder }: { title: string; value: string[]; onChange: (v: string[]) => void; placeholder: string }) {
+  return (
+    <div className={panelCls}>
+      <SectionTitle title={title} desc="Mỗi dòng là một ý trong CV." />
+      <textarea className={textareaCls} value={joinLines(value)} onChange={e => onChange(splitLines(e.target.value))} placeholder={placeholder} />
+    </div>
+  )
+}
+
+function BasicItemsEditor({ title, value, onChange }: { title: string; value: CvItem[]; onChange: (v: CvItem[]) => void }) {
+  return (
+    <div className={panelCls}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <SectionTitle title={title} />
+        <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { tieuDe: '', donVi: '', thoiGian: '', moTa: '' }])}>
+          <Plus size={15} /> Thêm
+        </button>
+      </div>
+      <div className="grid gap-3">
+        {value.map((item, index) => (
+          <div key={index} className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 md:grid-cols-2">
+            <input className={inputCls} placeholder="Tiêu đề" value={item.tieuDe ?? ''} onChange={e => onChange(updateList(value, index, { tieuDe: e.target.value }))} />
+            <input className={inputCls} placeholder="Đơn vị / công ty" value={item.donVi ?? ''} onChange={e => onChange(updateList(value, index, { donVi: e.target.value }))} />
+            <input className={inputCls} placeholder="Thời gian" value={item.thoiGian ?? ''} onChange={e => onChange(updateList(value, index, { thoiGian: e.target.value }))} />
+            <div className="flex gap-2">
+              <input className={inputCls} placeholder="Mô tả ngắn" value={item.moTa ?? ''} onChange={e => onChange(updateList(value, index, { moTa: e.target.value }))} />
+              <button type="button" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rose-200 bg-white text-rose-600" onClick={() => onChange(value.filter((_, i) => i !== index))}>
+                <Trash2 size={15} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SkillEditor({ value, onChange }: { value: SkillGroup[]; onChange: (v: SkillGroup[]) => void }) {
+  return (
+    <div className={panelCls}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <SectionTitle title="Kỹ năng lập trình" desc="Chia theo Frontend, Backend, Database, DevOps..." />
+        <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { nhom: '', muc: [] }])}><Plus size={15} /> Thêm nhóm</button>
+      </div>
+      <div className="grid gap-3">
+        {value.map((item, index) => (
+          <div key={index} className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="flex gap-2">
+              <input className={inputCls} placeholder="Nhóm kỹ năng, ví dụ Frontend" value={item.nhom ?? ''} onChange={e => onChange(updateList(value, index, { nhom: e.target.value }))} />
+              <button type="button" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rose-200 bg-white text-rose-600" onClick={() => onChange(value.filter((_, i) => i !== index))}>
+                <Trash2 size={15} />
+              </button>
+            </div>
+            <textarea className={textareaCls} placeholder="Mỗi dòng là một kỹ năng: ReactJS, NextJS, TypeScript..." value={joinLines(item.muc)} onChange={e => onChange(updateList(value, index, { muc: splitLines(e.target.value) }))} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProjectEditor({ value, onChange }: { value: ProjectDetail[]; onChange: (v: ProjectDetail[]) => void }) {
+  return (
+    <div className={panelCls}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <SectionTitle title="Kinh nghiệm theo dự án" desc="Đây là phần quan trọng nhất với CV dân IT." />
+        <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { tenDuAn: '', thoiGian: '', viTri: '', trachNhiem: [], lienKet: [] }])}><Plus size={15} /> Thêm dự án</button>
+      </div>
+      <div className="grid gap-3">
+        {value.map((item, index) => (
+          <div key={index} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="grid gap-2 md:grid-cols-3">
+              <input className={inputCls} placeholder="Tên dự án" value={item.tenDuAn ?? ''} onChange={e => onChange(updateList(value, index, { tenDuAn: e.target.value }))} />
+              <input className={inputCls} placeholder="Thời gian" value={item.thoiGian ?? ''} onChange={e => onChange(updateList(value, index, { thoiGian: e.target.value }))} />
+              <input className={inputCls} placeholder="Vị trí" value={item.viTri ?? ''} onChange={e => onChange(updateList(value, index, { viTri: e.target.value }))} />
+            </div>
+            <textarea className={textareaCls} placeholder="Mô tả dự án" value={item.moTa ?? ''} onChange={e => onChange(updateList(value, index, { moTa: e.target.value }))} />
+            <textarea className={textareaCls} placeholder="Trách nhiệm, mỗi dòng một ý" value={joinLines(item.trachNhiem)} onChange={e => onChange(updateList(value, index, { trachNhiem: splitLines(e.target.value) }))} />
+            <div className="grid gap-2 md:grid-cols-3">
+              <input className={inputCls} placeholder="OS" value={item.heDieuHanh ?? ''} onChange={e => onChange(updateList(value, index, { heDieuHanh: e.target.value }))} />
+              <input className={inputCls} placeholder="Ngôn ngữ" value={item.ngonNgu ?? ''} onChange={e => onChange(updateList(value, index, { ngonNgu: e.target.value }))} />
+              <input className={inputCls} placeholder="Framework" value={item.framework ?? ''} onChange={e => onChange(updateList(value, index, { framework: e.target.value }))} />
+              <input className={inputCls} placeholder="Kỹ thuật" value={item.kyThuat ?? ''} onChange={e => onChange(updateList(value, index, { kyThuat: e.target.value }))} />
+              <input className={inputCls} placeholder="Địa điểm" value={item.diaDiem ?? ''} onChange={e => onChange(updateList(value, index, { diaDiem: e.target.value }))} />
+              <button type="button" className="min-h-11 rounded-xl border border-rose-200 bg-white px-3 text-sm font-black text-rose-600" onClick={() => onChange(value.filter((_, i) => i !== index))}>Xóa dự án</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Preview({ cv, data }: { cv: CvData; data: any }) {
+  const hoTen = cv.hoTenHienThi || data.current?.hoTen || 'Ứng viên IT'
+  const title = cv.chucDanh || data.ungVien?.viTriMongMuon || 'Software Developer'
+  const experiences = cv.kinhNghiemLam.length ? cv.kinhNghiemLam : [{ tieuDe: title, donVi: '', thoiGian: '', moTa: '' }]
+  const projects: ProjectDetail[] = cv.duAnChiTiet.length
+    ? cv.duAnChiTiet
+    : cv.duAn.map(item => ({ tenDuAn: item.tieuDe, moTa: item.moTa, viTri: item.donVi, thoiGian: item.thoiGian }))
+
+  return (
+    <div className="mx-auto w-full max-w-[210mm] bg-white px-8 py-8 text-[#1a1a1a] shadow-[0_28px_80px_rgba(15,23,42,.16)] lg:px-12 lg:py-10" style={{ minHeight: '297mm', fontFamily: 'Inter, Segoe UI, Arial, sans-serif' }}>
+      <h1 className="text-4xl font-black uppercase tracking-wide text-black">{hoTen}</h1>
+      <p className="mt-1 text-base font-black uppercase tracking-wide text-black">{title}</p>
+
+      <section className="mt-5 flex flex-col gap-5 sm:flex-row">
+        <div className="grid h-[120px] w-[100px] shrink-0 place-items-center overflow-hidden border border-slate-300 bg-slate-100 text-xs font-black text-slate-400">
+          {cv.anhDaiDien ? <img src={cv.anhDaiDien} alt={hoTen} className="h-full w-full object-cover" /> : 'PHOTO'}
+        </div>
+        <div className="text-sm leading-7">
+          <p><strong>Full Name:</strong> {hoTen}</p>
+          <p><strong>Phone:</strong> {cv.soDienThoai || data.current?.soDienThoai || '-'}</p>
+          <p><strong>Email:</strong> {cv.emailLienHe || data.current?.email || '-'}</p>
+          <p><strong>Facebook:</strong> {cv.facebook || '-'}</p>
+          <p><strong>GitHub:</strong> {cv.github || '-'}</p>
+          <p><strong>Portfolio:</strong> {cv.portfolioUrl || '-'}</p>
+          <p><strong>Location:</strong> {cv.diaDiem || data.ungVien?.diaChi || '-'}</p>
+        </div>
+      </section>
+
+      <CvSection title="Experience Summary">
+        <ul className="list-disc pl-5 text-sm leading-6">{(cv.tomTatKinhNghiem.length ? cv.tomTatKinhNghiem : [data.ungVien?.tomTat || 'Cập nhật tóm tắt kinh nghiệm để nhà tuyển dụng nắm nhanh năng lực.']).map((item, i) => <li key={i}>{item}</li>)}</ul>
+      </CvSection>
+
+      <CvSection title="Skills">
+        <p className="font-bold">● Soft Skills</p>
+        <ul className="list-disc pl-5 text-sm leading-6">{(cv.kyNangMem.length ? cv.kyNangMem : ['Giao tiếp tốt, chủ động phối hợp đội nhóm.']).map((item, i) => <li key={i}>{item}</li>)}</ul>
+        {(cv.kyNangLapTrinh.length ? cv.kyNangLapTrinh : [{ nhom: 'Programming Skills', muc: ['JavaScript, TypeScript, ReactJS, Node.js'] }]).map((group, i) => (
+          <div key={i} className="mt-2">
+            <p className="font-bold">● {group.nhom}</p>
+            <ul className="list-disc pl-5 text-sm leading-6">{(group.muc ?? []).map((item, idx) => <li key={idx}>{item}</li>)}</ul>
+          </div>
+        ))}
+      </CvSection>
+
+      <CvSection title="Experience">
+        {experiences.map((item, i) => <p key={i} className="mb-2 text-sm leading-6"><strong>{item.tieuDe}</strong> {item.donVi} {item.thoiGian} <br />{item.moTa}</p>)}
+      </CvSection>
+
+      <CvSection title="Education">
+        {cv.hocVan.map((item, i) => <p key={i} className="text-sm leading-6"><strong>{item.tieuDe}</strong> {item.donVi} {item.thoiGian} {item.moTa}</p>)}
+      </CvSection>
+
+      {cv.baiVietKyThuat.length > 0 && (
+        <CvSection title="Blog / Technical Writing">
+          <ul className="list-disc pl-5 text-sm leading-6">{cv.baiVietKyThuat.map((item, i) => <li key={i}>{item.nhan} {item.url}</li>)}</ul>
+        </CvSection>
+      )}
+
+      <CvSection title="Experience by Projects">
+        {projects.map((item, i) => (
+          <div key={i} className="mb-6 break-inside-avoid">
+            <h3 className="border-b-2 border-black pb-1 text-sm font-bold italic">Project Name: {item.tenDuAn}</h3>
+            <InfoGrid rows={[
+              ['Duration', item.thoiGian],
+              ['Position', item.viTri],
+              ['Description', item.moTa],
+            ]} />
+            {!!item.trachNhiem?.length && <InfoGrid rows={[['Responsibilities', <ul className="list-disc pl-5">{item.trachNhiem.map((r, idx) => <li key={idx}>{r}</li>)}</ul>]]} />}
+            <InfoGrid rows={[
+              ['OS', item.heDieuHanh],
+              ['Languages', item.ngonNgu],
+              ['Framework', item.framework],
+              ['Techniques', item.kyThuat],
+              ['Work Location', item.diaDiem],
+            ]} />
+          </div>
+        ))}
+      </CvSection>
+    </div>
+  )
+}
+
+function CvSection({ title, children }: { title: string; children: ReactNode }) {
+  return <section className="mt-6 break-inside-avoid"><h2 className="mb-2 text-lg font-black uppercase tracking-wide text-black">{title}</h2>{children}</section>
+}
+
+function InfoGrid({ rows }: { rows: [string, ReactNode][] }) {
+  return <div className="mt-3 grid grid-cols-[120px_1fr] gap-x-4 gap-y-1 text-sm leading-6">{rows.filter(([, value]) => Boolean(value)).map(([label, value]) => <><span key={`${label}-l`} className="font-bold">{label}</span><span key={`${label}-v`}>: {value}</span></>)}</div>
 }
 
 export default function CvStudio({ data, onReload }: { data: any; onReload: () => Promise<void> }) {
   const [cv, setCv] = useState<CvData>(emptyCv)
-  const [profile, setProfile] = useState<any>({})
-  const [thongBao, setThongBao] = useState('')
-  const selectedTemplate = useMemo(() => templates.find(item => item.id === cv.templateCv) ?? templates[0], [cv.templateCv])
+  const [dangLuu, setDangLuu] = useState(false)
+  const current = data.current ?? {}
+  const ungVien = data.ungVien ?? {}
+  const progress = useMemo(() => {
+    const fields = [cv.tieuDe, cv.hoTenHienThi || current.hoTen, cv.chucDanh || ungVien.viTriMongMuon, cv.emailLienHe || current.email, cv.soDienThoai || current.soDienThoai, cv.tomTatKinhNghiem.length, cv.kyNangLapTrinh.length, cv.duAnChiTiet.length || cv.duAn.length]
+    return Math.round((fields.filter(Boolean).length / fields.length) * 100)
+  }, [cv, current, ungVien])
 
   useEffect(() => {
-    if (data.ungVien) setProfile({ ...data.ungVien })
     const main = data.hoSo?.find((item: any) => item.cvChinh) ?? data.hoSo?.[0]
-    if (main) setCv({ ...emptyCv, ...main })
-  }, [data.ungVien?.id, data.hoSo?.length])
-
-  function chonTemplate(template: TemplateCv) {
-    setCv({ ...cv, templateCv: template.id, mauChinh: template.mauChinh, mauPhu: template.mauPhu, font: template.font })
-  }
+    const base = {
+      ...emptyCv,
+      hoTenHienThi: current.hoTen,
+      chucDanh: ungVien.viTriMongMuon,
+      soDienThoai: current.soDienThoai,
+      emailLienHe: current.email,
+      diaDiem: ungVien.diaChi,
+      tomTatKinhNghiem: ungVien.tomTat ? [ungVien.tomTat] : emptyCv.tomTatKinhNghiem,
+    }
+    setCv(main ? { ...base, ...main } : base)
+  }, [data.hoSo?.length, ungVien?.id])
 
   function docAnh(file?: File) {
     if (!file) return
+    if (!file.type.startsWith('image/')) return toast.error('Vui lòng chọn file ảnh hợp lệ.')
     const reader = new FileReader()
-    reader.onload = () => {
-      const anhDaiDien = String(reader.result ?? '')
-      setCv({ ...cv, anhDaiDien })
-      setProfile({ ...profile, anhDaiDien })
-    }
+    reader.onload = () => setCv(value => ({ ...value, anhDaiDien: String(reader.result ?? '') }))
     reader.readAsDataURL(file)
   }
 
-  function docFile(file?: File) {
+  function docFileCv(file?: File) {
     if (!file) return
     const reader = new FileReader()
-    reader.onload = () => {
-      const markdown = String(reader.result ?? '')
-      const parsed = parseMarkdown(markdown)
-      setCv({
-        ...cv,
-        markdownGoc: markdown,
-        kinhNghiemLam: parsed.kinhNghiemLam.length ? parsed.kinhNghiemLam : cv.kinhNghiemLam,
-        duAn: parsed.duAn.length ? parsed.duAn : cv.duAn,
-        hocVan: parsed.hocVan.length ? parsed.hocVan : cv.hocVan,
-        chungChi: parsed.chungChi.length ? parsed.chungChi : cv.chungChi,
-      })
-      if (parsed.tomTat) setProfile({ ...profile, tomTat: parsed.tomTat })
-    }
-    reader.readAsText(file, 'utf-8')
+    reader.onload = () => setCv(value => ({ ...value, fileCvTen: file.name, fileCvLoai: file.type || 'application/octet-stream', fileCvData: String(reader.result ?? '') }))
+    reader.readAsDataURL(file)
   }
 
   function goiYAi() {
-    const viTri = profile.viTriMongMuon || 'Frontend Developer'
-    setProfile({
-      ...profile,
-      tomTat: `Ung vien ${viTri} co tu duy san pham, nam vung quy trinh xay dung web app hien dai, uu tien trai nghiem nguoi dung, chat luong code va kha nang phoi hop voi backend/nhan su san pham.`,
-    })
-    setCv({
-      ...cv,
-      ghiChuAi: 'Da goi y tom tat va cau truc CV theo huong tuyen dung IT. Ban co the chinh sua truc tiep truoc khi luu.',
-      duAn: cv.duAn.length ? cv.duAn : [
-        { tieuDe: 'ITJob Recruitment Platform', donVi: 'Personal/School Project', thoiGian: '2025', moTa: 'Xay dung he thong tuyen dung IT voi dashboard ung vien, nha tuyen dung, quan tri vien, tim kiem viec lam va ung tuyen nhanh.' },
+    const chucDanh = cv.chucDanh || 'Fullstack Developer'
+    setCv(value => ({
+      ...value,
+      tomTatKinhNghiem: value.tomTatKinhNghiem.length ? value.tomTatKinhNghiem : [
+        `${chucDanh} tập trung xây dựng sản phẩm web có kiến trúc rõ ràng, responsive tốt và trải nghiệm người dùng mượt.`,
+        'Có kinh nghiệm làm việc với frontend hiện đại, backend API, xác thực người dùng và tối ưu dữ liệu.',
+        'Ưu tiên code dễ bảo trì, quy trình Git rõ ràng và phối hợp tốt với team sản phẩm.',
       ],
-    })
+      kyNangMem: value.kyNangMem.length ? value.kyNangMem : ['Giao tiếp rõ ràng, chủ động phối hợp đội nhóm.', 'Tư duy logic, học nhanh công nghệ mới.', 'Làm việc có kế hoạch và chịu áp lực tốt.'],
+      kyNangLapTrinh: value.kyNangLapTrinh.length ? value.kyNangLapTrinh : [
+        { nhom: 'Frontend', muc: ['JavaScript, TypeScript, HTML, CSS.', 'ReactJS, NextJS, responsive UI, component architecture.'] },
+        { nhom: 'Backend', muc: ['Node.js, RESTful API, authentication & authorization.', 'Database design, role-based access control.'] },
+        { nhom: 'Tools', muc: ['Git, GitHub, deployment, VPS/hosting/domain.'] },
+      ],
+      duAnChiTiet: value.duAnChiTiet.length ? value.duAnChiTiet : [
+        {
+          tenDuAn: 'ITJob Recruitment Platform',
+          thoiGian: '2025 - nay',
+          viTri: chucDanh,
+          moTa: 'Hệ thống tuyển dụng CNTT cho ứng viên, nhà tuyển dụng và quản trị viên.',
+          trachNhiem: ['Xây dựng dashboard theo vai trò.', 'Thiết kế luồng ứng tuyển, CV, portfolio và lịch phỏng vấn.', 'Tối ưu responsive và trải nghiệm người dùng.'],
+          heDieuHanh: 'Windows, Linux',
+          ngonNgu: 'TypeScript, JavaScript',
+          framework: 'ReactJS, Node.js, Express, MongoDB',
+          kyThuat: 'RESTful API, JWT, RBAC, Tailwind CSS',
+          diaDiem: 'Đà Nẵng, Việt Nam',
+        },
+      ],
+    }))
+    toast.success('Đã gợi ý nội dung CV IT.')
   }
 
   async function luuStudio() {
-    if (!data.ungVien?.id) return
-    await apiCoXacThuc(`/ungvien/${data.ungVien.id}`, { method: 'PATCH', body: JSON.stringify({ ...profile, maNguoiDung: data.ungVien.maNguoiDung }) })
-    const payload = { ...cv, maUngVien: data.ungVien.id }
-    await apiCoXacThuc(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
-    setThongBao('Da luu CV Studio va dong bo vao ho so nang luc.')
-    await onReload()
-  }
-
-  function renderEditor(label: string, key: 'kinhNghiemLam' | 'duAn' | 'hocVan' | 'chungChi') {
-    const list = cv[key] ?? []
-    return <div style={{ display: 'grid', gap: 8 }}>
-      {sectionTitle(label)}
-      {list.map((item, index) => <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <input style={fieldStyle()} placeholder="Tieu de" value={item.tieuDe ?? ''} onChange={e => setCv({ ...cv, [key]: updateList(list, index, { tieuDe: e.target.value }) })} />
-        <input style={fieldStyle()} placeholder="Don vi / cong ty" value={item.donVi ?? ''} onChange={e => setCv({ ...cv, [key]: updateList(list, index, { donVi: e.target.value }) })} />
-        <input style={fieldStyle()} placeholder="Thoi gian" value={item.thoiGian ?? ''} onChange={e => setCv({ ...cv, [key]: updateList(list, index, { thoiGian: e.target.value }) })} />
-        <input style={fieldStyle()} placeholder="Mo ta ngan" value={item.moTa ?? ''} onChange={e => setCv({ ...cv, [key]: updateList(list, index, { moTa: e.target.value }) })} />
-      </div>)}
-      <button type="button" className="uv-secondary" onClick={() => setCv({ ...cv, [key]: [...list, { tieuDe: '', donVi: '', thoiGian: '', moTa: '' }] })}>Them {label.toLowerCase()}</button>
-    </div>
+    if (!data.ungVien?.id) return toast.error('Không tìm thấy thông tin ứng viên.')
+    if (!cv.tieuDe.trim()) return toast.warning('Vui lòng nhập tiêu đề CV.')
+    try {
+      setDangLuu(true)
+      const payload = { ...cv, maUngVien: data.ungVien.id }
+      await apiCoXacThuc(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
+      toast.success('Đã lưu CV Studio.')
+      await onReload()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Không thể lưu CV.')
+    } finally {
+      setDangLuu(false)
+    }
   }
 
   return (
-    <section className="uv-panel" style={{ display: 'grid', gap: 18, border: '1px solid #bfdbfe' }}>
-      <div className="uv-panel-head">
+    <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_16px_46px_rgba(15,23,42,0.08)] sm:p-5">
+      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h2>CV Studio hoanh trang</h2>
-          <p style={{ margin: 0, color: '#64748b' }}>Chon trong {templates.length} mau sinh san, upload anh/file, preview va chinh sua truc tiep.</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0b5c91]">CV Studio</p>
+          <h2 className="mt-1 text-2xl font-black text-slate-950">Tạo CV IT theo chuẩn A4</h2>
+          <p className="mt-1 max-w-3xl text-sm font-semibold text-slate-500">Nhập đủ thông tin như mẫu CV trong `index.html`: thông tin cá nhân, summary, kỹ năng, học vấn, bài viết kỹ thuật và kinh nghiệm theo dự án.</p>
         </div>
-        <button className="primary-button" onClick={luuStudio}><Save size={16} /> Luu Studio</button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-photo-upload')?.click()}><ImagePlus size={16} /> Upload ảnh</button>
+          <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()}><FileUp size={16} /> Upload CV gốc</button>
+          <button type="button" className={secondaryBtn} onClick={goiYAi}><Brain size={16} /> Gợi ý nội dung</button>
+          <button type="button" className={primaryBtn} disabled={dangLuu} onClick={luuStudio}><Save size={16} /> {dangLuu ? 'Đang lưu...' : 'Lưu CV'}</button>
+          <input id="cv-photo-upload" hidden type="file" accept="image/*" onChange={e => docAnh(e.target.files?.[0])} />
+          <input id="cv-file-upload" hidden type="file" accept=".pdf,.doc,.docx,.txt,.md,application/pdf" onChange={e => docFileCv(e.target.files?.[0])} />
+        </div>
       </div>
-      {thongBao && <div className="uv-error" style={{ background: '#ecfdf5', color: '#166534' }}>{thongBao}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 420px) 1fr', gap: 18, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <label className="uv-secondary" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <ImagePlus size={16} /> Upload anh
-              <input hidden type="file" accept="image/*" onChange={e => docAnh(e.target.files?.[0])} />
-            </label>
-            <label className="uv-secondary" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <FileUp size={16} /> Upload file
-              <input hidden type="file" accept=".md,.txt,.json,text/*" onChange={e => docFile(e.target.files?.[0])} />
-            </label>
-          </div>
-          <button type="button" className="uv-secondary" onClick={goiYAi} style={{ justifyContent: 'center' }}>
-            <Brain size={16} /> Goi y noi dung kieu AI
-          </button>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <input style={fieldStyle()} value={cv.tieuDe} onChange={e => setCv({ ...cv, tieuDe: e.target.value })} placeholder="Tieu de CV" />
-            <input style={fieldStyle()} value={profile.viTriMongMuon ?? ''} onChange={e => setProfile({ ...profile, viTriMongMuon: e.target.value })} placeholder="Vi tri mong muon" />
-          </div>
-          <textarea style={{ ...fieldStyle(), minHeight: 92 }} value={profile.tomTat ?? ''} onChange={e => setProfile({ ...profile, tomTat: e.target.value })} placeholder="Tom tat ban than" />
-
-          <div>
-            <h3 style={{ margin: '0 0 10px', display: 'flex', alignItems: 'center', gap: 8 }}><LayoutTemplate size={17} /> Thu vien template</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, maxHeight: 280, overflow: 'auto' }}>
-              {templates.map(template => <button key={template.id} type="button" onClick={() => chonTemplate(template)} title={template.ten} style={{
-                height: 72,
-                border: cv.templateCv === template.id ? '2px solid #2563eb' : '1px solid #dbe4f0',
-                borderRadius: 8,
-                background: '#fff',
-                padding: 6,
-                display: 'grid',
-                gap: 4,
-                cursor: 'pointer',
-              }}>
-                <span style={{ height: 18, borderRadius: 4, background: template.mauChinh }} />
-                <span style={{ height: 24, borderRadius: 4, background: template.layout === 'split' ? `linear-gradient(90deg, ${template.mauPhu} 0 34%, #f8fafc 34%)` : template.layout === 'hero' ? `linear-gradient(135deg, ${template.mauChinh}, ${template.mauPhu})` : '#f8fafc' }} />
-                <small style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{template.ten}</small>
-              </button>)}
+      <div className="grid gap-5 xl:grid-cols-[minmax(360px,520px)_minmax(0,1fr)]">
+        <div className="grid max-h-none gap-4 xl:max-h-[calc(100dvh-180px)] xl:overflow-y-auto xl:pr-2">
+          <div className={panelCls}>
+            <SectionTitle title="Thông tin cá nhân" desc={`Độ hoàn thiện CV: ${progress}%${cv.fileCvTen ? ` - đã upload ${cv.fileCvTen}` : ''}`} />
+            <div className="grid gap-3 md:grid-cols-2">
+              <input className={inputCls} placeholder="Họ tên hiển thị" value={cv.hoTenHienThi ?? ''} onChange={e => setCv({ ...cv, hoTenHienThi: e.target.value })} />
+              <input className={inputCls} placeholder="Chức danh" value={cv.chucDanh ?? ''} onChange={e => setCv({ ...cv, chucDanh: e.target.value })} />
+              <input className={inputCls} placeholder="Tiêu đề CV" value={cv.tieuDe} onChange={e => setCv({ ...cv, tieuDe: e.target.value })} />
+              <input className={inputCls} placeholder="Số điện thoại" value={cv.soDienThoai ?? ''} onChange={e => setCv({ ...cv, soDienThoai: e.target.value })} />
+              <input className={inputCls} placeholder="Email" value={cv.emailLienHe ?? ''} onChange={e => setCv({ ...cv, emailLienHe: e.target.value })} />
+              <input className={inputCls} placeholder="Facebook" value={cv.facebook ?? ''} onChange={e => setCv({ ...cv, facebook: e.target.value })} />
+              <input className={inputCls} placeholder="GitHub" value={cv.github ?? ''} onChange={e => setCv({ ...cv, github: e.target.value })} />
+              <input className={inputCls} placeholder="Portfolio" value={cv.portfolioUrl ?? ''} onChange={e => setCv({ ...cv, portfolioUrl: e.target.value })} />
+              <input className={inputCls} placeholder="Địa điểm" value={cv.diaDiem ?? ''} onChange={e => setCv({ ...cv, diaDiem: e.target.value })} />
+              <div className="flex items-center gap-4 rounded-xl border border-slate-200 px-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={cv.cvChinh} onChange={e => setCv({ ...cv, cvChinh: e.target.checked })} /> CV chính</label>
+                <label className="flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={cv.congKhai} onChange={e => setCv({ ...cv, congKhai: e.target.checked })} /> Công khai</label>
+              </div>
             </div>
           </div>
 
-          {renderEditor('Kinh nghiem', 'kinhNghiemLam')}
-          {renderEditor('Du an', 'duAn')}
-          {renderEditor('Hoc van', 'hocVan')}
-          {renderEditor('Chung chi', 'chungChi')}
+          <CvTextList title="Experience Summary" value={cv.tomTatKinhNghiem} onChange={v => setCv({ ...cv, tomTatKinhNghiem: v })} placeholder="Full-stack Web Developer focusing on building scalable web products..." />
+          <CvTextList title="Soft Skills" value={cv.kyNangMem} onChange={v => setCv({ ...cv, kyNangMem: v })} placeholder="Excellent communication, teamwork, fast learning..." />
+          <SkillEditor value={cv.kyNangLapTrinh} onChange={v => setCv({ ...cv, kyNangLapTrinh: v })} />
+          <BasicItemsEditor title="Kinh nghiệm làm việc" value={cv.kinhNghiemLam} onChange={v => setCv({ ...cv, kinhNghiemLam: v })} />
+          <BasicItemsEditor title="Học vấn" value={cv.hocVan} onChange={v => setCv({ ...cv, hocVan: v })} />
+          <BasicItemsEditor title="Chứng chỉ" value={cv.chungChi} onChange={v => setCv({ ...cv, chungChi: v })} />
+          <ProjectEditor value={cv.duAnChiTiet} onChange={v => setCv({ ...cv, duAnChiTiet: v })} />
         </div>
 
-        <div style={{ position: 'sticky', top: 14 }}>
-          <div style={{ background: '#eef4ff', border: '1px solid #dbeafe', borderRadius: 8, padding: 10, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Wand2 size={16} color="#2563eb" />
-            <strong>Preview: {selectedTemplate.ten}</strong>
-          </div>
-          <div style={{
-            minHeight: 760,
-            background: '#fff',
-            border: '1px solid #dbe4f0',
-            borderRadius: 8,
-            overflow: 'hidden',
-            boxShadow: '0 28px 80px rgba(15,23,42,.16)',
-            fontFamily: selectedTemplate.font === 'Georgia' ? 'Georgia, serif' : selectedTemplate.font === 'System' ? 'system-ui, sans-serif' : 'Inter, Arial, sans-serif',
-          }}>
-            <div style={{
-              display: selectedTemplate.layout === 'split' ? 'grid' : 'block',
-              gridTemplateColumns: selectedTemplate.layout === 'split' ? '230px 1fr' : undefined,
-              minHeight: 760,
-            }}>
-              <aside style={{
-                background: selectedTemplate.layout === 'split' ? selectedTemplate.mauPhu : selectedTemplate.layout === 'hero' ? `linear-gradient(135deg, ${selectedTemplate.mauChinh}, ${selectedTemplate.mauPhu})` : '#f8fafc',
-                color: selectedTemplate.layout === 'split' || selectedTemplate.layout === 'hero' ? '#fff' : '#0f172a',
-                padding: 28,
-              }}>
-                <div style={{ width: 116, height: 116, borderRadius: selectedTemplate.layout === 'editorial' ? 8 : 999, overflow: 'hidden', background: '#dbeafe', marginBottom: 18, border: '4px solid rgba(255,255,255,.45)' }}>
-                  {cv.anhDaiDien || profile.anhDaiDien ? <img src={cv.anhDaiDien || profile.anhDaiDien} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ height: '100%', display: 'grid', placeItems: 'center', fontWeight: 900 }}>IMG</div>}
-                </div>
-                <h1 style={{ margin: 0, fontSize: selectedTemplate.layout === 'compact' ? 28 : 38, lineHeight: 1.02 }}>{data.current?.hoTen ?? 'Ung vien IT'}</h1>
-                <p style={{ fontWeight: 800, color: selectedTemplate.layout === 'split' || selectedTemplate.layout === 'hero' ? '#dbeafe' : selectedTemplate.mauChinh }}>{profile.viTriMongMuon || 'Software Developer'}</p>
-                <p style={{ fontSize: 13 }}>{data.current?.email}</p>
-                <p style={{ fontSize: 13 }}>{data.current?.soDienThoai}</p>
-              </aside>
-              <main style={{ padding: selectedTemplate.layout === 'compact' ? 24 : 34 }}>
-                <h2 style={{ marginTop: 0, color: selectedTemplate.mauPhu }}>Profile</h2>
-                <p style={{ color: '#475569' }}>{profile.tomTat || 'Hay viet tom tat nghe nghiep de nha tuyen dung hieu nhanh gia tri cua ban.'}</p>
-                <h2 style={{ color: selectedTemplate.mauPhu }}>Experience</h2>
-                {itemText(cv.kinhNghiemLam).map((item, index) => <div key={index} style={{ borderLeft: selectedTemplate.layout === 'timeline' ? `3px solid ${selectedTemplate.mauChinh}` : 0, paddingLeft: selectedTemplate.layout === 'timeline' ? 14 : 0, marginBottom: 14 }}>
-                  <strong>{item.tieuDe}</strong><p style={{ margin: '2px 0', color: selectedTemplate.mauChinh }}>{[item.donVi, item.thoiGian].filter(Boolean).join(' · ')}</p><p style={{ margin: 0, color: '#64748b' }}>{item.moTa}</p>
-                </div>)}
-                <h2 style={{ color: selectedTemplate.mauPhu }}>Projects</h2>
-                {itemText(cv.duAn).map((item, index) => <div key={index} style={{ marginBottom: 12 }}><strong>{item.tieuDe}</strong><p style={{ margin: 0, color: '#64748b' }}>{item.moTa || item.donVi}</p></div>)}
-                <h2 style={{ color: selectedTemplate.mauPhu }}>Education & Certificates</h2>
-                {[...itemText(cv.hocVan), ...cv.chungChi].map((item, index) => <p key={index} style={{ margin: '6px 0' }}><strong>{item.tieuDe}</strong> <span style={{ color: '#64748b' }}>{item.donVi} {item.thoiGian}</span></p>)}
-              </main>
-            </div>
-          </div>
+        <div className="min-w-0 xl:sticky xl:top-4 xl:max-h-[calc(100dvh-150px)] xl:overflow-auto">
+          <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-black text-slate-700">Preview A4 - linh hoạt theo nội dung</div>
+          <Preview cv={cv} data={data} />
         </div>
       </div>
     </section>
