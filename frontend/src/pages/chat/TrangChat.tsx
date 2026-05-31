@@ -381,3 +381,151 @@ function useChatState(nguoiDung: NguoiDungInfo | null) {
     },
   }
 }
+
+// ─── Sidebar: danh sách cuộc trò chuyện ──────────────────────────────────────
+function Sidebar({ nguoiDung, chat, tab, setTab, search, setSearch }: {
+  nguoiDung: NguoiDungInfo; chat: ReturnType<typeof useChatState>
+  tab: 'dm' | 'nhom'; setTab: (t: 'dm' | 'nhom') => void
+  search: string; setSearch: (s: string) => void
+}) {
+  const dmList = chat.danhSach.filter(c => c.loai !== 'nhom_cong_dong')
+  const nhomDaThamGia = chat.danhSach.filter(c => c.loai === 'nhom_cong_dong')
+  const nhomChuaThamGia = chat.nhomCongDong.filter(n => !nhomDaThamGia.some(j => j._id === n._id))
+
+  const filterDm = dmList.filter(c => {
+    const other = c.nguoiThamGia.find(p => p._id !== nguoiDung.id)
+    return !search || other?.hoTen.toLowerCase().includes(search.toLowerCase())
+  })
+
+  const labelLoai = (loai: string) => {
+    if (loai === 'admin_support') return { icon: '🛡️', label: 'Hỗ trợ Admin' }
+    if (loai === 'ung_vien_nha_tuyen_dung') return { icon: '💼', label: 'Tuyển dụng' }
+    return { icon: '💬', label: 'Chat' }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
+      {/* Header sidebar */}
+      <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid #f3f4f6' }}>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#111827' }}>Tin nhắn</h2>
+        {chat.tongChuaDoc > 0 && (
+          <span style={{ display: 'inline-block', marginTop: 4, background: '#7c3aed', color: 'white', borderRadius: 10, padding: '1px 8px', fontSize: 11, fontWeight: 700 }}>
+            {chat.tongChuaDoc} chưa đọc
+          </span>
+        )}
+      </div>
+
+      {/* Search */}
+      <div style={{ padding: '10px 12px', borderBottom: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#f9fafb', borderRadius: 10, padding: '8px 12px' }}>
+          <Search size={14} style={{ color: '#9ca3af', flexShrink: 0 }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Tìm cuộc trò chuyện..."
+            style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: 13, flex: 1, color: '#111827' }} />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #f3f4f6' }}>
+        {[{ key: 'dm', label: 'Tin nhắn', icon: MessageSquare }, { key: 'nhom', label: 'Nhóm', icon: Hash }].map(t => (
+          <button key={t.key} onClick={() => setTab(t.key as any)}
+            style={{ flex: 1, padding: '10px 0', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, fontWeight: tab === t.key ? 700 : 500, color: tab === t.key ? '#7c3aed' : '#6b7280', borderBottom: tab === t.key ? '2px solid #7c3aed' : '2px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <t.icon size={14} /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {tab === 'dm' ? (
+          filterDm.length === 0 ? (
+            <div style={{ padding: 32, textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+              <MessageCircle size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
+              <p style={{ margin: 0 }}>Chưa có cuộc trò chuyện</p>
+              {nguoiDung.vaiTro === 'nha_tuyen_dung' && <p style={{ margin: '4px 0 0', fontSize: 12 }}>Chat với ứng viên từ trang Pipeline</p>}
+            </div>
+          ) : filterDm.map(ctc => {
+            const other = ctc.nguoiThamGia.find(p => p._id !== nguoiDung.id)
+            const isOnline = other ? chat.online.has(other._id) : false
+            const unread = ctc.soChuaDocCuaToi || 0
+            const { icon } = labelLoai(ctc.loai)
+            const isActive = chat.cuocTroChuyenHienTai?._id === ctc._id
+            return (
+              <button key={ctc._id} onClick={() => chat.moCuocTroChuyen(ctc)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: 'none', cursor: 'pointer', textAlign: 'left', background: isActive ? '#f5f3ff' : unread > 0 ? '#fafaf9' : 'white', borderLeft: isActive ? '3px solid #7c3aed' : '3px solid transparent', transition: 'background 0.15s' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <Avatar name={other?.hoTen || '?'} size={42} online={isOnline} />
+                  <span style={{ position: 'absolute', top: -2, right: -2, fontSize: 12 }}>{icon}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: unread > 0 ? 700 : 500, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {other?.hoTen || 'Người dùng'}
+                    </span>
+                    {ctc.tinNhanCuoiCung?.thoiGian && <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0 }}>{thoiGianNgan(ctc.tinNhanCuoiCung.thoiGian)}</span>}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, color: unread > 0 ? '#7c3aed' : '#6b7280', fontWeight: unread > 0 ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                      {ctc.tinNhanCuoiCung?.noiDung || 'Chưa có tin nhắn'}
+                    </span>
+                    {unread > 0 && <span style={{ background: '#7c3aed', color: 'white', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 700, flexShrink: 0, marginLeft: 6 }}>{unread > 9 ? '9+' : unread}</span>}
+                  </div>
+                </div>
+              </button>
+            )
+          })
+        ) : (
+          <div style={{ padding: '8px 0' }}>
+            {nhomDaThamGia.length > 0 && (
+              <>
+                <div style={{ padding: '6px 14px 4px', fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Đã tham gia</div>
+                {nhomDaThamGia.map(nhom => {
+                  const isActive = chat.cuocTroChuyenHienTai?._id === nhom._id
+                  const unread = nhom.soChuaDocCuaToi || 0
+                  return (
+                    <button key={nhom._id} onClick={() => chat.moCuocTroChuyen(nhom)}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: 'none', cursor: 'pointer', textAlign: 'left', background: isActive ? '#f5f3ff' : 'white', borderLeft: isActive ? '3px solid #7c3aed' : '3px solid transparent' }}>
+                      <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #667eea, #764ba2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18, flexShrink: 0 }}>
+                        {nhom.anhNhom ? <img src={nhom.anhNhom} style={{ width: 42, height: 42, borderRadius: 12, objectFit: 'cover' }} alt="" /> : '#'}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{nhom.tenNhom || 'Nhóm cộng đồng'}</span>
+                          {unread > 0 && <span style={{ background: '#7c3aed', color: 'white', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 700 }}>{unread > 9 ? '9+' : unread}</span>}
+                        </div>
+                        <span style={{ fontSize: 12, color: '#6b7280' }}>{nhom.soThanhVien || nhom.nguoiThamGia?.length || 0} thành viên</span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </>
+            )}
+            {nhomChuaThamGia.length > 0 && (
+              <>
+                <div style={{ padding: '10px 14px 4px', fontSize: 11, fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Khám phá nhóm</div>
+                {nhomChuaThamGia.map(nhom => (
+                  <div key={nhom._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px' }}>
+                    <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #43e97b, #38f9d7)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18, flexShrink: 0 }}>#</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{nhom.tenNhom || 'Nhóm cộng đồng'}</div>
+                      <div style={{ fontSize: 12, color: '#6b7280' }}>{nhom.moTaNhom || ''} · {nhom.soThanhVien || 0} thành viên</div>
+                    </div>
+                    <button onClick={() => chat.thamGiaNhom(nhom._id)}
+                      style={{ flexShrink: 0, background: '#7c3aed', color: 'white', border: 'none', borderRadius: 8, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Plus size={12} /> Tham gia
+                    </button>
+                  </div>
+                ))}
+              </>
+            )}
+            {nhomDaThamGia.length === 0 && nhomChuaThamGia.length === 0 && (
+              <div style={{ padding: 32, textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+                <Hash size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
+                <p style={{ margin: 0 }}>Chưa có nhóm nào</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
