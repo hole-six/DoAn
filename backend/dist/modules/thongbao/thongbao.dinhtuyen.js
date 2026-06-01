@@ -1,11 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dinhTuyenThongBao = void 0;
-const dinhtuyencoban_js_1 = require("../../dungchung/dinhtuyencoban.js");
+const express_1 = require("express");
+const xacthuc_js_1 = require("../../dungchung/xacthuc.js");
 const thongbao_dieukhien_js_1 = require("./thongbao.dieukhien.js");
-const dinhTuyenCoBan = (0, dinhtuyencoban_js_1.taoDinhTuyenCoBan)(thongbao_dieukhien_js_1.dieuKhienThongBao);
-// Thêm routes mới
-dinhTuyenCoBan.patch('/:id/danh-dau-da-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.danhDauDaDoc);
-dinhTuyenCoBan.post('/danh-dau-tat-ca-da-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.danhDauTatCaDaDoc);
-dinhTuyenCoBan.get('/dem-chua-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.demChuaDoc);
-exports.dinhTuyenThongBao = dinhTuyenCoBan;
+exports.dinhTuyenThongBao = (0, express_1.Router)();
+exports.dinhTuyenThongBao.use(xacthuc_js_1.yeuCauDangNhap);
+exports.dinhTuyenThongBao.get('/', thongbao_dieukhien_js_1.dieuKhienThongBao.layDanhSach);
+exports.dinhTuyenThongBao.get('/dem-chua-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.demChuaDoc);
+exports.dinhTuyenThongBao.get('/:ma', thongbao_dieukhien_js_1.dieuKhienThongBao.layChiTiet);
+exports.dinhTuyenThongBao.post('/', thongbao_dieukhien_js_1.dieuKhienThongBao.taoMoi);
+exports.dinhTuyenThongBao.patch('/:ma', thongbao_dieukhien_js_1.dieuKhienThongBao.capNhat);
+exports.dinhTuyenThongBao.patch('/:id/danh-dau-da-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.danhDauDaDoc);
+exports.dinhTuyenThongBao.post('/danh-dau-tat-ca-da-doc', thongbao_dieukhien_js_1.dieuKhienThongBao.danhDauTatCaDaDoc);
+exports.dinhTuyenThongBao.delete('/:ma', thongbao_dieukhien_js_1.dieuKhienThongBao.xoa);

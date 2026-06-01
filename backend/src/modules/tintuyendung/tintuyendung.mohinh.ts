@@ -22,6 +22,7 @@ const tinTuyenDungSchema = new Schema(
     luongMax: Number,
     loaiHinh: { type: String, enum: loaiHinhLamViec, default: 'toan_thoi_gian' },
     capBac: { type: String, enum: capBacTinTuyenDung, default: 'junior' },
+    anhDaiDien: String,
     hanNop: Date,
     soLuong: { type: Number, default: 1 },
     moTa: { type: String, required: true },

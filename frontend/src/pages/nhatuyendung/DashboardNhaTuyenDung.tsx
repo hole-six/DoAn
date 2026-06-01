@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { clsx } from 'clsx'
 import { Bell, Briefcase, Calendar, CheckCircle, Edit3, Eye, ImagePlus, Plus, Save, Trash2, Users, XCircle } from 'lucide-react'
+import { useConfirm } from '../../components/ConfirmDialog'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
+const LOCKED_JOB_STATUSES = new Set(['dang_mo', 'tam_dong', 'het_han'])
 
 type Tone = 'blue' | 'green' | 'yellow' | 'red' | 'gray'
 
@@ -17,7 +19,7 @@ const toneClass: Record<Tone, string> = {
 }
 
 const ntdScope = [
-  'mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-3 pb-4 lg:gap-4',
+  'flex w-full min-w-0 flex-col gap-3 pb-4 lg:gap-4',
   '[&_.primary-button]:inline-flex [&_.primary-button]:min-h-11 [&_.primary-button]:w-full [&_.primary-button]:items-center [&_.primary-button]:justify-center [&_.primary-button]:gap-2 [&_.primary-button]:rounded-xl [&_.primary-button]:bg-[#0e4d7d] [&_.primary-button]:px-4 [&_.primary-button]:text-sm [&_.primary-button]:font-black [&_.primary-button]:text-white [&_.primary-button]:shadow-[0_8px_18px_rgba(14,77,125,0.24)] [&_.primary-button]:transition [&_.primary-button]:hover:bg-[#0a3659] sm:[&_.primary-button]:w-auto',
   '[&_.ntd-actions]:flex [&_.ntd-actions]:flex-wrap [&_.ntd-actions]:items-center [&_.ntd-actions]:gap-2',
   '[&_.ntd-actions_button]:inline-flex [&_.ntd-actions_button]:min-h-9 [&_.ntd-actions_button]:items-center [&_.ntd-actions_button]:justify-center [&_.ntd-actions_button]:gap-1.5 [&_.ntd-actions_button]:rounded-xl [&_.ntd-actions_button]:border [&_.ntd-actions_button]:border-slate-200 [&_.ntd-actions_button]:bg-white [&_.ntd-actions_button]:px-3 [&_.ntd-actions_button]:text-xs [&_.ntd-actions_button]:font-black [&_.ntd-actions_button]:text-slate-900',
@@ -103,6 +105,10 @@ function labelInterviewStatus(value?: string) {
   return ({ da_len_lich: 'Đã lên lịch', da_xac_nhan: 'Đã xác nhận', doi_lich: 'Xin đổi lịch', hoan_thanh: 'Hoàn thành', da_huy: 'Đã hủy' } as Record<string, string>)[value ?? ''] ?? value ?? '-'
 }
 
+function canEditJob(job: any) {
+  return !LOCKED_JOB_STATUSES.has(String(job?.trangThai ?? ''))
+}
+
 function useEmployerData() {
   const [state, setState] = useState<any>({ loading: true, error: '' })
   const user = currentUser()
@@ -134,7 +140,18 @@ function useEmployerData() {
       const myNotifications = notifications.filter((item: any) => String(item.maNguoiDung?._id ?? item.maNguoiDung) === user?.id)
       setState({ loading: false, error: '', user, company, jobs: myJobs, applications: myApplications, interviews: myInterviews, notifications: myNotifications, skills })
     } catch (err) {
-      setState((prev: any) => ({ ...prev, loading: false, error: err instanceof Error ? err.message : 'Không tải được dữ liệu' }))
+      const errorMessage = err instanceof Error ? err.message : 'Không tải được dữ liệu'
+      setState((prev: any) => ({ 
+        ...prev, 
+        loading: false, 
+        error: errorMessage,
+        // Provide safe defaults to prevent crashes
+        jobs: [],
+        applications: [],
+        interviews: [],
+        notifications: [],
+        skills: []
+      }))
     }
   }
 
@@ -169,10 +186,12 @@ function PanelHead({ title, action }: { title: string; action?: ReactNode }) {
 export default function DashboardNhaTuyenDung() {
   const data = useEmployerData()
   if (data.loading) return <Page title="Tổng quan nhà tuyển dụng" desc="Đang tải dữ liệu..."><div className="ntd-panel">Đang tải...</div></Page>
-  const openJobs = data.jobs.filter((item: any) => item.trangThai === 'dang_mo')
-  const unread = data.notifications.filter((item: any) => !item.daDoc).length
-  const upcoming = data.interviews.filter((item: any) => new Date(item.thoiGianBatDau) >= new Date()).length
-  const pending = data.applications.filter((item: any) => ['da_nop', 'da_xem', 'dang_xet_duyet'].includes(item.trangThai))
+  
+  // Safe defaults to prevent crashes when API fails
+  const openJobs = (data.jobs ?? []).filter((item: any) => item.trangThai === 'dang_mo')
+  const unread = (data.notifications ?? []).filter((item: any) => !item.daDoc).length
+  const upcoming = (data.interviews ?? []).filter((item: any) => new Date(item.thoiGianBatDau) >= new Date()).length
+  const pending = (data.applications ?? []).filter((item: any) => ['da_nop', 'da_xem', 'dang_xet_duyet'].includes(item.trangThai))
 
   return <Page title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'} desc="Quản lý tin tuyển dụng, pipeline ứng viên, lịch phỏng vấn và hồ sơ công ty." action={<a className="primary-button" href="/nha-tuyen-dung/tao-tin"><Plus size={16} /> Đăng tin mới</a>}>
     <ErrorBox message={data.error} />
@@ -194,18 +213,19 @@ export default function DashboardNhaTuyenDung() {
       </section>
       <section className="ntd-panel">
         <PanelHead title="Tin tuyển dụng" action={<a href="/nha-tuyen-dung/quan-ly-tin">Quản lý</a>} />
-        {data.jobs.length ? data.jobs.slice(0, 5).map((job: any) => <JobRow key={job.id} job={job} />) : <Empty>Chưa có tin tuyển dụng.</Empty>}
+        {(data.jobs ?? []).length ? (data.jobs ?? []).slice(0, 5).map((job: any) => <JobRow key={job.id} job={job} />) : <Empty>Chưa có tin tuyển dụng.</Empty>}
       </section>
       <section className="ntd-panel">
         <PanelHead title="Lịch phỏng vấn" action={<a href="/nha-tuyen-dung/lich-phong-van">Xem lịch</a>} />
-        {data.interviews.length ? data.interviews.slice(0, 5).map((item: any) => <InterviewRow key={item.id} item={item} />) : <Empty>Chưa có lịch phỏng vấn.</Empty>}
+        {(data.interviews ?? []).length ? (data.interviews ?? []).slice(0, 5).map((item: any) => <InterviewRow key={item.id} item={item} />) : <Empty>Chưa có lịch phỏng vấn.</Empty>}
       </section>
     </div>
   </Page>
 }
 
 function JobRow({ job, onEdit, onDelete }: { job: any; onEdit?: () => void; onDelete?: () => void }) {
-  return <div className="ntd-row"><div><strong>{job.tieuDe}</strong><p>{job.diaChi} - {money(job.luongMin)} - {money(job.luongMax)} - Hạn {formatDate(job.hanNop)}</p></div><div className="ntd-actions"><Badge tone={toneJobStatus(job.trangThai)}>{labelJobStatus(job.trangThai)}</Badge>{onEdit && <button onClick={onEdit}><Edit3 size={14} /> Sửa</button>}{onDelete && <button onClick={onDelete}><Trash2 size={14} /> Xóa</button>}</div></div>
+  const editable = canEditJob(job)
+  return <div className="ntd-row"><div><strong>{job.tieuDe}</strong><p>{job.diaChi} - {money(job.luongMin)} - {money(job.luongMax)} - Hạn {formatDate(job.hanNop)}</p></div><div className="ntd-actions"><Badge tone={toneJobStatus(job.trangThai)}>{labelJobStatus(job.trangThai)}</Badge>{onEdit && <button onClick={onEdit}>{editable ? <><Edit3 size={14} /> Sửa</> : <><Eye size={14} /> Xem</>}</button>}{editable && onDelete && <button onClick={onDelete}><Trash2 size={14} /> Xóa</button>}</div></div>
 }
 
 function ApplicationRow({ item, onClick }: { item: any; onClick?: () => void }) {
@@ -221,8 +241,14 @@ export function QuanLyTinNhaTuyenDungPage() {
   const [filter, setFilter] = useState('all')
   const [editing, setEditing] = useState<any>(null)
   const [error, setError] = useState('')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const jobs = (data.jobs ?? []).filter((job: any) => filter === 'all' || job.trangThai === filter)
-  const remove = async (id: string) => { if (confirm('Xóa tin tuyển dụng này?')) { await api(`/tintuyendung/${id}`, { method: 'DELETE' }); await data.reload() } }
+  const remove = (id: string) => {
+    confirm('Delete job', 'Are you sure you want to delete this job?', async () => {
+      await api(`/tintuyendung/${id}`, { method: 'DELETE' })
+      await data.reload()
+    }, 'danger', 'Delete')
+  }
   const handleTaoTin = () => {
     if (!data.company?.id) { setError('Chưa tải được thông tin công ty. Vui lòng thử lại.'); return }
     setError('')
@@ -232,8 +258,9 @@ export function QuanLyTinNhaTuyenDungPage() {
   return <Page title="Quản lý tin tuyển dụng" desc="Tạo, chỉnh sửa, mở/tạm đóng và theo dõi hiệu quả từng tin." action={<button className="primary-button" onClick={handleTaoTin} disabled={data.loading}><Plus size={16} /> Tạo tin</button>}>
     <ErrorBox message={error || data.error} />
     <div className="ntd-filterbar"><select value={filter} onChange={e => setFilter(e.target.value)}><option value="all">Tất cả trạng thái</option><option value="nhap">Nháp</option><option value="cho_duyet">Chờ duyệt</option><option value="dang_mo">Đang mở</option><option value="tam_dong">Tạm đóng</option><option value="het_han">Hết hạn</option></select></div>
-    <section className="ntd-panel">{jobs.length ? jobs.map((job: any) => <JobRow key={job.id} job={job} onEdit={() => setEditing(job)} onDelete={() => remove(job.id)} />) : <Empty>Không có tin phù hợp.</Empty>}</section>
+    <section className="ntd-panel">{jobs.length ? jobs.map((job: any) => <JobRow key={job.id} job={job} onEdit={canEditJob(job) ? () => setEditing(job) : undefined} onDelete={canEditJob(job) ? () => remove(job.id) : undefined} />) : <Empty>Không có tin phù hợp.</Empty>}</section>
     {editing && <JobModal job={editing} skills={data.skills ?? []} onClose={() => setEditing(null)} onSaved={async () => { setEditing(null); setError(''); await data.reload() }} onError={setError} />}
+    <ConfirmDialogComponent />
   </Page>
 }
 
@@ -256,7 +283,7 @@ function JobModal({ job, skills, onClose, onSaved, onError }: any) {
     batBuoc: x?.batBuoc ?? true,
   })).filter((x: any) => x.maKyNang)
   const [form, setForm] = useState<any>({ ...job, hanNop: job.hanNop ? String(job.hanNop).slice(0, 10) : '', kyNang: kyNangNormalized })
-  return <div className="ntd-modal"><div className="ntd-modal-card"><div className="ntd-modal-head"><h2>{job.id ? 'Sửa tin tuyển dụng' : 'Tạo tin tuyển dụng'}</h2><button onClick={onClose}><XCircle size={18} /></button></div><JobForm job={form} setJob={setForm} skills={skills} onSubmit={async (payload: any) => { try { await api(`/tintuyendung${job.id ? `/${job.id}` : ''}`, { method: job.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) }); await onSaved() } catch (err) { onError(err instanceof Error ? err.message : 'Không lưu được tin') } }} /></div></div>
+  return <div className="ntd-modal" onClick={onClose}><div className="ntd-modal-card" onClick={e => e.stopPropagation()} style={{ maxHeight: '95vh', overflowY: 'auto' }}><div className="ntd-modal-head"><h2>{job.id ? 'Sửa tin tuyển dụng' : 'Tạo tin tuyển dụng'}</h2><button onClick={onClose}><XCircle size={18} /></button></div><JobForm job={form} setJob={setForm} skills={skills} onSubmit={async (payload: any) => { try { await api(`/tintuyendung${job.id ? `/${job.id}` : ''}`, { method: job.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) }); await onSaved() } catch (err) { onError(err instanceof Error ? err.message : 'Không lưu được tin') } }} /></div></div>
 }
 
 function getKyNangId(x: any): string {
@@ -311,13 +338,13 @@ function SkillPicker({ skills, kyNang, onChange }: { skills: any[]; kyNang: any[
             Đã chọn ({selectedCount})
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {kyNang.map(x => {
+            {kyNang.map((x, idx) => {
               const id = getId(x)
               const skill = skills.find(s => s.id === id)
               const bb = x.batBuoc !== false
               return (
                 <span
-                  key={id}
+                  key={id || `skill-${idx}`}
                   className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${bb ? 'border-[#0e4d7d] bg-[#0e4d7d] text-white' : 'border-slate-300 bg-white text-slate-700'}`}
                 >
                   {skill?.tenKyNang ?? id}
@@ -366,12 +393,12 @@ function SkillPicker({ skills, kyNang, onChange }: { skills: any[]; kyNang: any[
               {group}
             </p>
             <div className="flex flex-wrap gap-1.5 p-2.5">
-              {items.map((skill: any) => {
+              {items.map((skill: any, idx: number) => {
                 const selected = isSelected(skill.id)
                 const bb = selected && isBatBuoc(skill.id)
                 return (
                   <button
-                    key={skill.id}
+                    key={skill.id || `item-${group}-${idx}`}
                     type="button"
                     onClick={() => toggle(skill.id)}
                     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition ${
@@ -465,13 +492,21 @@ export function UngVienNhaTuyenDungPage() {
   const [status, setStatus] = useState('all')
   const [selected, setSelected] = useState<any>(null)
   const [schedule, setSchedule] = useState<any>(null)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const apps = (data.applications ?? []).filter((item: any) => status === 'all' || item.trangThai === status)
-  const patchApp = async (id: string, trangThai: string) => { await api(`/hosoungtuyen/${id}`, { method: 'PATCH', body: JSON.stringify({ trangThai }) }); await data.reload(); if (selected?.id === id) setSelected({ ...selected, trangThai }) }
+  const patchApp = (id: string, trangThai: string) => {
+    confirm('Update status', 'Confirm changing application status?', async () => {
+      await api(`/hosoungtuyen/${id}/chuyen-trang-thai`, { method: 'POST', body: JSON.stringify({ trangThai }) })
+      await data.reload()
+      if (selected?.id === id) setSelected({ ...selected, trangThai })
+    }, 'warning', 'Confirm')
+  }
   return <Page title="Pipeline ứng viên" desc="Xem hồ sơ, cập nhật trạng thái và lên lịch phỏng vấn cho từng ứng viên.">
     <div className="ntd-filterbar"><select value={status} onChange={e => setStatus(e.target.value)}><option value="all">Tất cả pipeline</option><option value="da_nop">Đã nộp</option><option value="da_xem">Đã xem</option><option value="dang_xet_duyet">Đang xét duyệt</option><option value="moi_phong_van">Mời phỏng vấn</option><option value="dat">Đạt</option><option value="tu_choi">Từ chối</option></select></div>
     <section className="ntd-panel">{apps.length ? apps.map((item: any) => <ApplicationRow key={item.id} item={item} onClick={() => setSelected(item)} />) : <Empty>Không có ứng viên phù hợp.</Empty>}</section>
     {selected && <CandidateDrawer item={selected} onClose={() => setSelected(null)} onPatch={patchApp} onSchedule={() => setSchedule(selected)} />}
-    {schedule && <ScheduleModal app={schedule} onClose={() => setSchedule(null)} onSaved={async () => { await patchApp(schedule.id, 'moi_phong_van'); setSchedule(null) }} />}
+    {schedule && <ScheduleModal app={schedule} onClose={() => setSchedule(null)} onSaved={async () => { await api(`/hosoungtuyen/${schedule.id}/chuyen-trang-thai`, { method: 'POST', body: JSON.stringify({ trangThai: 'moi_phong_van' }) }); await data.reload(); setSchedule(null) }} />}
+    <ConfirmDialogComponent />
   </Page>
 }
 
@@ -481,20 +516,34 @@ function CandidateDrawer({ item, onClose, onPatch, onSchedule }: any) {
 
 function ScheduleModal({ app, onClose, onSaved }: any) {
   const [form, setForm] = useState<any>({ maHoSoUngTuyen: app.id, thoiGianBatDau: '', thoiGianKetThuc: '', hinhThuc: 'online', diaChi: 'Google Meet', linkHop: '', ghiChu: '', trangThai: 'da_len_lich', ketQua: 'cho_ket_qua' })
-  const submit = async (e: FormEvent) => { e.preventDefault(); await api('/lichphongvan', { method: 'POST', body: JSON.stringify(form) }); await onSaved() }
-  return <div className="ntd-modal"><form className="ntd-modal-card ntd-form" onSubmit={submit}><div className="ntd-modal-head"><h2>Lên lịch phỏng vấn</h2><button type="button" onClick={onClose}><XCircle size={18} /></button></div><Field label="Bắt đầu"><input type="datetime-local" required value={form.thoiGianBatDau} onChange={e => setForm({ ...form, thoiGianBatDau: e.target.value })} /></Field><Field label="Kết thúc"><input type="datetime-local" value={form.thoiGianKetThuc} onChange={e => setForm({ ...form, thoiGianKetThuc: e.target.value })} /></Field><Field label="Hình thức"><select value={form.hinhThuc} onChange={e => setForm({ ...form, hinhThuc: e.target.value })}><option value="online">Online</option><option value="offline">Offline</option></select></Field><Field label="Địa chỉ"><input value={form.diaChi} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field><Field label="Link họp" wide><input value={form.linkHop} onChange={e => setForm({ ...form, linkHop: e.target.value })} /></Field><Field label="Ghi chú" wide><textarea value={form.ghiChu} onChange={e => setForm({ ...form, ghiChu: e.target.value })} /></Field><div className="ntd-form-actions"><button type="button" className="ntd-secondary" onClick={onClose}>Hủy</button><button className="primary-button">Tạo lịch</button></div></form></div>
+  const { confirm, ConfirmDialogComponent } = useConfirm()
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    confirm('Create interview', 'Confirm creating this interview schedule?', async () => {
+      await api('/lichphongvan', { method: 'POST', body: JSON.stringify(form) })
+      await onSaved()
+    }, 'warning', 'Confirm')
+  }
+  return <div className="ntd-modal"><form className="ntd-modal-card ntd-form" onSubmit={submit}><div className="ntd-modal-head"><h2>Lên lịch phỏng vấn</h2><button type="button" onClick={onClose}><XCircle size={18} /></button></div><Field label="Bắt đầu"><input type="datetime-local" required value={form.thoiGianBatDau} onChange={e => setForm({ ...form, thoiGianBatDau: e.target.value })} /></Field><Field label="Kết thúc"><input type="datetime-local" value={form.thoiGianKetThuc} onChange={e => setForm({ ...form, thoiGianKetThuc: e.target.value })} /></Field><Field label="Hình thức"><select value={form.hinhThuc} onChange={e => setForm({ ...form, hinhThuc: e.target.value })}><option value="online">Online</option><option value="offline">Offline</option></select></Field><Field label="Địa chỉ"><input value={form.diaChi} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field><Field label="Link họp" wide><input value={form.linkHop} onChange={e => setForm({ ...form, linkHop: e.target.value })} /></Field><Field label="Ghi chú" wide><textarea value={form.ghiChu} onChange={e => setForm({ ...form, ghiChu: e.target.value })} /></Field><div className="ntd-form-actions"><button type="button" className="ntd-secondary" onClick={onClose}>Hủy</button><button className="primary-button">Tạo lịch</button></div><ConfirmDialogComponent /></form></div>
 }
 
 export function LichPhongVanNhaTuyenDungPage() {
   const data = useEmployerData()
   const [selectedId, setSelectedId] = useState('')
   const [status, setStatus] = useState('all')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const items = (data.interviews ?? []).filter((item: any) => status === 'all' || item.trangThai === status)
   const selected = items.find((item: any) => item.id === (selectedId || items[0]?.id)) ?? items[0]
-  const patch = async (id: string, payload: any) => { await api(`/lichphongvan/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }); await data.reload() }
+  const patch = (id: string, action: string, payload?: any) => {
+    confirm('Update interview', 'Confirm this interview update?', async () => {
+      await api(`/lichphongvan/${id}/${action}`, { method: 'POST', body: payload ? JSON.stringify(payload) : undefined })
+      await data.reload()
+    }, 'warning', 'Confirm')
+  }
   return <Page title="Lịch phỏng vấn" desc="Điều phối lịch, cập nhật kết quả và trạng thái phỏng vấn.">
     <div className="ntd-filterbar"><select value={status} onChange={e => setStatus(e.target.value)}><option value="all">Tất cả trạng thái</option><option value="da_len_lich">Đã lên lịch</option><option value="da_xac_nhan">Đã xác nhận</option><option value="doi_lich">Xin đổi lịch</option><option value="hoan_thanh">Hoàn thành</option></select></div>
-    <div className="ntd-split"><section className="ntd-panel">{items.length ? items.map((item: any) => <InterviewRow key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelectedId(item.id)} />) : <Empty>Chưa có lịch phỏng vấn.</Empty>}</section><section className="ntd-panel">{selected ? <><PanelHead title={selected.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? 'Chi tiết lịch'} /><div className="ntd-detail-grid"><span>Bắt đầu</span><strong>{formatDate(selected.thoiGianBatDau)}</strong><span>Kết thúc</span><strong>{formatDate(selected.thoiGianKetThuc)}</strong><span>Hình thức</span><strong>{selected.hinhThuc}</strong><span>Địa chỉ/link</span><strong>{selected.linkHop || selected.diaChi}</strong><span>Ghi chú</span><strong>{selected.ghiChu || '-'}</strong><span>Trạng thái</span><Badge tone="blue">{labelInterviewStatus(selected.trangThai)}</Badge></div><div className="ntd-actions ntd-detail-actions"><button onClick={() => patch(selected.id, { trangThai: 'da_xac_nhan' })}>Xác nhận</button><button onClick={() => patch(selected.id, { trangThai: 'hoan_thanh', ketQua: 'dat' })}>Hoàn thành - đạt</button><button onClick={() => patch(selected.id, { trangThai: 'hoan_thanh', ketQua: 'khong_dat' })}>Không đạt</button><button onClick={() => patch(selected.id, { trangThai: 'da_huy' })}>Hủy lịch</button></div></> : <Empty>Chọn lịch để xem chi tiết.</Empty>}</section></div>
+    <div className="ntd-split"><section className="ntd-panel">{items.length ? items.map((item: any) => <InterviewRow key={item.id} item={item} active={selected?.id === item.id} onClick={() => setSelectedId(item.id)} />) : <Empty>Chưa có lịch phỏng vấn.</Empty>}</section><section className="ntd-panel">{selected ? <><PanelHead title={selected.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? 'Chi tiết lịch'} /><div className="ntd-detail-grid"><span>Bắt đầu</span><strong>{formatDate(selected.thoiGianBatDau)}</strong><span>Kết thúc</span><strong>{formatDate(selected.thoiGianKetThuc)}</strong><span>Hình thức</span><strong>{selected.hinhThuc}</strong><span>Địa chỉ/link</span><strong>{selected.linkHop || selected.diaChi}</strong><span>Ghi chú</span><strong>{selected.ghiChu || '-'}</strong><span>Trạng thái</span><Badge tone="blue">{labelInterviewStatus(selected.trangThai)}</Badge></div><div className="ntd-actions ntd-detail-actions"><button onClick={() => patch(selected.id, 'xac-nhan')}>Xác nhận</button><button onClick={() => patch(selected.id, 'hoan-thanh', { ketQua: 'dat' })}>Hoàn thành - đạt</button><button onClick={() => patch(selected.id, 'hoan-thanh', { ketQua: 'khong_dat' })}>Không đạt</button><button onClick={() => patch(selected.id, 'huy')}>Hủy lịch</button></div></> : <Empty>Chọn lịch để xem chi tiết.</Empty>}</section></div>
+    <ConfirmDialogComponent />
   </Page>
 }
 
@@ -540,9 +589,15 @@ export function AnalyticsNhaTuyenDungPage() {
 
 export function ThongBaoNhaTuyenDungPage() {
   const data = useEmployerData()
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const patch = async (id: string, payload: any) => { await api(`/thongbao/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }); await data.reload() }
-  const remove = async (id: string) => { await api(`/thongbao/${id}`, { method: 'DELETE' }); await data.reload() }
-  return <Page title="Thông báo" desc="Cập nhật về tin tuyển dụng, hồ sơ ứng viên và lịch phỏng vấn."><section className="ntd-panel">{data.notifications?.length ? data.notifications.map((item: any) => <div className="ntd-row" key={item.id ?? item._id}><a href={item.lienKet || '#'}><strong>{item.tieuDe}</strong><p>{item.noiDung}</p><p>{formatDate(item.ngayTao)}</p></a><div className="ntd-actions"><Badge tone={item.daDoc ? 'gray' : 'blue'}>{item.daDoc ? 'Đã đọc' : 'Mới'}</Badge><button onClick={() => patch(item.id ?? item._id, { daDoc: true })}>Đọc</button><button onClick={() => remove(item.id ?? item._id)}><Trash2 size={14} /></button></div></div>) : <Empty>Chưa có thông báo.</Empty>}</section></Page>
+  const remove = (id: string) => {
+    confirm('Delete notification', 'Are you sure to delete this notification?', async () => {
+      await api(`/thongbao/${id}`, { method: 'DELETE' })
+      await data.reload()
+    }, 'danger', 'Delete')
+  }
+  return <Page title="Thông báo" desc="Cập nhật về tin tuyển dụng, hồ sơ ứng viên và lịch phỏng vấn."><section className="ntd-panel">{data.notifications?.length ? data.notifications.map((item: any) => <div className="ntd-row" key={item.id ?? item._id}><a href={item.lienKet || '#'}><strong>{item.tieuDe}</strong><p>{item.noiDung}</p><p>{formatDate(item.ngayTao)}</p></a><div className="ntd-actions"><Badge tone={item.daDoc ? 'gray' : 'blue'}>{item.daDoc ? 'Đã đọc' : 'Mới'}</Badge><button onClick={() => patch(item.id ?? item._id, { daDoc: true })}>Đọc</button><button onClick={() => remove(item.id ?? item._id)}><Trash2 size={14} /></button></div></div>) : <Empty>Chưa có thông báo.</Empty>}</section><ConfirmDialogComponent /></Page>
 }
 
 export function CaiDatNhaTuyenDungPage() {

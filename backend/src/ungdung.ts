@@ -12,7 +12,7 @@ export function taoUngDung() {
   ungDung.use(helmet())
   ungDung.use(cors())
   ungDung.use(morgan('dev'))
-  ungDung.use(express.json({ limit: '2mb' }))
+  ungDung.use(express.json({ limit: '10mb' }))
   ungDung.use(
     '/uploads',
     express.static(path.join(process.cwd(), 'uploads'), {

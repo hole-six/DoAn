@@ -14,12 +14,15 @@ import { dinhTuyenTinNhan } from '../modules/tinnhan/tinnhan.dinhtuyen.js'
 import { dinhTuyenTinTuyenDung } from '../modules/tintuyendung/tintuyendung.dinhtuyen.js'
 import { dinhTuyenUngVien } from '../modules/ungvien/ungvien.dinhtuyen.js'
 import { dinhTuyenXacThuc } from '../modules/xacthuc/xacthuc.dinhtuyen.js'
+import { ganNguoiDungNeuCo } from '../dungchung/xacthuc.js'
 
 export const apiTong = Router()
 
 apiTong.get('/trangthai', (_yeuCau, phanHoi) => {
   phanHoi.json({ thongBao: 'API san sang', thoiGian: new Date().toISOString() })
 })
+
+apiTong.use(ganNguoiDungNeuCo)
 
 apiTong.use('/nguoidung', dinhTuyenNguoiDung)
 apiTong.use('/canhbaoquantri', dinhTuyenCanhBaoQuanTri)

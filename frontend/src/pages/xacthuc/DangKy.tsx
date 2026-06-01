@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Lock, Mail, Phone, User } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import dangKyImg from '../../assets/dangky.png'
+import './auth-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 

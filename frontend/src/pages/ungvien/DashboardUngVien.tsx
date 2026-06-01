@@ -91,49 +91,49 @@ export default function DashboardUngVien() {
   ]
 
   return (
-    <div className="space-y-5 pb-24 sm:pb-6">
+    <div className="space-y-4 pb-24 sm:space-y-5 sm:pb-6 px-3 sm:px-0">
 
       {/* ── Hero banner ─────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-5 text-white shadow-lg sm:p-6">
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-sky-900 p-4 sm:p-5 md:p-6 text-white shadow-lg">
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-8 left-1/3 h-48 w-48 rounded-full bg-violet-500/10 blur-2xl" />
 
-        <div className="relative grid gap-5 md:grid-cols-[1fr_auto]">
+        <div className="relative grid gap-4 sm:gap-5 md:grid-cols-[1fr_auto]">
           {/* Left */}
           <div>
-            <p className="text-xs font-black uppercase tracking-widest text-sky-300">Chào mừng trở lại</p>
-            <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-sky-300">Chào mừng trở lại</p>
+            <h2 className="mt-1.5 sm:mt-2 text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-tight">
               Xin chào, {nguoiDung?.hoTen || 'Ứng viên'}! 👋
             </h2>
-            <p className="mt-2 max-w-lg text-sm font-medium leading-relaxed text-sky-100">
+            <p className="mt-2 max-w-lg text-xs sm:text-sm font-medium leading-relaxed text-sky-100">
               Hồ sơ của bạn đang được{' '}
               <span className="font-black text-white">{data.hoSo?.luotXem || 0} nhà tuyển dụng</span>{' '}
               xem. Tiếp tục cập nhật để tăng cơ hội.
             </p>
 
             {/* Quick stats inline */}
-            <div className="mt-4 flex flex-wrap gap-3">
-              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold backdrop-blur-sm">
-                <Eye size={13} className="text-sky-300" />
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-bold backdrop-blur-sm">
+                <Eye size={12} className="text-sky-300 shrink-0" />
                 <span>{data.hoSo?.luotXem || 0} lượt xem</span>
               </div>
-              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold backdrop-blur-sm">
-                <TrendingUp size={13} className="text-emerald-300" />
+              <div className="flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-bold backdrop-blur-sm">
+                <TrendingUp size={12} className="text-emerald-300 shrink-0" />
                 <span>{data.hoSo?.doHoanThien || 0}% hoàn thiện</span>
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row flex-wrap gap-2">
               <Link
                 to="/ung-vien/ho-so"
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition hover:bg-sky-400 active:scale-95"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-sky-400 active:scale-95"
               >
                 Cập nhật hồ sơ
               </Link>
               <Link
                 to="/viec-lam"
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/25 px-4 py-2 text-sm font-extrabold text-white transition hover:bg-white/10 active:scale-95"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/25 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-white/10 active:scale-95"
               >
                 Tìm việc mới
               </Link>
@@ -141,10 +141,10 @@ export default function DashboardUngVien() {
           </div>
 
           {/* Right — progress ring */}
-          <div className="flex flex-col items-center justify-center gap-2 rounded-2xl bg-white/10 p-4 backdrop-blur-sm sm:min-w-[140px]">
+          <div className="flex flex-col items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-white/10 p-4 backdrop-blur-sm md:min-w-[140px]">
             <div className="relative">
-              <ProgressRing value={data.hoSo?.doHoanThien || 0} size={88} />
-              <span className="absolute inset-0 flex items-center justify-center text-xl font-black text-white">
+              <ProgressRing value={data.hoSo?.doHoanThien || 0} size={80} />
+              <span className="absolute inset-0 flex items-center justify-center text-lg sm:text-xl font-black text-white">
                 {data.hoSo?.doHoanThien || 0}%
               </span>
             </div>
@@ -154,22 +154,22 @@ export default function DashboardUngVien() {
       </div>
 
       {/* ── KPI grid ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         {kpis.map(item => (
-          <div key={item.nhan} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md sm:flex-col sm:items-start sm:gap-2">
-            <div className={clsx('grid h-10 w-10 shrink-0 place-items-center rounded-xl sm:h-9 sm:w-9', item.bg, item.text)}>
-              <item.icon size={20} />
+          <div key={item.nhan} className="flex items-center gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm transition hover:shadow-md sm:flex-col sm:items-start">
+            <div className={clsx('grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-lg sm:rounded-xl', item.bg, item.text)}>
+              <item.icon size={18} className="sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-wide text-slate-400">{item.nhan}</p>
-              <strong className="block text-2xl font-black leading-none text-slate-950 mt-0.5">{item.so}</strong>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-wide text-slate-400 truncate">{item.nhan}</p>
+              <strong className="block text-xl sm:text-2xl font-black leading-none text-slate-950 mt-0.5">{item.so}</strong>
             </div>
           </div>
         ))}
       </div>
 
       {/* ── Two-col grid ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-2">
 
         {/* Applications */}
         <Card padding="md">
@@ -182,12 +182,12 @@ export default function DashboardUngVien() {
           ) : (
             <div className="space-y-2">
               {data.hoSoUngTuyen.map(hs => (
-                <div key={hs.id} className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-sky-200 hover:bg-sky-50/40 sm:grid-cols-[1fr_auto_auto] sm:items-center">
+                <div key={hs.id} className="grid grid-cols-1 gap-2 rounded-lg sm:rounded-xl border border-slate-200 bg-white p-2.5 sm:p-3 transition hover:border-sky-200 hover:bg-sky-50/40 sm:grid-cols-[1fr_auto_auto] sm:items-center">
                   <div className="min-w-0">
-                    <strong className="block truncate font-black text-slate-950">{hs.viTri}</strong>
-                    <span className="mt-0.5 block truncate text-sm font-medium text-slate-500">{hs.congTy}</span>
+                    <strong className="block truncate text-sm sm:text-base font-black text-slate-950">{hs.viTri}</strong>
+                    <span className="mt-0.5 block truncate text-xs sm:text-sm font-medium text-slate-500">{hs.congTy}</span>
                   </div>
-                  <span className="text-sm font-bold text-slate-500 whitespace-nowrap">{hs.ngay}</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-500 whitespace-nowrap">{hs.ngay}</span>
                   <StatusBadge status={hs.trangThai} />
                 </div>
               ))}
@@ -206,16 +206,16 @@ export default function DashboardUngVien() {
           ) : (
             <div className="space-y-2">
               {data.lichPhongVan.map(lv => (
-                <article key={lv.id} className="flex gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-sky-200 hover:bg-sky-50/40">
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700">
-                    <Calendar size={18} />
+                <article key={lv.id} className="flex gap-2.5 sm:gap-3 rounded-lg sm:rounded-xl border border-slate-200 bg-white p-2.5 sm:p-3 transition hover:border-sky-200 hover:bg-sky-50/40">
+                  <div className="grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center rounded-lg sm:rounded-xl bg-sky-50 text-sky-700">
+                    <Calendar size={16} className="sm:w-[18px] sm:h-[18px]" />
                   </div>
                   <div className="min-w-0">
-                    <strong className="block truncate font-black text-slate-950">{lv.viTri}</strong>
-                    <span className="mt-0.5 block text-sm font-medium text-slate-500">
+                    <strong className="block truncate text-sm sm:text-base font-black text-slate-950">{lv.viTri}</strong>
+                    <span className="mt-0.5 block text-xs sm:text-sm font-medium text-slate-500">
                       {lv.congTy} · {lv.ngay} {lv.gio}
                     </span>
-                    <span className="mt-1 block text-xs font-black text-sky-700">{lv.hinh}</span>
+                    <span className="mt-1 block text-[11px] sm:text-xs font-black text-sky-700">{lv.hinh}</span>
                   </div>
                 </article>
               ))}

@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, Search, SlidersHorizontal } from 'lucide-react'
 import timJobBg from '../../assets/timjob.png'
+import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
+import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
+import './vieclam-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
@@ -68,6 +71,7 @@ function toggleValue(list: string[], value: string) {
 }
 
 export default function TimKiemViecLam() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [tuKhoa, setTuKhoa] = useState(searchParams.get('tuKhoa') ?? '')
   const [diaDiem, setDiaDiem] = useState(searchParams.get('diaDiem') ?? '')
@@ -79,11 +83,39 @@ export default function TimKiemViecLam() {
   const [kyNangDangChon, setKyNangDangChon] = useState<string[]>([])
   const [capBacDangChon, setCapBacDangChon] = useState<string[]>([])
   const [loaiHinhDangChon, setLoaiHinhDangChon] = useState<string[]>([])
+  const [searchActive, setSearchActive] = useState(false)
+  const searchWrapRef = useRef<HTMLDivElement | null>(null)
+  const { groups, loading, hasAny } = useSearchSuggestions({
+    query: tuKhoa,
+    active: searchActive,
+    apiUrl: API_URL,
+  })
 
   useEffect(() => {
     setTuKhoa(searchParams.get('tuKhoa') ?? '')
     setDiaDiem(searchParams.get('diaDiem') ?? '')
   }, [searchParams])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSearchActive(false)
+    }
+    const onMouseDown = (event: MouseEvent) => {
+      if (!searchWrapRef.current) return
+      if (!searchWrapRef.current.contains(event.target as Node)) setSearchActive(false)
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('mousedown', onMouseDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('mousedown', onMouseDown)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = searchActive ? 'hidden' : 'unset'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [searchActive])
 
   useEffect(() => {
     let active = true
@@ -129,7 +161,18 @@ export default function TimKiemViecLam() {
     const params = new URLSearchParams()
     if (tuKhoa.trim()) params.set('tuKhoa', tuKhoa.trim())
     if (diaDiem.trim()) params.set('diaDiem', diaDiem.trim())
+    setSearchActive(false)
     setSearchParams(params)
+  }
+
+  const chonGoiY = (item: SuggestionItem) => {
+    setTuKhoa(item.queryValue)
+    setSearchActive(false)
+    if (item.type === 'company') {
+      navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+      return
+    }
+    navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
   }
 
   const toggleSave = (id: string) => {
@@ -187,23 +230,29 @@ export default function TimKiemViecLam() {
 
   return (
     <main className="app-page jobs-real-page">
-      <section className="jobs-real-hero">
+      <section className={`jobs-real-hero${searchActive ? ' search-focus-active' : ''}`}>
         <img src={timJobBg} alt="" />
         <div />
         <article>
           <h1>Tìm việc IT bằng dữ liệu tuyển dụng thật</h1>
           <p>{dangTai ? 'Đang tải dữ liệu...' : `${ketQua.length} việc làm phù hợp từ hệ thống ITJob`}</p>
-          <div className="jobs-real-search">
+          <div ref={searchWrapRef} className={`jobs-real-search${searchActive ? ' search-shell-active' : ''}`}>
             <label>
               <Search size={18} />
-              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chức danh, kỹ năng, công ty..." />
+              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chức danh, kỹ năng, công ty..." />
             </label>
             <label>
               <MapPin size={18} />
               <input value={diaDiem} onChange={e => setDiaDiem(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Địa điểm" />
             </label>
             <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm việc</button>
+            {searchActive && (
+              <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+            )}
           </div>
+          {searchActive && (loading || hasAny) && (
+            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="Đóng gợi ý tìm kiếm" />
+          )}
           <div className="jobs-real-tags">
             {goiYKyNang.map(skill => <button key={skill.id} onClick={() => setKyNangDangChon(prev => toggleValue(prev, skill.id))}>{skill.ten}</button>)}
           </div>

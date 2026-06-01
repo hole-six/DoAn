@@ -1,21 +1,21 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   Search, Briefcase,
   TrendingUp, Star, FileText, Sparkles, ChevronRight,
-  Building2, Users, Award, Zap, Globe, Shield,
+  Award, Zap, Globe, Shield,
   ArrowRight, CheckCircle,
 } from 'lucide-react'
 import effortBg from './assets/EffortBackground.png'
 import './ungdung.css'
+import './pages/trangchu/trangchu-styles.css'
 import './realtime.css'
 import './components/chat-notification.css'
 
 // ✨ Import Real-time Components
-import { ChatBox } from './components/ChatBox'
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { OfflineIndicator } from './components/OfflineIndicator'
-import { khoiTaoSocket } from './lib/socket'
+import { khoiTaoSocket, ngatketnoisocket } from './lib/socket'
 import { dangKyPushSubscription, langNgheNotificationClick as langNghePushClick } from './lib/pushNotifications'
 import { ChatProvider } from './contexts/ChatContext'
 import { ThongBaoProvider } from './contexts/ThongBaoContext'
@@ -155,12 +155,7 @@ const tinTuyenDung = [
   },
 ]
 
-const thongKe = [
-  { icon: Briefcase,  so: '12.400+',  nhan: 'Việc làm IT' },
-  { icon: Building2,  so: '3.200+',   nhan: 'Công ty công nghệ' },
-  { icon: Users,      so: '580.000+', nhan: 'Ứng viên IT' },
-  { icon: Award,      so: '98%',      nhan: 'Hài lòng dịch vụ' },
-]
+
 
 const lyDo = [
   { icon: Zap,          tieu: 'Ứng tuyển siêu nhanh',    mo: 'Chỉ 1 click để nộp hồ sơ. Hệ thống tự điền thông tin từ CV của bạn.' },
@@ -266,13 +261,47 @@ function useTrangChuData() {
 
 function HeroTrangChu() {
   const [tuKhoa, setTuKhoa] = useState('')
+  const [searchActive, setSearchActive] = useState(false)
+  const searchWrapRef = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
+  const { groups, loading, hasAny } = useSearchSuggestions({
+    query: tuKhoa,
+    active: searchActive,
+    apiUrl: API_URL,
+  })
 
   const timKiem = () => {
     const params = new URLSearchParams()
     if (tuKhoa.trim()) params.set('tuKhoa', tuKhoa.trim())
+    setSearchActive(false)
     navigate(`/viec-lam${params.toString() ? `?${params.toString()}` : ''}`)
   }
+
+  const chonGoiY = (item: SuggestionItem) => {
+    setTuKhoa(item.queryValue)
+    setSearchActive(false)
+    if (item.type === 'company') {
+      navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+      return
+    }
+    navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+  }
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSearchActive(false)
+    }
+    const onMouseDown = (event: MouseEvent) => {
+      if (!searchWrapRef.current) return
+      if (!searchWrapRef.current.contains(event.target as Node)) setSearchActive(false)
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('mousedown', onMouseDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('mousedown', onMouseDown)
+    }
+  }, [])
 
   return (
     <section className="trangchu-hero">
@@ -282,22 +311,33 @@ function HeroTrangChu() {
         className="trangchu-hero-nen"
         aria-hidden="true"
       />
+      {searchActive && (loading || hasAny) && (
+        <button
+          type="button"
+          className="search-overlay"
+          onClick={() => setSearchActive(false)}
+          aria-label="Đóng gợi ý tìm kiếm"
+        />
+      )}
 
 
-      <div className="trangchu-hero-noidung">
+      <div className={`trangchu-hero-noidung${searchActive ? ' search-focus-active' : ''}`}>
+        <p className="eyebrow">Nền tảng tuyển dụng CNTT</p>
         <h1>
          Tìm việc chất IT Đà Nẵng
         </h1>
 
+        
         {/* Khung tìm kiếm */}
-        <div className="trangchu-khop-timkiem">
-          <label>
-            <Search size={18} />
+        <div ref={searchWrapRef} className={`trangchu-khop-timkiem${searchActive ? ' search-shell-active' : ''}`}>
+          <label className="trangchu-search-input">
+            <Search size={20} />
             <input
               type="text"
-              placeholder="Tên công ty, ngành nghề, kỹ năng..."
+              placeholder="Tên vị trí, công ty, kỹ năng..."
               value={tuKhoa}
               onChange={e => setTuKhoa(e.target.value)}
+              onFocus={() => setSearchActive(true)}
               onKeyDown={e => { if (e.key === 'Enter') timKiem() }}
             />
           </label>
@@ -305,12 +345,15 @@ function HeroTrangChu() {
             <Search size={18} />
             Tìm kiếm
           </button>
+          {searchActive && (
+            <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+          )}
         </div>
 
         {/* Gợi ý từ khoá */}
         <div className="trangchu-goiy">
-          <span>Gợi ý:</span>
-          {['React', 'Node.js', 'Python', 'Java', 'DevOps', 'AI/ML'].map(kn => (
+          <span>Kỹ năng nổi bật:</span>
+          {['React', 'Node.js', 'TypeScript', 'Java', 'DevOps', 'Data Engineer'].map(kn => (
             <button key={kn} onClick={() => navigate(`/viec-lam?tuKhoa=${encodeURIComponent(kn)}`)}>{kn}</button>
           ))}
         </div>
@@ -358,25 +401,7 @@ function ThanhTinhNang() {
 
 // ─── Thống kê ─────────────────────────────────────────────────────────────────
 
-function SectionThongKe({ stats }: { stats?: Array<{ icon: React.ElementType; so: string; nhan: string }> }) {
-  const items = stats?.length ? stats : thongKe
-  return (
-    <section className="section">
-      <div className="stats-grid">
-        {items.map(item => {
-          const Icon = item.icon
-          return (
-            <div key={item.nhan} className="stat-card">
-              <div className="icon-shell"><Icon size={22} /></div>
-              <strong>{item.so}</strong>
-              <span>{item.nhan}</span>
-            </div>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
+
 
 // ─── Nhà tuyển dụng nổi bật ───────────────────────────────────────────────────
 
@@ -658,61 +683,64 @@ function TrangChu() {
 
 import BoDinhTuyen from './components/BoDinhTuyen'
 import DashboardShell from './components/DashboardShell'
-import DangNhap from './pages/xacthuc/DangNhap'
-import DangKy from './pages/xacthuc/DangKy'
-import TimKiemViecLam from './pages/vieclam/TimKiemViecLam'
-import ChiTietViecLam from './pages/vieclam/ChiTietViecLam'
-import DanhSachCongTy from './pages/congty/DanhSachCongTy'
-import HoSoCongTy from './pages/congty/HoSoCongTy'
-import BlogPage from './pages/blog/Blog'
-import DashboardUngVien, {
-  CaiDatUngVienPage,
-  HoSoUngVienPage,
-  LichPhongVanPage,
-  ThongBaoUngVienPage,
-  UngTuyenPage,
-  ViecDaLuuPage,
-} from './pages/ungvien/UngVienHeThong'
-import PortfolioGeneratorPage from './pages/ungvien/PortfolioGenerator'
-import DashboardNhaTuyenDung, {
-  AnalyticsNhaTuyenDungPage,
-  BangGiaNhaTuyenDungPage,
-  CaiDatNhaTuyenDungPage,
-  CongTyNhaTuyenDungPage,
-  LichPhongVanNhaTuyenDungPage,
-  QuanLyTinNhaTuyenDungPage,
-  TaoTinNhaTuyenDungPage,
-  ThongBaoNhaTuyenDungPage,
-  UngVienNhaTuyenDungPage,
-} from './pages/nhatuyendung/DashboardNhaTuyenDung'
-import DashboardQuanTriVien from './pages/quantrivien/DashboardQuanTriVien'
-import QuanLyNguoiDung from './pages/quantrivien/QuanLyNguoiDung'
-import {
-  BaoCaoAdmin,
-  CaiDatAdmin,
-  DuyetTinTuyenDungAdmin,
-  LogsAdmin,
-  QuanLyCongTyAdmin,
-  QuanLyKyNangAdmin,
-  QuanLyReviewCongTyAdmin,
-} from './pages/quantrivien/AdminHeThong'
-import TrangDangXayDungPage from './pages/TrangDangXayDung'
+import SearchSuggestionPanel from './components/search/SearchSuggestionPanel'
+import { type SuggestionItem, useSearchSuggestions } from './components/search/useSearchSuggestions'
+
+const DangNhap = lazy(() => import('./pages/xacthuc/DangNhap'))
+const DangKy = lazy(() => import('./pages/xacthuc/DangKy'))
+const TimKiemViecLam = lazy(() => import('./pages/vieclam/TimKiemViecLam'))
+const ChiTietViecLam = lazy(() => import('./pages/vieclam/ChiTietViecLam'))
+const DanhSachCongTy = lazy(() => import('./pages/congty/DanhSachCongTy'))
+const HoSoCongTy = lazy(() => import('./pages/congty/HoSoCongTy'))
+const BlogPage = lazy(() => import('./pages/blog/Blog'))
+const DashboardUngVien = lazy(() => import('./pages/ungvien/dashboard/DashboardUngVienPage'))
+const HoSoUngVienPage = lazy(() => import('./pages/ungvien/hoso/HoSoUngVienPage'))
+const ViecDaLuuPage = lazy(() => import('./pages/ungvien/viecdaluu/ViecDaLuuPage'))
+const UngTuyenPage = lazy(() => import('./pages/ungvien/ungtuyen/UngTuyenPage'))
+const LichPhongVanPage = lazy(() => import('./pages/ungvien/lichphongvan/LichPhongVanPage'))
+const ThongBaoUngVienPage = lazy(() => import('./pages/ungvien/thongbao/ThongBaoUngVienPage'))
+const CaiDatUngVienPage = lazy(() => import('./pages/ungvien/caidat/CaiDatUngVienPage'))
+const PortfolioGeneratorPage = lazy(() => import('./pages/ungvien/PortfolioGenerator'))
+const DashboardNhaTuyenDung = lazy(() => import('./pages/nhatuyendung/dashboard/DashboardNhaTuyenDungPage'))
+const QuanLyTinNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/jobs/QuanLyTinNhaTuyenDungPage'))
+const UngVienNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/candidates/UngVienNhaTuyenDungPage'))
+const LichPhongVanNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/interviews/LichPhongVanNhaTuyenDungPage'))
+const CongTyNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/company/CongTyNhaTuyenDungPage'))
+const ThongBaoNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/notifications/ThongBaoNhaTuyenDungPage'))
+const BangGiaNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/pricing/BangGiaNhaTuyenDungPage'))
+const DashboardQuanTriVien = lazy(() => import('./pages/quantrivien/DashboardQuanTriVien'))
+const QuanLyNguoiDung = lazy(() => import('./pages/quantrivien/QuanLyNguoiDung'))
+const QuanLyCongTyAdmin = lazy(() => import('./pages/quantrivien/congty/QuanLyCongTyAdmin'))
+const DuyetTinTuyenDungAdmin = lazy(() => import('./pages/quantrivien/tintuyendung/DuyetTinTuyenDungAdmin'))
+const QuanLyKyNangAdmin = lazy(() => import('./pages/quantrivien/kynang/QuanLyKyNangAdmin'))
+const QuanLyReviewCongTyAdmin = lazy(() => import('./pages/quantrivien/review/QuanLyReviewCongTyAdmin'))
+const ChatUngVienPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatUngVienPage })))
+const ChatNhaTuyenDungPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatNhaTuyenDungPage })))
+const ChatAdminPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatAdminPage })))
+const TrangDangXayDungPage = lazy(() => import('./pages/TrangDangXayDung'))
+
+function RouteFallback() {
+  return <div className="route-loading">Dang tai...</div>
+}
 
 export default function UngDung() {
   // ✨ Initialize real-time features
   useEffect(() => {
-    const token = layAccessToken()
-    
-    if (token) {
-      // Initialize Socket.IO
-      khoiTaoSocket(token)
-      
-      // Register push notifications
-      dangKyPushSubscription().catch(console.error)
-      
-      // Listen for notification clicks
-      langNghePushClick()
+    langNghePushClick()
+
+    const capNhatSocket = () => {
+      const token = layAccessToken()
+      if (token) {
+        khoiTaoSocket(token)
+        dangKyPushSubscription().catch(console.error)
+      } else {
+        ngatketnoisocket()
+      }
     }
+
+    capNhatSocket()
+    window.addEventListener('itjob-auth-change', capNhatSocket)
+    return () => window.removeEventListener('itjob-auth-change', capNhatSocket)
   }, [])
 
   return (
@@ -723,8 +751,8 @@ export default function UngDung() {
           <PWAInstallPrompt />
           <OfflineIndicator />
           <ThongBaoToastContainer />
-          <ChatBox />
       
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         {/* Public routes với Header + Footer */}
         <Route element={<BoDinhTuyen />}>
@@ -755,6 +783,7 @@ export default function UngDung() {
           <Route path="viec-da-luu" element={<ViecDaLuuPage />} />
           <Route path="ung-tuyen" element={<UngTuyenPage />} />
           <Route path="lich-phong-van" element={<LichPhongVanPage />} />
+          <Route path="chat" element={<ChatUngVienPage />} />
           <Route path="thong-bao" element={<ThongBaoUngVienPage />} />
           <Route path="cai-dat" element={<CaiDatUngVienPage />} />
         </Route>
@@ -764,13 +793,13 @@ export default function UngDung() {
           <Route index element={<DashboardNhaTuyenDung />} />
           <Route path="dashboard" element={<DashboardNhaTuyenDung />} />
           <Route path="quan-ly-tin" element={<QuanLyTinNhaTuyenDungPage />} />
-          <Route path="tao-tin" element={<TaoTinNhaTuyenDungPage />} />
+          <Route path="tao-tin" element={<Navigate to="/nha-tuyen-dung/quan-ly-tin?new=1" replace />} />
           <Route path="ung-vien" element={<UngVienNhaTuyenDungPage />} />
           <Route path="lich-phong-van" element={<LichPhongVanNhaTuyenDungPage />} />
+          <Route path="lich-phong-vaan" element={<Navigate to="/nha-tuyen-dung/lich-phong-van" replace />} />
           <Route path="cong-ty" element={<CongTyNhaTuyenDungPage />} />
-          <Route path="analytics" element={<AnalyticsNhaTuyenDungPage />} />
+          <Route path="chat" element={<ChatNhaTuyenDungPage />} />
           <Route path="thong-bao" element={<ThongBaoNhaTuyenDungPage />} />
-          <Route path="cai-dat" element={<CaiDatNhaTuyenDungPage />} />
           <Route path="bang-gia" element={<BangGiaNhaTuyenDungPage />} />
         </Route>
 
@@ -781,14 +810,13 @@ export default function UngDung() {
           <Route path="cong-ty" element={<QuanLyCongTyAdmin />} />
           <Route path="tin-tuyen-dung" element={<DuyetTinTuyenDungAdmin />} />
           <Route path="ky-nang" element={<QuanLyKyNangAdmin />} />
-          <Route path="analytics" element={<BaoCaoAdmin />} />
           <Route path="review" element={<QuanLyReviewCongTyAdmin />} />
-          <Route path="cai-dat" element={<CaiDatAdmin />} />
-          <Route path="logs" element={<LogsAdmin />} />
+          <Route path="chat" element={<ChatAdminPage />} />
         </Route>
 
         <Route path="*" element={<TrangDangXayDungPage ten="404 – Không tìm thấy" />} />
       </Routes>
+      </Suspense>
         </ChatProvider>
       </ThongBaoProvider>
     </BrowserRouter>

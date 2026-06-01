@@ -2,11 +2,19 @@ import { Server as HttpServer } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
 import { bienMoiTruong } from './bienmoitruong.js'
 import jwt from 'jsonwebtoken'
+import { NguoiDung } from '../modules/nguoidung/nguoidung.mohinh.js'
 
 export interface NguoiDungSocket {
   _id: string
   email: string
   vaiTro: string
+}
+
+type SocketTokenPayload = {
+  sub: string
+  email: string
+  vaiTro: string
+  loai?: string
 }
 
 export interface SocketXacThuc extends Socket {
@@ -36,7 +44,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
   })
 
   // Middleware xác thực
-  io.use((socket: Socket, next) => {
+  io.use(async (socket: Socket, next) => {
     const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1]
 
     if (!token) {
@@ -44,8 +52,21 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
     }
 
     try {
-      const decoded = jwt.verify(token, bienMoiTruong.khoaJwt) as NguoiDungSocket
-      ;(socket as SocketXacThuc).nguoiDung = decoded
+      const decoded = jwt.verify(token, bienMoiTruong.khoaJwt) as SocketTokenPayload
+      if (decoded.loai && decoded.loai !== 'access') {
+        return next(new Error('Token khong hop le'))
+      }
+
+      const nguoiDung = await (NguoiDung as any).findById(decoded.sub).select('_id email vaiTro trangThai')
+      if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+        return next(new Error('Tai khoan khong con hieu luc'))
+      }
+
+      ;(socket as SocketXacThuc).nguoiDung = {
+        _id: String(nguoiDung._id),
+        email: nguoiDung.email,
+        vaiTro: nguoiDung.vaiTro,
+      }
       next()
     } catch (err) {
       next(new Error('Token khong hop le'))
@@ -59,7 +80,12 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
 
     if (!nguoiDung) return
 
-    const userId = nguoiDung._id
+    const userId = String(nguoiDung._id ?? '')
+    if (!userId) {
+      console.warn('Socket connection rejected due to missing user id')
+      socket.disconnect(true)
+      return
+    }
     console.log(`✅ User connected: ${nguoiDung.email} (${userId})`)
 
     // Thêm vào danh sách online

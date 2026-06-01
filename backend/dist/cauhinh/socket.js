@@ -13,6 +13,7 @@ exports.layDanhSachUserOnline = layDanhSachUserOnline;
 const socket_io_1 = require("socket.io");
 const bienmoitruong_js_1 = require("./bienmoitruong.js");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const nguoidung_mohinh_js_1 = require("../modules/nguoidung/nguoidung.mohinh.js");
 let io = null;
 // Map để theo dõi user online
 const usersOnline = new Map(); // userId -> [socketId1, socketId2, ...]
@@ -31,14 +32,26 @@ function khoiTaoSocket(httpServer) {
         transports: ['websocket', 'polling'],
     });
     // Middleware xác thực
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
         if (!token) {
             return next(new Error('Khong co token xac thuc'));
         }
         try {
             const decoded = jsonwebtoken_1.default.verify(token, bienmoitruong_js_1.bienMoiTruong.khoaJwt);
-            socket.nguoiDung = decoded;
+            if (decoded.loai && decoded.loai !== 'access') {
+                return next(new Error('Token khong hop le'));
+            }
+            const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(decoded.sub).select('_id email vaiTro trangThai');
+            if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+                return next(new Error('Tai khoan khong con hieu luc'));
+            }
+            ;
+            socket.nguoiDung = {
+                _id: String(nguoiDung._id),
+                email: nguoiDung.email,
+                vaiTro: nguoiDung.vaiTro,
+            };
             next();
         }
         catch (err) {
@@ -51,7 +64,12 @@ function khoiTaoSocket(httpServer) {
         const nguoiDung = socketXacThuc.nguoiDung;
         if (!nguoiDung)
             return;
-        const userId = nguoiDung._id;
+        const userId = String(nguoiDung._id ?? '');
+        if (!userId) {
+            console.warn('Socket connection rejected due to missing user id');
+            socket.disconnect(true);
+            return;
+        }
         console.log(`✅ User connected: ${nguoiDung.email} (${userId})`);
         // Thêm vào danh sách online
         if (!usersOnline.has(userId)) {

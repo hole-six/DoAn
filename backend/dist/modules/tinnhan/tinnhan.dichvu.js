@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.layHoacTaoCuocTroChuyenModel = layHoacTaoCuocTroChuyenModel;
+exports.layDanhSachNhomCongDong = layDanhSachNhomCongDong;
+exports.thamGiaNhomCongDong = thamGiaNhomCongDong;
 exports.layDanhSachCuocTroChuyenModel = layDanhSachCuocTroChuyenModel;
 exports.layCuocTroChuyenModelTheoMa = layCuocTroChuyenModelTheoMa;
 exports.danhDauDaDocCuocTroChuyenModel = danhDauDaDocCuocTroChuyenModel;
@@ -22,10 +24,14 @@ async function layHoacTaoCuocTroChuyenModel(params) {
     // Sắp xếp để tìm kiếm nhất quán
     const nguoiThamGiaSorted = [...params.nguoiThamGia].sort();
     // Tìm cuộc trò chuyện hiện có
-    let cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findOne({
+    const dieuKienTimKiem = {
         nguoiThamGia: { $all: nguoiThamGiaSorted, $size: nguoiThamGiaSorted.length },
         daLuuTru: false,
-    }).populate('nguoiThamGia', 'hoTen email vaiTro');
+        ...(params.loai ? { loai: params.loai } : {}),
+        ...(params.maHoSoUngTuyen ? { maHoSoUngTuyen: params.maHoSoUngTuyen } : {}),
+        ...(params.maTinTuyenDung ? { maTinTuyenDung: params.maTinTuyenDung } : {}),
+    };
+    let cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findOne(dieuKienTimKiem).populate('nguoiThamGia', 'hoTen email vaiTro');
     // Nếu chưa có, tạo mới
     if (!cuocTroChuyenModel) {
         cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.create({
@@ -38,6 +44,43 @@ async function layHoacTaoCuocTroChuyenModel(params) {
         await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro');
     }
     return cuocTroChuyenModel;
+}
+async function layDanhSachNhomCongDong() {
+    const danhSach = await tinnhan_mohinh_js_1.CuocTroChuyenModel.find({
+        loai: 'nhom_cong_dong',
+        daLuuTru: false,
+    })
+        .populate('nguoiThamGia', 'hoTen email vaiTro')
+        .populate('quanTriNhom', 'hoTen email')
+        .sort({ ngayCapNhat: -1 });
+    return danhSach.map((doc) => {
+        const obj = doc.toObject();
+        return {
+            ...obj,
+            id: String(obj._id),
+            soThanhVien: obj.nguoiThamGia?.length || 0,
+        };
+    });
+}
+async function thamGiaNhomCongDong(maNhom, maNguoiDung) {
+    const nhom = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findById(maNhom);
+    if (!nhom)
+        throw new loiungdung_js_1.LoiUngDung('Khong tim thay nhom', 404);
+    if (nhom.loai !== 'nhom_cong_dong')
+        throw new loiungdung_js_1.LoiUngDung('Day khong phai nhom cong dong', 400);
+    const daCoMat = nhom.nguoiThamGia.some((id) => String(id) === maNguoiDung);
+    if (!daCoMat) {
+        nhom.nguoiThamGia.push(maNguoiDung);
+        nhom.soChuaDoc.set(maNguoiDung, 0);
+        await nhom.save();
+        await tinnhan_mohinh_js_1.TinNhanModel.create({
+            maCuocTroChuyenId: maNhom,
+            nguoiGui: maNguoiDung,
+            noiDung: 'da tham gia nhom',
+            loai: 'system',
+        });
+    }
+    return nhom;
 }
 /**
  * Lấy danh sách cuộc trò chuyện của user
@@ -152,12 +195,18 @@ async function guiTinNhan(params) {
                 },
             });
             // Gửi notification nếu user offline
+            const vaiTroNhan = nguoiThamGia.vaiTro;
+            const duongDanChat = vaiTroNhan === 'admin'
+                ? '/quan-tri/chat'
+                : vaiTroNhan === 'ung_vien'
+                    ? '/ung-vien/chat'
+                    : '/nha-tuyen-dung/chat';
             await (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
                 maNguoiDung: id,
                 loai: 'tin_nhan',
                 tieuDe: `Tin nhắn mới từ ${tinNhan.nguoiGui.hoTen}`,
                 noiDung: params.noiDung.substring(0, 100),
-                lienKet: `/chat/${params.maCuocTroChuyenId}`,
+                lienKet: `${duongDanChat}?cuocTroChuyen=${params.maCuocTroChuyenId}`,
                 mucDoUuTien: 'trung_binh',
                 icon: '💬',
                 mauSac: '#8b5cf6',

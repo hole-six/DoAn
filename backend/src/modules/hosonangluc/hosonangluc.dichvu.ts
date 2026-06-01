@@ -60,9 +60,18 @@ export const dichVuHoSoNangLuc = {
   },
   async capNhat(ma: string, duLieu: unknown) {
     const payload = duLieu as any
-    if (payload.cvChinh && payload.maUngVien) await (HoSoNangLuc as any).updateMany({ maUngVien: payload.maUngVien, _id: { $ne: ma } }, { $set: { cvChinh: false } })
-    const ketQua = await (HoSoNangLuc as any).findByIdAndUpdate(ma, payload, { returnDocument: 'after', runValidators: true })
+    const ketQua = await (HoSoNangLuc as any).findById(ma)
     if (!ketQua) throw new LoiUngDung('Khong tim thay ho so nang luc de cap nhat', 404)
+
+    if (payload.cvChinh && payload.maUngVien) {
+      await (HoSoNangLuc as any).updateMany(
+        { maUngVien: payload.maUngVien, _id: { $ne: ma } },
+        { $set: { cvChinh: false } },
+      )
+    }
+
+    Object.assign(ketQua, payload)
+    await ketQua.save()
     return chuanHoaHoSo(ketQua)
   },
   async xoa(ma: string) {

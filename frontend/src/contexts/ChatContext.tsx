@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer, useRef, useCallback } from 'react'
+import { createContext, useContext, useEffect, useReducer, useRef, useCallback, useState } from 'react'
 import { langNgheEvent, boLangNgheEvent, guiEvent } from '../lib/socket'
 import { layNguoiDung, layAccessToken } from '../lib/auth'
 
@@ -52,6 +52,12 @@ export interface CuocTroChuyenPreview {
   }
   soChuaDocCuaToi?: number
   ngayCapNhat: string
+}
+
+export type ChatContextMeta = {
+  loai?: string
+  maHoSoUngTuyen?: string
+  maTinTuyenDung?: string
 }
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -202,16 +208,23 @@ interface ChatContextValue extends ChatState {
   taiDanhSachCuocTroChuyen: () => Promise<void>
   layNguoiKhac: (cuocTroChuyen: CuocTroChuyenPreview) => NguoiThamGia | undefined
   kiemTraOnline: (userId: string) => boolean
-  moChatVoiNguoiDung: (maNguoiDungKhac: string) => Promise<void>
+  moChatVoiNguoiDung: (maNguoiDungKhac: string, context?: ChatContextMeta) => Promise<CuocTroChuyenPreview | void>
 }
 
 const ChatContext = createContext<ChatContextValue | null>(null)
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(chatReducer, initialState)
+  const [authTick, setAuthTick] = useState(0)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const nguoiDung = layNguoiDung()
   const token = layAccessToken()
+
+  useEffect(() => {
+    const capNhat = () => setAuthTick(value => value + 1)
+    window.addEventListener('itjob-auth-change', capNhat)
+    return () => window.removeEventListener('itjob-auth-change', capNhat)
+  }, [])
 
   // ─── Socket listeners ──────────────────────────────────────────────────────
 
@@ -265,7 +278,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       boLangNgheEvent('user_offline', xuLyUserOffline)
       boLangNgheEvent('user_typing', xuLyTyping)
     }
-  }, [token, nguoiDung?.id])
+  }, [token, nguoiDung?.id, authTick])
 
   // ─── Actions ───────────────────────────────────────────────────────────────
 
@@ -421,18 +434,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_TIN_NHAN_TRA_LOI', payload: tinNhan })
   }, [])
 
-  const moChatVoiNguoiDung = useCallback(async (maNguoiDungKhac: string) => {
+  const moChatVoiNguoiDung = useCallback(async (maNguoiDungKhac: string, context?: ChatContextMeta) => {
     if (!token || !nguoiDung) return
     try {
       const res = await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ nguoiThamGia: [nguoiDung.id, maNguoiDungKhac] }),
+        body: JSON.stringify({
+          nguoiNhan: maNguoiDungKhac,
+          loai: context?.loai,
+          maHoSoUngTuyen: context?.maHoSoUngTuyen,
+          maTinTuyenDung: context?.maTinTuyenDung,
+        }),
       })
       const data = await res.json()
       if (data.duLieu) {
         dispatch({ type: 'MO_CHAT' })
         await moCuocTroChuyen(data.duLieu)
+        return data.duLieu as CuocTroChuyenPreview
       }
     } catch (err) {
       console.error('Lỗi mở chat:', err)

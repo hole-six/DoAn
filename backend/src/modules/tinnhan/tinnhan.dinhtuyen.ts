@@ -1,7 +1,9 @@
 import { Router } from 'express'
 import { dieuKhienTinNhan } from './tinnhan.dieukhien.js'
+import { yeuCauDangNhap } from '../../dungchung/xacthuc.js'
 
 export const dinhTuyenTinNhan = Router()
+dinhTuyenTinNhan.use(yeuCauDangNhap)
 
 // Conversation routes
 dinhTuyenTinNhan.get('/cuoc-tro-chuyen', dieuKhienTinNhan.layDanhSachCuocTroChuyenModel)

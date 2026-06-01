@@ -5,12 +5,18 @@ const mongoose_1 = require("mongoose");
 // ============================================
 // CONVERSATION MODEL (Cuộc hội thoại)
 // ============================================
-exports.loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support'];
+exports.loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'];
 const cuocTroChuyenSchema = new mongoose_1.Schema({
     // Participants
     nguoiThamGia: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung', required: true }],
     // Type
     loai: { type: String, enum: exports.loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
+    // Tên nhóm (dùng cho nhom_cong_dong)
+    tenNhom: { type: String },
+    moTaNhom: { type: String },
+    anhNhom: { type: String },
+    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
+    quanTriNhom: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung' }],
     // Context (nếu chat về hồ sơ ứng tuyển cụ thể)
     maHoSoUngTuyen: { type: mongoose_1.Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
     maTinTuyenDung: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TinTuyenDung' },

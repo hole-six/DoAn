@@ -1,0 +1,625 @@
+/* ========================================================================== */
+/* CANDIDATE DASHBOARD STYLES */
+/* Split from ungdung.css. Keep role-specific dashboard rules here. */
+/* ========================================================================== */
+
+/* Candidate workspace */
+.uv-page {
+  color: #0f172a;
+}
+
+.uv-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.uv-header h1 {
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+.uv-header p {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.uv-hero {
+  align-items: center;
+  background: linear-gradient(135deg, #0f172a, #164c96);
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  margin-bottom: 18px;
+  padding: 26px;
+}
+
+.uv-hero p {
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.uv-hero h2 {
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 850;
+  letter-spacing: 0;
+  margin-top: 8px;
+}
+
+.uv-hero span {
+  color: #dbeafe;
+  display: block;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 10px;
+}
+
+.uv-progress {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.uv-progress strong {
+  color: #ffffff;
+  display: block;
+  font-size: 34px;
+}
+
+.uv-progress > div {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  height: 8px;
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.uv-progress i {
+  background: #60a5fa;
+  display: block;
+  height: 100%;
+}
+
+.uv-kpi-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.uv-kpi,
+.uv-panel {
+  background: #ffffff;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.uv-kpi {
+  min-height: 118px;
+  padding: 18px;
+}
+
+.uv-kpi svg {
+  color: #0058be;
+}
+
+.uv-kpi p {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  margin-top: 12px;
+  text-transform: uppercase;
+}
+
+.uv-kpi strong {
+  color: #0f172a;
+  display: block;
+  font-size: 30px;
+  font-weight: 850;
+  margin-top: 6px;
+}
+
+.uv-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.uv-panel {
+  padding: 20px;
+}
+
+.uv-panel-head {
+  align-items: center;
+  border-bottom: 1px solid #edf1f6;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 14px;
+}
+
+.uv-panel-head h2 {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.uv-panel-head a {
+  color: #0058be;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.uv-row {
+  align-items: center;
+  border-bottom: 1px solid #edf1f6;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 15px 0;
+}
+
+.uv-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.uv-row strong {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.uv-row p {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.uv-badge {
+  border-radius: 5px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 850;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.uv-badge.blue { background: #eff6ff; color: #0058be; }
+.uv-badge.green { background: #dcfce7; color: #166534; }
+.uv-badge.yellow { background: #fef3c7; color: #92400e; }
+.uv-badge.red { background: #ffe4e6; color: #be123c; }
+.uv-badge.gray { background: #f1f5f9; color: #475569; }
+
+.uv-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.uv-field {
+  color: #475569;
+  display: grid;
+  font-size: 12px;
+  font-weight: 850;
+  gap: 7px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.uv-field input,
+.uv-field select,
+.uv-field textarea,
+.uv-nested input {
+  background: #ffffff;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 42px;
+  outline: none;
+  padding: 0 12px;
+  text-transform: none;
+}
+
+.uv-field textarea {
+  min-height: 92px;
+  padding-top: 10px;
+}
+
+.uv-form-actions {
+  display: flex;
+  gap: 10px;
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.uv-secondary,
+.uv-actions button,
+.uv-nested button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #334155;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 850;
+  gap: 6px;
+  min-height: 36px;
+  padding: 8px 12px;
+}
+
+.uv-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.uv-error {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 6px;
+  color: #be123c;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.uv-nested {
+  display: grid;
+  gap: 8px;
+}
+
+.uv-nested-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+}
+
+.uv-modal {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 100;
+}
+
+.uv-modal-card {
+  background: #ffffff;
+  border: 1px solid #dfe5ee;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.2);
+  max-height: 88vh;
+  overflow: auto;
+  padding: 22px;
+  width: min(920px, 100%);
+}
+
+.uv-modal-head {
+  align-items: center;
+  display: flex;
+  grid-column: 1 / -1;
+  justify-content: space-between;
+}
+
+.uv-check {
+  align-items: center;
+  display: flex;
+  font-weight: 750;
+  gap: 8px;
+}
+
+.uv-section-gap {
+  margin-top: 16px;
+}
+
+.uv-empty {
+  background: #f8fafc;
+  border: 1px dashed #cfd7e3;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 12px;
+  padding: 18px;
+}
+
+.uv-clickable {
+  cursor: pointer;
+}
+
+.uv-row.active,
+.uv-clickable:hover {
+  background: #f8fafc;
+}
+
+.uv-task {
+  color: inherit;
+}
+
+.uv-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.uv-tabs button {
+  background: #ffffff;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 850;
+  min-height: 40px;
+  padding: 8px 14px;
+}
+
+.uv-tabs button.active {
+  background: #0058be;
+  border-color: #0058be;
+  color: #ffffff;
+}
+
+.uv-filterbar {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dfe5ee;
+  border-radius: 6px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px;
+}
+
+.uv-filterbar input,
+.uv-filterbar select {
+  background: #ffffff;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 40px;
+  outline: none;
+  padding: 0 12px;
+}
+
+.uv-filterbar input {
+  flex: 1;
+}
+
+.uv-interview-layout {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.3fr);
+}
+
+.uv-interview-list {
+  align-self: start;
+}
+
+.uv-interview-detail {
+  align-self: start;
+  min-height: 420px;
+}
+
+.uv-detail-grid {
+  border: 1px solid #edf1f6;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.uv-detail-grid > span,
+.uv-detail-grid > strong {
+  border-bottom: 1px solid #edf1f6;
+  color: #0f172a;
+  font-size: 14px;
+  padding: 12px;
+}
+
+.uv-detail-grid > span {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 850;
+}
+
+.uv-detail-grid > strong {
+  font-weight: 750;
+}
+
+.uv-detail-grid > :nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+.uv-detail-actions {
+  border-bottom: 1px solid #edf1f6;
+  justify-content: flex-start;
+  margin: 16px 0;
+  padding-bottom: 16px;
+}
+
+.uv-checklist {
+  background: #f8fafc;
+  border: 1px solid #dfe5ee;
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.uv-checklist strong {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.uv-checklist label {
+  align-items: center;
+  color: #334155;
+  display: flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.uv-checklist.inline {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.uv-note {
+  background: #f8fafc;
+  border: 1px solid #dfe5ee;
+  border-radius: 6px;
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.uv-note strong {
+  color: #0f172a;
+  display: block;
+  font-size: 14px;
+  font-weight: 850;
+  margin-bottom: 6px;
+}
+
+.uv-note p {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.uv-timeline {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.uv-timeline div {
+  align-items: center;
+  color: #64748b;
+  display: flex;
+  font-size: 13px;
+  font-weight: 750;
+  gap: 10px;
+}
+
+.uv-timeline i {
+  background: #cbd5e1;
+  border-radius: 999px;
+  display: block;
+  height: 10px;
+  width: 10px;
+}
+
+.uv-timeline div.active {
+  color: #0058be;
+}
+
+.uv-timeline div.active i {
+  background: #0058be;
+}
+
+.uv-drawer {
+  align-items: stretch;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  inset: 0;
+  justify-content: flex-end;
+  position: fixed;
+  z-index: 100;
+}
+
+.uv-drawer-card {
+  background: #ffffff;
+  border-left: 1px solid #dfe5ee;
+  box-shadow: -20px 0 60px rgba(15, 23, 42, 0.16);
+  max-width: 520px;
+  overflow: auto;
+  padding: 22px;
+  width: 100%;
+}
+
+.uv-portfolio-row {
+  border: 1px solid #dfe5ee;
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  padding: 10px;
+}
+
+.uv-portfolio-row textarea {
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 600;
+  grid-column: 1 / 4;
+  min-height: 70px;
+  padding: 10px 12px;
+}
+
+.uv-actions button:disabled,
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+@media (max-width: 980px) {
+  .uv-hero,
+  .uv-kpi-grid,
+  .uv-grid,
+  .uv-form,
+  .uv-interview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .uv-filterbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .uv-filterbar input,
+  .uv-filterbar select {
+    width: 100%;
+  }
+
+  .uv-portfolio-row {
+    grid-template-columns: 1fr;
+  }
+
+  .uv-portfolio-row textarea {
+    grid-column: auto;
+  }
+}

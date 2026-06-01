@@ -92,13 +92,57 @@ export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuL
     ...options,
     headers: { ...headerCoXacThuc(), ...(options.headers ?? {}) },
   })
-  const data = await res.json().catch(() => ({}))
+  const rawText = await res.text()
+  let data: any = {}
+  if (rawText) {
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { thongBao: rawText, message: rawText }
+    }
+  }
 
   if (res.status === 401 && thuLai && layRefreshToken()) {
     await lamMoiPhienDangNhap()
     return apiCoXacThuc(path, options, false)
   }
 
-  if (!res.ok) throw new Error(data.thongBao ?? 'Thao tac that bai')
+  if (!res.ok) {
+    const fieldErrors = data.fieldErrors ?? data.loi
+    const firstFieldError = fieldErrors && typeof fieldErrors === 'object'
+      ? Object.values(fieldErrors).flat().find(Boolean)
+      : ''
+    throw new Error(String(firstFieldError || data.thongBao || 'Thao tac that bai'))
+  }
+  return data.duLieu
+}
+
+export async function apiUploadCoXacThuc(path: string, formData: FormData, options: RequestInit = {}, thuLai = true) {
+  const token = layAccessToken()
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    method: options.method ?? 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers ?? {}),
+    },
+    body: formData,
+  })
+  const rawText = await res.text()
+  let data: any = {}
+  if (rawText) {
+    try {
+      data = JSON.parse(rawText)
+    } catch {
+      data = { thongBao: rawText, message: rawText }
+    }
+  }
+
+  if (res.status === 401 && thuLai && layRefreshToken()) {
+    await lamMoiPhienDangNhap()
+    return apiUploadCoXacThuc(path, formData, options, false)
+  }
+
+  if (!res.ok) throw new Error(data.thongBao || 'Upload that bai')
   return data.duLieu
 }

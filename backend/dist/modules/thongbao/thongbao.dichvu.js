@@ -10,17 +10,18 @@ const socket_js_1 = require("../../cauhinh/socket.js");
 const dichvucoban_js_1 = require("../../dungchung/dichvucoban.js");
 const thongbao_mohinh_js_1 = require("./thongbao.mohinh.js");
 exports.dichVuThongBao = (0, dichvucoban_js_1.taoDichVuCoBan)(thongbao_mohinh_js_1.ThongBao);
-// Tạo và gửi thông báo real-time
+// Tao va gui thong bao real-time
 async function taoVaGuiThongBao(duLieu) {
-    // Tạo thông báo trong database
     const thongBao = await thongbao_mohinh_js_1.ThongBao.create(duLieu);
-    // Gửi real-time qua Socket.IO
     (0, socket_js_1.guiThongBaoChoNguoiDung)(duLieu.maNguoiDung, 'thong_bao_moi', {
         _id: thongBao._id,
         loai: thongBao.loai,
         tieuDe: thongBao.tieuDe,
         noiDung: thongBao.noiDung,
         lienKet: thongBao.lienKet,
+        maHoSoUngTuyen: thongBao.maHoSoUngTuyen,
+        maLichPhongVan: thongBao.maLichPhongVan,
+        maTinTuyenDung: thongBao.maTinTuyenDung,
         mucDoUuTien: thongBao.mucDoUuTien,
         icon: thongBao.icon,
         mauSac: thongBao.mauSac,
@@ -29,20 +30,20 @@ async function taoVaGuiThongBao(duLieu) {
     });
     return thongBao;
 }
-// Đánh dấu đã đọc
+// Danh dau da doc
 async function danhDauDaDoc(maThongBao, maNguoiDung) {
     const thongBao = await thongbao_mohinh_js_1.ThongBao.findOneAndUpdate({ _id: maThongBao, maNguoiDung }, { daDoc: true }, { new: true });
     return thongBao;
 }
-// Đánh dấu tất cả đã đọc
+// Danh dau tat ca da doc
 async function danhDauTatCaDaDoc(maNguoiDung) {
     await thongbao_mohinh_js_1.ThongBao.updateMany({ maNguoiDung, daDoc: false }, { daDoc: true });
 }
-// Lấy số thông báo chưa đọc
+// Lay so thong bao chua doc
 async function demThongBaoChuaDoc(maNguoiDung) {
     return await thongbao_mohinh_js_1.ThongBao.countDocuments({ maNguoiDung, daDoc: false });
 }
-// Xóa thông báo cũ (> 30 ngày)
+// Xoa thong bao cu (> 30 ngay)
 async function xoaThongBaoCu() {
     const ngayCu = new Date();
     ngayCu.setDate(ngayCu.getDate() - 30);

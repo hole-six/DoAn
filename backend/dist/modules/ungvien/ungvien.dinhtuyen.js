@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dinhTuyenUngVien = void 0;
-const dinhtuyencoban_js_1 = require("../../dungchung/dinhtuyencoban.js");
+const express_1 = require("express");
+const xacthuc_js_1 = require("../../dungchung/xacthuc.js");
 const ungvien_dieukhien_js_1 = require("./ungvien.dieukhien.js");
-exports.dinhTuyenUngVien = (0, dinhtuyencoban_js_1.taoDinhTuyenCoBan)(ungvien_dieukhien_js_1.dieuKhienUngVien);
+exports.dinhTuyenUngVien = (0, express_1.Router)();
+exports.dinhTuyenUngVien.use(xacthuc_js_1.yeuCauDangNhap);
+exports.dinhTuyenUngVien.get('/toi', ungvien_dieukhien_js_1.dieuKhienUngVien.layHoSoCuaToi);
+exports.dinhTuyenUngVien.get('/', ungvien_dieukhien_js_1.dieuKhienUngVien.layDanhSach);
+exports.dinhTuyenUngVien.get('/:ma', ungvien_dieukhien_js_1.dieuKhienUngVien.layChiTiet);
+exports.dinhTuyenUngVien.post('/', ungvien_dieukhien_js_1.dieuKhienUngVien.taoMoi);
+exports.dinhTuyenUngVien.patch('/:ma', ungvien_dieukhien_js_1.dieuKhienUngVien.capNhatCoQuyen);
+exports.dinhTuyenUngVien.delete('/:ma', ungvien_dieukhien_js_1.dieuKhienUngVien.xoaCoQuyen);

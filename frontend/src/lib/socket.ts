@@ -1,13 +1,20 @@
 import { io, Socket } from 'socket.io-client'
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? import.meta.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:5000'
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ??
+  import.meta.env.VITE_API_URL?.replace('/api', '') ??
+  'http://localhost:5000'
+
+const CONNECT_EVENT = 'connect'
+const DISCONNECT_EVENT = 'disconnect'
+const RECONNECT_EVENT = 'reconnect'
+const CONNECT_ERROR_EVENT = 'connect_error'
 
 let socket: Socket | null = null
 
 export function khoiTaoSocket(token: string): Socket {
   if (socket?.connected) return socket
 
-  // Ngắt kết nối cũ nếu có
   if (socket) {
     socket.disconnect()
     socket = null
@@ -21,16 +28,20 @@ export function khoiTaoSocket(token: string): Socket {
     reconnectionDelay: 1000,
   })
 
-  socket.on('connect', () => {
-    console.log('✅ Socket.IO connected:', socket?.id)
+  socket.on(CONNECT_EVENT, () => {
+    console.log('Socket.IO connected:', socket?.id)
   })
 
-  socket.on('disconnect', (reason) => {
-    console.log('❌ Socket.IO disconnected:', reason)
+  socket.on(DISCONNECT_EVENT, reason => {
+    console.log('Socket.IO disconnected:', reason)
   })
 
-  socket.on('connect_error', (err) => {
-    console.warn('⚠️ Socket.IO connect error:', err.message)
+  socket.on(RECONNECT_EVENT, () => {
+    console.log('Socket.IO reconnected')
+  })
+
+  socket.on(CONNECT_ERROR_EVENT, err => {
+    console.warn('Socket.IO connect error:', err.message)
   })
 
   return socket
@@ -63,4 +74,29 @@ export function boLangNgheEvent(event: string, callback?: (...args: any[]) => vo
 
 export function kiemTraKetNoi(): boolean {
   return socket?.connected ?? false
+}
+
+export function langNgheTrangThaiKetNoi(
+  handlers: {
+    onConnect?: () => void
+    onDisconnect?: (reason: Socket.DisconnectReason) => void
+    onReconnect?: () => void
+    onConnectError?: (error: Error) => void
+  },
+) {
+  if (!socket) return () => undefined
+
+  const { onConnect, onDisconnect, onReconnect, onConnectError } = handlers
+
+  if (onConnect) socket.on(CONNECT_EVENT, onConnect)
+  if (onDisconnect) socket.on(DISCONNECT_EVENT, onDisconnect)
+  if (onReconnect) socket.on(RECONNECT_EVENT, onReconnect)
+  if (onConnectError) socket.on(CONNECT_ERROR_EVENT, onConnectError)
+
+  return () => {
+    if (onConnect) socket?.off(CONNECT_EVENT, onConnect)
+    if (onDisconnect) socket?.off(DISCONNECT_EVENT, onDisconnect)
+    if (onReconnect) socket?.off(RECONNECT_EVENT, onReconnect)
+    if (onConnectError) socket?.off(CONNECT_ERROR_EVENT, onConnectError)
+  }
 }

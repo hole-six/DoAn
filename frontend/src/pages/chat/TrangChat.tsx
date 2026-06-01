@@ -7,14 +7,12 @@
  * - Admin: chat với NTD (hỗ trợ), quản lý nhóm cộng đồng, xem tất cả
  */
 import { useEffect, useRef, useState, useCallback } from 'react'
-import type { ReactNode } from 'react'
 import { clsx } from 'clsx'
 import {
   ArrowLeft, Check, CheckCheck, Hash, MessageCircle,
   MessageSquare, Plus, Reply, Search, Send, Shield,
   Smile, Trash2, Users, X,
 } from 'lucide-react'
-import AppIcon from '../../components/AppIcon'
 import { layNguoiDung } from '../../lib/auth'
 import { guiEvent, langNgheEvent, boLangNgheEvent } from '../../lib/socket'
 
@@ -252,7 +250,6 @@ function useChatState(nguoiDung: NguoiDungInfo | null) {
   const [tinNhanList, setTinNhanList] = useState<TinNhan[]>([])
   const [online, setOnline] = useState<Set<string>>(new Set())
   const [dangNhap, setDangNhap] = useState<Set<string>>(new Set())
-  const [dangTai, setDangTai] = useState(false)
   const [dangTaiTN, setDangTaiTN] = useState(false)
   const [traLoi, setTraLoi] = useState<TinNhan | null>(null)
   const token = localStorage.getItem('itjob_token')
@@ -372,7 +369,7 @@ function useChatState(nguoiDung: NguoiDungInfo | null) {
 
   return {
     danhSach, nhomCongDong, cuocTroChuyenHienTai, tinNhanList,
-    online, dangNhap, dangTai, dangTaiTN, traLoi, tongChuaDoc,
+    online, dangNhap, dangTaiTN, traLoi, tongChuaDoc,
     taiDanhSach, moCuocTroChuyen, guiTinNhan, xoaTinNhan, themPhanUng,
     thamGiaNhom, setTraLoi,
     quayLai: () => {
@@ -529,3 +526,211 @@ function Sidebar({ nguoiDung, chat, tab, setTab, search, setSearch }: {
     </div>
   )
 }
+
+// ─── Khu vực tin nhắn ─────────────────────────────────────────────────────────
+function KhuVucTinNhan({ nguoiDung, chat }: { nguoiDung: NguoiDungInfo; chat: ReturnType<typeof useChatState> }) {
+  const [input, setInput] = useState('')
+  const endRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const typingRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const ctc = chat.cuocTroChuyenHienTai!
+  const isGroup = ctc.loai === 'nhom_cong_dong'
+  const other = !isGroup ? ctc.nguoiThamGia.find(p => p._id !== nguoiDung.id) : null
+  const isOnline = other ? chat.online.has(other._id) : false
+  const isDangNhap = other ? chat.dangNhap.has(other._id) : [...chat.dangNhap].some(id => id !== nguoiDung.id)
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [chat.tinNhanList.length])
+  useEffect(() => { inputRef.current?.focus() }, [ctc._id])
+
+  const xuLyNhap = (val: string) => {
+    setInput(val)
+    if (typingRef.current) clearTimeout(typingRef.current)
+    guiEvent('typing_start', { conversationId: ctc._id })
+    typingRef.current = setTimeout(() => guiEvent('typing_stop', { conversationId: ctc._id }), 2000)
+  }
+
+  const xuLyGui = async () => {
+    if (!input.trim()) return
+    const text = input; setInput('')
+    await chat.guiTinNhan(text)
+  }
+
+  // Nhóm tin nhắn liên tiếp cùng người gửi
+  const nhomTN = chat.tinNhanList.map((msg, i) => {
+    const next = chat.tinNhanList[i + 1]
+    const isMe = msg.nguoiGui._id === nguoiDung.id
+    return {
+      msg, isMe,
+      showAvatar: !next || next.nguoiGui._id !== msg.nguoiGui._id,
+    }
+  })
+
+  const headerTitle = isGroup
+    ? (ctc.tenNhom || 'Nhóm cộng đồng')
+    : (other?.hoTen || 'Người dùng')
+
+  const headerSub = isGroup
+    ? `${ctc.nguoiThamGia?.length || 0} thành viên`
+    : isDangNhap ? '✏️ đang nhập...' : isOnline ? '● Đang online' : '○ Offline'
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
+      <div style={{ padding: '10px 16px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', gap: 10, background: 'white', flexShrink: 0 }}>
+        <button onClick={chat.quayLai} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 10, border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer', flexShrink: 0 }}>
+          <ArrowLeft size={18} style={{ color: '#6b7280' }} />
+        </button>
+        {isGroup
+          ? <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, #667eea, #764ba2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 18, flexShrink: 0 }}>#</div>
+          : <Avatar name={other?.hoTen || '?'} size={38} online={isOnline} />
+        }
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{headerTitle}</div>
+          <div style={{ fontSize: 12, color: isOnline && !isGroup ? '#10b981' : '#9ca3af' }}>{headerSub}</div>
+        </div>
+        {ctc.loai === 'admin_support' && <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#fef3c7', borderRadius: 8, padding: '4px 10px', fontSize: 12, fontWeight: 700, color: '#92400e' }}><Shield size={13} /> Hỗ trợ Admin</div>}
+        {isGroup && <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: '#ede9fe', borderRadius: 8, padding: '4px 10px', fontSize: 12, fontWeight: 700, color: '#5b21b6' }}><Users size={13} /> Nhóm</div>}
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 12px', background: '#f9fafb' }}>
+        {chat.dangTaiTN ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+            <div className="chat-spinner" />
+          </div>
+        ) : chat.tinNhanList.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 32, color: '#9ca3af', fontSize: 14 }}>
+            {isGroup ? '👋 Hãy là người đầu tiên nhắn tin trong nhóm!' : '👋 Hãy bắt đầu cuộc trò chuyện!'}
+          </div>
+        ) : nhomTN.map(({ msg, isMe, showAvatar }) => (
+          <TinNhanItem key={msg.id} msg={msg} isMe={isMe} showAvatar={showAvatar} isGroup={isGroup}
+            onReply={chat.setTraLoi} onDelete={chat.xoaTinNhan} onReact={chat.themPhanUng} />
+        ))}
+        {isDangNhap && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginTop: 4 }}>
+            {other && <Avatar name={other.hoTen} size={28} />}
+            <div style={{ background: 'white', padding: '10px 14px', borderRadius: '4px 16px 16px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+              <TypingDots />
+            </div>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      {/* Reply preview */}
+      {chat.traLoi && (
+        <div style={{ padding: '8px 16px', background: '#f5f3ff', borderTop: '1px solid #ede9fe', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div style={{ flex: 1, borderLeft: '3px solid #7c3aed', paddingLeft: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#7c3aed' }}>{chat.traLoi.nguoiGui.hoTen}</div>
+            <div style={{ fontSize: 12, color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chat.traLoi.noiDung}</div>
+          </div>
+          <button onClick={() => chat.setTraLoi(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 4 }}><X size={14} /></button>
+        </div>
+      )}
+
+      {/* Input */}
+      <div style={{ padding: '12px 16px', background: 'white', borderTop: '1px solid #f3f4f6', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input ref={inputRef} type="text" value={input} onChange={e => xuLyNhap(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); xuLyGui() } }}
+            placeholder={isGroup ? `Nhắn tin vào ${ctc.tenNhom || 'nhóm'}...` : `Nhắn tin cho ${other?.hoTen || ''}...`}
+            style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: 22, padding: '10px 16px', fontSize: 14, outline: 'none', background: '#f9fafb', transition: 'border-color 0.15s' }}
+            onFocus={e => (e.target.style.borderColor = '#7c3aed')}
+            onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
+          />
+          <button onClick={xuLyGui} disabled={!input.trim()}
+            style={{ width: 42, height: 42, borderRadius: '50%', border: 'none', background: input.trim() ? 'linear-gradient(135deg, #667eea, #764ba2)' : '#e5e7eb', color: 'white', cursor: input.trim() ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background 0.15s' }}>
+            <Send size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main TrangChat component ─────────────────────────────────────────────────
+export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
+  const nguoiDung = layNguoiDung() as NguoiDungInfo | null
+  const chat = useChatState(nguoiDung)
+  const [tab, setTab] = useState<'dm' | 'nhom'>('dm')
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    const targetId = new URLSearchParams(window.location.search).get('cuocTroChuyen')
+    if (!targetId || chat.cuocTroChuyenHienTai || !chat.danhSach.length) return
+    const found = chat.danhSach.find(item => item._id === targetId || item.id === targetId)
+    if (found) {
+      void chat.moCuocTroChuyen(found)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [chat.danhSach, chat.cuocTroChuyenHienTai])
+
+  if (!nguoiDung) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#9ca3af', fontSize: 14 }}>
+      Vui lòng đăng nhập để sử dụng chat.
+    </div>
+  )
+
+  const eyebrowMap: Record<VaiTro, string> = {
+    ung_vien: 'ITJob Ứng viên',
+    nha_tuyen_dung: 'ITJob Employer',
+    admin: 'ITJob Admin',
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      {/* Page header */}
+      <div className="relative flex min-w-0 flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_8px_24px_rgba(14,77,125,0.07)] sm:flex-row sm:items-center sm:justify-between sm:p-5 mb-3">
+        <span className="pointer-events-none absolute -right-14 -top-20 h-40 w-56 rounded-full bg-violet-300/20 blur-3xl" />
+        <div className="relative z-[1] min-w-0">
+          <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.1em] text-violet-600">{eyebrowMap[vaiTro]}</span>
+          <h1 className="break-words text-2xl font-black leading-tight text-slate-950">Tin nhắn & Cộng đồng</h1>
+          <p className="mt-1 text-sm font-semibold leading-relaxed text-slate-500">
+            {vaiTro === 'admin' && 'Hỗ trợ nhà tuyển dụng, quản lý nhóm cộng đồng và theo dõi cuộc trò chuyện.'}
+            {vaiTro === 'nha_tuyen_dung' && 'Chat với ứng viên, liên hệ admin hỗ trợ và tham gia nhóm cộng đồng.'}
+            {vaiTro === 'ung_vien' && 'Nhận tin từ nhà tuyển dụng, tham gia nhóm cộng đồng IT.'}
+          </p>
+        </div>
+        {chat.tongChuaDoc > 0 && (
+          <div className="relative z-[1] flex-none">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1.5 text-sm font-black text-violet-700">
+              <MessageCircle size={14} /> {chat.tongChuaDoc} tin chưa đọc
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Chat layout */}
+      <div style={{
+        flex: 1, display: 'grid', minHeight: 0,
+        gridTemplateColumns: chat.cuocTroChuyenHienTai ? '1fr' : '1fr',
+        borderRadius: 16, border: '1px solid #e5e7eb', overflow: 'hidden', background: 'white',
+        boxShadow: '0 8px 24px rgba(14,77,125,0.07)',
+        // Desktop: sidebar + content
+      }} className="chat-layout">
+        {/* Sidebar — ẩn trên mobile khi đang xem conversation */}
+        <div className={clsx('chat-sidebar', chat.cuocTroChuyenHienTai && 'chat-sidebar--hidden')}>
+          <Sidebar nguoiDung={nguoiDung} chat={chat} tab={tab} setTab={setTab} search={search} setSearch={setSearch} />
+        </div>
+
+        {/* Content area */}
+        <div className={clsx('chat-content', !chat.cuocTroChuyenHienTai && 'chat-content--hidden')}>
+          {chat.cuocTroChuyenHienTai ? (
+            <KhuVucTinNhan nguoiDung={nguoiDung} chat={chat} />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', gap: 12 }}>
+              <MessageCircle size={56} style={{ opacity: 0.2 }} />
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>Chọn một cuộc trò chuyện để bắt đầu</p>
+              <p style={{ margin: 0, fontSize: 13 }}>Hoặc tham gia nhóm cộng đồng từ tab Nhóm</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Wrapper exports cho từng dashboard ──────────────────────────────────────
+export function ChatUngVienPage() { return <TrangChat vaiTro="ung_vien" /> }
+export function ChatNhaTuyenDungPage() { return <TrangChat vaiTro="nha_tuyen_dung" /> }
+export function ChatAdminPage() { return <TrangChat vaiTro="admin" /> }

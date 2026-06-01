@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { clsx } from 'clsx'
 import { Edit3, Plus, RefreshCw, Search, Trash2, UserCheck, Users, X } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
+import './admin-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const PAGE_SIZE = 6

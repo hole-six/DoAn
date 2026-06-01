@@ -22,4 +22,6 @@ const lichPhongVanSchema = new Schema(
   },
 )
 
+lichPhongVanSchema.index({ maHoSoUngTuyen: 1 }, { unique: true })
+
 export const LichPhongVan = model('LichPhongVan', lichPhongVanSchema)

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
+import './admin-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const PAGE_SIZE = 6
@@ -41,23 +42,48 @@ const toneTin     = (v: string) => v === 'dang_mo' ? 'green' : v === 'tu_choi' |
 const labelLoai   = (v: string) => ({ toan_thoi_gian:'Toàn thời gian', ban_thoi_gian:'Bán thời gian', thuc_tap:'Thực tập', tu_xa:'Từ xa', hybrid:'Hybrid' } as Record<string,string>)[v] ?? v
 const labelCap    = (v: string) => ({ intern:'Intern', fresher:'Fresher', junior:'Junior', middle:'Middle', senior:'Senior', lead:'Lead' } as Record<string,string>)[v] ?? v
 
-const SKILL_TYPES = [
+const SKILL_TYPE_BASE = [
   { value:'tat_ca', label:'Tất cả loại' },
   { value:'ngon_ngu', label:'Ngôn ngữ' },
   { value:'frontend', label:'Frontend' },
   { value:'backend', label:'Backend' },
   { value:'database', label:'Database' },
-  { value:'devops', label:'DevOps' },
-  { value:'kiem_thu', label:'Kiểm thử' },
-  { value:'thiet_ke', label:'Thiết kế' },
-  { value:'phan_tich', label:'Phân tích' },
-  { value:'quan_ly', label:'Quản lý' },
+  { value:'du_lieu', label:'Data & AI' },
+  { value:'mobile', label:'Mobile' },
+  { value:'devops', label:'DevOps & Cloud' },
+  { value:'testing', label:'Testing / QA' },
+  { value:'kiem_thu', label:'Testing / QA' },
+  { value:'thiet_ke', label:'Design' },
+  { value:'phan_tich', label:'Business Analyst' },
+  { value:'quan_ly', label:'Product / Management' },
   { value:'ky_nang_mem', label:'Kỹ năng mềm' },
   { value:'khac', label:'Khác' },
 ]
 
 // ─── validation helpers ──────────────────────────────────────────────────────
 type Errors = Record<string, string>
+
+function normalizeSkillType(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+}
+
+function formatSkillTypeLabel(value?: string) {
+  const key = String(value ?? '').trim()
+  if (!key) return '-'
+  const found = SKILL_TYPE_BASE.find((item) => item.value === key)
+  if (found) return found.label
+  return key
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(' ')
+}
 
 function required(v: any, label: string): string | null {
   if (v === undefined || v === null || String(v).trim() === '') return `${label} là bắt buộc`
@@ -728,7 +754,8 @@ function validateKyNang(f: any): Errors {
   const e: Errors = {}
   const tErr = collect(required(f.tenKyNang, 'Tên kỹ năng'), minLen(f.tenKyNang ?? '', 2, 'Tên kỹ năng'))
   if (tErr) e.tenKyNang = tErr
-  if (!f.loaiKyNang || f.loaiKyNang === 'tat_ca') e.loaiKyNang = 'Vui lòng chọn loại kỹ năng'
+  const loaiKyNang = normalizeSkillType(String(f.loaiKyNang ?? ''))
+  if (!loaiKyNang || loaiKyNang === 'tat_ca') e.loaiKyNang = 'Vui lòng chọn loại kỹ năng'
   return e
 }
 
@@ -750,9 +777,27 @@ export function QuanLyKyNangAdmin() {
   }
   useEffect(() => { load() }, [])
 
+  const skillTypeOptions = useMemo(() => {
+    const optionMap = new Map<string, string>()
+    for (const option of SKILL_TYPE_BASE) optionMap.set(option.value, option.label)
+    for (const item of items) {
+      const value = normalizeSkillType(String(item.loaiKyNang ?? ''))
+      if (!value) continue
+      if (!optionMap.has(value)) optionMap.set(value, formatSkillTypeLabel(value))
+    }
+    if (form?.loaiKyNang) {
+      const value = normalizeSkillType(String(form.loaiKyNang))
+      if (value && !optionMap.has(value)) optionMap.set(value, formatSkillTypeLabel(value))
+    }
+    return Array.from(optionMap.entries()).map(([value, label]) => ({ value, label }))
+  }, [items, form?.loaiKyNang])
+
   const list = useMemo(() => {
     const k = keyword.trim().toLowerCase()
-    return items.filter(item => (!k || item.tenKyNang?.toLowerCase().includes(k)) && (filter === 'tat_ca' || item.loaiKyNang === filter))
+    return items.filter((item) => {
+      const loai = normalizeSkillType(String(item.loaiKyNang ?? ''))
+      return (!k || item.tenKyNang?.toLowerCase().includes(k)) && (filter === 'tat_ca' || loai === filter)
+    })
   }, [filter, items, keyword])
   const pageItems = getPage(list, page)
   useEffect(() => { setPage(1) }, [keyword, filter])
@@ -764,7 +809,8 @@ export function QuanLyKyNangAdmin() {
     setSaving(true)
     try {
       setApiError(''); setErrors({})
-      await api(`/danhmuckynang${form.id ? `/${form.id}` : ''}`, { method: form.id ? 'PATCH' : 'POST', body: JSON.stringify({ tenKyNang: form.tenKyNang.trim(), loaiKyNang: form.loaiKyNang }) })
+      const loaiKyNang = normalizeSkillType(String(form.loaiKyNang ?? ''))
+      await api(`/danhmuckynang${form.id ? `/${form.id}` : ''}`, { method: form.id ? 'PATCH' : 'POST', body: JSON.stringify({ tenKyNang: form.tenKyNang.trim(), loaiKyNang }) })
       setForm(null); await load()
     } catch (err) { setApiError(getError(err)) } finally { setSaving(false) }
   }
@@ -779,7 +825,7 @@ export function QuanLyKyNangAdmin() {
 
   const openForm = (item?: any) => {
     setErrors({})
-    setForm(item ? { id: getId(item), tenKyNang: item.tenKyNang, loaiKyNang: item.loaiKyNang } : { loaiKyNang: 'frontend' })
+    setForm(item ? { id: getId(item), tenKyNang: item.tenKyNang, loaiKyNang: normalizeSkillType(String(item.loaiKyNang ?? '')) } : { loaiKyNang: 'frontend' })
   }
 
   return (
@@ -790,14 +836,14 @@ export function QuanLyKyNangAdmin() {
 
       <div className={tw.panel}>
         <Toolbar keyword={keyword} onKeyword={setKeyword} filter={filter} onFilter={setFilter} onRefresh={load}
-          placeholder="Tìm tên kỹ năng..." options={SKILL_TYPES} />
+          placeholder="Tìm tên kỹ năng..." options={skillTypeOptions} />
         {apiError && <div className={tw.error}>{apiError}</div>}
         <div className="hidden sm:block">
         <TableWrap heads={['Tên kỹ năng', 'Loại', 'Ngày tạo', 'Thao tác']} minWidth={480}>
           {pageItems.map(item => (
             <tr key={getId(item)}>
               <td><span className="ap-table-strong">{item.tenKyNang}</span></td>
-              <td><Badge label={SKILL_TYPES.find(t => t.value === item.loaiKyNang)?.label ?? item.loaiKyNang} tone="blue" /></td>
+              <td><Badge label={formatSkillTypeLabel(item.loaiKyNang)} tone="blue" /></td>
               <td>{formatDate(item.ngayTao)}</td>
               <td><div className="ap-actions">
                 <button className="ap-btn-icon" title="Sửa" onClick={() => openForm(item)}><AppIcon icon={Edit3} size={14} /></button>
@@ -816,7 +862,7 @@ export function QuanLyKyNangAdmin() {
                   <h3 className="line-clamp-2 text-sm font-black leading-snug text-slate-950">{item.tenKyNang}</h3>
                   <p className="mt-1 text-xs font-semibold text-slate-500">Ngày tạo: {formatDate(item.ngayTao)}</p>
                 </div>
-                <Badge label={SKILL_TYPES.find(t => t.value === item.loaiKyNang)?.label ?? item.loaiKyNang} tone="blue" />
+                <Badge label={formatSkillTypeLabel(item.loaiKyNang)} tone="blue" />
               </div>
               <div className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
                 <button className={clsx(tw.subtleBtn, 'min-h-10 text-xs')} onClick={() => openForm(item)}><AppIcon icon={Edit3} size={14} /> Sửa</button>
@@ -838,10 +884,19 @@ export function QuanLyKyNangAdmin() {
                   onChange={e => setForm({ ...form, tenKyNang: e.target.value })} />
               </Field>
               <Field label="Loại kỹ năng" required error={errors.loaiKyNang}>
-                <Select value={form.loaiKyNang ?? ''} error={errors.loaiKyNang} onChange={e => setForm({ ...form, loaiKyNang: e.target.value })}>
-                  <option value="">— Chọn loại —</option>
-                  {SKILL_TYPES.filter(t => t.value !== 'tat_ca').map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </Select>
+                <Input
+                  list="admin-skill-type-options"
+                  value={form.loaiKyNang ?? ''}
+                  error={errors.loaiKyNang}
+                  placeholder="Ví dụ: frontend, backend, cloud_native..."
+                  onChange={e => setForm({ ...form, loaiKyNang: e.target.value })}
+                />
+                <datalist id="admin-skill-type-options">
+                  {skillTypeOptions.filter((type) => type.value !== 'tat_ca').map((type) => (
+                    <option key={type.value} value={type.value}>{type.label}</option>
+                  ))}
+                </datalist>
+                <span className="text-[11px] font-semibold text-slate-500">Có thể chọn loại có sẵn hoặc nhập loại mới.</span>
               </Field>
               {apiError && <div className={clsx(tw.error, 'sm:col-span-2')}>{apiError}</div>}
               <div className={tw.formActions}>

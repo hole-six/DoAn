@@ -44,6 +44,15 @@
 .btn-primary:disabled { opacity: 0.6; pointer-events: none; }
 @media (min-width: 640px) { .btn-primary { width: auto; } }
 
+.route-loading {
+  display: grid;
+  min-height: 60vh;
+  place-items: center;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
 /* Nút phụ — trắng viền */
 .btn-subtle {
   display: inline-flex;
@@ -710,4 +719,67 @@ body {
 ::-moz-selection {
   background: #0058be;
   color: white;
+}
+
+/* ========================================================================== */
+/* CHAT LAYOUT — responsive sidebar + content                                 */
+/* ========================================================================== */
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  height: calc(100dvh - 280px);
+  min-height: 480px;
+}
+
+@media (min-width: 768px) {
+  .chat-layout {
+    grid-template-columns: 300px 1fr;
+    height: calc(100dvh - 220px);
+  }
+  .chat-sidebar { border-right: 1px solid #f3f4f6; }
+  .chat-sidebar--hidden { display: flex !important; }
+  .chat-content--hidden { display: flex !important; }
+}
+
+.chat-sidebar { display: flex; flex-direction: column; overflow: hidden; }
+.chat-sidebar--hidden { display: none; }
+.chat-content { display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.chat-content--hidden { display: none; }
+
+@media (min-width: 768px) {
+  .chat-sidebar--hidden { display: flex; }
+  .chat-content--hidden { display: flex; }
+}
+
+/* Global typography baseline */
+:root {
+  --font-ui: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+html {
+  font-size: 16px;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-ui) !important;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-ui) !important;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
 }

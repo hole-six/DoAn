@@ -1,0 +1,355 @@
+/* Shared mobile interaction utilities */
+
+/* ========================================================================== */
+/* SWIPE GESTURES                                                             */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .swipeable {
+    touch-action: pan-y;
+    user-select: none;
+  }
+
+  .swipe-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .swipe-indicator.left {
+    left: 16px;
+  }
+
+  .swipe-indicator.right {
+    right: 16px;
+  }
+
+  .swipeable:active .swipe-indicator {
+    opacity: 1;
+  }
+}
+
+/* ========================================================================== */
+/* TOAST NOTIFICATIONS (Mobile optimized)                                     */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .toast-container {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .toast {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: all;
+    animation: slideInDown 0.3s ease;
+  }
+
+  .toast.success {
+    border-left: 4px solid #10b981;
+  }
+
+  .toast.error {
+    border-left: 4px solid #e11d48;
+  }
+
+  .toast.warning {
+    border-left: 4px solid #f59e0b;
+  }
+
+  .toast.info {
+    border-left: 4px solid #0058be;
+  }
+
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* ========================================================================== */
+/* FLOATING ACTION BUTTON (FAB)                                               */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .fab {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #0058be;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 88, 190, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 40;
+  }
+
+  .fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 88, 190, 0.5);
+  }
+
+  .fab:active {
+    transform: scale(0.95);
+  }
+
+  .fab svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* FAB with label */
+  .fab-extended {
+    width: auto;
+    padding: 0 20px;
+    border-radius: 28px;
+    gap: 8px;
+  }
+
+  .fab-extended span {
+    font-weight: 700;
+    font-size: 14px;
+  }
+}
+
+/* ========================================================================== */
+/* MOBILE SEARCH BAR                                                          */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .mobile-search-bar {
+    position: sticky;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e8eaf0;
+    z-index: 45;
+  }
+
+  .mobile-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 44px;
+    border: 1px solid #e8eaf0;
+    border-radius: 24px;
+    font-size: 15px;
+    background: #f9fafb;
+    transition: all 0.2s;
+  }
+
+  .mobile-search-input:focus {
+    outline: none;
+    border-color: #0058be;
+    background: #ffffff;
+  }
+
+  .mobile-search-icon {
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+  }
+}
+
+/* ========================================================================== */
+/* MOBILE FILTERS DRAWER                                                      */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .filters-drawer {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    max-height: 80vh;
+    background: #ffffff;
+    border-radius: 16px 16px 0 0;
+    z-index: 100;
+    transition: bottom 0.3s ease;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .filters-drawer.active {
+    bottom: 0;
+  }
+
+  .filters-drawer-handle {
+    width: 40px;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    margin: 12px auto;
+  }
+
+  .filters-drawer-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e8eaf0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .filters-drawer-content {
+    padding: 20px;
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+  }
+
+  .filters-drawer-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e8eaf0;
+    display: flex;
+    gap: 12px;
+  }
+
+  .filters-drawer-footer button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filters-drawer-footer .btn-reset {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+  }
+
+  .filters-drawer-footer .btn-apply {
+    background: #0058be;
+    color: white;
+    border: none;
+  }
+}
+
+/* ========================================================================== */
+/* MOBILE CARD ACTIONS                                                        */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .card-swipe-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    background: #f3f4f6;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .card-swipe-actions.visible {
+    transform: translateX(0);
+  }
+
+  .card-action-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .card-action-btn.edit {
+    background: #0058be;
+    color: white;
+  }
+
+  .card-action-btn.delete {
+    background: #e11d48;
+    color: white;
+  }
+}
+
+/* ========================================================================== */
+/* FINAL MOBILE POLISH                                                        */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  /* Smooth transitions */
+  * {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Better tap feedback */
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  /* Prevent text selection on UI elements */
+  button,
+  .nav-item,
+  .tab,
+  .card-header {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Better focus for keyboard navigation */
+  *:focus-visible {
+    outline: 3px solid #0058be;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Optimize images */
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  /* Better font rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}

@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useReducer, useCallback } from 'react'
-import { langNgheEvent, boLangNgheEvent } from '../lib/socket'
-import { layNguoiDung, layAccessToken } from '../lib/auth'
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
+import { boLangNgheEvent, kiemTraKetNoi, langNgheEvent, langNgheTrangThaiKetNoi } from '../lib/socket'
+import { layAccessToken, layNguoiDung } from '../lib/auth'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+const POLL_MS_KET_NOI = 45000
+const POLL_MS_MAT_KET_NOI = 15000
 
 export interface ThongBao {
   _id: string
@@ -45,16 +45,21 @@ function thongBaoReducer(state: ThongBaoState, action: ThongBaoAction): ThongBao
   switch (action.type) {
     case 'SET_DANH_SACH':
       return { ...state, danhSach: action.payload }
-    case 'THEM_THONG_BAO':
+    case 'THEM_THONG_BAO': {
+      const daTonTai = state.danhSach.some(tb => tb._id === action.payload._id)
+      const danhSach = daTonTai
+        ? state.danhSach.map(tb => (tb._id === action.payload._id ? action.payload : tb))
+        : [action.payload, ...state.danhSach].slice(0, 50)
       return {
         ...state,
-        danhSach: [action.payload, ...state.danhSach].slice(0, 50),
-        soLuongChuaDoc: state.soLuongChuaDoc + 1,
+        danhSach,
+        soLuongChuaDoc: daTonTai || action.payload.daDoc ? state.soLuongChuaDoc : state.soLuongChuaDoc + 1,
       }
+    }
     case 'DANH_DAU_DA_DOC':
       return {
         ...state,
-        danhSach: state.danhSach.map(tb => tb._id === action.payload ? { ...tb, daDoc: true } : tb),
+        danhSach: state.danhSach.map(tb => (tb._id === action.payload ? { ...tb, daDoc: true } : tb)),
         soLuongChuaDoc: Math.max(0, state.soLuongChuaDoc - 1),
       }
     case 'DANH_DAU_TAT_CA_DA_DOC':
@@ -76,8 +81,6 @@ function thongBaoReducer(state: ThongBaoState, action: ThongBaoAction): ThongBao
   }
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
 interface ThongBaoContextValue extends ThongBaoState {
   danhDauDaDoc: (id: string) => Promise<void>
   danhDauTatCaDaDoc: () => Promise<void>
@@ -87,46 +90,24 @@ interface ThongBaoContextValue extends ThongBaoState {
 
 const ThongBaoContext = createContext<ThongBaoContextValue | null>(null)
 
-export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
+export function ThongBaoProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(thongBaoReducer, {
     danhSach: [],
     soLuongChuaDoc: 0,
     dangTai: false,
     toasts: [],
   })
+  const [authTick, setAuthTick] = useState(0)
 
   const nguoiDung = layNguoiDung()
   const token = layAccessToken()
+  const pollTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!token || !nguoiDung) return
-
-    const xuLyThongBaoMoi = (thongBao: ThongBao) => {
-      dispatch({ type: 'THEM_THONG_BAO', payload: thongBao })
-
-      // Hiển thị toast
-      const toastId = `toast_${Date.now()}`
-      dispatch({ type: 'THEM_TOAST', payload: { ...thongBao, toastId } })
-      setTimeout(() => dispatch({ type: 'XOA_TOAST', payload: toastId }), 5000)
-
-      // Browser notification
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(thongBao.tieuDe, {
-          body: thongBao.noiDung,
-          icon: '/favicon.svg',
-          tag: thongBao._id,
-        })
-      }
-    }
-
-    langNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
-    taiThongBao()
-    demChuaDoc()
-
-    return () => {
-      boLangNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
-    }
-  }, [token, nguoiDung?.id])
+    const capNhat = () => setAuthTick(value => value + 1)
+    window.addEventListener('itjob-auth-change', capNhat)
+    return () => window.removeEventListener('itjob-auth-change', capNhat)
+  }, [])
 
   const taiThongBao = useCallback(async () => {
     const tok = layAccessToken()
@@ -139,13 +120,13 @@ export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json()
       dispatch({ type: 'SET_DANH_SACH', payload: data.duLieu || [] })
     } catch (err) {
-      console.error('Lỗi tải thông báo:', err)
+      console.error('Loi tai thong bao:', err)
     } finally {
       dispatch({ type: 'SET_DANG_TAI', payload: false })
     }
-  }, [token])
+  }, [])
 
-  const demChuaDoc = async () => {
+  const demChuaDoc = useCallback(async () => {
     const tok = layAccessToken()
     if (!tok) return
     try {
@@ -154,8 +135,75 @@ export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
       })
       const data = await res.json()
       dispatch({ type: 'SET_SO_LUONG_CHUA_DOC', payload: data.duLieu?.soLuong || 0 })
-    } catch {}
-  }
+    } catch {
+      // bo qua loi dem thong bao de UI khong bi ngat
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!token || !nguoiDung) return
+
+    const lamMoiDuLieuThongBao = async () => {
+      await Promise.all([taiThongBao(), demChuaDoc()])
+    }
+
+    const xoaPolling = () => {
+      if (pollTimerRef.current) {
+        window.clearInterval(pollTimerRef.current)
+        pollTimerRef.current = null
+      }
+    }
+
+    const batDauPolling = (thoiGianMs: number) => {
+      xoaPolling()
+      pollTimerRef.current = window.setInterval(() => {
+        void lamMoiDuLieuThongBao()
+      }, thoiGianMs)
+    }
+
+    const xuLyThongBaoMoi = (thongBao: ThongBao) => {
+      dispatch({ type: 'THEM_THONG_BAO', payload: thongBao })
+
+      const toastId = `toast_${Date.now()}`
+      dispatch({ type: 'THEM_TOAST', payload: { ...thongBao, toastId } })
+      window.setTimeout(() => dispatch({ type: 'XOA_TOAST', payload: toastId }), 5000)
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(thongBao.tieuDe, {
+          body: thongBao.noiDung,
+          icon: '/favicon.svg',
+          tag: thongBao._id,
+        })
+      }
+    }
+
+    langNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
+    void lamMoiDuLieuThongBao()
+    batDauPolling(kiemTraKetNoi() ? POLL_MS_KET_NOI : POLL_MS_MAT_KET_NOI)
+
+    const boLangNgheKetNoi = langNgheTrangThaiKetNoi({
+      onConnect: () => {
+        void lamMoiDuLieuThongBao()
+        batDauPolling(POLL_MS_KET_NOI)
+      },
+      onReconnect: () => {
+        void lamMoiDuLieuThongBao()
+        batDauPolling(POLL_MS_KET_NOI)
+      },
+      onDisconnect: () => {
+        batDauPolling(POLL_MS_MAT_KET_NOI)
+      },
+      onConnectError: () => {
+        batDauPolling(POLL_MS_MAT_KET_NOI)
+      },
+    })
+
+    return () => {
+      boLangNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
+      boLangNgheKetNoi()
+      xoaPolling()
+    }
+  }, [token, nguoiDung?.id, authTick, taiThongBao, demChuaDoc])
 
   const danhDauDaDoc = useCallback(async (id: string) => {
     const tok = layAccessToken()
@@ -167,9 +215,9 @@ export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
       })
       dispatch({ type: 'DANH_DAU_DA_DOC', payload: id })
     } catch (err) {
-      console.error('Lỗi đánh dấu đã đọc:', err)
+      console.error('Loi danh dau da doc:', err)
     }
-  }, [token])
+  }, [])
 
   const danhDauTatCaDaDoc = useCallback(async () => {
     const tok = layAccessToken()
@@ -181,22 +229,24 @@ export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
       })
       dispatch({ type: 'DANH_DAU_TAT_CA_DA_DOC' })
     } catch (err) {
-      console.error('Lỗi đánh dấu tất cả:', err)
+      console.error('Loi danh dau tat ca da doc:', err)
     }
-  }, [token])
+  }, [])
 
   const xoaToast = useCallback((toastId: string) => {
     dispatch({ type: 'XOA_TOAST', payload: toastId })
   }, [])
 
   return (
-    <ThongBaoContext.Provider value={{
-      ...state,
-      danhDauDaDoc,
-      danhDauTatCaDaDoc,
-      taiThongBao,
-      xoaToast,
-    }}>
+    <ThongBaoContext.Provider
+      value={{
+        ...state,
+        danhDauDaDoc,
+        danhDauTatCaDaDoc,
+        taiThongBao,
+        xoaToast,
+      }}
+    >
       {children}
     </ThongBaoContext.Provider>
   )
@@ -204,6 +254,6 @@ export function ThongBaoProvider({ children }: { children: React.ReactNode }) {
 
 export function useThongBao() {
   const ctx = useContext(ThongBaoContext)
-  if (!ctx) throw new Error('useThongBao phải dùng trong ThongBaoProvider')
+  if (!ctx) throw new Error('useThongBao phai dung trong ThongBaoProvider')
   return ctx
 }

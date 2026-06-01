@@ -8,6 +8,9 @@ import {
 import CvStudio from './CvStudio'
 import { toast } from '../../lib/toast'
 import { DashboardSkeleton } from '../../components/LoadingStates'
+import { useConfirm } from '../../components/ConfirmDialog'
+import './ungvien-styles.css'
+import './ungvien-responsive.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
@@ -195,10 +198,10 @@ function FilterBar({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-2 sm:flex-row sm:items-center">{children}</div>
 }
 function Modal({ children }: { children: ReactNode }) {
-  return <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-sm">{children}</div>
+  return <div className="fixed inset-0 z-[300] flex items-stretch justify-center overflow-hidden bg-slate-950/50 p-0 backdrop-blur-sm">{children}</div>
 }
 function ModalCard({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={clsx('w-full max-w-2xl rounded-2xl bg-white shadow-2xl max-h-[calc(100dvh-2rem)] overflow-y-auto p-4 sm:p-6', className)}>{children}</div>
+  return <div className={clsx('h-dvh w-full max-w-none overflow-y-auto rounded-none bg-white p-4 shadow-none sm:p-6', className)}>{children}</div>
 }
 function ModalHead({ title, subtitle, onClose }: { title: string; subtitle?: string; onClose: () => void }) {
   return (
@@ -215,8 +218,8 @@ function ModalHead({ title, subtitle, onClose }: { title: string; subtitle?: str
 }
 function Drawer({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm" onClick={onClose}>
-      <div className="absolute inset-y-0 right-0 w-full max-w-xl overflow-y-auto bg-white shadow-2xl p-4 sm:p-6 sm:rounded-l-2xl" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[300] bg-slate-950/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="absolute inset-0 h-dvh w-full overflow-y-auto rounded-none bg-white p-4 shadow-none sm:p-6" onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -271,7 +274,7 @@ function CompactTask({ task }: { task: { title: string; desc: string; href: stri
 
 // ─── Dashboard default ────────────────────────────────────────────────────────
 
-export default function DashboardUngVienMoi() {
+export default function DashboardUngVienMới() {
   const data = useUngVienData()
   if (data.loading) return <DashboardSkeleton />
   const hoSoChinh = data.hoSo?.find((x: any) => x.cvChinh)
@@ -399,8 +402,8 @@ function CvModal({ cv, setCv, onClose, onSubmit }: any) {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Tiêu đề CV" wide><input className={inputCls} value={cv.tieuDe} onChange={e => setCv({ ...cv, tieuDe: e.target.value })} /></Field>
             <div className="flex flex-wrap gap-4 md:col-span-2">
-              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer"><input type="checkbox" className="h-4 w-4 rounded" checked={cv.cvChinh} onChange={e => setCv({ ...cv, cvChinh: e.target.checked })} /> Dat lam CV chinh</label>
-              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer"><input type="checkbox" className="h-4 w-4 rounded" checked={cv.congKhai} onChange={e => setCv({ ...cv, congKhai: e.target.checked })} /> Cong khai voi nha tuyen dung</label>
+              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer"><input type="checkbox" className="h-4 w-4 rounded" checked={cv.cvChinh} onChange={e => setCv({ ...cv, cvChinh: e.target.checked })} /> Đặt làm CV chính</label>
+              <label className="flex items-center gap-2 text-sm font-bold text-slate-700 cursor-pointer"><input type="checkbox" className="h-4 w-4 rounded" checked={cv.congKhai} onChange={e => setCv({ ...cv, congKhai: e.target.checked })} /> Công khai với nhà tuyển dụng</label>
             </div>
             {(['hocVan', 'kinhNghiemLam', 'chungChi', 'duAn'] as const).map(key => (
               <SectionEditor key={key} label={sectionLabel[key]} value={cv[key] ?? []} onChange={(v: any[]) => setCv({ ...cv, [key]: v })} />
@@ -421,23 +424,48 @@ export function HoSoUngVienPage() {
   const [error, setError] = useState('')
   const [profile, setProfile] = useState<any>(null)
   const [cv, setCv] = useState<any>(null)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   useEffect(() => { if (data.ungVien) setProfile({ ...data.ungVien }) }, [data.ungVien?.id])
 
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault()
-    try {
-      await api(`/ungvien/${profile.id}`, { method: 'PATCH', body: JSON.stringify({ ...profile, maNguoiDung: profile.maNguoiDung }) })
-      await data.reload(); setError('')
-    } catch (err) { setError(err instanceof Error ? err.message : 'Không lưu được hồ sơ') }
+    confirm(
+      'Lưu hồ sơ ứng viên',
+      'Bạn có chắc chắn muốn cập nhật thông tin hồ sơ cá nhân?',
+      async () => {
+        try {
+          await api(`/ungvien/${profile.id}`, { method: 'PATCH', body: JSON.stringify({ ...profile, maNguoiDung: profile.maNguoiDung }) })
+          await data.reload(); setError('')
+        } catch (err) { setError(err instanceof Error ? err.message : 'Không lưu được hồ sơ') }
+      },
+      'info',
+      'Lưu',
+    )
   }
   const saveCv = async (e: FormEvent) => {
     e.preventDefault()
-    await api(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify({ ...cv, maUngVien: data.ungVien.id }) })
-    setCv(null); await data.reload()
+    confirm(
+      cv.id ? 'Cập nhật CV' : 'Tạo CV mới',
+      cv.id ? 'Xác nhận cập nhật nội dung CV này?' : 'Xác nhận tạo CV mới cho hồ sơ của bạn?',
+      async () => {
+        await api(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify({ ...cv, maUngVien: data.ungVien.id }) })
+        setCv(null); await data.reload()
+      },
+      'info',
+      cv.id ? 'Cập nhật' : 'Tạo CV',
+    )
   }
   const removeCv = async (id: string) => {
-    if (!confirm('Xóa CV này?')) return
-    await api(`/hosonangluc/${id}`, { method: 'DELETE' }); await data.reload()
+    confirm(
+      'Xóa CV',
+      'Bạn có chắc chắn muốn xóa CV này? Hành động này không thể hoàn tác.',
+      async () => {
+        await api(`/hosonangluc/${id}`, { method: 'DELETE' })
+        await data.reload()
+      },
+      'danger',
+      'Xóa',
+    )
   }
 
   if (data.loading || !profile) return <Page title="Hồ sơ năng lực" desc="Đang tải..."><Panel>Đang tải...</Panel></Page>
@@ -478,6 +506,7 @@ export function HoSoUngVienPage() {
         ) : <Empty>Chưa có CV năng lực.</Empty>}
       </Panel>
       {cv && <CvModal cv={cv} setCv={setCv} onClose={() => setCv(null)} onSubmit={saveCv} />}
+      <ConfirmDialogComponent />
     </Page>
   )
 }
@@ -491,15 +520,15 @@ function AppDrawer({ item, onClose }: { item: any; onClose: () => void }) {
   const activeIdx = timeline.indexOf(item.trangThai)
   return (
     <Drawer onClose={onClose}>
-      <ModalHead title="Chi tiet ung tuyen" onClose={onClose} />
+      <ModalHead title="Chi tiết ứng tuyển" onClose={onClose} />
       <DetailGrid rows={[
         ['Vi tri', item.tinTuyenDung?.tieuDe],
-        ['Cong ty', item.tinTuyenDung?.nhaTuyenDung?.tenCongTy],
+        ['Công ty', item.tinTuyenDung?.nhaTuyenDung?.tenCongTy],
         ['CV da dung', item.hoSoNangLuc?.tieuDe ?? '-'],
         ['Diem khop', `${item.diemKhopKyNang ?? 0}%`],
         ['Trạng thái', <Badge tone={toneUT(item.trangThai)}>{labelUT(item.trangThai)}</Badge>],
       ]} />
-      {item.thuXinViec && <div className="mt-4 rounded-xl bg-slate-50 p-3"><strong className="text-sm font-black text-slate-700">Thu xin viec</strong><p className="mt-1 text-sm text-slate-600">{item.thuXinViec}</p></div>}
+      {item.thuXinViec && <div className="mt-4 rounded-xl bg-slate-50 p-3"><strong className="text-sm font-black text-slate-700">Thư xin việc</strong><p className="mt-1 text-sm text-slate-600">{item.thuXinViec}</p></div>}
       <div className="mt-4 space-y-2">
         {timeline.map((step: string, i: number) => (
           <div key={step} className="flex items-center gap-3">
@@ -517,20 +546,37 @@ export function UngTuyenPage() {
   const [tab, setTab] = useState<'applied' | 'jobs'>('applied')
   const [selected, setSelected] = useState<any>(null)
   const [error, setError] = useState('')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const mainCv = data.hoSo?.find((x: any) => x.cvChinh)
   const appliedIds = new Set(data.ungTuyen?.map((x: any) => x.maTinTuyenDung))
   const jobs = data.tinList?.filter((x: any) => x.trangThai === 'dang_mo') ?? []
 
   const apply = async (job: any) => {
     if (!mainCv) { location.href = '/ung-vien/ho-so'; return }
-    try {
-      await api('/hosoungtuyen', { method: 'POST', body: JSON.stringify({ maUngVien: data.ungVien.id, maTinTuyenDung: job.id, maHoSoNangLuc: mainCv.id, diemKhopKyNang: 72, thuXinViec: 'Toi quan tam toi vi tri nay.' }) })
-      await data.reload(); setError('')
-    } catch (err) { setError(err instanceof Error ? err.message : 'Không ứng tuyển được') }
+    confirm(
+      'Xác nhận ứng tuyển',
+      `Gửi hồ sơ ứng tuyển vào vị trí "${job.tieuDe}"?`,
+      async () => {
+        try {
+          await api('/hosoungtuyen', { method: 'POST', body: JSON.stringify({ maUngVien: data.ungVien.id, maTinTuyenDung: job.id, maHoSoNangLuc: mainCv.id, diemKhopKyNang: 72, thuXinViec: 'Tôi quan tâm tới vị trí này.' }) })
+          await data.reload(); setError('')
+        } catch (err) { setError(err instanceof Error ? err.message : 'Không ứng tuyển được') }
+      },
+      'info',
+      'Ứng tuyển',
+    )
   }
   const withdraw = async (id: string) => {
-    await api(`/hosoungtuyen/${id}`, { method: 'PATCH', body: JSON.stringify({ trangThai: 'da_rut' }) })
-    await data.reload()
+    confirm(
+      'Rút hồ sơ ứng tuyển',
+      'Bạn có chắc chắn muốn rút hồ sơ này?',
+      async () => {
+        await api(`/hosoungtuyen/${id}/rut`, { method: 'POST' })
+        await data.reload()
+      },
+      'warning',
+      'Rút hồ sơ',
+    )
   }
 
   return (
@@ -539,13 +585,13 @@ export function UngTuyenPage() {
       <Tabs tabs={[{ key: 'applied', label: 'Đã ứng tuyển' }, { key: 'jobs', label: 'Việc phù hợp' }]} active={tab} onChange={k => setTab(k as any)} />
       {tab === 'applied' ? (
         <Panel>
-          <PanelHead title="Pipeline ung tuyen" />
+          <PanelHead title="Pipeline ứng tuyển" />
           {data.ungTuyen?.length ? (
             <div className="space-y-2">
               {data.ungTuyen.map((item: any) => (
                 <div key={item.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="flex-1 min-w-0"><AppRow item={item} onClick={() => setSelected(item)} /></div>
-                  <SecondaryBtn disabled={item.trangThai === 'da_rut'} onClick={() => withdraw(item.id)} className="shrink-0 text-rose-600 border-rose-200 hover:bg-rose-50">Rut ho so</SecondaryBtn>
+                  <SecondaryBtn disabled={item.trangThai === 'da_rut'} onClick={() => withdraw(item.id)} className="shrink-0 text-rose-600 border-rose-200 hover:bg-rose-50">Rút hồ sơ</SecondaryBtn>
                 </div>
               ))}
             </div>
@@ -570,6 +616,7 @@ export function UngTuyenPage() {
         </Panel>
       )}
       {selected && <AppDrawer item={selected} onClose={() => setSelected(null)} />}
+      <ConfirmDialogComponent />
     </Page>
   )
 }
@@ -586,7 +633,7 @@ function ItvDetail({ item, onConfirm, onReschedule }: { item: any; onConfirm: ()
     setChecklist(next)
     localStorage.setItem(`itjob_interview_checklist_${item.id}`, JSON.stringify(next))
   }
-  const items: Record<string, string> = { portfolio: 'Portfolio da chon', cv: 'CV chinh da kiem tra', questions: 'Cau hoi cho nha tuyen dung', device: 'Thiet bi / link hop san sang' }
+  const items: Record<string, string> = { portfolio: 'Portfolio đã chọn', cv: 'CV chính đã kiểm tra', questions: 'Câu hỏi cho nhà tuyển dụng', device: 'Thiết bị / link họp sẵn sàng' }
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -597,20 +644,20 @@ function ItvDetail({ item, onConfirm, onReschedule }: { item: any; onConfirm: ()
         <Badge tone={toneLich(item.trangThai)}>{labelLich(item.trangThai)}</Badge>
       </div>
       <DetailGrid rows={[
-        ['Bat dau', formatDate(item.thoiGianBatDau)],
-        ['Ket thuc', formatDate(item.thoiGianKetThuc)],
-        ['Hinh thuc', item.hinhThuc === 'online' ? 'Online' : 'Offline'],
+        ['Bắt đầu', formatDate(item.thoiGianBatDau)],
+        ['Kết thúc', formatDate(item.thoiGianKetThuc)],
+        ['Hình thức', item.hinhThuc === 'online' ? 'Online' : 'Offline'],
         ['Địa chỉ / link', item.hinhThuc === 'online' ? item.linkHop : item.diaChi],
-        ['Ket qua', labelKQ(item.ketQua)],
-        ['Ghi chu', item.ghiChu || '-'],
+        ['Kết quả', labelKQ(item.ketQua)],
+        ['Ghi chú', item.ghiChu || '-'],
       ]} />
       <div className="flex flex-wrap gap-2">
-        {item.hinhThuc === 'online' && item.linkHop && <PrimaryBtn href={item.linkHop} className="bg-emerald-600 hover:bg-emerald-700"><ExternalLink size={15} /> Mo link hop</PrimaryBtn>}
-        <SecondaryBtn disabled={item.trangThai === 'da_xac_nhan'} onClick={onConfirm}><CheckCircle size={14} /> Xac nhan</SecondaryBtn>
-        <SecondaryBtn onClick={onReschedule}><Calendar size={14} /> Xin doi lich</SecondaryBtn>
+        {item.hinhThuc === 'online' && item.linkHop && <PrimaryBtn href={item.linkHop} className="bg-emerald-600 hover:bg-emerald-700"><ExternalLink size={15} /> Mở link họp</PrimaryBtn>}
+        <SecondaryBtn disabled={item.trangThai === 'da_xac_nhan'} onClick={onConfirm}><CheckCircle size={14} /> Xác nhận</SecondaryBtn>
+        <SecondaryBtn onClick={onReschedule}><Calendar size={14} /> Xin đổi lịch</SecondaryBtn>
       </div>
       <div>
-        <strong className="block text-sm font-black text-slate-700 mb-2">Checklist chuan bi</strong>
+        <strong className="block text-sm font-black text-slate-700 mb-2">Checklist chuẩn bị</strong>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {Object.entries(items).map(([key, label]) => (
             <label key={key} className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 p-3 transition hover:border-sky-200 hover:bg-sky-50/50">
@@ -631,6 +678,7 @@ export function LichPhongVanPage() {
   const [selectedId, setSelectedId] = useState('')
   const [reschedule, setReschedule] = useState<any>(null)
   const [reason, setReason] = useState('')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const filtered = (data.lich ?? []).filter((x: any) =>
     (status === 'all' || x.trangThai === status) && (type === 'all' || x.hinhThuc === type),
@@ -638,14 +686,31 @@ export function LichPhongVanPage() {
   const selected = filtered.find((x: any) => x.id === (selectedId || filtered[0]?.id)) ?? filtered[0]
   const upcoming = (data.lich ?? []).filter((x: any) => new Date(x.thoiGianBatDau) >= new Date()).length
 
-  const patch = async (id: string, payload: any) => {
-    await api(`/lichphongvan/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })
-    await data.reload()
+  const xacNhanLich = (id: string) => {
+    confirm(
+      'Xác nhận lịch phỏng vấn',
+      'Bạn xác nhận tham gia lịch phỏng vấn này?',
+      async () => {
+        await api(`/lichphongvan/${id}/xac-nhan`, { method: 'POST' })
+        await data.reload()
+      },
+      'info',
+      'Xác nhận',
+    )
   }
   const submitReschedule = async (e: FormEvent) => {
     e.preventDefault()
-    await patch(reschedule.id, { trangThai: 'doi_lich', ghiChu: reason })
-    setReschedule(null); setReason('')
+    confirm(
+      'Gửi yêu cầu đổi lịch',
+      'Bạn có chắc chắn muốn gửi yêu cầu đổi lịch phỏng vấn?',
+      async () => {
+        await api(`/lichphongvan/${reschedule.id}/doi-lich`, { method: 'POST', body: JSON.stringify({ ghiChu: reason }) })
+        await data.reload()
+        setReschedule(null); setReason('')
+      },
+      'warning',
+      'Gửi yêu cầu',
+    )
   }
 
   return (
@@ -654,18 +719,18 @@ export function LichPhongVanPage() {
         <Kpi icon={Calendar} label="Sap toi" value={upcoming} />
         <Kpi icon={CheckCircle} label="Đã xác nhận" value={(data.lich ?? []).filter((x: any) => x.trangThai === 'da_xac_nhan').length} />
         <Kpi icon={Bell} label="Cần phản hồi" value={(data.lich ?? []).filter((x: any) => x.trangThai === 'da_len_lich').length} />
-        <Kpi icon={FileText} label="Hoan thanh" value={(data.lich ?? []).filter((x: any) => x.trangThai === 'hoan_thanh').length} />
+        <Kpi icon={FileText} label="Hoàn thành" value={(data.lich ?? []).filter((x: any) => x.trangThai === 'hoan_thanh').length} />
       </div>
       <FilterBar>
         <select className={clsx(selectCls, 'sm:w-auto')} value={status} onChange={e => setStatus(e.target.value)}>
-          <option value="all">Tat ca trang thai</option>
+          <option value="all">Tất cả trạng thái</option>
           <option value="da_len_lich">Cần phản hồi</option>
           <option value="da_xac_nhan">Đã xác nhận</option>
-          <option value="doi_lich">Xin doi lich</option>
-          <option value="hoan_thanh">Hoan thanh</option>
+          <option value="doi_lich">Xin đổi lịch</option>
+          <option value="hoan_thanh">Hoàn thành</option>
         </select>
         <select className={clsx(selectCls, 'sm:w-auto')} value={type} onChange={e => setType(e.target.value)}>
-          <option value="all">Tat ca hinh thuc</option>
+          <option value="all">Tất cả hình thức</option>
           <option value="online">Online</option>
           <option value="offline">Offline</option>
         </select>
@@ -675,23 +740,24 @@ export function LichPhongVanPage() {
           {filtered.length ? <div className="space-y-2">{filtered.map((x: any) => <ItvRow key={x.id} item={x} active={selected?.id === x.id} onClick={() => setSelectedId(x.id)} />)}</div> : <Empty>Không có lịch phù hợp bộ lọc.</Empty>}
         </Panel>
         <Panel>
-          {selected ? <ItvDetail item={selected} onConfirm={() => patch(selected.id, { trangThai: 'da_xac_nhan' })} onReschedule={() => { setReschedule(selected); setReason(selected.ghiChu ?? '') }} /> : <Empty>Chon mot lich de xem chi tiet.</Empty>}
+          {selected ? <ItvDetail item={selected} onConfirm={() => xacNhanLich(selected.id)} onReschedule={() => { setReschedule(selected); setReason(selected.ghiChu ?? '') }} /> : <Empty>Chọn một lịch để xem chi tiết.</Empty>}
         </Panel>
       </div>
       {reschedule && (
         <Modal>
-          <ModalCard className="max-w-md">
+          <ModalCard>
             <form onSubmit={submitReschedule}>
-              <ModalHead title="Xin doi lich" onClose={() => setReschedule(null)} />
+              <ModalHead title="Xin đổi lịch" onClose={() => setReschedule(null)} />
               <Field label="Ly do / ghi chu" wide><textarea className={textareaCls} value={reason} onChange={e => setReason(e.target.value)} required /></Field>
               <div className="mt-4 flex justify-end gap-2">
                 <SecondaryBtn type="button" onClick={() => setReschedule(null)}>Hủy</SecondaryBtn>
-                <PrimaryBtn type="submit">Gui yeu cau</PrimaryBtn>
+                <PrimaryBtn type="submit">Gửi yêu cầu</PrimaryBtn>
               </div>
             </form>
           </ModalCard>
         </Modal>
       )}
+      <ConfirmDialogComponent />
     </Page>
   )
 }
@@ -701,18 +767,35 @@ export function LichPhongVanPage() {
 export function ThongBaoUngVienPage() {
   const data = useUngVienData()
   const [filter, setFilter] = useState('all')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const patch = async (id: string, payload: any) => {
     await api(`/thongbao/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })
     await data.reload()
   }
   const remove = async (id: string) => {
-    await api(`/thongbao/${id}`, { method: 'DELETE' })
-    await data.reload()
+    confirm(
+      'Xóa thông báo',
+      'Bạn có chắc chắn muốn xóa thông báo này?',
+      async () => {
+        await api(`/thongbao/${id}`, { method: 'DELETE' })
+        await data.reload()
+      },
+      'danger',
+      'Xóa',
+    )
   }
   const markAll = async () => {
-    await Promise.all((data.thongBao ?? []).filter((x: any) => !x.daDoc).map((x: any) => api(`/thongbao/${x.id ?? x._id}`, { method: 'PATCH', body: JSON.stringify({ daDoc: true }) })))
-    await data.reload()
+    confirm(
+      'Đánh dấu tất cả đã đọc',
+      'Xác nhận đánh dấu toàn bộ thông báo là đã đọc?',
+      async () => {
+        await Promise.all((data.thongBao ?? []).filter((x: any) => !x.daDoc).map((x: any) => api(`/thongbao/${x.id ?? x._id}`, { method: 'PATCH', body: JSON.stringify({ daDoc: true }) })))
+        await data.reload()
+      },
+      'info',
+      'Đánh dấu',
+    )
   }
   const items = (data.thongBao ?? []).filter((x: any) =>
     filter === 'all' || (filter === 'unread' && !x.daDoc) || (filter === 'read' && x.daDoc) || x.loai === filter,
@@ -722,13 +805,13 @@ export function ThongBaoUngVienPage() {
     <Page title="Thông báo" desc="Theo dõi cập nhật từ hệ thống, nhà tuyển dụng và lịch phỏng vấn." action={<SecondaryBtn onClick={markAll}>Đánh dấu tất cả đã đọc</SecondaryBtn>}>
       <FilterBar>
         <select className={clsx(selectCls, 'sm:w-auto')} value={filter} onChange={e => setFilter(e.target.value)}>
-          <option value="all">Tat ca</option>
+          <option value="all">Tất cả</option>
           <option value="unread">Chưa đọc</option>
           <option value="read">Đã đọc</option>
           <option value="lich_phong_van">Lịch phỏng vấn</option>
           <option value="ho_so_ung_tuyen">Ứng tuyển</option>
-          <option value="tin_tuyen_dung">Tin tuyen dung</option>
-          <option value="he_thong">He thong</option>
+          <option value="tin_tuyen_dung">Tin tuyển dụng</option>
+          <option value="he_thong">Hệ thống</option>
         </select>
       </FilterBar>
       <Panel>
@@ -748,7 +831,7 @@ export function ThongBaoUngVienPage() {
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
                     <Badge tone={item.daDoc ? 'gray' : 'blue'}>{item.daDoc ? 'Đã đọc' : 'Mới'}</Badge>
-                    {!item.daDoc && <SecondaryBtn onClick={() => patch(id, { daDoc: true })} className="text-xs px-2 min-h-[36px]">Danh dau doc</SecondaryBtn>}
+                    {!item.daDoc && <SecondaryBtn onClick={() => patch(id, { daDoc: true })} className="text-xs px-2 min-h-[36px]">Đánh dấu đọc</SecondaryBtn>}
                     <button onClick={() => remove(id)} className="grid h-9 w-9 place-items-center rounded-xl border border-rose-200 text-rose-500 transition hover:bg-rose-50"><Trash2 size={14} /></button>
                   </div>
                 </div>
@@ -757,6 +840,7 @@ export function ThongBaoUngVienPage() {
           </div>
         ) : <Empty>Không có thông báo phù hợp.</Empty>}
       </Panel>
+      <ConfirmDialogComponent />
     </Page>
   )
 }
@@ -780,7 +864,7 @@ export function ViecDaLuuPage() {
   const apply = async (job: any) => {
     if (!mainCv) { location.href = '/ung-vien/ho-so'; return }
     try {
-      await api('/hosoungtuyen', { method: 'POST', body: JSON.stringify({ maUngVien: data.ungVien.id, maTinTuyenDung: job.id, maHoSoNangLuc: mainCv.id, diemKhopKyNang: 70, thuXinViec: 'Toi muon ung tuyen nhanh tu danh sach viec da luu.' }) })
+      await api('/hosoungtuyen', { method: 'POST', body: JSON.stringify({ maUngVien: data.ungVien.id, maTinTuyenDung: job.id, maHoSoNangLuc: mainCv.id, diemKhopKyNang: 70, thuXinViec: 'Tôi muốn ứng tuyển nhanh từ danh sách việc đã lưu.' }) })
       await data.reload(); setError('')
     } catch (err) { setError(err instanceof Error ? err.message : 'Không ứng tuyển được') }
   }
@@ -788,7 +872,7 @@ export function ViecDaLuuPage() {
   return (
     <Page title="Việc đã lưu" desc="Lưu lại các tin tuyển dụng cần theo dõi hoặc ứng tuyển sau.">
       <ErrorBox message={error} />
-      <FilterBar><input className={inputCls} value={query} onChange={e => setQuery(e.target.value)} placeholder="Loc theo cong ty, dia diem, luong..." /></FilterBar>
+      <FilterBar><input className={inputCls} value={query} onChange={e => setQuery(e.target.value)} placeholder="Lọc theo công ty, địa điểm, lương..." /></FilterBar>
       <Panel>
         {jobs.length ? (
           <div className="space-y-2">
@@ -799,7 +883,7 @@ export function ViecDaLuuPage() {
                   <p className="mt-0.5 truncate text-sm font-medium text-slate-500">{job.nhaTuyenDung?.tenCongTy} - {job.diaChi} - {money(job.luongMin)} - {money(job.luongMax)}</p>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <SecondaryBtn onClick={() => toggle(job.id)}><Star size={14} /> Bo luu</SecondaryBtn>
+                  <SecondaryBtn onClick={() => toggle(job.id)}><Star size={14} /> Bỏ lưu</SecondaryBtn>
                   <PrimaryBtn disabled={appliedIds.has(job.id)} onClick={() => apply(job)}>{appliedIds.has(job.id) ? 'Đã nộp' : 'Ứng tuyển nhanh'}</PrimaryBtn>
                 </div>
               </Row>
@@ -835,12 +919,12 @@ export function CaiDatUngVienPage() {
     <Page title="Cài đặt tài khoản" desc="Cập nhật thông tin đăng nhập, liên hệ và tùy chọn thông báo.">
       <Panel>
         <form onSubmit={save} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Ho ten"><input className={inputCls} value={form.hoTen ?? ''} onChange={e => setForm({ ...form, hoTen: e.target.value })} /></Field>
-          <Field label="So dien thoai"><input className={inputCls} value={form.soDienThoai ?? ''} onChange={e => setForm({ ...form, soDienThoai: e.target.value })} /></Field>
+          <Field label="Họ tên"><input className={inputCls} value={form.hoTen ?? ''} onChange={e => setForm({ ...form, hoTen: e.target.value })} /></Field>
+          <Field label="Số điện thoại"><input className={inputCls} value={form.soDienThoai ?? ''} onChange={e => setForm({ ...form, soDienThoai: e.target.value })} /></Field>
           <Field label="Mật khẩu mới"><input className={inputCls} type="password" value={form.matKhau ?? ''} onChange={e => setForm({ ...form, matKhau: e.target.value })} placeholder="Để trống nếu không đổi" /></Field>
-          <Field label="Tuy chon thong bao" wide>
+          <Field label="Tùy chọn thông báo" wide>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {[{ key: 'email', label: 'Email' }, { key: 'interview', label: 'Phong van' }, { key: 'job', label: 'Tin tuyen dung' }].map(({ key, label }) => (
+              {[{ key: 'email', label: 'Email' }, { key: 'interview', label: 'Phỏng vấn' }, { key: 'job', label: 'Tin tuyển dụng' }].map(({ key, label }) => (
                 <label key={key} className="flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 p-3 transition hover:border-sky-200 hover:bg-sky-50/50">
                   <input type="checkbox" className="h-4 w-4 rounded accent-sky-600" checked={prefs[key]} onChange={e => setPrefs({ ...prefs, [key]: e.target.checked })} />
                   <span className="text-sm font-bold text-slate-700">{label}</span>

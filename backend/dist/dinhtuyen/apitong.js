@@ -17,10 +17,12 @@ const tinnhan_dinhtuyen_js_1 = require("../modules/tinnhan/tinnhan.dinhtuyen.js"
 const tintuyendung_dinhtuyen_js_1 = require("../modules/tintuyendung/tintuyendung.dinhtuyen.js");
 const ungvien_dinhtuyen_js_1 = require("../modules/ungvien/ungvien.dinhtuyen.js");
 const xacthuc_dinhtuyen_js_1 = require("../modules/xacthuc/xacthuc.dinhtuyen.js");
+const xacthuc_js_1 = require("../dungchung/xacthuc.js");
 exports.apiTong = (0, express_1.Router)();
 exports.apiTong.get('/trangthai', (_yeuCau, phanHoi) => {
     phanHoi.json({ thongBao: 'API san sang', thoiGian: new Date().toISOString() });
 });
+exports.apiTong.use(xacthuc_js_1.ganNguoiDungNeuCo);
 exports.apiTong.use('/nguoidung', nguoidung_dinhtuyen_js_1.dinhTuyenNguoiDung);
 exports.apiTong.use('/canhbaoquantri', canhbaoquantri_dinhtuyen_js_1.dinhTuyenCanhBaoQuanTri);
 exports.apiTong.use('/xacthuc', xacthuc_dinhtuyen_js_1.dinhTuyenXacThuc);

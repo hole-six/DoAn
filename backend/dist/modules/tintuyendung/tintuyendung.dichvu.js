@@ -24,6 +24,7 @@ function chuanHoaTin(taiLieu) {
         luongMax: duLieu.luongMax,
         loaiHinh: duLieu.loaiHinh,
         capBac: duLieu.capBac,
+        anhDaiDien: duLieu.anhDaiDien,
         hanNop: duLieu.hanNop,
         soLuong: duLieu.soLuong,
         moTa: duLieu.moTa,

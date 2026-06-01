@@ -63,11 +63,14 @@ exports.dichVuHoSoNangLuc = {
     },
     async capNhat(ma, duLieu) {
         const payload = duLieu;
-        if (payload.cvChinh && payload.maUngVien)
-            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ maUngVien: payload.maUngVien, _id: { $ne: ma } }, { $set: { cvChinh: false } });
-        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findByIdAndUpdate(ma, payload, { returnDocument: 'after', runValidators: true });
+        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findById(ma);
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so nang luc de cap nhat', 404);
+        if (payload.cvChinh && payload.maUngVien) {
+            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ maUngVien: payload.maUngVien, _id: { $ne: ma } }, { $set: { cvChinh: false } });
+        }
+        Object.assign(ketQua, payload);
+        await ketQua.save();
         return chuanHoaHoSo(ketQua);
     },
     async xoa(ma) {

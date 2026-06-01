@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Award, Briefcase, Globe, MapPin, Star, ThumbsUp, Users } from 'lucide-react'
+import './congty-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
+const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:5000'
 const logoDuPhong = 'https://placehold.co/160x160/eaf2ff/2563eb?text=IT'
 const bannerDuPhong = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80'
+
+// Helper function để lấy URL đầy đủ cho logo
+function layUrlLogo(logo?: string) {
+  if (!logo) return logoDuPhong
+  if (logo.startsWith('http://') || logo.startsWith('https://')) return logo
+  return `${BASE_URL}${logo}`
+}
 
 type CongTy = {
   id: string
@@ -78,7 +87,7 @@ function CardViecLam({ tin, congTy }: { tin: TinTuyenDung; congTy: CongTy }) {
       <h4 style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4, marginBottom: 10, color: '#0b1c30' }}>{tin.tieuDe}</h4>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div style={{ width: 28, height: 28, borderRadius: 6, background: '#f3f4f6', border: '1px solid #e5e7eb', overflow: 'hidden', flexShrink: 0 }}>
-          <img src={congTy.logo || logoDuPhong} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={layUrlLogo(congTy.logo)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{congTy.tenCongTy}</span>
       </div>
@@ -142,7 +151,7 @@ export default function HoSoCongTy() {
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
             <div style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
-              <img src={congTy.logo || logoDuPhong} alt={congTy.tenCongTy} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={layUrlLogo(congTy.logo)} alt={congTy.tenCongTy} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 0, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>{congTy.tenCongTy}</h1>
           </div>

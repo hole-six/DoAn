@@ -10,6 +10,7 @@ export const kiemTraTaoTinTuyenDung = z.object({
   luongMax: z.number().min(0).optional(),
   loaiHinh: z.enum(loaiHinhLamViec).optional(),
   capBac: z.enum(capBacTinTuyenDung).optional(),
+  anhDaiDien: z.string().optional(),
   hanNop: z.coerce.date().optional(),
   soLuong: z.number().int().min(1).optional(),
   moTa: z.string().min(10),

@@ -12,6 +12,7 @@ exports.kiemTraTaoTinTuyenDung = zod_1.z.object({
     luongMax: zod_1.z.number().min(0).optional(),
     loaiHinh: zod_1.z.enum(tintuyendung_mohinh_js_1.loaiHinhLamViec).optional(),
     capBac: zod_1.z.enum(tintuyendung_mohinh_js_1.capBacTinTuyenDung).optional(),
+    anhDaiDien: zod_1.z.string().optional(),
     hanNop: zod_1.z.coerce.date().optional(),
     soLuong: zod_1.z.number().int().min(1).optional(),
     moTa: zod_1.z.string().min(10),

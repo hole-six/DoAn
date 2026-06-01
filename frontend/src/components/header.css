@@ -1,0 +1,700 @@
+/* Header and mobile navigation styles */
+
+/* Final header role-aware layout overrides. */
+.site-header-rong {
+  background: #0b1f43 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24) !important;
+  box-shadow: 0 10px 26px rgba(2, 8, 23, 0.24) !important;
+}
+
+.tech-strip-rong {
+  align-items: center !important;
+  background: #101827 !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16) !important;
+  display: flex !important;
+  height: 34px !important;
+  overflow: hidden !important;
+}
+
+.tech-strip-track {
+  animation: marquee-tech 34s linear infinite !important;
+  display: flex !important;
+  gap: 30px !important;
+  min-width: max-content !important;
+  padding-left: 0 !important;
+}
+
+.tech-strip-item {
+  align-items: center !important;
+  color: #cbd5e1 !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  gap: 8px !important;
+  opacity: 0.78 !important;
+  white-space: nowrap !important;
+}
+
+.tech-strip-item img {
+  filter: brightness(0) invert(1) !important;
+  height: 20px !important;
+  opacity: 0.9 !important;
+  width: 20px !important;
+}
+
+.nav-bar-rong {
+  display: grid !important;
+  gap: 20px !important;
+  grid-template-columns: 210px minmax(480px, 1fr) minmax(420px, auto) !important;
+  min-height: 74px !important;
+  padding: 0 32px !important;
+}
+
+.nav-bar-rong .brand {
+  align-items: center !important;
+  display: flex !important;
+  min-width: 0 !important;
+}
+
+.nav-bar-rong .logo-thuonghieu {
+  height: 44px !important;
+  object-fit: contain !important;
+  width: auto !important;
+}
+
+.nav-bar-rong nav {
+  justify-content: center !important;
+  min-width: 0 !important;
+}
+
+.nav-bar-rong nav a {
+  border: 1px solid transparent !important;
+  color: #eaf2ff !important;
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  min-height: 42px !important;
+  padding: 13px 16px !important;
+  white-space: nowrap !important;
+}
+
+.nav-bar-rong nav a.active,
+.nav-bar-rong nav a:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(191, 219, 254, 0.32) !important;
+}
+
+.nav-actions-rong {
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  min-width: 0 !important;
+}
+
+.nav-cta-rong {
+  align-content: center !important;
+  border-radius: 10px !important;
+  min-height: 48px !important;
+  min-width: 190px !important;
+  padding: 8px 14px !important;
+}
+
+.nav-cta-rong span {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+}
+
+.nav-cta-rong strong {
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+.nav-pill-rong,
+.nav-user-rong {
+  align-items: center !important;
+  border: 1px solid rgba(191, 219, 254, 0.24) !important;
+  border-radius: 999px !important;
+  color: #eaf2ff !important;
+  display: inline-flex !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  gap: 8px !important;
+  min-height: 42px !important;
+  padding: 0 14px !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+
+.nav-pill-rong.strong {
+  background: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #0e4d7d !important;
+}
+
+.nav-user-rong {
+  border-radius: 12px !important;
+  max-width: 230px !important;
+  padding: 5px 10px 5px 5px !important;
+}
+
+.nav-user-rong > span:last-child {
+  display: grid !important;
+  min-width: 0 !important;
+}
+
+.nav-user-rong small,
+.nav-user-rong strong {
+  display: block !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.nav-user-rong small {
+  color: #bfdbfe !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  line-height: 1.1 !important;
+}
+
+.nav-user-rong strong {
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  max-width: 148px !important;
+}
+
+.avatar-rong {
+  background: #eaf2ff !important;
+  color: #0e4d7d !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  width: 32px !important;
+}
+
+.nav-icon-rong,
+.nav-notification-rong .notification-center > button {
+  align-items: center !important;
+  background: transparent !important;
+  border: 1px solid rgba(191, 219, 254, 0.2) !important;
+  border-radius: 999px !important;
+  color: #dbeafe !important;
+  display: inline-flex !important;
+  height: 42px !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  width: 42px !important;
+}
+
+.nav-notification-rong .notification-center > button:hover,
+.nav-icon-rong:hover,
+.nav-pill-rong:hover,
+.nav-user-rong:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.mobile-menu-rong {
+  background: rgba(4, 14, 40, 0.98) !important;
+  border-top: 1px solid rgba(151, 190, 255, 0.2) !important;
+  display: grid !important;
+  gap: 4px !important;
+  padding: 14px 20px 18px !important;
+}
+
+.mobile-menu-rong a,
+.mobile-menu-rong button {
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: #dfebff !important;
+  display: inline-flex !important;
+  font-weight: 850 !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  min-height: 42px !important;
+  text-align: left !important;
+}
+
+.mobile-menu-rong button {
+  color: #fecaca !important;
+}
+
+@media (max-width: 1280px) {
+  .nav-bar-rong {
+    grid-template-columns: 170px minmax(0, 1fr) auto !important;
+    padding: 0 20px !important;
+  }
+
+  .nav-bar-rong nav {
+    justify-content: flex-start !important;
+  }
+
+  .nav-bar-rong nav a {
+    font-size: 14px !important;
+    padding-inline: 11px !important;
+  }
+
+  .nav-cta-rong {
+    min-width: 170px !important;
+  }
+}
+
+@media (max-width: 1080px) {
+  .nav-bar-rong {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  .nav-bar-rong nav,
+  .nav-actions-rong .nav-cta-rong,
+  .nav-actions-rong .nav-pill-rong,
+  .nav-actions-rong .nav-user-rong,
+  .nav-actions-rong .nav-notification-rong,
+  .nav-actions-rong .nav-icon-rong {
+    display: none !important;
+  }
+
+  .site-header-rong .menu-button {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(191, 219, 254, 0.24) !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .tech-strip-rong {
+    height: 28px !important;
+  }
+
+  .tech-strip-item {
+    font-size: 11px !important;
+  }
+
+  .tech-strip-item img {
+    height: 16px !important;
+    width: 16px !important;
+  }
+
+  .nav-bar-rong {
+    min-height: 62px !important;
+    padding: 0 14px !important;
+  }
+
+  .nav-bar-rong .logo-thuonghieu {
+    height: 38px !important;
+  }
+}
+
+/* ========================================================================== */
+/* MOBILE RESPONSIVE IMPROVEMENTS - HEADER & NAVIGATION */
+/* ========================================================================== */
+
+/* Nút đăng nhập/đăng ký cho mobile */
+.nav-pill-rong {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px 16px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.nav-pill-rong:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-pill-rong.strong {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.95);
+  color: #0d244a;
+}
+
+.nav-pill-rong.strong:hover {
+  background: #ffffff;
+  border-color: #ffffff;
+}
+
+/* User avatar và notification */
+.nav-user-rong {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 10px;
+  min-height: 42px;
+  padding: 4px 12px 4px 4px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.nav-user-rong:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.nav-user-rong span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-user-rong small {
+  color: #bfdbfe;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.nav-user-rong strong {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.nav-notification-rong {
+  position: relative;
+}
+
+/* Responsive cho tablet */
+@media (max-width: 1024px) {
+  .nav-bar-rong {
+    grid-template-columns: 180px minmax(0, 1fr) auto;
+    gap: 16px;
+  }
+
+  .nav-bar-rong .logo-thuonghieu {
+    height: 48px;
+  }
+
+  .nav-bar-rong nav a {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .nav-cta-rong {
+    min-width: 180px;
+    min-height: 48px;
+    padding: 6px 12px;
+  }
+
+  .nav-cta-rong span {
+    font-size: 11px;
+  }
+
+  .nav-cta-rong strong {
+    font-size: 14px;
+  }
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+  .nav-bar-rong {
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    min-height: 68px;
+    padding: 0 16px;
+  }
+
+  /* Menu button bên trái - hiện lên */
+  .nav-bar-rong .menu-button {
+    display: inline-flex !important;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 10px;
+    color: #ffffff;
+    height: 44px;
+    width: 44px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .nav-bar-rong .menu-button:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  /* Logo ở giữa và to hơn */
+  .nav-bar-rong .brand {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .nav-bar-rong .logo-thuonghieu {
+    height: 50px;
+  }
+
+  /* Ẩn navigation desktop */
+  .nav-bar-rong nav {
+    display: none !important;
+  }
+
+  /* Nav actions bên phải */
+  .nav-actions-rong {
+    grid-column: 3;
+    justify-self: end;
+    gap: 8px;
+  }
+
+  /* Ẩn các elements không cần thiết trên mobile */
+  .nav-actions-rong .nav-cta-rong,
+  .nav-actions-rong .nav-notification-rong {
+    display: none !important;
+  }
+
+  /* Nút đăng nhập/đăng ký */
+  .nav-pill-rong {
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 14px;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .nav-pill-rong svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nav-pill-rong span {
+    display: inline;
+  }
+
+  /* User info - hiện avatar + tên */
+  .nav-user-rong {
+    min-height: 40px;
+    padding: 4px 10px 4px 4px;
+    gap: 8px;
+    max-width: 140px;
+  }
+
+  .nav-user-rong span {
+    display: flex !important;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .nav-user-rong small {
+    display: none;
+  }
+
+  .nav-user-rong strong {
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .avatar-rong {
+    height: 34px;
+    width: 34px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Mobile menu */
+  .mobile-menu-rong {
+    background: rgba(4, 14, 40, 0.98);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(151, 190, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    left: 0;
+    max-height: calc(100vh - 68px);
+    overflow-y: auto;
+    padding: 12px;
+    position: absolute;
+    right: 0;
+    top: 68px;
+    z-index: 100;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .mobile-menu-rong a,
+  .mobile-menu-rong button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    color: #dfebff;
+    display: flex;
+    font-size: 15px;
+    font-weight: 600;
+    gap: 10px;
+    min-height: 48px;
+    padding: 12px 16px;
+    text-align: left;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+
+  .mobile-menu-rong a:hover,
+  .mobile-menu-rong button:hover {
+    background: rgba(122, 169, 255, 0.15);
+    color: #ffffff;
+  }
+
+  .mobile-menu-rong button {
+    border-top: 1px solid rgba(151, 190, 255, 0.15);
+    color: #fecaca;
+    margin-top: 8px;
+  }
+
+  .mobile-menu-rong button:hover {
+    background: rgba(254, 202, 202, 0.1);
+  }
+}
+
+/* Responsive cho mobile nhỏ */
+@media (max-width: 480px) {
+  .nav-bar-rong {
+    padding: 0 12px;
+    min-height: 64px;
+    grid-template-columns: auto 1fr auto;
+  }
+
+  /* Menu button */
+  .nav-bar-rong .menu-button {
+    height: 42px;
+    width: 42px;
+  }
+
+  /* Logo */
+  .nav-bar-rong .logo-thuonghieu {
+    height: 46px;
+  }
+
+  /* Chỉ hiện nút đăng ký (strong) hoặc avatar */
+  .nav-actions-rong .nav-pill-rong:not(.strong) {
+    display: none !important;
+  }
+
+  .nav-pill-rong.strong {
+    min-height: 38px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .nav-pill-rong.strong span {
+    display: inline;
+  }
+
+  /* User info - chỉ hiện avatar + tên ngắn */
+  .nav-user-rong {
+    min-height: 38px;
+    padding: 3px 8px 3px 3px;
+    max-width: 120px;
+  }
+
+  .nav-user-rong strong {
+    font-size: 12px;
+  }
+
+  .avatar-rong {
+    height: 32px;
+    width: 32px;
+    font-size: 11px;
+  }
+}
+
+/* HEADER RESPONSIVE                                                          */
+/* ========================================================================== */
+
+@media (max-width: 1024px) {
+  .site-header-rong {
+    position: sticky;
+  }
+
+  .nav-bar-rong {
+    grid-template-columns: auto 1fr auto;
+    min-height: 70px;
+    padding: 0 16px;
+  }
+
+  .nav-bar-rong .logo-thuonghieu {
+    height: 44px;
+  }
+
+  .nav-bar-rong nav {
+    display: none;
+  }
+
+  .nav-actions-rong {
+    gap: 8px;
+  }
+
+  .nav-icon-rong {
+    width: 38px;
+    height: 38px;
+  }
+
+  .menu-button {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.9);
+    padding: 8px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .menu-button:hover {
+    background: rgba(255,255,255,0.1);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide tech marquee on mobile */
+  .site-header-rong > div:first-child {
+    display: none;
+  }
+
+  .nav-bar-rong {
+    min-height: 64px;
+  }
+
+  .nav-bar-rong .logo-thuonghieu {
+    height: 38px;
+  }
+
+  .nav-actions-rong .nav-icon-rong:first-child {
+    display: none; /* Hide notification bell */
+  }
+}
+
+/* ========================================================================== */

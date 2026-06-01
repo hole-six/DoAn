@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, Zap } from 'lucide-react'
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
+import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
+import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
+import './congty-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
@@ -119,6 +122,7 @@ function hienThiTiengViet(value?: string, fallback = '') {
 }
 
 export default function DanhSachCongTy() {
+  const navigate = useNavigate()
   const [tuKhoa, setTuKhoa] = useState('')
   const [quyMoDangChon, setQuyMoDangChon] = useState<string[]>([])
   const [linhVucDangChon, setLinhVucDangChon] = useState<string[]>([])
@@ -131,6 +135,13 @@ export default function DanhSachCongTy() {
   const [reviews, setReviews] = useState<DanhGia[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
+  const [searchActive, setSearchActive] = useState(false)
+  const searchWrapRef = useRef<HTMLDivElement | null>(null)
+  const { groups, loading, hasAny } = useSearchSuggestions({
+    query: tuKhoa,
+    active: searchActive,
+    apiUrl: API_URL,
+  })
 
   useEffect(() => {
     let active = true
@@ -145,6 +156,22 @@ export default function DanhSachCongTy() {
       .catch(error => setLoi(error instanceof Error ? error.message : 'Không tải được dữ liệu công ty'))
       .finally(() => active && setDangTai(false))
     return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSearchActive(false)
+    }
+    const onMouseDown = (event: MouseEvent) => {
+      if (!searchWrapRef.current) return
+      if (!searchWrapRef.current.contains(event.target as Node)) setSearchActive(false)
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('mousedown', onMouseDown)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('mousedown', onMouseDown)
+    }
   }, [])
 
   const stats = useMemo(() => {
@@ -237,15 +264,23 @@ export default function DanhSachCongTy() {
     setDanhGiaToiThieu(0)
   }
 
+  const chonGoiY = (item: SuggestionItem) => {
+    setTuKhoa(item.queryValue)
+    setSearchActive(false)
+    if (item.type !== 'company') {
+      navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+    }
+  }
+
   return (
     <main className="app-page jobs-real-page company-real-page">
-      <section className="jobs-real-hero company-real-hero">
+      <section className={`jobs-real-hero company-real-hero${searchActive ? ' search-focus-active' : ''}`}>
         <img src={congTyCongNgheBg} alt="" />
         <div />
         <article>
           <h1>Khám phá công ty IT bằng dữ liệu thật</h1>
           <p>{dangTai ? 'Đang tải dữ liệu công ty...' : `${ketQua.length} công ty phù hợp từ hệ thống ITJob`}</p>
-          <div className="jobs-real-search company-real-search">
+          <div ref={searchWrapRef} className={`jobs-real-search company-real-search${searchActive ? ' search-shell-active' : ''}`}>
             <label>
               <Search size={18} />
               <input
@@ -253,10 +288,17 @@ export default function DanhSachCongTy() {
                 placeholder="Tên công ty, lĩnh vực, địa điểm..."
                 value={tuKhoa}
                 onChange={e => setTuKhoa(e.target.value)}
+                onFocus={() => setSearchActive(true)}
               />
             </label>
-            <button className="primary-button"><Search size={17} /> Tìm kiếm</button>
+            <button className="primary-button" onClick={() => setSearchActive(false)}><Search size={17} /> Tìm kiếm</button>
+            {searchActive && (
+              <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+            )}
           </div>
+          {searchActive && (loading || hasAny) && (
+            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="Đóng gợi ý tìm kiếm" />
+          )}
           <div className="jobs-real-tags">
             {boLocDong.linhVuc.slice(0, 8).map(([label]) => (
               <button key={label} onClick={() => setLinhVucDangChon(prev => toggleValue(prev, label))}>{hienThiTiengViet(label)}</button>

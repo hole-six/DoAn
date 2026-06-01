@@ -14,6 +14,7 @@ import {
 } from '../../components'
 import AppIcon from '../../components/AppIcon'
 import { CheckCircle, Clock, Users, Briefcase, Building2, AlertTriangle, RefreshCw, FileText, Server } from 'lucide-react'
+import './admin-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 

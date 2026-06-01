@@ -2,10 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuLichPhongVan = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const hosoungtuyen_mohinh_js_1 = require("../hosoungtuyen/hosoungtuyen.mohinh.js");
 require("../nhatuyendung/nhatuyendung.mohinh.js");
 require("../tintuyendung/tintuyendung.mohinh.js");
+const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const lichphongvan_mohinh_js_1 = require("./lichphongvan.mohinh.js");
 function chuanHoaLich(taiLieu) {
     const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
@@ -22,7 +22,12 @@ function chuanHoaLich(taiLieu) {
                     ? {
                         id: String(tin._id),
                         tieuDe: tin.tieuDe,
-                        nhaTuyenDung: tin.maNhaTuyenDung?._id ? { id: String(tin.maNhaTuyenDung._id), tenCongTy: tin.maNhaTuyenDung.tenCongTy } : undefined,
+                        nhaTuyenDung: tin.maNhaTuyenDung?._id
+                            ? {
+                                id: String(tin.maNhaTuyenDung._id),
+                                tenCongTy: tin.maNhaTuyenDung.tenCongTy,
+                            }
+                            : undefined,
                     }
                     : undefined,
             }
@@ -40,7 +45,10 @@ function chuanHoaLich(taiLieu) {
     };
 }
 function populate(q) {
-    return q.populate({ path: 'maHoSoUngTuyen', populate: { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy' } } });
+    return q.populate({
+        path: 'maHoSoUngTuyen',
+        populate: { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung' } },
+    });
 }
 exports.dichVuLichPhongVan = {
     async layDanhSach() {
@@ -56,13 +64,14 @@ exports.dichVuLichPhongVan = {
     async taoMoi(duLieu) {
         const ketQua = await lichphongvan_mohinh_js_1.LichPhongVan.create(duLieu);
         const lichMoi = await this.layTheoMa(String(ketQua._id));
-        // Gửi thông báo cho ứng viên
         try {
-            const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(duLieu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung');
+            const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
+                .findById(duLieu.maHoSoUngTuyen)
+                .populate('maUngVien maTinTuyenDung');
             if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
                 const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
                 await (0, thongbao_helper_js_1.thongBaoMoiPhongVan)({
-                    maUngVien: String(hoSo.maUngVien._id),
+                    maUngVien: String(hoSo.maUngVien.maNguoiDung ?? hoSo.maUngVien._id),
                     tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
                     viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
                     thoiGian: duLieu.thoiGianBatDau,
@@ -77,18 +86,24 @@ exports.dichVuLichPhongVan = {
         return lichMoi;
     },
     async capNhat(ma, duLieu) {
-        const lichCu = await lichphongvan_mohinh_js_1.LichPhongVan.findById(ma);
-        const ketQua = await populate(lichphongvan_mohinh_js_1.LichPhongVan.findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true }));
+        const lichCu = await lichphongvan_mohinh_js_1.LichPhongVan.findById(ma).populate('maHoSoUngTuyen');
+        const ketQua = await populate(lichphongvan_mohinh_js_1.LichPhongVan.findByIdAndUpdate(ma, duLieu, {
+            returnDocument: 'after',
+            runValidators: true,
+        }));
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Khong tim thay lich phong van de cap nhat', 404);
-        // Gửi thông báo nếu thời gian thay đổi
-        if (lichCu && duLieu.thoiGianBatDau && lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
+        if (lichCu &&
+            duLieu.thoiGianBatDau &&
+            lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
             try {
-                const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(lichCu.maHoSoUngTuyen).populate('maUngVien maTinTuyenDung');
+                const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
+                    .findById(lichCu.maHoSoUngTuyen)
+                    .populate('maUngVien maTinTuyenDung');
                 if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
                     const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
                     await (0, thongbao_helper_js_1.thongBaoLichPhongVanThayDoi)({
-                        maUngVien: String(hoSo.maUngVien._id),
+                        maUngVien: String(hoSo.maUngVien.maNguoiDung ?? hoSo.maUngVien._id),
                         tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
                         viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
                         thoiGianMoi: duLieu.thoiGianBatDau,
@@ -99,6 +114,53 @@ exports.dichVuLichPhongVan = {
             }
             catch (error) {
                 console.error('Loi gui thong bao thay doi lich:', error);
+            }
+        }
+        if (lichCu &&
+            String(duLieu.trangThai ?? '') &&
+            String(duLieu.trangThai) !== String(lichCu.trangThai ?? '')) {
+            try {
+                const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
+                    .findById(lichCu.maHoSoUngTuyen?._id ?? lichCu.maHoSoUngTuyen)
+                    .populate('maUngVien maTinTuyenDung');
+                if (hoSo?.maUngVien && hoSo?.maTinTuyenDung) {
+                    const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
+                    const maNguoiDungUngVien = String(hoSo.maUngVien.maNguoiDung ?? hoSo.maUngVien._id);
+                    const maNguoiDungNhaTuyenDung = String(tin.maNhaTuyenDung?.maNguoiDung ?? tin.maNhaTuyenDung?._id ?? '');
+                    const tenUngVien = hoSo.maUngVien?.hoTen ?? hoSo.maUngVien?.tenUngVien ?? 'Ung vien';
+                    const viTriUngTuyen = tin.tieuDe || 'Vị trí tuyển dụng';
+                    if (duLieu.trangThai === 'da_xac_nhan' && maNguoiDungNhaTuyenDung) {
+                        await (0, thongbao_helper_js_1.thongBaoUngVienChapNhanLich)({
+                            maNhaTuyenDung: maNguoiDungNhaTuyenDung,
+                            tenUngVien,
+                            viTriUngTuyen,
+                            thoiGian: ketQua.thoiGianBatDau,
+                            maLichPhongVan: ma,
+                        });
+                    }
+                    if (duLieu.trangThai === 'da_huy' && maNguoiDungNhaTuyenDung) {
+                        await (0, thongbao_helper_js_1.thongBaoUngVienTuChoiLich)({
+                            maNhaTuyenDung: maNguoiDungNhaTuyenDung,
+                            tenUngVien,
+                            viTriUngTuyen,
+                            lyDo: duLieu.ghiChu,
+                            maLichPhongVan: ma,
+                        });
+                    }
+                    if (duLieu.trangThai === 'hoan_thanh' && duLieu.ketQua && maNguoiDungUngVien) {
+                        await (0, thongbao_helper_js_1.thongBaoKetQuaPhongVan)({
+                            maUngVien: maNguoiDungUngVien,
+                            tenCongTy: tin.maNhaTuyenDung?.tenCongTy || 'Công ty',
+                            viTriUngTuyen,
+                            ketQua: duLieu.ketQua,
+                            ghiChu: duLieu.ghiChu,
+                            maLichPhongVan: ma,
+                        });
+                    }
+                }
+            }
+            catch (error) {
+                console.error('Loi gui thong bao cap nhat lich:', error);
             }
         }
         return chuanHoaLich(ketQua);

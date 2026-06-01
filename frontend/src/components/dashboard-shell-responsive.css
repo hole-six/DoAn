@@ -1,0 +1,460 @@
+﻿/* ========================================================================== */
+/* DASHBOARD SHELL - RESPONSIVE IMPROVEMENTS */
+/* ========================================================================== */
+
+/* â”€â”€â”€ Base Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Smooth transitions for sidebar */
+aside[data-open] {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Better scrolling on mobile */
+aside[data-open] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* â”€â”€â”€ Mobile Responsive (â‰¤1023px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (max-width: 1023px) {
+  /* Mobile sidebar overlay */
+  aside[data-open="false"] {
+    transform: translateX(-100%);
+  }
+
+  aside[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  /* Mobile header improvements */
+  .sticky.top-0.z-\[60\] {
+    height: 64px;
+    padding: 0 16px;
+  }
+
+  /* Mobile header button */
+  .inline-flex.h-11.w-11.items-center.justify-center.rounded-xl {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Mobile header title */
+  .text-lg.font-black.text-slate-900 {
+    font-size: 16px;
+  }
+
+  /* Mobile header avatar */
+  .inline-flex.h-11.w-11.items-center.justify-center.rounded-xl.bg-gradient-to-br {
+    width: 40px;
+    height: 40px;
+    font-size: 11px;
+  }
+
+  /* Main content padding for mobile */
+  main.min-w-0.flex-1 {
+    padding: 16px 12px 120px 12px !important;
+  }
+
+  /* Sidebar width on mobile */
+  aside.w-\[min\(88vw\,300px\)\] {
+    width: min(85vw, 280px);
+  }
+
+  /* Sidebar padding on mobile */
+  aside {
+    padding: 16px !important;
+  }
+
+  /* Logo section on mobile */
+  .flex.items-center.justify-center.border-b {
+    min-height: 72px !important;
+    padding-bottom: 12px !important;
+  }
+
+  /* Role card on mobile */
+  .rounded-xl.border.p-3 {
+    padding: 12px !important;
+  }
+
+  /* Navigation items on mobile */
+  nav.grid.gap-1 a {
+    min-height: 48px !important;
+    font-size: 15px !important;
+  }
+
+  /* Navigation icons on mobile */
+  nav.grid.gap-1 a svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* Logout button on mobile */
+  a[title="ÄÄƒng xuáº¥t"] {
+    min-height: 48px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* â”€â”€â”€ Small Mobile (â‰¤480px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (max-width: 480px) {
+  /* Tighter spacing */
+  aside {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+
+  /* Smaller logo */
+  .flex.items-center.justify-center.border-b img {
+    max-height: 36px !important;
+  }
+
+  /* Smaller navigation */
+  nav.grid.gap-1 a {
+    min-height: 44px !important;
+    font-size: 14px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Main content */
+  main.min-w-0.flex-1 {
+    padding: 12px 8px 120px 8px !important;
+  }
+
+  /* Mobile header */
+  .sticky.top-0.z-\[60\] {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .inline-flex.h-11.w-11.items-center.justify-center.rounded-xl {
+    width: 40px;
+    height: 40px;
+  }
+
+  .text-lg.font-black.text-slate-900 {
+    font-size: 15px;
+  }
+}
+
+/* â”€â”€â”€ Tablet Landscape (768px - 1023px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Slightly larger sidebar on tablet */
+  aside.w-\[min\(88vw\,300px\)\] {
+    width: min(60vw, 320px);
+  }
+
+  /* Better spacing */
+  main.min-w-0.flex-1 {
+    padding: 20px 16px 120px 16px !important;
+  }
+}
+
+/* â”€â”€â”€ Desktop Improvements (â‰¥1024px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (min-width: 1024px) {
+  /* Sidebar transitions */
+  aside {
+    transition: width 0.2s ease, padding 0.2s ease;
+  }
+
+  /* Collapsed state */
+  aside[data-collapsed="true"] {
+    width: 84px !important;
+  }
+
+  aside[data-collapsed="false"] {
+    width: 264px !important;
+  }
+
+  /* Main content adjustment for collapsed sidebar */
+  .itdash-collapsed main {
+    margin-left: 0;
+  }
+
+  /* Better hover states */
+  nav.grid.gap-1 a:hover {
+    transform: translateX(2px);
+  }
+
+  aside[data-collapsed="true"] nav.grid.gap-1 a:hover {
+    transform: translateX(0);
+  }
+
+  /* Tooltip for collapsed items */
+  aside[data-collapsed="true"] nav.grid.gap-1 a {
+    position: relative;
+  }
+
+  aside[data-collapsed="true"] nav.grid.gap-1 a:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+  }
+
+  /* Main content padding */
+  main.min-w-0.flex-1 {
+    padding: 24px !important;
+  }
+}
+
+/* â”€â”€â”€ Large Desktop (â‰¥1440px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (min-width: 1440px) {
+  /* Wider sidebar */
+  aside[data-collapsed="false"] {
+    width: 280px !important;
+  }
+
+  /* Keep dashboard workspace full-width on large screens */
+  main.min-w-0.flex-1 {
+    padding: 32px !important;
+  }
+}
+
+/* â”€â”€â”€ Backdrop Blur Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Mobile overlay */
+.fixed.inset-0.z-\[65\].bg-slate-900\/45 {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* â”€â”€â”€ Active Navigation Item Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Better active state visibility */
+nav.grid.gap-1 a[class*="navActive"] {
+  position: relative;
+}
+
+nav.grid.gap-1 a[class*="navActive"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: currentColor;
+  border-radius: 0 4px 4px 0;
+  opacity: 0.8;
+}
+
+aside[data-collapsed="true"] nav.grid.gap-1 a[class*="navActive"]::before {
+  display: none;
+}
+
+/* â”€â”€â”€ Role Card Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.rounded-xl.border.p-3 {
+  transition: all 0.2s ease;
+}
+
+.rounded-xl.border.p-3:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* â”€â”€â”€ Logout Button Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+a[title="ÄÄƒng xuáº¥t"] {
+  transition: all 0.2s ease;
+}
+
+a[title="ÄÄƒng xuáº¥t"]:hover {
+  transform: translateX(2px);
+}
+
+aside[data-collapsed="true"] a[title="ÄÄƒng xuáº¥t"]:hover {
+  transform: translateX(0);
+}
+
+/* â”€â”€â”€ Collapse/Expand Button Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+button[aria-label*="menu"] {
+  transition: all 0.2s ease;
+}
+
+button[aria-label*="menu"]:hover {
+  transform: scale(1.05);
+}
+
+button[aria-label*="menu"]:active {
+  transform: scale(0.95);
+}
+
+/* â”€â”€â”€ Mobile Header Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (max-width: 1023px) {
+  /* Sticky header shadow on scroll */
+  .sticky.top-0.z-\[60\] {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Better bell icon */
+  .sticky.top-0.z-\[60\] svg[class*="lucide-bell"] {
+    transition: transform 0.2s ease;
+  }
+
+  .sticky.top-0.z-\[60\] svg[class*="lucide-bell"]:active {
+    transform: scale(0.9);
+  }
+
+  /* Avatar improvements */
+  .inline-flex.h-11.w-11.items-center.justify-center.rounded-xl.bg-gradient-to-br {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+  }
+
+  .inline-flex.h-11.w-11.items-center.justify-center.rounded-xl.bg-gradient-to-br:active {
+    transform: scale(0.95);
+  }
+}
+
+/* â”€â”€â”€ Accessibility Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Focus visible states */
+aside a:focus-visible,
+aside button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  aside,
+  aside[data-open],
+  nav.grid.gap-1 a,
+  button[aria-label*="menu"],
+  .fixed.inset-0.z-\[65\] {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* â”€â”€â”€ Print Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media print {
+  aside,
+  .sticky.top-0.z-\[60\],
+  button,
+  .fixed.inset-0.z-\[65\] {
+    display: none !important;
+  }
+
+  main.min-w-0.flex-1 {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+/* â”€â”€â”€ Dark Mode Support (if needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode overrides if needed */
+}
+
+/* â”€â”€â”€ Safe Area Insets (for notched devices) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@supports (padding: max(0px)) {
+  @media (max-width: 1023px) {
+    .sticky.top-0.z-\[60\] {
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+    }
+
+    aside[data-open] {
+      padding-left: max(16px, env(safe-area-inset-left));
+    }
+
+    main.min-w-0.flex-1 {
+      padding-left: max(12px, env(safe-area-inset-left)) !important;
+      padding-right: max(12px, env(safe-area-inset-right)) !important;
+      padding-bottom: max(120px, calc(120px + env(safe-area-inset-bottom))) !important;
+    }
+  }
+}
+
+/* â”€â”€â”€ Smooth Scroll Behavior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+main.min-w-0.flex-1 {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.min-w-0.flex-1 {
+    scroll-behavior: auto;
+  }
+}
+
+/* â”€â”€â”€ Loading States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+aside[data-loading="true"] {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* â”€â”€â”€ Better Touch Targets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (max-width: 1023px) {
+  /* Ensure all interactive elements are at least 44x44px */
+  nav.grid.gap-1 a,
+  button,
+  a[title="ÄÄƒng xuáº¥t"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* â”€â”€â”€ Overflow Handling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+/* Prevent content from overflowing sidebar */
+aside nav.grid.gap-1 a span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* â”€â”€â”€ Animation for Menu Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+@media (max-width: 1023px) {
+  aside[data-open="true"] {
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+}
+

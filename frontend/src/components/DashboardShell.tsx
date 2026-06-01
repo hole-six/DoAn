@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, NavLink, Outlet } from 'react-router-dom'
 import { clsx } from 'clsx'
 import {
-  BarChart2,
   Bell,
   BookOpen,
   Briefcase,
@@ -12,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageCircle,
   PanelLeftClose,
   PanelLeftOpen,
   Settings,
@@ -24,6 +24,8 @@ import logoWeb from '../assets/logoweb.png'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 import AppIcon from './AppIcon'
 import BottomNav from './BottomNav'
+import './dashboard-shell.css'
+import './dashboard-shell-responsive.css'
 
 type VaiTro = 'ungvien' | 'nhatuyendung' | 'quantrivien'
 
@@ -45,13 +47,11 @@ const menuUngVien = [
 const menuNTD = [
   { to: '/nha-tuyen-dung/dashboard', icon: LayoutDashboard, label: 'Tổng quan', end: true },
   { to: '/nha-tuyen-dung/quan-ly-tin', icon: Briefcase, label: 'Quản lý tin' },
-  { to: '/nha-tuyen-dung/tao-tin', icon: FileText, label: 'Tạo tin mới' },
   { to: '/nha-tuyen-dung/ung-vien', icon: Users, label: 'Pipeline ứng viên' },
   { to: '/nha-tuyen-dung/lich-phong-van', icon: Calendar, label: 'Lịch phỏng vấn' },
   { to: '/nha-tuyen-dung/cong-ty', icon: Building2, label: 'Thông tin công ty' },
-  { to: '/nha-tuyen-dung/analytics', icon: BarChart2, label: 'Analytics' },
+  { to: '/nha-tuyen-dung/chat', icon: MessageCircle, label: 'Tin nhắn' },
   { to: '/nha-tuyen-dung/thong-bao', icon: Bell, label: 'Thông báo' },
-  { to: '/nha-tuyen-dung/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
 
 const menuAdmin = [
@@ -61,6 +61,8 @@ const menuAdmin = [
   { to: '/quan-tri/tin-tuyen-dung', icon: Briefcase, label: 'Duyệt tin tuyển dụng' },
   { to: '/quan-tri/ky-nang', icon: BookOpen, label: 'Danh mục kỹ năng' },
   { to: '/quan-tri/review', icon: UserCheck, label: 'Review công ty' },
+  { to: '/quan-tri/chat', icon: MessageCircle, label: 'Tin nhắn & Hỗ trợ' },
+ 
 ]
 
 const menuUngVienHienThi = [
@@ -70,6 +72,7 @@ const menuUngVienHienThi = [
   { to: '/ung-vien/viec-da-luu', icon: Star, label: 'Việc đã lưu' },
   { to: '/ung-vien/ung-tuyen', icon: Briefcase, label: 'Hồ sơ ứng tuyển' },
   { to: '/ung-vien/lich-phong-van', icon: Calendar, label: 'Lịch phỏng vấn' },
+  { to: '/ung-vien/chat', icon: MessageCircle, label: 'Tin nhắn' },
   { to: '/ung-vien/thong-bao', icon: Bell, label: 'Thông báo' },
   { to: '/ung-vien/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
@@ -280,3 +283,4 @@ export default function DashboardShell({ vaiTro }: Props) {
     </>
   )
 }
+

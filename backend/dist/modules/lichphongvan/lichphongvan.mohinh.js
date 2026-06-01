@@ -19,4 +19,5 @@ const lichPhongVanSchema = new mongoose_1.Schema({
     collection: 'lich_phong_van',
     timestamps: { createdAt: 'ngayTao', updatedAt: 'ngayCapNhat' },
 });
+lichPhongVanSchema.index({ maHoSoUngTuyen: 1 }, { unique: true });
 exports.LichPhongVan = (0, mongoose_1.model)('LichPhongVan', lichPhongVanSchema);

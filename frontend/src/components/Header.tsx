@@ -5,6 +5,8 @@ import logoWeb from '../assets/logoweb.png'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 import AppIcon from './AppIcon'
 import { ThongBaoCenter } from './ThongBaoCenter'
+import './header.css'
+import './header-mobile-fix.css'
 
 const techLogos = [
   { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
@@ -87,6 +89,10 @@ export default function Header() {
       </div>
 
       <div className="nav-bar-rong">
+        <button className="menu-button" aria-label="Menu" onClick={() => setMenuMo(!menuMo)}>
+          <AppIcon icon={menuMo ? X : Menu} size={20} />
+        </button>
+
         <Link to="/" className="brand" aria-label="ITJob">
           <img src={logoWeb} alt="ITJob" className="logo-thuonghieu" />
         </Link>
@@ -117,26 +123,19 @@ export default function Header() {
                   <strong>{tenHienThi}</strong>
                 </span>
               </Link>
-              <button className="nav-icon-rong" aria-label="Đăng xuất" onClick={dangXuat} title="Đăng xuất">
-                <AppIcon icon={LogOut} size={19} />
-              </button>
             </>
           ) : (
             <>
               <Link to="/dang-nhap" className="nav-pill-rong">
                 <AppIcon icon={LogIn} size={17} />
-                Đăng nhập
+                <span>Đăng nhập</span>
               </Link>
               <Link to="/dang-ky" className="nav-pill-rong strong">
                 <AppIcon icon={UserPlus} size={17} />
-                Đăng ký
+                <span>Đăng ký</span>
               </Link>
             </>
           )}
-
-          <button className="menu-button" aria-label="Menu" onClick={() => setMenuMo(!menuMo)}>
-            <AppIcon icon={menuMo ? X : Menu} size={20} />
-          </button>
         </div>
       </div>
 
@@ -149,7 +148,7 @@ export default function Header() {
           ))}
           {nguoiDung && (
             <button onClick={dangXuat}>
-              <AppIcon icon={LogOut} size={17} />
+              <AppIcon icon={LogOut} size={18} />
               Đăng xuất
             </button>
           )}

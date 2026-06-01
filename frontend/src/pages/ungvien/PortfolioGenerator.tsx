@@ -79,7 +79,7 @@ async function taiFileHtml(id: string) {
   const res = await fetch(`${API_URL}/portfolio/${id}/export`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   })
-  if (!res.ok) throw new Error(await res.text() || 'Khong tai duoc index.html')
+  if (!res.ok) throw new Error(await res.text() || 'Không tải được index.html')
   const blob = await res.blob()
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -131,7 +131,7 @@ export default function PortfolioGeneratorPage() {
         }
         if (portfolios[0]) napPortfolio(portfolios[0])
       } catch (error) {
-        setThongBao(error instanceof Error ? error.message : 'Khong tai duoc du lieu portfolio')
+        setThongBao(error instanceof Error ? error.message : 'Không tải được dữ liệu portfolio')
       }
     }
     load()
@@ -155,7 +155,7 @@ export default function PortfolioGeneratorPage() {
 
   async function luuPortfolio() {
     if (!maHoSoNangLuc) {
-      setThongBao('Ban can tao hoac chon CV chinh truoc khi tao portfolio.')
+      setThongBao('Bạn cần tạo hoặc chọn CV chính trước khi tạo portfolio.')
       return ''
     }
     setDangXuLy(true)
@@ -167,10 +167,10 @@ export default function PortfolioGeneratorPage() {
       const portfolio = duLieu as Portfolio
       setPortfolioId(portfolio.id)
       setDanhSachPortfolio(prev => [portfolio, ...prev.filter(item => item.id !== portfolio.id)])
-      setThongBao('Da luu portfolio.')
+      setThongBao('Đã lưu portfolio.')
       return portfolio.id
     } catch (error) {
-      setThongBao(error instanceof Error ? error.message : 'Luu portfolio that bai')
+      setThongBao(error instanceof Error ? error.message : 'Lưu portfolio thất bại')
       return ''
     } finally {
       setDangXuLy(false)
@@ -188,9 +188,9 @@ export default function PortfolioGeneratorPage() {
         body: JSON.stringify(payload()),
       }) as { html: string }
       setPreviewHtml(duLieu.html)
-      setThongBao('Preview da cap nhat.')
+      setThongBao('Preview đã cập nhật.')
     } catch (error) {
-      setThongBao(error instanceof Error ? error.message : 'Preview that bai')
+      setThongBao(error instanceof Error ? error.message : 'Preview thất bại')
     } finally {
       setDangXuLy(false)
     }
@@ -203,9 +203,9 @@ export default function PortfolioGeneratorPage() {
     setThongBao('')
     try {
       await taiFileHtml(id)
-      setThongBao('Da xuat file index.html.')
+      setThongBao('Đã xuất file index.html.')
     } catch (error) {
-      setThongBao(error instanceof Error ? error.message : 'Xuat file that bai')
+      setThongBao(error instanceof Error ? error.message : 'Xuất file thất bại')
     } finally {
       setDangXuLy(false)
     }
@@ -214,7 +214,7 @@ export default function PortfolioGeneratorPage() {
   function docFileMd(file?: File) {
     if (!file) return
     if (!file.name.toLowerCase().endsWith('.md')) {
-      setThongBao('Chi nhan file .md')
+      setThongBao('Chỉ nhận file .md')
       return
     }
     const reader = new FileReader()
@@ -226,7 +226,7 @@ export default function PortfolioGeneratorPage() {
     return (
       <div style={cardStyle({ padding: 28 })}>
         <h1 style={{ margin: 0, fontSize: 28 }}>Portfolio HTML</h1>
-        <p style={{ color: '#64748b' }}>Ban can tao ho so ung vien truoc khi dung chuc nang nay.</p>
+        <p style={{ color: '#64748b' }}>Bạn cần tạo hồ sơ ứng viên trước khi dùng chức năng này.</p>
       </div>
     )
   }
@@ -236,18 +236,18 @@ export default function PortfolioGeneratorPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
         <div>
           <p className="eyebrow" style={{ margin: 0, color: '#2563eb' }}>Portfolio Generator</p>
-          <h1 style={{ margin: '4px 0 6px', fontSize: 32, letterSpacing: 0 }}>Tao index.html tu Markdown + CV chinh</h1>
-          <p style={{ margin: 0, color: '#64748b' }}>Upload hoac paste Markdown, chon theme/mau, preview realtime va xuat file HTML standalone.</p>
+          <h1 style={{ margin: '4px 0 6px', fontSize: 32, letterSpacing: 0 }}>Tạo index.html từ Markdown + CV chính</h1>
+          <p style={{ margin: 0, color: '#64748b' }}>Upload hoặc paste Markdown, chọn theme/màu, preview realtime và xuất file HTML standalone.</p>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button className="ghost-button" onClick={luuPortfolio} disabled={dangXuLy}>
-            <Save size={17} /> Luu
+            <Save size={17} /> Lưu
           </button>
           <button className="ghost-button" onClick={xemTruoc} disabled={dangXuLy}>
             <Eye size={17} /> Preview
           </button>
           <button className="primary-button" onClick={taiIndexHtml} disabled={dangXuLy}>
-            <Download size={17} /> Tai index.html
+            <Download size={17} /> Tải index.html
           </button>
         </div>
       </div>
@@ -256,20 +256,20 @@ export default function PortfolioGeneratorPage() {
 
       {!hoSoChinh ? (
         <div style={cardStyle({ padding: 24 })}>
-          <h2 style={{ marginTop: 0 }}>Chua co CV chinh</h2>
-          <p style={{ color: '#64748b' }}>Hay tao ho so nang luc/CV chinh truoc. Portfolio se lay ten, ky nang, kinh nghiem, du an va hoc van tu CV do de output day du.</p>
+          <h2 style={{ marginTop: 0 }}>Chưa có CV chính</h2>
+          <p style={{ color: '#64748b' }}>Hãy tạo hồ sơ năng lực/CV chính trước. Portfolio sẽ lấy tên, kỹ năng, kinh nghiệm, dự án và học vấn từ CV đó để output đầy đủ.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 520px) minmax(360px, 1fr)', gap: 18, alignItems: 'start' }}>
           <section style={cardStyle({ padding: 18, display: 'grid', gap: 14 })}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Sparkles size={20} color="#2563eb" />
-              <h2 style={{ margin: 0, fontSize: 20 }}>Noi dung va giao dien</h2>
+              <h2 style={{ margin: 0, fontSize: 20 }}>Nội dung và giao diện</h2>
             </div>
 
             {danhSachPortfolio.length > 0 && (
               <label style={labelStyle()}>
-                Portfolio da luu
+                Portfolio đã lưu
                 <select style={inputStyle()} value={portfolioId} onChange={e => {
                   const portfolio = danhSachPortfolio.find(item => item.id === e.target.value)
                   if (portfolio) napPortfolio(portfolio)
@@ -280,14 +280,14 @@ export default function PortfolioGeneratorPage() {
             )}
 
             <label style={labelStyle()}>
-              Tieu de
+              Tiêu đề
               <input style={inputStyle()} value={tieuDe} onChange={e => setTieuDe(e.target.value)} />
             </label>
 
             <label style={labelStyle()}>
-              CV nguon
+              CV nguồn
               <select style={inputStyle()} value={maHoSoNangLuc} onChange={e => setMaHoSoNangLuc(e.target.value)}>
-                {hoSo.map(item => <option key={item.id} value={item.id}>{item.tieuDe}{item.cvChinh ? ' - CV chinh' : ''}</option>)}
+                {hoSo.map(item => <option key={item.id} value={item.id}>{item.tieuDe}{item.cvChinh ? ' - CV chính' : ''}</option>)}
               </select>
             </label>
 
@@ -326,11 +326,11 @@ export default function PortfolioGeneratorPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <label style={labelStyle()}>
-                Mau chinh
+                Màu chính
                 <input type="color" value={mauChinh} onChange={e => setMauChinh(e.target.value)} style={{ ...inputStyle(), height: 46, padding: 6 }} />
               </label>
               <label style={labelStyle()}>
-                Mau phu
+                Màu phụ
                 <input type="color" value={mauPhu} onChange={e => setMauPhu(e.target.value)} style={{ ...inputStyle(), height: 46, padding: 6 }} />
               </label>
             </div>
@@ -363,12 +363,12 @@ export default function PortfolioGeneratorPage() {
             <div style={{ height: 44, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px' }}>
               <strong>Preview index.html</strong>
               <button className="ghost-button" onClick={xemTruoc} disabled={dangXuLy} style={{ padding: '8px 12px' }}>
-                <Eye size={16} /> Cap nhat
+                <Eye size={16} /> Cập nhật
               </button>
             </div>
             <iframe
               title="Portfolio preview"
-              srcDoc={previewHtml || '<!doctype html><html><body style="font-family:Arial,sans-serif;padding:32px;color:#475569"><h2>Chua co preview</h2><p>Bam Preview de tao ban xem truoc tu Markdown va CV chinh.</p></body></html>'}
+              srcDoc={previewHtml || '<!doctype html><html><body style="font-family:Arial,sans-serif;padding:32px;color:#475569"><h2>Chưa có preview</h2><p>Bấm Preview để tạo bản xem trước từ Markdown và CV chính.</p></body></html>'}
               style={{ width: '100%', height: 'calc(100vh - 210px)', minHeight: 620, border: '1px solid #dbe4f0', borderRadius: 8, background: '#fff' }}
             />
           </section>

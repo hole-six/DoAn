@@ -18,6 +18,7 @@ const tinTuyenDungSchema = new mongoose_1.Schema({
     luongMax: Number,
     loaiHinh: { type: String, enum: exports.loaiHinhLamViec, default: 'toan_thoi_gian' },
     capBac: { type: String, enum: exports.capBacTinTuyenDung, default: 'junior' },
+    anhDaiDien: String,
     hanNop: Date,
     soLuong: { type: Number, default: 1 },
     moTa: { type: String, required: true },

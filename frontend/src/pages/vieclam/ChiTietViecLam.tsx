@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Bookmark, Briefcase, Building2, Clock, DollarSign, Globe, MapPin, Share2, Users } from 'lucide-react'
-import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
+import { Bookmark, Briefcase, Building2, Clock, DollarSign, FileText, Globe, MapPin, Share2, UploadCloud, Users, X } from 'lucide-react'
+import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
+import { imageUrl } from '../../lib/format'
+import './vieclam-styles.css'
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const logoDuPhong = 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT'
@@ -30,6 +32,17 @@ type TinTuyenDung = {
   trangThai?: string
   ngayDang?: string
   kyNang?: Array<{ tenKyNang?: string }>
+  anhDaiDien?: string
+}
+
+type HoSoNangLuc = {
+  id: string
+  maUngVien: string
+  tieuDe?: string
+  cvChinh?: boolean
+  fileCvTen?: string
+  fileCvLoai?: string
+  fileCvData?: string
 }
 
 type CongTy = {
@@ -69,6 +82,15 @@ function tachDong(value?: string) {
     .filter(Boolean)
 }
 
+async function uploadFileCv(file: File) {
+  const formData = new FormData()
+  formData.append('tep', file)
+  const ketQua = await apiUploadCoXacThuc('/hosonangluc/upload-file', formData)
+  const url = ketQua.url || ketQua.duongDan
+  if (!url) throw new Error('Upload khong tra ve duong dan file')
+  return url
+}
+
 export default function ChiTietViecLam() {
   const { id } = useParams()
   const [tab, setTab] = useState<'mo-ta' | 'cong-ty'>('mo-ta')
@@ -78,6 +100,12 @@ export default function ChiTietViecLam() {
   const [daUngTuyen, setDaUngTuyen] = useState(false)
   const [thongBaoUngTuyen, setThongBaoUngTuyen] = useState('')
   const [dangUngTuyen, setDangUngTuyen] = useState(false)
+  const [moModalUngTuyen, setMoModalUngTuyen] = useState(false)
+  const [ungVienHienTai, setUngVienHienTai] = useState<any>(null)
+  const [cvList, setCvList] = useState<HoSoNangLuc[]>([])
+  const [cvDangChon, setCvDangChon] = useState('')
+  const [fileCvMoi, setFileCvMoi] = useState<File | null>(null)
+  const [thuXinViec, setThuXinViec] = useState('')
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
 
@@ -136,7 +164,6 @@ export default function ChiTietViecLam() {
     }
 
     if (!viec) return
-    setDangUngTuyen(true)
     setThongBaoUngTuyen('')
 
     try {
@@ -158,18 +185,57 @@ export default function ChiTietViecLam() {
         return
       }
 
-      await apiCoXacThuc('/hosoungtuyen/ung-tuyen-nhanh', {
+      const hoSoNangLucList = await apiCoXacThuc('/hosonangluc').catch(() => [])
+      const danhSachCv = (hoSoNangLucList ?? []).filter((item: HoSoNangLuc) => item.maUngVien === ungVien.id)
+      setUngVienHienTai(ungVien)
+      setCvList(danhSachCv)
+      setCvDangChon(danhSachCv.find((item: HoSoNangLuc) => item.cvChinh)?.id ?? danhSachCv[0]?.id ?? '')
+      setFileCvMoi(null)
+      setThuXinViec(`Toi quan tam toi vi tri ${viec.tieuDe} tai ${tenCongTy} va mong muon duoc trao doi them.`)
+      setMoModalUngTuyen(true)
+    } catch (err) {
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Khong mo duoc form ung tuyen')
+    }
+  }
+
+  const nopHoSoUngTuyen = async () => {
+    if (!viec || !ungVienHienTai) return
+    setDangUngTuyen(true)
+    setThongBaoUngTuyen('')
+    try {
+      let maHoSoNangLuc = cvDangChon
+      if (fileCvMoi) {
+        if (fileCvMoi.size > 10 * 1024 * 1024) throw new Error('File CV goc nen nho hon 10MB')
+        const fileCvData = await uploadFileCv(fileCvMoi)
+        const cvMoi = await apiCoXacThuc('/hosonangluc', {
+          method: 'POST',
+          body: JSON.stringify({
+            maUngVien: ungVienHienTai.id,
+            tieuDe: fileCvMoi.name.replace(/\.[^.]+$/, '') || `CV ${viec.tieuDe}`,
+            fileCvTen: fileCvMoi.name,
+            fileCvLoai: fileCvMoi.type || 'application/octet-stream',
+            fileCvData,
+            cvChinh: cvList.length === 0,
+            congKhai: false,
+          }),
+        })
+        maHoSoNangLuc = cvMoi.id
+      }
+      if (!maHoSoNangLuc) throw new Error('Ban can chon hoac upload CV truoc khi ung tuyen')
+
+      await apiCoXacThuc('/hosoungtuyen/ung-tuyen', {
         method: 'POST',
         body: JSON.stringify({
           maTinTuyenDung: viec.id,
-          diemKhopKyNang: 75,
-          thuXinViec: `Tôi quan tâm tới vị trí ${viec.tieuDe} tại ${tenCongTy} và mong muốn được trao đổi thêm.`,
+          maHoSoNangLuc,
+          thuXinViec: thuXinViec.trim() || undefined,
         }),
       })
       setDaUngTuyen(true)
-      setThongBaoUngTuyen('Ứng tuyển thành công. Hồ sơ đã được gửi tới nhà tuyển dụng.')
+      setMoModalUngTuyen(false)
+      setThongBaoUngTuyen('Ung tuyen thanh cong. Ho so va CV da duoc gui toi nha tuyen dung.')
     } catch (err) {
-      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không ứng tuyển được')
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Khong ung tuyen duoc')
     } finally {
       setDangUngTuyen(false)
     }
@@ -181,7 +247,7 @@ export default function ChiTietViecLam() {
   return (
     <main style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
       <div style={{ position: 'relative', height: 280, overflow: 'hidden', background: 'linear-gradient(135deg, #0b1c30 0%, #1e3a5f 100%)' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'url(https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15 }} />
+        <div style={{ position: 'absolute', inset: 0, background: `url(${viec.anhDaiDien ? imageUrl(viec.anhDaiDien) : 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80'})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: viec.anhDaiDien ? 0.32 : 0.15 }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
             <div style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
@@ -320,6 +386,49 @@ export default function ChiTietViecLam() {
           </div>
         </div>
       </div>
+      {moModalUngTuyen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(15,23,42,0.45)', display: 'grid', placeItems: 'center', padding: 16 }}>
+          <div style={{ width: 'min(720px, 100%)', maxHeight: '92vh', overflow: 'hidden', background: '#fff', borderRadius: 12, boxShadow: '0 24px 80px rgba(15,23,42,0.28)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
+            <div style={{ minHeight: 64, padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Ung tuyen {viec.tieuDe}</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, fontWeight: 600, color: '#64748b' }}>Chon CV trong he thong hoac upload CV moi de gui cho nha tuyen dung.</p>
+              </div>
+              <button onClick={() => setMoModalUngTuyen(false)} style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><X size={18} /></button>
+            </div>
+            <div style={{ overflow: 'auto', padding: 20, display: 'grid', gap: 14 }}>
+              <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: 14, display: 'grid', gap: 10 }}>
+                <strong style={{ fontSize: 14, color: '#0f172a' }}>CV co san</strong>
+                {cvList.length ? cvList.map(cv => (
+                  <label key={cv.id} style={{ minHeight: 52, display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', background: cvDangChon === cv.id && !fileCvMoi ? '#eff6ff' : '#fff' }}>
+                    <input type="radio" checked={cvDangChon === cv.id && !fileCvMoi} onChange={() => { setCvDangChon(cv.id); setFileCvMoi(null) }} />
+                    <FileText size={18} color="#2563eb" />
+                    <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{cv.tieuDe || cv.fileCvTen || 'CV ung vien'}</span>
+                    {cv.cvChinh && <span style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Mac dinh</span>}
+                  </label>
+                )) : <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Ban chua co CV trong he thong. Hay upload CV moi ben duoi.</p>}
+              </div>
+              <label style={{ border: '1px dashed #94a3b8', borderRadius: 10, padding: 14, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', background: fileCvMoi ? '#f0fdf4' : '#f8fafc' }}>
+                <UploadCloud size={20} color="#0f766e" />
+                <span style={{ flex: 1 }}>
+                  <strong style={{ display: 'block', fontSize: 14, color: '#0f172a' }}>{fileCvMoi ? fileCvMoi.name : 'Upload CV moi'}</strong>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>PDF, DOC, DOCX hoac file CV ca nhan.</span>
+                </span>
+                <input type="file" className="hidden" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => { const file = event.target.files?.[0] ?? null; setFileCvMoi(file); if (file) setCvDangChon('') }} />
+              </label>
+              <label style={{ display: 'grid', gap: 8 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Thu xin viec</span>
+                <textarea value={thuXinViec} onChange={event => setThuXinViec(event.target.value)} rows={5} style={{ borderRadius: 10, border: '1px solid #cbd5e1', padding: 12, fontSize: 14, lineHeight: 1.6, resize: 'vertical' }} />
+              </label>
+              {thongBaoUngTuyen && <div style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fef2f2', color: '#991b1b', padding: 12, fontSize: 14, fontWeight: 700 }}>{thongBaoUngTuyen}</div>}
+            </div>
+            <div style={{ minHeight: 64, padding: 16, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button onClick={() => setMoModalUngTuyen(false)} style={{ minWidth: 96, minHeight: 42, borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', fontWeight: 800, cursor: 'pointer' }}>Huy</button>
+              <button onClick={nopHoSoUngTuyen} disabled={dangUngTuyen || (!cvDangChon && !fileCvMoi)} style={{ minWidth: 150, minHeight: 42, borderRadius: 10, border: '1px solid #0058be', background: '#0058be', color: '#fff', fontWeight: 800, cursor: dangUngTuyen ? 'wait' : 'pointer', opacity: (!cvDangChon && !fileCvMoi) ? 0.55 : 1 }}>{dangUngTuyen ? 'Dang gui...' : 'Gui ung tuyen'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

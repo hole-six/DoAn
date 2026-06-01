@@ -1,25 +1,9 @@
 import { Schema, model } from 'mongoose'
 
-export const loaiKyNang = [
-  'ngon_ngu',
-  'frontend',
-  'backend',
-  'database',
-  'devops',
-  'testing',
-  'kiem_thu',
-  'thiet_ke',
-  'ky_nang_mem',
-  'mobile',
-  'du_lieu',
-  'phan_tich',
-  'quan_ly',
-] as const
-
 const danhMucKyNangSchema = new Schema(
   {
     tenKyNang: { type: String, required: true, unique: true, trim: true },
-    loaiKyNang: { type: String, enum: loaiKyNang, required: true },
+    loaiKyNang: { type: String, required: true, trim: true },
   },
   {
     collection: 'danh_muc_ky_nang',

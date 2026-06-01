@@ -1,11 +1,17 @@
-import { taoDinhTuyenCoBan } from '../../dungchung/dinhtuyencoban.js'
+import { Router } from 'express'
+import { yeuCauDangNhap } from '../../dungchung/xacthuc.js'
 import { dieuKhienThongBao } from './thongbao.dieukhien.js'
 
-const dinhTuyenCoBan = taoDinhTuyenCoBan(dieuKhienThongBao)
+export const dinhTuyenThongBao = Router()
 
-// Thêm routes mới
-dinhTuyenCoBan.patch('/:id/danh-dau-da-doc', dieuKhienThongBao.danhDauDaDoc)
-dinhTuyenCoBan.post('/danh-dau-tat-ca-da-doc', dieuKhienThongBao.danhDauTatCaDaDoc)
-dinhTuyenCoBan.get('/dem-chua-doc', dieuKhienThongBao.demChuaDoc)
+dinhTuyenThongBao.use(yeuCauDangNhap)
 
-export const dinhTuyenThongBao = dinhTuyenCoBan
+dinhTuyenThongBao.get('/', dieuKhienThongBao.layDanhSach)
+dinhTuyenThongBao.get('/dem-chua-doc', dieuKhienThongBao.demChuaDoc)
+dinhTuyenThongBao.get('/:ma', dieuKhienThongBao.layChiTiet)
+dinhTuyenThongBao.post('/', dieuKhienThongBao.taoMoi)
+dinhTuyenThongBao.patch('/:ma', dieuKhienThongBao.capNhat)
+dinhTuyenThongBao.patch('/:id/danh-dau-da-doc', dieuKhienThongBao.danhDauDaDoc)
+dinhTuyenThongBao.post('/danh-dau-tat-ca-da-doc', dieuKhienThongBao.danhDauTatCaDaDoc)
+dinhTuyenThongBao.delete('/:ma', dieuKhienThongBao.xoa)
+

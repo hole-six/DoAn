@@ -1,4 +1,5 @@
 import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
+import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import {
   layDanhSachCuocTroChuyenModel,
   layHoacTaoCuocTroChuyenModel,
@@ -26,6 +27,7 @@ export const dieuKhienTinNhan = {
   layHoacTaoCuocTroChuyenModel: batLoiBatDongBo(async (yeuCau, phanHoi) => {
     const maNguoiDung = (yeuCau as any).nguoiDung._id
     const { nguoiNhan, maHoSoUngTuyen, maTinTuyenDung, loai } = yeuCau.body
+    if (!nguoiNhan) throw new LoiUngDung('Thieu nguoi nhan tin nhan', 422, 'MISSING_RECEIVER')
     const cuocTroChuyenModel = await layHoacTaoCuocTroChuyenModel({
       nguoiThamGia: [maNguoiDung, nguoiNhan],
       loai,
