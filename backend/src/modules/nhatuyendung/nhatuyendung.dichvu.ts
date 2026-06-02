@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../nguoidung/nguoidung.mohinh.js'
 import { NhaTuyenDung } from './nhatuyendung.mohinh.js'
 
@@ -45,7 +45,7 @@ export const dichVuNhaTuyenDung = {
 
   async layTheoMa(ma: string) {
     const duLieu = await (NhaTuyenDung as any).findById(ma).populate('maNguoiDung', 'hoTen email soDienThoai')
-    if (!duLieu) throw new LoiUngDung('Khong tim thay nha tuyen dung', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy nhà tuyển dụng', 404)
     return chuanHoaNhaTuyenDung(duLieu)
   },
 
@@ -64,13 +64,16 @@ export const dichVuNhaTuyenDung = {
       .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
       .populate('maNguoiDung', 'hoTen email soDienThoai')
 
-    if (!ketQua) throw new LoiUngDung('Khong tim thay nha tuyen dung de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy nhà tuyển dụng de cap nhat', 404)
     return chuanHoaNhaTuyenDung(ketQua)
   },
 
   async xoa(ma: string) {
     const ketQua = await (NhaTuyenDung as any).findByIdAndDelete(ma).populate('maNguoiDung', 'hoTen email soDienThoai')
-    if (!ketQua) throw new LoiUngDung('Khong tim thay nha tuyen dung de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy nhà tuyển dụng de xoa', 404)
     return chuanHoaNhaTuyenDung(ketQua)
   },
 }
+
+
+

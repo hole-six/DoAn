@@ -1,4 +1,4 @@
-import { Server as HttpServer } from 'http'
+﻿import { Server as HttpServer } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
 import { bienMoiTruong } from './bienmoitruong.js'
 import jwt from 'jsonwebtoken'
@@ -25,7 +25,7 @@ import type { Socket } from 'socket.io'
 
 let io: SocketIOServer | null = null
 
-// Map để theo dõi user online
+// Map Ä‘á»ƒ theo dÃµi user online
 const usersOnline = new Map<string, string[]>() // userId -> [socketId1, socketId2, ...]
 const typingUsers = new Map<string, Set<string>>() // conversationId -> Set<userId>
 
@@ -43,12 +43,12 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
     transports: ['websocket', 'polling'],
   })
 
-  // Middleware xác thực
+  // Middleware xÃ¡c thá»±c
   io.use(async (socket: Socket, next) => {
     const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1]
 
     if (!token) {
-      return next(new Error('Khong co token xac thuc'))
+      return next(new Error('Không có token xác thực'))
     }
 
     try {
@@ -73,7 +73,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
     }
   })
 
-  // Xử lý kết nối
+  // Xá»­ lÃ½ káº¿t ná»‘i
   io.on('connection', (socket: Socket) => {
     const socketXacThuc = socket as SocketXacThuc
     const nguoiDung = socketXacThuc.nguoiDung
@@ -86,9 +86,9 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
       socket.disconnect(true)
       return
     }
-    console.log(`✅ User connected: ${nguoiDung.email} (${userId})`)
+    console.log(`âœ… User connected: ${nguoiDung.email} (${userId})`)
 
-    // Thêm vào danh sách online
+    // ThÃªm vÃ o danh sÃ¡ch online
     if (!usersOnline.has(userId)) {
       usersOnline.set(userId, [])
     }
@@ -97,10 +97,10 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
     // Join room theo user ID
     socket.join(`user:${userId}`)
 
-    // Join room theo vai trò
+    // Join room theo vai trÃ²
     socket.join(`role:${nguoiDung.vaiTro}`)
 
-    // Gửi thông báo kết nối thành công
+    // Gá»­i thÃ´ng bÃ¡o káº¿t ná»‘i thÃ nh cÃ´ng
     socket.emit('connected', {
       message: 'Ket noi thanh cong',
       userId,
@@ -119,7 +119,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
      */
     socket.on('join_conversation', (data: { conversationId: string }) => {
       socket.join(`conversation:${data.conversationId}`)
-      console.log(`👥 User ${userId} joined conversation ${data.conversationId}`)
+      console.log(`ðŸ‘¥ User ${userId} joined conversation ${data.conversationId}`)
     })
 
     /**
@@ -127,7 +127,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
      */
     socket.on('leave_conversation', (data: { conversationId: string }) => {
       socket.leave(`conversation:${data.conversationId}`)
-      console.log(`👋 User ${userId} left conversation ${data.conversationId}`)
+      console.log(`ðŸ‘‹ User ${userId} left conversation ${data.conversationId}`)
     })
 
     /**
@@ -176,7 +176,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
     // ============================================
 
     socket.on('disconnect', () => {
-      console.log(`❌ User disconnected: ${nguoiDung.email}`)
+      console.log(`âŒ User disconnected: ${nguoiDung.email}`)
 
       // Remove from online list
       const sockets = usersOnline.get(userId)
@@ -205,13 +205,13 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
       })
     })
 
-    // Xử lý lỗi
+    // Xá»­ lÃ½ lá»—i
     socket.on('error', (error) => {
       console.error('Socket error:', error)
     })
   })
 
-  console.log('🔌 Socket.IO server initialized')
+  console.log('ðŸ”Œ Socket.IO server initialized')
   return io
 }
 
@@ -222,7 +222,7 @@ export function laySocketIO(): SocketIOServer {
   return io
 }
 
-// Helper functions để gửi thông báo
+// Helper functions Ä‘á»ƒ gá»­i thÃ´ng bÃ¡o
 export function guiThongBaoChoNguoiDung(maNguoiDung: string, event: string, data: any) {
   if (!io) return
   io.to(`user:${maNguoiDung}`).emit(event, data)
@@ -238,12 +238,15 @@ export function guiThongBaoChoTatCa(event: string, data: any) {
   io.emit(event, data)
 }
 
-// Helper để kiểm tra user online
+// Helper Ä‘á»ƒ kiá»ƒm tra user online
 export function kiemTraUserOnline(userId: string): boolean {
   return usersOnline.has(userId) && usersOnline.get(userId)!.length > 0
 }
 
-// Helper để lấy danh sách user online
+// Helper Ä‘á»ƒ láº¥y danh sÃ¡ch user online
 export function layDanhSachUserOnline(): string[] {
   return Array.from(usersOnline.keys())
 }
+
+
+

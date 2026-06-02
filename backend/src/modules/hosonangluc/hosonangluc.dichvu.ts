@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../ungvien/ungvien.mohinh.js'
 import { HoSoNangLuc } from './hosonangluc.mohinh.js'
 
@@ -27,7 +27,7 @@ function chuanHoaHoSo(taiLieu: any) {
     duAnChiTiet: duLieu.duAnChiTiet ?? [],
     fileCvTen: duLieu.fileCvTen,
     fileCvLoai: duLieu.fileCvLoai,
-    fileCvData: duLieu.fileCvData,
+    fileCvĐạta: duLieu.fileCvĐạta,
     loaiHoSo: duLieu.loaiHoSo ?? 'builder',
     anhDaiDien: duLieu.anhDaiDien,
     templateCv: duLieu.templateCv ?? 'classic-blue',
@@ -50,7 +50,7 @@ export const dichVuHoSoNangLuc = {
   },
   async layTheoMa(ma: string) {
     const duLieu = await (HoSoNangLuc as any).findById(ma)
-    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so nang luc', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực', 404)
     return chuanHoaHoSo(duLieu)
   },
   async taoMoi(duLieu: unknown) {
@@ -62,7 +62,7 @@ export const dichVuHoSoNangLuc = {
   async capNhat(ma: string, duLieu: unknown) {
     const payload = duLieu as any
     const ketQua = await (HoSoNangLuc as any).findById(ma)
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ho so nang luc de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực de cap nhat', 404)
 
     if (payload.cvChinh && payload.maUngVien) {
       await (HoSoNangLuc as any).updateMany(
@@ -77,7 +77,9 @@ export const dichVuHoSoNangLuc = {
   },
   async xoa(ma: string) {
     const ketQua = await (HoSoNangLuc as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ho so nang luc de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực de xoa', 404)
     return chuanHoaHoSo(ketQua)
   },
 }
+
+

@@ -51,7 +51,7 @@ async function gieoKyNang() {
         { tenKyNang: 'Elasticsearch', loaiKyNang: 'database' },
         { tenKyNang: 'Android', loaiKyNang: 'mobile' },
         { tenKyNang: 'iOS', loaiKyNang: 'mobile' },
-        { tenKyNang: 'Data Analyst', loaiKyNang: 'du_lieu' },
+        { tenKyNang: 'Đạta Analyst', loaiKyNang: 'du_lieu' },
         { tenKyNang: 'Machine Learning', loaiKyNang: 'du_lieu' },
     ];
     for (const muc of duLieuMau) {
@@ -107,7 +107,7 @@ async function gieoHoSoUngVien(maNguoiDung, kyNang) {
             ngaySinh: new Date('1999-05-20'),
             gioiTinh: 'nam',
             diaChi: 'Hai Chau, Da Nang',
-            tomTat: 'Frontend developer tap trung vao React, UI system va trai nghiem nguoi dung cho san pham tuyen dung IT.',
+            tomTat: 'Frontend developer tập trung vào React, UI system và trải nghiệm người dùng cho sản phẩm tuyển dụng IT.',
             kinhNghiem: 3,
             viTriMongMuon: 'Senior Frontend Developer',
             mucLuongMongMuon: 35000000,
@@ -119,14 +119,14 @@ async function gieoHoSoUngVien(maNguoiDung, kyNang) {
                 {
                     tenDuAn: 'ITJob Candidate Workspace',
                     lienKet: 'https://portfolio.itjob.vn/candidate-workspace',
-                    moTa: 'Dashboard quan ly CV, ho so ung tuyen va lich phong van cho ung vien IT.',
+                    moTa: 'Dashboard quản lý CV, hồ sơ ứng tuyển và lịch phỏng vấn cho ứng viên IT.',
                     congNghe: ['React', 'TypeScript', 'MongoDB'],
                 },
                 {
                     tenDuAn: 'Salary Insight UI',
                     lienKet: 'https://portfolio.itjob.vn/salary-insight',
                     moTa: 'Giao dien phan tich luong lap trinh vien theo cap bac va ky nang.',
-                    congNghe: ['React', 'Data Visualization'],
+                    congNghe: ['React', 'Đạta Visualization'],
                 },
             ],
         },
@@ -164,7 +164,7 @@ async function gieoNhaTuyenDungVaTin(maNguoiDung, kyNang) {
             capBac: 'senior',
             hanNop: new Date('2026-12-31'),
             soLuong: 3,
-            moTa: 'Tham gia xay dung nen tang tuyen dung IT, toi uu workflow ung tuyen va dashboard nha tuyen dung.',
+            moTa: 'Tham gia xây dựng nền tảng tuyển dụng IT, tối ưu workflow ứng tuyển và dashboard nhà tuyển dụng.',
             yeuCau: 'Thanh thao React, NodeJS, REST API, MongoDB va tu duy san pham.',
             quyenLoi: 'Luong canh tranh, review 2 lan/nam, thiet bi lam viec cao cap.',
             luotXem: 245,
@@ -187,7 +187,7 @@ async function gieoDanhGiaCongTy(maNguoiDungUngVien, maNguoiDungNhaTuyenDung) {
             maUngVien: ungVien._id,
             maNhaTuyenDung: nhaTuyenDung._id,
             diem: 5,
-            noiDung: 'Quy trinh phong van ro rang, nha tuyen dung phan hoi nhanh va chia se ky ve ky vong cong viec.',
+            noiDung: 'Quy trình phỏng vấn rõ ràng, nhà tuyển dụng phản hồi nhanh và chia sẻ kỹ về kỳ vọng công việc.',
             anDanh: false,
             daDuyet: true,
         },
@@ -235,7 +235,7 @@ async function gieoNhieuCongTyVaTin(kyNang, maNguoiDungUngVien) {
                 ['QA Automation Engineer', 'Da Nang', 25000000, 45000000, 'hybrid', 'middle', ['QA Automation', 'TypeScript']],
                 ['NodeJS Backend Developer', 'Da Nang', 30000000, 55000000, 'hybrid', 'middle', ['NodeJS', 'MongoDB', 'Redis']],
                 ['Next.js Fullstack Engineer', 'Ho Chi Minh City', 40000000, 75000000, 'hybrid', 'senior', ['Next.js', 'React', 'GraphQL']],
-                ['Data Analyst BI', 'Da Nang', 22000000, 40000000, 'toan_thoi_gian', 'junior', ['Data Analyst', 'SQL Server']],
+                ['Đạta Analyst BI', 'Da Nang', 22000000, 40000000, 'toan_thoi_gian', 'junior', ['Đạta Analyst', 'SQL Server']],
             ],
         },
         {
@@ -412,7 +412,7 @@ async function gieoNhieuCongTyVaTin(kyNang, maNguoiDungUngVien) {
                 maUngVien: ungVien._id,
                 maNhaTuyenDung: nhaTuyenDung._id,
                 diem: 5 - (index % 3) * 0.5,
-                noiDung: `Quy trinh tuyen dung cua ${congTy.tenCongTy} ro rang, trao doi ky ve cong viec va phan hoi nhanh sau phong van.`,
+                noiDung: `Quy trình tuyển dụng của ${congTy.tenCongTy} rõ ràng, trao đổi kỹ về công việc và phản hồi nhanh sau phỏng vấn.`,
                 anDanh: false,
                 daDuyet: true,
             },
@@ -491,7 +491,7 @@ async function gieoDuLieuUngVienDayDu(maNguoiDungUngVien, maNguoiDungNhaTuyenDun
             diaChi: 'TechNova Solutions, 120 Nguyen Van Linh, Hai Chau, Da Nang',
             hinhThuc: 'offline',
             linkHop: '',
-            ghiChu: 'Vong phong van voi Engineering Manager, mang theo CCCD de check-in toa nha.',
+            ghiChu: 'Vòng phỏng vấn với Engineering Manager, mang theo CCCD để check-in tòa nhà.',
             trangThai: 'da_xac_nhan',
             ketQua: 'cho_ket_qua',
         },
@@ -513,10 +513,10 @@ async function gieoDuLieuUngVienDayDu(maNguoiDungUngVien, maNguoiDungNhaTuyenDun
             $set: {
                 maNguoiDung: maNguoiDungUngVien,
                 loai: 'lich_phong_van',
-                tieuDe: lichMau.trangThai === 'hoan_thanh' ? 'Cap nhat ket qua phong van' : 'Ban co lich phong van',
+                tieuDe: lichMau.trangThai === 'hoan_thanh' ? 'Cập nhật kết quả phỏng vấn' : 'Bạn có lịch phỏng vấn',
                 noiDung: lichMau.trangThai === 'hoan_thanh'
-                    ? 'TechNova Solutions da cap nhat ket qua phong van cua ban.'
-                    : 'TechNova Solutions da moi ban tham gia phong van Senior Fullstack Developer.',
+                    ? 'TechNova Solutions đã cập nhật kết quả phỏng vấn của bạn.'
+                    : 'TechNova Solutions đã mời bạn tham gia phỏng vấn Senior Fullstack Developer.',
                 lienKet: '/ung-vien/lich-phong-van',
                 maHoSoUngTuyen: ungTuyen._id,
                 maLichPhongVan: lichBoSung._id,
@@ -540,8 +540,8 @@ async function gieoDuLieuMau() {
     console.log('Da gieo du lieu mau thanh cong');
     console.log('Tai khoan mau:');
     console.log(`- Admin: admin@itjob.vn / ${matKhauMau}`);
-    console.log(`- Ung vien: ungvien@itjob.vn / ${matKhauMau}`);
-    console.log(`- Nha tuyen dung: nhatuyendung@itjob.vn / ${matKhauMau}`);
+    console.log(`- Ứng viên: ungvien@itjob.vn / ${matKhauMau}`);
+    console.log(`- Nhà tuyển dụng: nhatuyendung@itjob.vn / ${matKhauMau}`);
     process.exit(0);
 }
 gieoDuLieuMau().catch((loi) => {

@@ -171,7 +171,7 @@ export function khoiDongCronCanhBaoQuanTri() {
     try {
       await tinhCanhBaoQuanTri()
     } catch (error) {
-      console.error('Tinh canh bao quan tri that bai:', error)
+      console.error('Tính cảnh báo quản trị thất bại:', error)
     } finally {
       dangChay = false
     }

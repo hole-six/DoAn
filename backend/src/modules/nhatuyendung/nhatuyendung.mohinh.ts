@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 export const trangThaiDuyetNhaTuyenDung = ['cho_duyet', 'da_duyet', 'tu_choi', 'bi_khoa'] as const
 
@@ -24,3 +24,5 @@ const nhaTuyenDungSchema = new Schema(
 )
 
 export const NhaTuyenDung = model('NhaTuyenDung', nhaTuyenDungSchema)
+
+

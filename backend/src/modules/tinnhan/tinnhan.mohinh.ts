@@ -1,7 +1,7 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 // ============================================
-// CONVERSATION MODEL (Cuộc hội thoại)
+// CONVERSATION MODEL (Cuá»™c há»™i thoáº¡i)
 // ============================================
 
 export const loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'] as const
@@ -14,19 +14,19 @@ const cuocTroChuyenSchema = new Schema(
     // Type
     loai: { type: String, enum: loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
 
-    // Tên nhóm (dùng cho nhom_cong_dong)
+    // TÃªn nhÃ³m (dÃ¹ng cho nhom_cong_dong)
     tenNhom: { type: String },
     moTaNhom: { type: String },
     anhNhom: { type: String },
 
-    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
+    // Chá»‰ dÃ¹ng cho nhom_cong_dong â€” ai lÃ  admin nhÃ³m
     quanTriNhom: [{ type: Schema.Types.ObjectId, ref: 'NguoiDung' }],
     
-    // Context (nếu chat về hồ sơ ứng tuyển cụ thể)
+    // Context (náº¿u chat vá» há»“ sÆ¡ á»©ng tuyá»ƒn cá»¥ thá»ƒ)
     maHoSoUngTuyen: { type: Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
     maTinTuyenDung: { type: Schema.Types.ObjectId, ref: 'TinTuyenDung' },
     
-    // Last message info (để hiển thị preview)
+    // Last message info (Ä‘á»ƒ hiá»ƒn thá»‹ preview)
     tinNhanCuoiCung: {
       noiDung: String,
       nguoiGui: { type: Schema.Types.ObjectId, ref: 'NguoiDung' },
@@ -58,7 +58,7 @@ cuocTroChuyenSchema.index({ daLuuTru: 1 })
 export const CuocTroChuyenModel = model<any>('CuocTroChuyenModel', cuocTroChuyenSchema)
 
 // ============================================
-// MESSAGE MODEL (Tin nhắn)
+// MESSAGE MODEL (Tin nháº¯n)
 // ============================================
 
 export const loaiTinNhanEnum = ['text', 'file', 'image', 'system'] as const
@@ -115,3 +115,5 @@ tinNhanSchema.index({ nguoiGui: 1 })
 tinNhanSchema.index({ daXoa: 1 })
 
 export const TinNhanModel = model<any>('TinNhanModel', tinNhanSchema)
+
+

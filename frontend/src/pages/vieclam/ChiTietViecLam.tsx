@@ -204,7 +204,7 @@ export default function ChiTietViecLam() {
       setThuXinViec(`Toi quan tam toi vi tri ${viec.tieuDe} tai ${tenCongTy} va mong muon duoc trao doi them.`)
       setMoModalUngTuyen(true)
     } catch (err) {
-      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Khong mo duoc form ung tuyen')
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không mở được form ứng tuyển')
     }
   }
 
@@ -233,7 +233,7 @@ export default function ChiTietViecLam() {
         })
         maHoSoNangLuc = cvMoi.id
       }
-      if (!maHoSoNangLuc) throw new Error('Ban can chon hoac upload CV truoc khi ung tuyen')
+      if (!maHoSoNangLuc) throw new Error('Bạn cần chọn hoặc upload CV trước khi ứng tuyển')
 
       await apiCoXacThuc('/hosoungtuyen/ung-tuyen', {
         method: 'POST',
@@ -245,9 +245,9 @@ export default function ChiTietViecLam() {
       })
       setDaUngTuyen(true)
       setMoModalUngTuyen(false)
-      setThongBaoUngTuyen('Ung tuyen thanh cong. Ho so va CV da duoc gui toi nha tuyen dung.')
+      setThongBaoUngTuyen('Ứng tuyển thành công. Hồ sơ và CV đã được gửi tới nhà tuyển dụng.')
     } catch (err) {
-      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Khong ung tuyen duoc')
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không ứng tuyển được')
     } finally {
       setDangUngTuyen(false)
     }
@@ -399,44 +399,44 @@ export default function ChiTietViecLam() {
         </div>
       </div>
       {moModalUngTuyen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(15,23,42,0.45)', display: 'grid', placeItems: 'center', padding: 16 }}>
-          <div style={{ width: 'min(720px, 100%)', maxHeight: '92vh', overflow: 'hidden', background: '#fff', borderRadius: 12, boxShadow: '0 24px 80px rgba(15,23,42,0.28)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,42,0.58)', display: 'grid', placeItems: 'center', padding: '88px 16px 18px' }}>
+          <div style={{ width: 'min(720px, 100%)', maxHeight: 'calc(100vh - 106px)', overflow: 'hidden', background: '#fff', borderRadius: 12, boxShadow: '0 24px 80px rgba(15,23,42,0.28)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
             <div style={{ minHeight: 64, padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <div>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Ung tuyen {viec.tieuDe}</h2>
-                <p style={{ margin: '4px 0 0', fontSize: 13, fontWeight: 600, color: '#64748b' }}>Chon CV trong he thong hoac upload CV moi de gui cho nha tuyen dung.</p>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Ứng tuyển {viec.tieuDe}</h2>
+                <p style={{ margin: '4px 0 0', fontSize: 13, fontWeight: 600, color: '#64748b' }}>Chọn CV trong hệ thống hoặc upload CV mới để gửi cho nhà tuyển dụng.</p>
               </div>
               <button onClick={() => setMoModalUngTuyen(false)} style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><X size={18} /></button>
             </div>
             <div style={{ overflow: 'auto', padding: 20, display: 'grid', gap: 14 }}>
               <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: 14, display: 'grid', gap: 10 }}>
-                <strong style={{ fontSize: 14, color: '#0f172a' }}>CV co san</strong>
+                <strong style={{ fontSize: 14, color: '#0f172a' }}>CV có sẵn</strong>
                 {cvList.length ? cvList.map(cv => (
                   <label key={cv.id} style={{ minHeight: 52, display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e5e7eb', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', background: cvDangChon === cv.id && !fileCvMoi ? '#eff6ff' : '#fff' }}>
                     <input type="radio" checked={cvDangChon === cv.id && !fileCvMoi} onChange={() => { setCvDangChon(cv.id); setFileCvMoi(null) }} />
                     <FileText size={18} color="#2563eb" />
-                    <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{cv.tieuDe || cv.fileCvTen || 'CV ung vien'}</span>
-                    {cv.cvChinh && <span style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Mac dinh</span>}
+                    <span style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>{cv.tieuDe || cv.fileCvTen || 'CV ứng viên'}</span>
+                    {cv.cvChinh && <span style={{ fontSize: 12, fontWeight: 800, color: '#15803d' }}>Mặc định</span>}
                   </label>
-                )) : <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Ban chua co CV trong he thong. Hay upload CV moi ben duoi.</p>}
+                )) : <p style={{ margin: 0, color: '#64748b', fontSize: 14 }}>Bạn chưa có CV trong hệ thống. Hãy upload CV mới bên dưới.</p>}
               </div>
               <label style={{ border: '1px dashed #94a3b8', borderRadius: 10, padding: 14, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', background: fileCvMoi ? '#f0fdf4' : '#f8fafc' }}>
                 <UploadCloud size={20} color="#0f766e" />
                 <span style={{ flex: 1 }}>
                   <strong style={{ display: 'block', fontSize: 14, color: '#0f172a' }}>{fileCvMoi ? fileCvMoi.name : 'Upload CV PDF mới'}</strong>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>PDF, DOC, DOCX hoac file CV ca nhan.</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Chỉ hỗ trợ PDF để nhà tuyển dụng xem trực tiếp.</span>
                 </span>
                 <input type="file" className="hidden" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0] ?? null; setFileCvMoi(file); if (file) setCvDangChon('') }} />
               </label>
               <label style={{ display: 'grid', gap: 8 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Thu xin viec</span>
+                <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Thư xin việc</span>
                 <textarea value={thuXinViec} onChange={event => setThuXinViec(event.target.value)} rows={5} style={{ borderRadius: 10, border: '1px solid #cbd5e1', padding: 12, fontSize: 14, lineHeight: 1.6, resize: 'vertical' }} />
               </label>
               {thongBaoUngTuyen && <div style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fef2f2', color: '#991b1b', padding: 12, fontSize: 14, fontWeight: 700 }}>{thongBaoUngTuyen}</div>}
             </div>
             <div style={{ minHeight: 64, padding: 16, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-              <button onClick={() => setMoModalUngTuyen(false)} style={{ minWidth: 96, minHeight: 42, borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', fontWeight: 800, cursor: 'pointer' }}>Huy</button>
-              <button onClick={nopHoSoUngTuyen} disabled={dangUngTuyen || (!cvDangChon && !fileCvMoi)} style={{ minWidth: 150, minHeight: 42, borderRadius: 10, border: '1px solid #0058be', background: '#0058be', color: '#fff', fontWeight: 800, cursor: dangUngTuyen ? 'wait' : 'pointer', opacity: (!cvDangChon && !fileCvMoi) ? 0.55 : 1 }}>{dangUngTuyen ? 'Dang gui...' : 'Gui ung tuyen'}</button>
+              <button onClick={() => setMoModalUngTuyen(false)} style={{ minWidth: 96, minHeight: 42, borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', fontWeight: 800, cursor: 'pointer' }}>Hủy</button>
+              <button onClick={nopHoSoUngTuyen} disabled={dangUngTuyen || (!cvDangChon && !fileCvMoi)} style={{ minWidth: 150, minHeight: 42, borderRadius: 10, border: '1px solid #0058be', background: '#0058be', color: '#fff', fontWeight: 800, cursor: dangUngTuyen ? 'wait' : 'pointer', opacity: (!cvDangChon && !fileCvMoi) ? 0.55 : 1 }}>{dangUngTuyen ? 'Đang gửi...' : 'Gửi ứng tuyển'}</button>
             </div>
           </div>
         </div>

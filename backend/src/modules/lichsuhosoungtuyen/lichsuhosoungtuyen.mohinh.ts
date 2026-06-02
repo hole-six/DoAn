@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 import { trangThaiHoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 
 const lichSuHoSoUngTuyenSchema = new Schema(
@@ -17,3 +17,5 @@ const lichSuHoSoUngTuyenSchema = new Schema(
 )
 
 export const LichSuHoSoUngTuyen = model('LichSuHoSoUngTuyen', lichSuHoSoUngTuyenSchema)
+
+

@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
 import multer from 'multer'
@@ -37,12 +37,12 @@ async function layCongTyTheoNguoiDung(maNguoiDung: string) {
 const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
   const nguoiDung = await layNguoiDungTuAccessToken(yeuCau.headers.authorization)
   if (!['nha_tuyen_dung', 'admin'].includes(nguoiDung.vaiTro)) {
-    throw new LoiUngDung('Ban khong co quyen tao tin tuyen dung', 403)
+    throw new LoiUngDung('Bạn không có quyền tạo tin tuyển dụng', 403)
   }
 
   if (nguoiDung.vaiTro === 'nha_tuyen_dung') {
     const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
-    if (!congTy) throw new LoiUngDung('Tai khoan nay chua co ho so nha tuyen dung', 422)
+    if (!congTy) throw new LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422)
 
     yeuCau.body = {
       ...yeuCau.body,
@@ -57,12 +57,12 @@ const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => 
 const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
   const nguoiDung = await layNguoiDungTuAccessToken(yeuCau.headers.authorization)
   if (!['nha_tuyen_dung', 'admin'].includes(nguoiDung.vaiTro)) {
-    throw new LoiUngDung('Ban khong co quyen sua tin tuyen dung', 403)
+    throw new LoiUngDung('Bạn không có quyền sửa tin tuyển dụng', 403)
   }
 
   const ma = String(yeuCau.params.ma ?? '')
   const tin = await (TinTuyenDung as any).findById(ma)
-  if (!tin) throw new LoiUngDung('Khong tim thay tin tuyen dung', 404)
+  if (!tin) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
 
   if (nguoiDung.vaiTro === 'admin') {
     if (yeuCau.body?.trangThai) {
@@ -73,10 +73,10 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
   }
 
   const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
-  if (!congTy) throw new LoiUngDung('Tai khoan nay chua co ho so nha tuyen dung', 422)
+  if (!congTy) throw new LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422)
 
   if (String(tin.maNhaTuyenDung) !== String(congTy._id)) {
-    throw new LoiUngDung('Ban khong co quyen sua tin tuyen dung nay', 403)
+    throw new LoiUngDung('Bạn không có quyền sửa tin tuyển dụng nay', 403)
   }
 
   if (yeuCau.body?.trangThai) {
@@ -110,7 +110,7 @@ dinhTuyenTinTuyenDung.get('/', dieuKhienTinTuyenDung.layDanhSach)
 dinhTuyenTinTuyenDung.get('/:ma', dieuKhienTinTuyenDung.layChiTiet)
 dinhTuyenTinTuyenDung.use(yeuCauDangNhap)
 dinhTuyenTinTuyenDung.post('/upload-anh', yeuCauVaiTro(['nha_tuyen_dung', 'admin']), taiAnhTin.single('anh'), (yeuCau, phanHoi) => {
-  if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: 'Chua co file anh tin tuyen dung' })
+  if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: 'Chưa có file ảnh tin tuyển dụng' })
   const duongDan = `/uploads/${yeuCau.file.filename}`
   const gocUrl = `${yeuCau.protocol}://${yeuCau.get('host')}`
   return phanHoi.status(201).json({ duLieu: { duongDan, url: `${gocUrl}${duongDan}` } })
@@ -138,3 +138,6 @@ dinhTuyenTinTuyenDung.post('/:ma/tam-dong', yeuCauVaiTro(['admin', 'nha_tuyen_du
   yeuCau.body = { trangThai: 'tam_dong' }
   tiepTheo()
 }), damBaoQuyenSuaXoaTin, dieuKhienTinTuyenDung.capNhat)
+
+
+

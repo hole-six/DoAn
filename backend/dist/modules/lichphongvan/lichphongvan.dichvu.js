@@ -11,13 +11,31 @@ function chuanHoaLich(taiLieu) {
     const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
     const ungTuyen = duLieu.maHoSoUngTuyen;
     const tin = ungTuyen?.maTinTuyenDung;
+    const ungVien = ungTuyen?.maUngVien;
     return {
         id: String(duLieu._id),
         maHoSoUngTuyen: ungTuyen?._id ? String(ungTuyen._id) : String(ungTuyen),
         hoSoUngTuyen: ungTuyen?._id
             ? {
                 id: String(ungTuyen._id),
+                maUngVien: ungVien?._id ? String(ungVien._id) : ungVien ? String(ungVien) : undefined,
+                maTinTuyenDung: tin?._id ? String(tin._id) : tin ? String(tin) : undefined,
                 trangThai: ungTuyen.trangThai,
+                ungVien: ungVien?._id
+                    ? {
+                        id: String(ungVien._id),
+                        viTriMongMuon: ungVien.viTriMongMuon,
+                        kinhNghiem: ungVien.kinhNghiem,
+                        nguoiDung: ungVien.maNguoiDung?._id
+                            ? {
+                                id: String(ungVien.maNguoiDung._id),
+                                hoTen: ungVien.maNguoiDung.hoTen,
+                                email: ungVien.maNguoiDung.email,
+                                soDienThoai: ungVien.maNguoiDung.soDienThoai,
+                            }
+                            : undefined,
+                    }
+                    : undefined,
                 tinTuyenDung: tin?._id
                     ? {
                         id: String(tin._id),
@@ -47,7 +65,10 @@ function chuanHoaLich(taiLieu) {
 function populate(q) {
     return q.populate({
         path: 'maHoSoUngTuyen',
-        populate: { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung' } },
+        populate: [
+            { path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } },
+            { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung' } },
+        ],
     });
 }
 exports.dichVuLichPhongVan = {
@@ -58,7 +79,7 @@ exports.dichVuLichPhongVan = {
     async layTheoMa(ma) {
         const duLieu = await populate(lichphongvan_mohinh_js_1.LichPhongVan.findById(ma));
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay lich phong van', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn', 404);
         return chuanHoaLich(duLieu);
     },
     async taoMoi(duLieu) {
@@ -81,7 +102,7 @@ exports.dichVuLichPhongVan = {
             }
         }
         catch (error) {
-            console.error('Loi gui thong bao moi phong van:', error);
+            console.error('Lỗi gửi thông báo mời phỏng vấn:', error);
         }
         return lichMoi;
     },
@@ -92,7 +113,7 @@ exports.dichVuLichPhongVan = {
             runValidators: true,
         }));
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay lich phong van de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn để cập nhật', 404);
         if (lichCu &&
             duLieu.thoiGianBatDau &&
             lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
@@ -113,7 +134,7 @@ exports.dichVuLichPhongVan = {
                 }
             }
             catch (error) {
-                console.error('Loi gui thong bao thay doi lich:', error);
+                console.error('Lỗi gửi thông báo thay đổi lịch:', error);
             }
         }
         if (lichCu &&
@@ -127,7 +148,7 @@ exports.dichVuLichPhongVan = {
                     const tin = await hoSo.maTinTuyenDung.populate('maNhaTuyenDung');
                     const maNguoiDungUngVien = String(hoSo.maUngVien.maNguoiDung ?? hoSo.maUngVien._id);
                     const maNguoiDungNhaTuyenDung = String(tin.maNhaTuyenDung?.maNguoiDung ?? tin.maNhaTuyenDung?._id ?? '');
-                    const tenUngVien = hoSo.maUngVien?.hoTen ?? hoSo.maUngVien?.tenUngVien ?? 'Ung vien';
+                    const tenUngVien = hoSo.maUngVien?.hoTen ?? hoSo.maUngVien?.tenUngVien ?? 'Ứng viên';
                     const viTriUngTuyen = tin.tieuDe || 'Vị trí tuyển dụng';
                     if (duLieu.trangThai === 'da_xac_nhan' && maNguoiDungNhaTuyenDung) {
                         await (0, thongbao_helper_js_1.thongBaoUngVienChapNhanLich)({
@@ -160,7 +181,7 @@ exports.dichVuLichPhongVan = {
                 }
             }
             catch (error) {
-                console.error('Loi gui thong bao cap nhat lich:', error);
+                console.error('Lỗi gửi thông báo cập nhật lịch:', error);
             }
         }
         return chuanHoaLich(ketQua);
@@ -168,7 +189,7 @@ exports.dichVuLichPhongVan = {
     async xoa(ma) {
         const ketQua = await lichphongvan_mohinh_js_1.LichPhongVan.findByIdAndDelete(ma);
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay lich phong van de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn để xóa', 404);
         return chuanHoaLich(ketQua);
     },
 };

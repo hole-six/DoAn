@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
 import multer from 'multer'
@@ -37,3 +37,5 @@ dinhTuyenNhaTuyenDung.get('/:ma', dieuKhienNhaTuyenDung.layChiTiet)
 dinhTuyenNhaTuyenDung.post('/', dieuKhienNhaTuyenDung.taoMoi)
 dinhTuyenNhaTuyenDung.patch('/:ma', dieuKhienNhaTuyenDung.capNhat)
 dinhTuyenNhaTuyenDung.delete('/:ma', dieuKhienNhaTuyenDung.xoa)
+
+

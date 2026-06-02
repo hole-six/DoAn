@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+﻿import fs from 'node:fs'
 import path from 'node:path'
 import multer from 'multer'
 import { taoDinhTuyenCoBan } from '../../dungchung/dinhtuyencoban.js'
@@ -66,3 +66,5 @@ dinhTuyenHoSoNangLuc.post('/upload-anh', yeuCauDangNhap, yeuCauVaiTro(['ung_vien
 dinhTuyenHoSoNangLuc.post('/upload-file', yeuCauDangNhap, yeuCauVaiTro(['ung_vien', 'admin']), taiFileCv.single('tep'), (yeuCau, phanHoi) => {
   return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chua co file CV goc')
 })
+
+

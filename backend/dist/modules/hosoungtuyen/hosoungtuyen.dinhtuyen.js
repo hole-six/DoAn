@@ -17,7 +17,7 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau, _phanHoi, tiepTheo) {
     const ma = String(yeuCau.params.ma ?? '');
     const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(ma).populate('maTinTuyenDung maUngVien');
     if (!hoSo)
-        throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'NOT_FOUND');
+        throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND');
     const trangThaiMoi = String(yeuCau.body?.trangThai ?? '');
     if (!trangThaiMoi) {
         tiepTheo();
@@ -54,7 +54,7 @@ exports.dinhTuyenHoSoUngTuyen.post('/ung-tuyen', (0, xacthuc_js_1.yeuCauVaiTro)(
 exports.dinhTuyenHoSoUngTuyen.post('/ung-tuyen-nhanh', (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien']), (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
     const maTinTuyenDung = String(yeuCau.body?.maTinTuyenDung ?? '');
     if (!maTinTuyenDung)
-        throw new loiungdung_js_1.LoiUngDung('Thieu ma tin tuyen dung', 422, 'MISSING_JOB_ID');
+        throw new loiungdung_js_1.LoiUngDung('Thiếu mã tin tuyển dụng', 422, 'MISSING_JOB_ID');
     const duLieu = await ungtuyen_dichvu_js_1.dichVuWorkflowUngTuyen.ungTuyen(yeuCau.nguoiDung, {
         maTinTuyenDung,
         thuXinViec: yeuCau.body?.thuXinViec,
@@ -66,7 +66,7 @@ exports.dinhTuyenHoSoUngTuyen.get('/:ma', hosoungtuyen_dieukhien_js_1.dieuKhienH
 exports.dinhTuyenHoSoUngTuyen.post('/', (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien', 'admin']), hosoungtuyen_dieukhien_js_1.dieuKhienHoSoUngTuyen.taoMoi);
 exports.dinhTuyenHoSoUngTuyen.patch('/:ma', (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien', 'nha_tuyen_dung', 'admin']), (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, _phanHoi, tiepTheo) => {
     if ('trangThai' in (yeuCau.body ?? {}) || 'diemKhopKyNang' in (yeuCau.body ?? {})) {
-        throw new loiungdung_js_1.LoiUngDung('Khong cap nhat truc tiep trang thai hoac diem khop ky nang; hay dung endpoint nghiep vu', 409, 'BUSINESS_ENDPOINT_REQUIRED');
+        throw new loiungdung_js_1.LoiUngDung('Không cập nhật trực tiếp trạng thái hoặc điểm khớp kỹ năng; hãy dùng endpoint nghiệp vụ', 409, 'BUSINESS_ENDPOINT_REQUIRED');
     }
     tiepTheo();
 }), (0, batloibatdongbo_js_1.batLoiBatDongBo)(kiemTraQuyenCapNhatHoSoUngTuyen), hosoungtuyen_dieukhien_js_1.dieuKhienHoSoUngTuyen.capNhat);
@@ -93,5 +93,5 @@ exports.dinhTuyenHoSoUngTuyen.post('/:ma/moi-phong-van', (0, xacthuc_js_1.yeuCau
     phanHoi.status(201).json({ duLieu });
 }));
 exports.dinhTuyenHoSoUngTuyen.post('/:ma/chuyen-trang-thai', (0, xacthuc_js_1.yeuCauVaiTro)(['nha_tuyen_dung', 'admin']), (0, batloibatdongbo_js_1.batLoiBatDongBo)(async () => {
-    throw new loiungdung_js_1.LoiUngDung('Khong chuyen trang thai truc tiep; hay dung endpoint nghiep vu phu hop', 409, 'BUSINESS_ENDPOINT_REQUIRED');
+    throw new loiungdung_js_1.LoiUngDung('Không chuyển trạng thái trực tiếp; hãy dùng endpoint nghiệp vụ phù hợp', 409, 'BUSINESS_ENDPOINT_REQUIRED');
 }));

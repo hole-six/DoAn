@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
 
@@ -60,7 +60,7 @@ export const dichVuTinTuyenDung = {
       .findById(ma)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
       .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (!duLieu) throw new LoiUngDung('Khong tim thay tin tuyen dung', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
     return chuanHoaTin(duLieu)
   },
 
@@ -83,7 +83,7 @@ export const dichVuTinTuyenDung = {
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
       .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
 
-    if (!ketQua) throw new LoiUngDung('Khong tim thay tin tuyen dung de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
     return chuanHoaTin(ketQua)
   },
 
@@ -92,7 +92,10 @@ export const dichVuTinTuyenDung = {
       .findByIdAndDelete(ma)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
       .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (!ketQua) throw new LoiUngDung('Khong tim thay tin tuyen dung de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404)
     return chuanHoaTin(ketQua)
   },
 }
+
+
+

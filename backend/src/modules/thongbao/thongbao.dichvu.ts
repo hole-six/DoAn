@@ -1,4 +1,4 @@
-import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
+﻿import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
 import { taoDichVuCoBan } from '../../dungchung/dichvucoban.js'
 import { ThongBao } from './thongbao.mohinh.js'
 
@@ -70,3 +70,5 @@ export async function xoaThongBaoCu() {
 
   return ketQua.deletedCount
 }
+
+

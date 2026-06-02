@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs'
+﻿import bcrypt from 'bcryptjs'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { NguoiDung } from './nguoidung.mohinh.js'
 
@@ -55,7 +55,7 @@ export const dichVuNguoiDung = {
     const nguoiDung = await (NguoiDung as any).findById(ma) as DuLieuNguoiDung | null
 
     if (!nguoiDung) {
-      throw new LoiUngDung('Khong tim thay nguoi dung', 404)
+      throw new LoiUngDung('Không tìm thấy người dùng', 404)
     }
 
     return boMatKhau(nguoiDung)
@@ -107,7 +107,7 @@ export const dichVuNguoiDung = {
     ) as DuLieuNguoiDung | null
 
     if (!nguoiDung) {
-      throw new LoiUngDung('Khong tim thay nguoi dung de cap nhat', 404)
+      throw new LoiUngDung('Không tìm thấy người dùng de cap nhat', 404)
     }
 
     return boMatKhau(nguoiDung)
@@ -117,13 +117,13 @@ export const dichVuNguoiDung = {
     const nguoiDung = await (NguoiDung as any).findById(ma) as DuLieuNguoiDung | null
 
     if (!nguoiDung) {
-      throw new LoiUngDung('Khong tim thay nguoi dung de xoa', 404)
+      throw new LoiUngDung('Không tìm thấy người dùng de xoa', 404)
     }
 
     if (nguoiDung.vaiTro === 'admin') {
       const soAdmin = await (NguoiDung as any).countDocuments({ vaiTro: 'admin' })
       if (soAdmin <= 1) {
-        throw new LoiUngDung('Khong the xoa admin cuoi cung cua he thong', 409)
+        throw new LoiUngDung('Không thể xóa admin cuối cùng của hệ thống', 409)
       }
     }
 
@@ -131,3 +131,6 @@ export const dichVuNguoiDung = {
     return boMatKhau(nguoiDung)
   },
 }
+
+
+

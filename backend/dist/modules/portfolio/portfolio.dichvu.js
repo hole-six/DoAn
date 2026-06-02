@@ -105,7 +105,7 @@ async function layUngVienTuToken(authorization) {
         .populate('maNguoiDung', 'hoTen email soDienThoai')
         .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
     if (!ungVien)
-        throw new loiungdung_js_1.LoiUngDung('Ban can tao ho so ung vien truoc khi tao portfolio', 422);
+        throw new loiungdung_js_1.LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước khi tao portfolio', 422);
     return ungVien;
 }
 async function layHoSoThuocUngVien(maHoSoNangLuc, maUngVien) {
@@ -117,7 +117,7 @@ async function layHoSoThuocUngVien(maHoSoNangLuc, maUngVien) {
 async function layPortfolioThuocUngVien(ma, maUngVien) {
     const portfolio = await portfolio_mohinh_js_1.Portfolio.findOne({ _id: ma, maUngVien });
     if (!portfolio)
-        throw new loiungdung_js_1.LoiUngDung('Khong tim thay portfolio', 404);
+        throw new loiungdung_js_1.LoiUngDung('Không tìm thấy portfolio', 404);
     return portfolio;
 }
 function mangThongTin(items = []) {
@@ -144,7 +144,7 @@ function renderMuc(tieuDe, items, rong) {
 }
 function renderPortfolioHtml(portfolio, ungVien, hoSo) {
     const nguoiDung = ungVien.maNguoiDung ?? {};
-    const ten = nguoiDung.hoTen ?? 'Ung vien IT';
+    const ten = nguoiDung.hoTen ?? 'Ứng viên IT';
     const email = nguoiDung.email ?? '';
     const dienThoai = nguoiDung.soDienThoai ?? '';
     const viTri = ungVien.viTriMongMuon ?? hoSo.tieuDe ?? 'Software Developer';

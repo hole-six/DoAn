@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { HoSoNangLuc } from '../hosonangluc/hosonangluc.mohinh.js'
 import { UngVien } from '../ungvien/ungvien.mohinh.js'
 import { layNguoiDungTuAccessToken } from '../xacthuc/xacthuc.dichvu.js'
@@ -123,7 +123,7 @@ async function layUngVienTuToken(authorization?: string) {
     .findOne({ maNguoiDung: nguoiDung.id })
     .populate('maNguoiDung', 'hoTen email soDienThoai')
     .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-  if (!ungVien) throw new LoiUngDung('Ban can tao ho so ung vien truoc khi tao portfolio', 422)
+  if (!ungVien) throw new LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước khi tao portfolio', 422)
   return ungVien
 }
 
@@ -135,7 +135,7 @@ async function layHoSoThuocUngVien(maHoSoNangLuc: string, maUngVien: unknown) {
 
 async function layPortfolioThuocUngVien(ma: string, maUngVien: unknown) {
   const portfolio = await (Portfolio as any).findOne({ _id: ma, maUngVien })
-  if (!portfolio) throw new LoiUngDung('Khong tim thay portfolio', 404)
+  if (!portfolio) throw new LoiUngDung('Không tìm thấy portfolio', 404)
   return portfolio
 }
 
@@ -165,7 +165,7 @@ function renderMuc(tieuDe: string, items: Array<Record<string, string>>, rong: s
 
 function renderPortfolioHtml(portfolio: any, ungVien: any, hoSo: any) {
   const nguoiDung = ungVien.maNguoiDung ?? {}
-  const ten = nguoiDung.hoTen ?? 'Ung vien IT'
+  const ten = nguoiDung.hoTen ?? 'Ứng viên IT'
   const email = nguoiDung.email ?? ''
   const dienThoai = nguoiDung.soDienThoai ?? ''
   const viTri = ungVien.viTriMongMuon ?? hoSo.tieuDe ?? 'Software Developer'
@@ -339,3 +339,5 @@ export const dichVuPortfolio = {
     return html
   },
 }
+
+

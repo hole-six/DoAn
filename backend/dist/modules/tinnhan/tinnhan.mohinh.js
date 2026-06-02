@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TinNhanModel = exports.loaiTinNhanEnum = exports.CuocTroChuyenModel = exports.loaiCuocTroChuyenEnum = void 0;
 const mongoose_1 = require("mongoose");
 // ============================================
-// CONVERSATION MODEL (Cuộc hội thoại)
+// CONVERSATION MODEL (Cuá»™c há»™i thoáº¡i)
 // ============================================
 exports.loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'];
 const cuocTroChuyenSchema = new mongoose_1.Schema({
@@ -11,16 +11,16 @@ const cuocTroChuyenSchema = new mongoose_1.Schema({
     nguoiThamGia: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung', required: true }],
     // Type
     loai: { type: String, enum: exports.loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
-    // Tên nhóm (dùng cho nhom_cong_dong)
+    // TÃªn nhÃ³m (dÃ¹ng cho nhom_cong_dong)
     tenNhom: { type: String },
     moTaNhom: { type: String },
     anhNhom: { type: String },
-    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
+    // Chá»‰ dÃ¹ng cho nhom_cong_dong â€” ai lÃ  admin nhÃ³m
     quanTriNhom: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung' }],
-    // Context (nếu chat về hồ sơ ứng tuyển cụ thể)
+    // Context (náº¿u chat vá» há»“ sÆ¡ á»©ng tuyá»ƒn cá»¥ thá»ƒ)
     maHoSoUngTuyen: { type: mongoose_1.Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
     maTinTuyenDung: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TinTuyenDung' },
-    // Last message info (để hiển thị preview)
+    // Last message info (Ä‘á»ƒ hiá»ƒn thá»‹ preview)
     tinNhanCuoiCung: {
         noiDung: String,
         nguoiGui: { type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung' },
@@ -45,7 +45,7 @@ cuocTroChuyenSchema.index({ maHoSoUngTuyen: 1 });
 cuocTroChuyenSchema.index({ daLuuTru: 1 });
 exports.CuocTroChuyenModel = (0, mongoose_1.model)('CuocTroChuyenModel', cuocTroChuyenSchema);
 // ============================================
-// MESSAGE MODEL (Tin nhắn)
+// MESSAGE MODEL (Tin nháº¯n)
 // ============================================
 exports.loaiTinNhanEnum = ['text', 'file', 'image', 'system'];
 const tinNhanSchema = new mongoose_1.Schema({

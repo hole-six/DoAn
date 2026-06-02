@@ -59,7 +59,7 @@ exports.dichVuTinTuyenDung = {
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
             .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng', 404);
         return chuanHoaTin(duLieu);
     },
     async taoMoi(duLieu) {
@@ -80,7 +80,7 @@ exports.dichVuTinTuyenDung = {
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
             .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
         return chuanHoaTin(ketQua);
     },
     async xoa(ma) {
@@ -89,7 +89,7 @@ exports.dichVuTinTuyenDung = {
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
             .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay tin tuyen dung de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404);
         return chuanHoaTin(ketQua);
     },
 };

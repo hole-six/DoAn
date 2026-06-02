@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { HoSoNangLuc } from '../hosonangluc/hosonangluc.mohinh.js'
 import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 import { dichVuHoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.dichvu.js'
@@ -40,14 +40,14 @@ function damBaoVaiTro(nguoiDung: NguoiDungHienTai, vaiTro: string) {
 async function layUngVienCuaNguoiDung(nguoiDung: NguoiDungHienTai) {
   damBaoVaiTro(nguoiDung, 'ung_vien')
   const ungVien = await (UngVien as any).findOne({ maNguoiDung: nguoiDung.id }).populate('maNguoiDung')
-  if (!ungVien) throw new LoiUngDung('Ban can tao ho so ung vien truoc khi thao tac', 422, 'CANDIDATE_PROFILE_REQUIRED')
+  if (!ungVien) throw new LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước khi thao tác', 422, 'CANDIDATE_PROFILE_REQUIRED')
   return ungVien
 }
 
 async function layCongTyCuaNguoiDung(nguoiDung: NguoiDungHienTai) {
   damBaoVaiTro(nguoiDung, 'nha_tuyen_dung')
   const congTy = await (NhaTuyenDung as any).findOne({ maNguoiDung: nguoiDung.id })
-  if (!congTy) throw new LoiUngDung('Tai khoan nay chua co ho so nha tuyen dung', 422, 'EMPLOYER_PROFILE_REQUIRED')
+  if (!congTy) throw new LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422, 'EMPLOYER_PROFILE_REQUIRED')
   return congTy
 }
 
@@ -57,7 +57,7 @@ async function layHoSoDayDu(maHoSoUngTuyen: string) {
     .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
     .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung logo' } })
     .populate('maHoSoNangLuc')
-  if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'APPLICATION_NOT_FOUND')
+  if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND')
   return hoSo
 }
 
@@ -65,7 +65,7 @@ async function damBaoHoSoThuocUngVien(maHoSoUngTuyen: string, nguoiDung: NguoiDu
   const ungVien = await layUngVienCuaNguoiDung(nguoiDung)
   const hoSo = await layHoSoDayDu(maHoSoUngTuyen)
   if (id(hoSo.maUngVien) !== id(ungVien)) {
-    throw new LoiUngDung('Ban khong co quyen thao tac voi ho so ung tuyen nay', 403, 'FORBIDDEN')
+    throw new LoiUngDung('Bạn không có quyền thao tác với hồ sơ ứng tuyển này', 403, 'FORBIDDEN')
   }
   return { hoSo, ungVien }
 }
@@ -74,14 +74,14 @@ async function damBaoHoSoThuocCongTy(maHoSoUngTuyen: string, nguoiDung: NguoiDun
   const congTy = await layCongTyCuaNguoiDung(nguoiDung)
   const hoSo = await layHoSoDayDu(maHoSoUngTuyen)
   if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung) !== id(congTy)) {
-    throw new LoiUngDung('Ban khong co quyen thao tac voi ho so ung tuyen nay', 403, 'FORBIDDEN')
+    throw new LoiUngDung('Bạn không có quyền thao tác với hồ sơ ứng tuyển này', 403, 'FORBIDDEN')
   }
   return { hoSo, congTy }
 }
 
 async function layLichVaHoSo(maLichPhongVan: string) {
   const lich = await (LichPhongVan as any).findById(maLichPhongVan)
-  if (!lich) throw new LoiUngDung('Khong tim thay lich phong van', 404, 'INTERVIEW_NOT_FOUND')
+  if (!lich) throw new LoiUngDung('Không tìm thấy lịch phỏng vấn', 404, 'INTERVIEW_NOT_FOUND')
   const hoSo = await layHoSoDayDu(id(lich.maHoSoUngTuyen))
   return { lich, hoSo }
 }
@@ -123,7 +123,7 @@ function thongTinThongBao(hoSo: any) {
   return {
     maNguoiDungUngVien: id(ungVien?.maNguoiDung),
     maNguoiDungNhaTuyenDung: id(congTy?.maNguoiDung),
-    tenUngVien: ungVien?.maNguoiDung?.hoTen ?? ungVien?.hoTen ?? 'Ung vien',
+    tenUngVien: ungVien?.maNguoiDung?.hoTen ?? ungVien?.hoTen ?? 'Ứng viên',
     kinhNghiem: `${ungVien?.kinhNghiem ?? 0} nam kinh nghiem`,
     tenCongTy: congTy?.tenCongTy ?? 'Cong ty',
     viTriUngTuyen: tin?.tieuDe ?? 'Vi tri ung tuyen',
@@ -131,12 +131,12 @@ function thongTinThongBao(hoSo: any) {
 }
 
 function damBaoTinDangMo(tin: any) {
-  if (!tin) throw new LoiUngDung('Khong tim thay tin tuyen dung', 404, 'JOB_NOT_FOUND')
+  if (!tin) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404, 'JOB_NOT_FOUND')
   if (String(tin.trangThai ?? '') !== 'dang_mo') {
     throw new LoiUngDung('Chi co the ung tuyen tin dang mo', 409, 'JOB_NOT_OPEN')
   }
   if (tin.hanNop && new Date(tin.hanNop).getTime() < Date.now()) {
-    throw new LoiUngDung('Tin tuyen dung da het han nop ho so', 409, 'JOB_EXPIRED')
+    throw new LoiUngDung('Tin tuyển dụng đã hết hạn nộp hồ sơ', 409, 'JOB_EXPIRED')
   }
 }
 
@@ -147,10 +147,10 @@ export const dichVuWorkflowUngTuyen = {
     damBaoTinDangMo(tin)
 
     if (!duLieu.maHoSoNangLuc) {
-      throw new LoiUngDung('Ban can chon CV de ung tuyen', 422, 'CV_REQUIRED')
+      throw new LoiUngDung('Bạn cần chọn CV để ứng tuyển', 422, 'CV_REQUIRED')
     }
     const hoSoNangLuc = await (HoSoNangLuc as any).findOne({ _id: duLieu.maHoSoNangLuc, maUngVien: ungVien._id })
-    if (!hoSoNangLuc) throw new LoiUngDung('Ban can chon CV hop le de ung tuyen', 422, 'CV_REQUIRED')
+    if (!hoSoNangLuc) throw new LoiUngDung('Bạn cần chọn CV hợp lệ để ứng tuyển', 422, 'CV_REQUIRED')
 
     try {
       const hoSo = await (HoSoUngTuyen as any).create({
@@ -164,7 +164,7 @@ export const dichVuWorkflowUngTuyen = {
       await ghiLichSuHoSo({
         maHoSoUngTuyen: id(hoSo),
         trangThaiMoi: 'da_nop',
-        ghiChu: 'Ung vien nop ho so',
+        ghiChu: 'Ứng viên nộp hồ sơ',
         maNguoiDung: nguoiDung.id,
       })
 
@@ -190,7 +190,7 @@ export const dichVuWorkflowUngTuyen = {
   async xemHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string) {
     const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
     if (hoSo.trangThai === 'da_nop') {
-      await capNhatTrangThaiHoSo(hoSo, 'da_xem', nguoiDung, 'Nha tuyen dung xem ho so lan dau')
+      await capNhatTrangThaiHoSo(hoSo, 'da_xem', nguoiDung, 'Nhà tuyển dụng xem hồ sơ lần đầu')
       const info = thongTinThongBao(hoSo)
       if (info.maNguoiDungUngVien) {
         await thongBaoHoSoDuocXem({
@@ -223,7 +223,7 @@ export const dichVuWorkflowUngTuyen = {
         await thongBaoHeThong({
           maNguoiDung: info.maNguoiDungUngVien,
           tieuDe: 'Ho so ung tuyen chua phu hop',
-          noiDung: `${info.tenCongTy} da cap nhat ket qua ho so vi tri ${info.viTriUngTuyen}.`,
+          noiDung: `${info.tenCongTy} đã cập nhật kết quả hồ sơ vi tri ${info.viTriUngTuyen}.`,
           lienKet: '/ung-vien/ung-tuyen',
           mucDoUuTien: 'cao',
         })
@@ -236,10 +236,10 @@ export const dichVuWorkflowUngTuyen = {
   async moiPhongVan(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: LichInput) {
     const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
     if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) {
-      throw new LoiUngDung('Chi co the moi phong van ho so da xem hoac dang xet duyet', 409, 'INVALID_APPLICATION_STATE')
+      throw new LoiUngDung('Chỉ có thể mời phỏng vấn hồ sơ đã xem hoặc đang xét duyệt', 409, 'INVALID_APPLICATION_STATE')
     }
     const lichCu = await (LichPhongVan as any).findOne({ maHoSoUngTuyen })
-    if (lichCu) throw new LoiUngDung('Ho so nay da co lich phong van', 409, 'INTERVIEW_EXISTS')
+    if (lichCu) throw new LoiUngDung('Hồ sơ này đã có lịch phỏng vấn', 409, 'INTERVIEW_EXISTS')
 
     const lich = await (LichPhongVan as any).create({
       maHoSoUngTuyen,
@@ -252,7 +252,7 @@ export const dichVuWorkflowUngTuyen = {
       trangThai: 'da_len_lich',
       ketQua: 'cho_ket_qua',
     })
-    await capNhatTrangThaiHoSo(hoSo, 'moi_phong_van', nguoiDung, 'Nha tuyen dung moi phong van')
+    await capNhatTrangThaiHoSo(hoSo, 'moi_phong_van', nguoiDung, 'Nhà tuyển dụng mời phỏng vấn')
 
     const info = thongTinThongBao(hoSo)
     if (info.maNguoiDungUngVien) {
@@ -295,7 +295,7 @@ export const dichVuWorkflowUngTuyen = {
     const { lich, hoSo } = await layLichVaHoSo(maLichPhongVan)
     await damBaoHoSoThuocUngVien(id(hoSo), nguoiDung)
     if (!['da_len_lich', 'da_xac_nhan'].includes(String(lich.trangThai ?? ''))) {
-      throw new LoiUngDung('Lich phong van khong the yeu cau doi', 409, 'INVALID_INTERVIEW_STATE')
+      throw new LoiUngDung('Lịch phỏng vấn không thể yêu cầu đổi', 409, 'INVALID_INTERVIEW_STATE')
     }
     lich.trangThai = 'doi_lich'
     lich.ghiChu = ghiChu
@@ -331,7 +331,7 @@ export const dichVuWorkflowUngTuyen = {
     const { lich, hoSo } = await layLichVaHoSo(maLichPhongVan)
     await damBaoHoSoThuocCongTy(id(hoSo), nguoiDung)
     if (['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) {
-      throw new LoiUngDung('Khong the cap nhat lich da ket thuc hoac da huy', 409, 'INVALID_INTERVIEW_STATE')
+      throw new LoiUngDung('Không thể cập nhật lịch đã kết thúc hoặc đã hủy', 409, 'INVALID_INTERVIEW_STATE')
     }
 
     Object.assign(lich, {
@@ -366,7 +366,7 @@ export const dichVuWorkflowUngTuyen = {
       throw new LoiUngDung('Chi co the hoan tat lich chua ket thuc', 409, 'INVALID_INTERVIEW_STATE')
     }
     if (!['dat', 'khong_dat'].includes(duLieu.ketQua)) {
-      throw new LoiUngDung('Ket qua phong van khong hop le', 422, 'INVALID_INTERVIEW_RESULT')
+      throw new LoiUngDung('Kết quả phỏng vấn không hợp lệ', 422, 'INVALID_INTERVIEW_RESULT')
     }
 
     lich.trangThai = 'hoan_thanh'
@@ -404,7 +404,7 @@ export const dichVuWorkflowUngTuyen = {
     const lich = await (LichPhongVan as any).findOne({ maHoSoUngTuyen })
     if (lich && !['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) {
       lich.trangThai = 'da_huy'
-      lich.ghiChu = ghiChu ?? 'Ung vien rut ho so'
+      lich.ghiChu = ghiChu ?? 'Ứng viên rút hồ sơ'
       await lich.save()
     }
 
@@ -412,8 +412,8 @@ export const dichVuWorkflowUngTuyen = {
     if (info.maNguoiDungNhaTuyenDung) {
       await thongBaoHeThong({
         maNguoiDung: info.maNguoiDungNhaTuyenDung,
-        tieuDe: 'Ung vien da rut ho so',
-        noiDung: `${info.tenUngVien} da rut ho so ung tuyen vi tri ${info.viTriUngTuyen}.`,
+        tieuDe: 'Ứng viên đã rút hồ sơ',
+        noiDung: `${info.tenUngVien} đã rút hồ sơ ứng tuyển vị trí ${info.viTriUngTuyen}.`,
         lienKet: '/nha-tuyen-dung/ung-vien',
         mucDoUuTien: 'cao',
       })
@@ -422,3 +422,6 @@ export const dichVuWorkflowUngTuyen = {
     return dichVuHoSoUngTuyen.layTheoMa(maHoSoUngTuyen)
   },
 }
+
+
+

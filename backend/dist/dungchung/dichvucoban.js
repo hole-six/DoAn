@@ -10,7 +10,7 @@ function taoDichVuCoBan(moHinh) {
         async layTheoMa(ma) {
             const duLieu = await moHinh.findById(ma);
             if (!duLieu) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu', 404);
             }
             return duLieu;
         },
@@ -20,14 +20,14 @@ function taoDichVuCoBan(moHinh) {
         async capNhat(ma, duLieu) {
             const ketQua = await moHinh.findByIdAndUpdate(ma, duLieu, { new: true, runValidators: true });
             if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de cap nhat', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu de cap nhat', 404);
             }
             return ketQua;
         },
         async xoa(ma) {
             const ketQua = await moHinh.findByIdAndDelete(ma);
             if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de xoa', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu de xoa', 404);
             }
             return ketQua;
         },

@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 export const gioiTinhUngVien = ['nam', 'nu', 'khac'] as const
 
@@ -41,3 +41,5 @@ const ungVienSchema = new Schema(
 )
 
 export const UngVien = model('UngVien', ungVienSchema)
+
+

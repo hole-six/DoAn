@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import { dinhTuyenAi } from '../modules/ai/ai.dinhtuyen.js'
 import { dinhTuyenCanhBaoQuanTri } from '../modules/canhbaoquantri/canhbaoquantri.dinhtuyen.js'
 import { dinhTuyenDanhGiaCongTy } from '../modules/danhgiacongty/danhgiacongty.dinhtuyen.js'
@@ -43,3 +43,5 @@ apiTong.use('/tinnhan', dinhTuyenTinNhan)
 apiTong.use('/danhgiacongty', dinhTuyenDanhGiaCongTy)
 apiTong.use('/ai', dinhTuyenAi)
 apiTong.use('/deploy', dinhTuyenDeploy)
+
+

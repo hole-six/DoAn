@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 export const loaiHinhLamViec = ['toan_thoi_gian', 'ban_thoi_gian', 'thuc_tap', 'tu_xa', 'hybrid'] as const
 export const capBacTinTuyenDung = ['intern', 'fresher', 'junior', 'middle', 'senior', 'lead'] as const
@@ -42,3 +42,5 @@ const tinTuyenDungSchema = new Schema(
 tinTuyenDungSchema.index({ tieuDe: 'text', moTa: 'text', yeuCau: 'text' })
 
 export const TinTuyenDung = model('TinTuyenDung', tinTuyenDungSchema)
+
+

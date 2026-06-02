@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 export const hinhThucPhongVan = ['online', 'offline'] as const
 export const trangThaiLichPhongVan = ['da_len_lich', 'da_xac_nhan', 'doi_lich', 'hoan_thanh', 'da_huy'] as const
@@ -25,3 +25,5 @@ const lichPhongVanSchema = new Schema(
 lichPhongVanSchema.index({ maHoSoUngTuyen: 1 }, { unique: true })
 
 export const LichPhongVan = model('LichPhongVan', lichPhongVanSchema)
+
+

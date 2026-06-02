@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
 import '../tintuyendung/tintuyendung.mohinh.js'
@@ -15,13 +15,31 @@ function chuanHoaLich(taiLieu: any) {
   const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
   const ungTuyen = duLieu.maHoSoUngTuyen
   const tin = ungTuyen?.maTinTuyenDung
+  const ungVien = ungTuyen?.maUngVien
   return {
     id: String(duLieu._id),
     maHoSoUngTuyen: ungTuyen?._id ? String(ungTuyen._id) : String(ungTuyen),
     hoSoUngTuyen: ungTuyen?._id
       ? {
           id: String(ungTuyen._id),
+          maUngVien: ungVien?._id ? String(ungVien._id) : ungVien ? String(ungVien) : undefined,
+          maTinTuyenDung: tin?._id ? String(tin._id) : tin ? String(tin) : undefined,
           trangThai: ungTuyen.trangThai,
+          ungVien: ungVien?._id
+            ? {
+                id: String(ungVien._id),
+                viTriMongMuon: ungVien.viTriMongMuon,
+                kinhNghiem: ungVien.kinhNghiem,
+                nguoiDung: ungVien.maNguoiDung?._id
+                  ? {
+                      id: String(ungVien.maNguoiDung._id),
+                      hoTen: ungVien.maNguoiDung.hoTen,
+                      email: ungVien.maNguoiDung.email,
+                      soDienThoai: ungVien.maNguoiDung.soDienThoai,
+                    }
+                  : undefined,
+              }
+            : undefined,
           tinTuyenDung: tin?._id
             ? {
                 id: String(tin._id),
@@ -52,7 +70,10 @@ function chuanHoaLich(taiLieu: any) {
 function populate(q: any) {
   return q.populate({
     path: 'maHoSoUngTuyen',
-    populate: { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung' } },
+    populate: [
+      { path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } },
+      { path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy maNguoiDung' } },
+    ],
   })
 }
 
@@ -63,7 +84,7 @@ export const dichVuLichPhongVan = {
   },
   async layTheoMa(ma: string) {
     const duLieu = await populate((LichPhongVan as any).findById(ma))
-    if (!duLieu) throw new LoiUngDung('Khong tim thay lich phong van', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy lịch phỏng vấn', 404)
     return chuanHoaLich(duLieu)
   },
   async taoMoi(duLieu: any) {
@@ -86,7 +107,7 @@ export const dichVuLichPhongVan = {
         })
       }
     } catch (error) {
-      console.error('Loi gui thong bao moi phong van:', error)
+      console.error('Lỗi gửi thông báo mời phỏng vấn:', error)
     }
 
     return lichMoi
@@ -99,7 +120,7 @@ export const dichVuLichPhongVan = {
         runValidators: true,
       }),
     )
-    if (!ketQua) throw new LoiUngDung('Khong tim thay lich phong van de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy lịch phỏng vấn để cập nhật', 404)
 
     if (
       lichCu &&
@@ -122,7 +143,7 @@ export const dichVuLichPhongVan = {
           })
         }
       } catch (error) {
-        console.error('Loi gui thong bao thay doi lich:', error)
+        console.error('Lỗi gửi thông báo thay đổi lịch:', error)
       }
     }
 
@@ -141,7 +162,7 @@ export const dichVuLichPhongVan = {
           const maNguoiDungNhaTuyenDung = String(
             tin.maNhaTuyenDung?.maNguoiDung ?? tin.maNhaTuyenDung?._id ?? '',
           )
-          const tenUngVien = hoSo.maUngVien?.hoTen ?? hoSo.maUngVien?.tenUngVien ?? 'Ung vien'
+          const tenUngVien = hoSo.maUngVien?.hoTen ?? hoSo.maUngVien?.tenUngVien ?? 'Ứng viên'
           const viTriUngTuyen = tin.tieuDe || 'Vị trí tuyển dụng'
 
           if (duLieu.trangThai === 'da_xac_nhan' && maNguoiDungNhaTuyenDung) {
@@ -176,7 +197,7 @@ export const dichVuLichPhongVan = {
           }
         }
       } catch (error) {
-        console.error('Loi gui thong bao cap nhat lich:', error)
+        console.error('Lỗi gửi thông báo cập nhật lịch:', error)
       }
     }
 
@@ -184,7 +205,10 @@ export const dichVuLichPhongVan = {
   },
   async xoa(ma: string) {
     const ketQua = await (LichPhongVan as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Khong tim thay lich phong van de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy lịch phỏng vấn để xóa', 404)
     return chuanHoaLich(ketQua)
   },
 }
+
+
+

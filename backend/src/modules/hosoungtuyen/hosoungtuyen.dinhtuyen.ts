@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { yeuCauDangNhap, yeuCauVaiTro } from '../../dungchung/xacthuc.js'
@@ -14,7 +14,7 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau: any, _phanHoi: any, tiepT
   const nguoiDung = yeuCau.nguoiDung
   const ma = String(yeuCau.params.ma ?? '')
   const hoSo = await (HoSoUngTuyen as any).findById(ma).populate('maTinTuyenDung maUngVien')
-  if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'NOT_FOUND')
+  if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND')
 
   const trangThaiMoi = String(yeuCau.body?.trangThai ?? '')
   if (!trangThaiMoi) {
@@ -59,7 +59,7 @@ dinhTuyenHoSoUngTuyen.post('/ung-tuyen', yeuCauVaiTro(['ung_vien']), batLoiBatDo
 
 dinhTuyenHoSoUngTuyen.post('/ung-tuyen-nhanh', yeuCauVaiTro(['ung_vien']), batLoiBatDongBo(async (yeuCau, phanHoi) => {
   const maTinTuyenDung = String(yeuCau.body?.maTinTuyenDung ?? '')
-  if (!maTinTuyenDung) throw new LoiUngDung('Thieu ma tin tuyen dung', 422, 'MISSING_JOB_ID')
+  if (!maTinTuyenDung) throw new LoiUngDung('Thiếu mã tin tuyển dụng', 422, 'MISSING_JOB_ID')
 
   const duLieu = await dichVuWorkflowUngTuyen.ungTuyen((yeuCau as any).nguoiDung, {
     maTinTuyenDung,
@@ -74,7 +74,7 @@ dinhTuyenHoSoUngTuyen.get('/:ma', dieuKhienHoSoUngTuyen.layChiTiet)
 dinhTuyenHoSoUngTuyen.post('/', yeuCauVaiTro(['ung_vien', 'admin']), dieuKhienHoSoUngTuyen.taoMoi)
 dinhTuyenHoSoUngTuyen.patch('/:ma', yeuCauVaiTro(['ung_vien', 'nha_tuyen_dung', 'admin']), batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
   if ('trangThai' in (yeuCau.body ?? {}) || 'diemKhopKyNang' in (yeuCau.body ?? {})) {
-    throw new LoiUngDung('Khong cap nhat truc tiep trang thai hoac diem khop ky nang; hay dung endpoint nghiep vu', 409, 'BUSINESS_ENDPOINT_REQUIRED')
+    throw new LoiUngDung('Không cập nhật trực tiếp trạng thái hoặc điểm khớp kỹ năng; hãy dùng endpoint nghiệp vụ', 409, 'BUSINESS_ENDPOINT_REQUIRED')
   }
   tiepTheo()
 }), batLoiBatDongBo(kiemTraQuyenCapNhatHoSoUngTuyen), dieuKhienHoSoUngTuyen.capNhat)
@@ -106,5 +106,7 @@ dinhTuyenHoSoUngTuyen.post('/:ma/moi-phong-van', yeuCauVaiTro(['nha_tuyen_dung']
 }))
 
 dinhTuyenHoSoUngTuyen.post('/:ma/chuyen-trang-thai', yeuCauVaiTro(['nha_tuyen_dung', 'admin']), batLoiBatDongBo(async () => {
-  throw new LoiUngDung('Khong chuyen trang thai truc tiep; hay dung endpoint nghiep vu phu hop', 409, 'BUSINESS_ENDPOINT_REQUIRED')
+  throw new LoiUngDung('Không chuyển trạng thái trực tiếp; hãy dùng endpoint nghiệp vụ phù hợp', 409, 'BUSINESS_ENDPOINT_REQUIRED')
 }))
+
+

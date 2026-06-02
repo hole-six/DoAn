@@ -51,7 +51,7 @@ const hoSoNangLucSchema = new mongoose_1.Schema({
     duAnChiTiet: [duAnChiTietSchema],
     fileCvTen: String,
     fileCvLoai: String,
-    fileCvData: String,
+    fileCvĐạta: String,
     loaiHoSo: { type: String, enum: ['builder', 'file_upload'], default: 'builder' },
     anhDaiDien: String,
     templateCv: { type: String, default: 'classic-blue' },

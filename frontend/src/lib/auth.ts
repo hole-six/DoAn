@@ -46,7 +46,7 @@ export function layRefreshToken() {
 
 export function luuPhienDangNhap(phien: PhienDangNhap) {
   const accessToken = phien.accessToken ?? phien.token
-  if (!accessToken) throw new Error('Thieu access token')
+  if (!accessToken) throw new Error('Thiếu access token')
 
   localStorage.setItem('itjob_access_token', accessToken)
   localStorage.setItem('itjob_token', accessToken)
@@ -75,7 +75,7 @@ export async function lamMoiPhienDangNhap() {
   if (dangLamMoiPhien) return dangLamMoiPhien
 
   const refreshToken = layRefreshToken()
-  if (!refreshToken) throw new Error('Chua co refresh token')
+  if (!refreshToken) throw new Error('Chưa có refresh token')
 
   dangLamMoiPhien = (async () => {
     const res = await fetch(`${API_URL}/xacthuc/lam-moi-token`, {
@@ -86,7 +86,7 @@ export async function lamMoiPhienDangNhap() {
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
       xoaPhienDangNhap()
-      throw new Error(data.thongBao ?? 'Phien dang nhap da het han')
+      throw new Error(data.thongBao ?? 'Phiên đăng nhập đã hết hạn')
     }
     luuPhienDangNhap(data.duLieu)
     return data.duLieu as PhienDangNhap
@@ -120,7 +120,7 @@ export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuL
       return apiCoXacThuc(path, options, false)
     } catch (error) {
       xoaPhienDangNhap()
-      throw error instanceof Error ? error : new Error('Phien dang nhap da het han')
+      throw error instanceof Error ? error : new Error('Phiên đăng nhập đã hết hạn')
     }
   }
 
@@ -129,7 +129,7 @@ export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuL
     const firstFieldError = fieldErrors && typeof fieldErrors === 'object'
       ? Object.values(fieldErrors).flat().find(Boolean)
       : ''
-    throw new Error(String(firstFieldError || data.thongBao || 'Thao tac that bai'))
+    throw new Error(String(firstFieldError || data.thongBao || 'Thao tác thất bại'))
   }
   return data.duLieu
 }
@@ -161,10 +161,10 @@ export async function apiUploadCoXacThuc(path: string, formData: FormData, optio
       return apiUploadCoXacThuc(path, formData, options, false)
     } catch (error) {
       xoaPhienDangNhap()
-      throw error instanceof Error ? error : new Error('Phien dang nhap da het han')
+      throw error instanceof Error ? error : new Error('Phiên đăng nhập đã hết hạn')
     }
   }
 
-  if (!res.ok) throw new Error(data.thongBao || 'Upload that bai')
+  if (!res.ok) throw new Error(data.thongBao || 'Upload thất bại')
   return data.duLieu
 }

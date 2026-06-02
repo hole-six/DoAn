@@ -35,7 +35,7 @@ exports.dichVuNguoiDung = {
     async layTheoMa(ma) {
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(ma);
         if (!nguoiDung) {
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nguoi dung', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng', 404);
         }
         return boMatKhau(nguoiDung);
     },
@@ -72,19 +72,19 @@ exports.dichVuNguoiDung = {
         }
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findByIdAndUpdate(ma, await bamMatKhauNeuCo(duLieuCapNhat), { returnDocument: 'after', runValidators: true });
         if (!nguoiDung) {
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nguoi dung de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng de cap nhat', 404);
         }
         return boMatKhau(nguoiDung);
     },
     async xoa(ma) {
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(ma);
         if (!nguoiDung) {
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nguoi dung de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng de xoa', 404);
         }
         if (nguoiDung.vaiTro === 'admin') {
             const soAdmin = await nguoidung_mohinh_js_1.NguoiDung.countDocuments({ vaiTro: 'admin' });
             if (soAdmin <= 1) {
-                throw new loiungdung_js_1.LoiUngDung('Khong the xoa admin cuoi cung cua he thong', 409);
+                throw new loiungdung_js_1.LoiUngDung('Không thể xóa admin cuối cùng của hệ thống', 409);
             }
         }
         await nguoidung_mohinh_js_1.NguoiDung.findByIdAndDelete(ma);

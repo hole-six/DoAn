@@ -15,7 +15,7 @@ const bienmoitruong_js_1 = require("./bienmoitruong.js");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const nguoidung_mohinh_js_1 = require("../modules/nguoidung/nguoidung.mohinh.js");
 let io = null;
-// Map để theo dõi user online
+// Map Ä‘á»ƒ theo dÃµi user online
 const usersOnline = new Map(); // userId -> [socketId1, socketId2, ...]
 const typingUsers = new Map(); // conversationId -> Set<userId>
 function khoiTaoSocket(httpServer) {
@@ -31,11 +31,11 @@ function khoiTaoSocket(httpServer) {
         },
         transports: ['websocket', 'polling'],
     });
-    // Middleware xác thực
+    // Middleware xÃ¡c thá»±c
     io.use(async (socket, next) => {
         const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(' ')[1];
         if (!token) {
-            return next(new Error('Khong co token xac thuc'));
+            return next(new Error('Không có token xác thực'));
         }
         try {
             const decoded = jsonwebtoken_1.default.verify(token, bienmoitruong_js_1.bienMoiTruong.khoaJwt);
@@ -58,7 +58,7 @@ function khoiTaoSocket(httpServer) {
             next(new Error('Token khong hop le'));
         }
     });
-    // Xử lý kết nối
+    // Xá»­ lÃ½ káº¿t ná»‘i
     io.on('connection', (socket) => {
         const socketXacThuc = socket;
         const nguoiDung = socketXacThuc.nguoiDung;
@@ -70,17 +70,17 @@ function khoiTaoSocket(httpServer) {
             socket.disconnect(true);
             return;
         }
-        console.log(`✅ User connected: ${nguoiDung.email} (${userId})`);
-        // Thêm vào danh sách online
+        console.log(`âœ… User connected: ${nguoiDung.email} (${userId})`);
+        // ThÃªm vÃ o danh sÃ¡ch online
         if (!usersOnline.has(userId)) {
             usersOnline.set(userId, []);
         }
         usersOnline.get(userId).push(socket.id);
         // Join room theo user ID
         socket.join(`user:${userId}`);
-        // Join room theo vai trò
+        // Join room theo vai trÃ²
         socket.join(`role:${nguoiDung.vaiTro}`);
-        // Gửi thông báo kết nối thành công
+        // Gá»­i thÃ´ng bÃ¡o káº¿t ná»‘i thÃ nh cÃ´ng
         socket.emit('connected', {
             message: 'Ket noi thanh cong',
             userId,
@@ -96,14 +96,14 @@ function khoiTaoSocket(httpServer) {
          */
         socket.on('join_conversation', (data) => {
             socket.join(`conversation:${data.conversationId}`);
-            console.log(`👥 User ${userId} joined conversation ${data.conversationId}`);
+            console.log(`ðŸ‘¥ User ${userId} joined conversation ${data.conversationId}`);
         });
         /**
          * Leave conversation room
          */
         socket.on('leave_conversation', (data) => {
             socket.leave(`conversation:${data.conversationId}`);
-            console.log(`👋 User ${userId} left conversation ${data.conversationId}`);
+            console.log(`ðŸ‘‹ User ${userId} left conversation ${data.conversationId}`);
         });
         /**
          * Typing indicator
@@ -145,7 +145,7 @@ function khoiTaoSocket(httpServer) {
         // DISCONNECT
         // ============================================
         socket.on('disconnect', () => {
-            console.log(`❌ User disconnected: ${nguoiDung.email}`);
+            console.log(`âŒ User disconnected: ${nguoiDung.email}`);
             // Remove from online list
             const sockets = usersOnline.get(userId);
             if (sockets) {
@@ -171,12 +171,12 @@ function khoiTaoSocket(httpServer) {
                 }
             });
         });
-        // Xử lý lỗi
+        // Xá»­ lÃ½ lá»—i
         socket.on('error', (error) => {
             console.error('Socket error:', error);
         });
     });
-    console.log('🔌 Socket.IO server initialized');
+    console.log('ðŸ”Œ Socket.IO server initialized');
     return io;
 }
 function laySocketIO() {
@@ -185,7 +185,7 @@ function laySocketIO() {
     }
     return io;
 }
-// Helper functions để gửi thông báo
+// Helper functions Ä‘á»ƒ gá»­i thÃ´ng bÃ¡o
 function guiThongBaoChoNguoiDung(maNguoiDung, event, data) {
     if (!io)
         return;
@@ -201,11 +201,11 @@ function guiThongBaoChoTatCa(event, data) {
         return;
     io.emit(event, data);
 }
-// Helper để kiểm tra user online
+// Helper Ä‘á»ƒ kiá»ƒm tra user online
 function kiemTraUserOnline(userId) {
     return usersOnline.has(userId) && usersOnline.get(userId).length > 0;
 }
-// Helper để lấy danh sách user online
+// Helper Ä‘á»ƒ láº¥y danh sÃ¡ch user online
 function layDanhSachUserOnline() {
     return Array.from(usersOnline.keys());
 }

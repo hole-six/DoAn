@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs'
+﻿import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
@@ -126,7 +126,7 @@ export async function lamMoiToken(duLieu: DuLieuLamMoiToken) {
 
 export async function layNguoiDungTuAccessToken(authorization?: string) {
   const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : ''
-  if (!token) throw new LoiUngDung('Thieu access token', 401)
+  if (!token) throw new LoiUngDung('Thiếu access token', 401)
 
   let payload: TokenPayload
   try {
@@ -200,3 +200,4 @@ export async function dangNhapGoogle(duLieu: DuLieuDangNhapGoogle) {
     nguoiDung: nguoiDungCongKhai,
   }
 }
+

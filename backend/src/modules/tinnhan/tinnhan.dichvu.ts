@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
 import { CuocTroChuyenModel, TinNhanModel } from './tinnhan.mohinh.js'
 import { taoVaGuiThongBao } from '../thongbao/thongbao.dichvu.js'
@@ -8,7 +8,7 @@ import { taoVaGuiThongBao } from '../thongbao/thongbao.dichvu.js'
 // ============================================
 
 /**
- * Lấy hoặc tạo cuộc trò chuyện giữa 2 người
+ * Láº¥y hoáº·c táº¡o cuá»™c trÃ² chuyá»‡n giá»¯a 2 ngÆ°á»i
  */
 export async function layHoacTaoCuocTroChuyenModel(params: {
   nguoiThamGia: string[]
@@ -16,10 +16,10 @@ export async function layHoacTaoCuocTroChuyenModel(params: {
   maHoSoUngTuyen?: string
   maTinTuyenDung?: string
 }) {
-  // Sắp xếp để tìm kiếm nhất quán
+  // Sáº¯p xáº¿p Ä‘á»ƒ tÃ¬m kiáº¿m nháº¥t quÃ¡n
   const nguoiThamGiaSorted = [...params.nguoiThamGia].sort()
 
-  // Tìm cuộc trò chuyện hiện có
+  // TÃ¬m cuá»™c trÃ² chuyá»‡n hiá»‡n cÃ³
   const dieuKienTimKiem: Record<string, unknown> = {
     nguoiThamGia: { $all: nguoiThamGiaSorted, $size: nguoiThamGiaSorted.length },
     daLuuTru: false,
@@ -30,7 +30,7 @@ export async function layHoacTaoCuocTroChuyenModel(params: {
 
   let cuocTroChuyenModel = await CuocTroChuyenModel.findOne(dieuKienTimKiem).populate('nguoiThamGia', 'hoTen email vaiTro')
 
-  // Nếu chưa có, tạo mới
+  // Náº¿u chÆ°a cÃ³, táº¡o má»›i
   if (!cuocTroChuyenModel) {
     cuocTroChuyenModel = await CuocTroChuyenModel.create({
       nguoiThamGia: nguoiThamGiaSorted,
@@ -67,7 +67,7 @@ export async function layDanhSachNhomCongDong() {
 
 export async function thamGiaNhomCongDong(maNhom: string, maNguoiDung: string) {
   const nhom = await CuocTroChuyenModel.findById(maNhom)
-  if (!nhom) throw new LoiUngDung('Khong tim thay nhom', 404)
+  if (!nhom) throw new LoiUngDung('Không tìm thấy nhóm', 404)
   if (nhom.loai !== 'nhom_cong_dong') throw new LoiUngDung('Day khong phai nhom cong dong', 400)
 
   const daCoMat = nhom.nguoiThamGia.some((id: any) => String(id) === maNguoiDung)
@@ -88,7 +88,7 @@ export async function thamGiaNhomCongDong(maNhom: string, maNguoiDung: string) {
 }
 
 /**
- * Lấy danh sách cuộc trò chuyện của user
+ * Láº¥y danh sÃ¡ch cuá»™c trÃ² chuyá»‡n cá»§a user
  */
 export async function layDanhSachCuocTroChuyenModel(maNguoiDung: string) {
   const danhSach = await CuocTroChuyenModel.find({
@@ -111,16 +111,16 @@ export async function layDanhSachCuocTroChuyenModel(maNguoiDung: string) {
 }
 
 /**
- * Lấy chi tiết cuộc trò chuyện
+ * Láº¥y chi tiáº¿t cuá»™c trÃ² chuyá»‡n
  */
 export async function layCuocTroChuyenModelTheoMa(maCuocTroChuyenModel: string, maNguoiDung: string) {
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(maCuocTroChuyenModel).populate('nguoiThamGia', 'hoTen email vaiTro')
 
   if (!cuocTroChuyenModel) {
-    throw new LoiUngDung('Khong tim thay cuoc tro chuyen', 404)
+    throw new LoiUngDung('Không tìm thấy cuộc trò chuyện', 404)
   }
 
-  // Kiểm tra quyền truy cập
+  // Kiá»ƒm tra quyá»n truy cáº­p
   const coQuyen = cuocTroChuyenModel.nguoiThamGia.some((ng: any) => String(ng._id) === maNguoiDung)
   if (!coQuyen) {
     throw new LoiUngDung('Ban khong co quyen truy cap cuoc tro chuyen nay', 403)
@@ -130,19 +130,19 @@ export async function layCuocTroChuyenModelTheoMa(maCuocTroChuyenModel: string, 
 }
 
 /**
- * Đánh dấu đã đọc tất cả tin nhắn trong cuộc trò chuyện
+ * ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘á»c táº¥t cáº£ tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
  */
 export async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel: string, maNguoiDung: string) {
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(maCuocTroChuyenModel)
   if (!cuocTroChuyenModel) {
-    throw new LoiUngDung('Khong tim thay cuoc tro chuyen', 404)
+    throw new LoiUngDung('Không tìm thấy cuộc trò chuyện', 404)
   }
 
-  // Reset số chưa đọc
+  // Reset sá»‘ chÆ°a Ä‘á»c
   cuocTroChuyenModel.soChuaDoc.set(maNguoiDung, 0)
   await cuocTroChuyenModel.save()
 
-  // Đánh dấu tất cả tin nhắn chưa đọc
+  // ÄÃ¡nh dáº¥u táº¥t cáº£ tin nháº¯n chÆ°a Ä‘á»c
   await TinNhanModel.updateMany(
     {
       maCuocTroChuyenId: maCuocTroChuyenModel,
@@ -167,7 +167,7 @@ export async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel: strin
 // ============================================
 
 /**
- * Gửi tin nhắn
+ * Gá»­i tin nháº¯n
  */
 export async function guiTinNhan(params: {
   maCuocTroChuyenId: string
@@ -177,10 +177,10 @@ export async function guiTinNhan(params: {
   tepDinhKem?: any[]
   traloiTinNhan?: string
 }) {
-  // Kiểm tra quyền
+  // Kiá»ƒm tra quyá»n
   const cuocTroChuyenModel = await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.nguoiGui)
 
-  // Tạo tin nhắn
+  // Táº¡o tin nháº¯n
   const tinNhan = await TinNhanModel.create({
     maCuocTroChuyenId: params.maCuocTroChuyenId,
     nguoiGui: params.nguoiGui,
@@ -190,20 +190,20 @@ export async function guiTinNhan(params: {
     traloiTinNhan: params.traloiTinNhan,
   })
 
-  // Populate để trả về đầy đủ thông tin
+  // Populate Ä‘á»ƒ tráº£ vá» Ä‘áº§y Ä‘á»§ thÃ´ng tin
   await tinNhan.populate('nguoiGui', 'hoTen email vaiTro')
   if (params.traloiTinNhan) {
     await tinNhan.populate('traloiTinNhan')
   }
 
-  // Cập nhật cuộc trò chuyện
+  // Cáº­p nháº­t cuá»™c trÃ² chuyá»‡n
   cuocTroChuyenModel.tinNhanCuoiCung = {
     noiDung: params.noiDung,
     nguoiGui: params.nguoiGui as any,
     thoiGian: new Date(),
   }
 
-  // Tăng số chưa đọc cho người khác
+  // TÄƒng sá»‘ chÆ°a Ä‘á»c cho ngÆ°á»i khÃ¡c
   for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
     const id = String((nguoiThamGia as any)._id)
     if (id !== params.nguoiGui) {
@@ -214,7 +214,7 @@ export async function guiTinNhan(params: {
 
   await cuocTroChuyenModel.save()
 
-  // Gửi real-time qua Socket.IO cho người nhận
+  // Gá»­i real-time qua Socket.IO cho ngÆ°á»i nháº­n
   const tinNhanObj = tinNhan.toObject()
   for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
     const id = String((nguoiThamGia as any)._id)
@@ -241,7 +241,7 @@ export async function guiTinNhan(params: {
         noiDung: params.noiDung.substring(0, 100),
         lienKet: `${duongDanChat}?cuocTroChuyen=${params.maCuocTroChuyenId}`,
         mucDoUuTien: 'trung_binh',
-        icon: '💬',
+        icon: 'ðŸ’¬',
         mauSac: '#8b5cf6',
       })
     }
@@ -254,7 +254,7 @@ export async function guiTinNhan(params: {
 }
 
 /**
- * Lấy danh sách tin nhắn trong cuộc trò chuyện
+ * Láº¥y danh sÃ¡ch tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
  */
 export async function layDanhSachTinNhan(params: {
   maCuocTroChuyenId: string
@@ -262,7 +262,7 @@ export async function layDanhSachTinNhan(params: {
   limit?: number
   truocTinNhan?: string
 }) {
-  // Kiểm tra quyền
+  // Kiá»ƒm tra quyá»n
   await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.maNguoiDung)
 
   const query: any = {
@@ -295,15 +295,15 @@ export async function layDanhSachTinNhan(params: {
 }
 
 /**
- * Xóa tin nhắn
+ * XÃ³a tin nháº¯n
  */
 export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
   const tinNhan = await TinNhanModel.findById(maTinNhan)
   if (!tinNhan) {
-    throw new LoiUngDung('Khong tim thay tin nhan', 404)
+    throw new LoiUngDung('Không tìm thấy tin nhắn', 404)
   }
 
-  // Chỉ người gửi mới được xóa
+  // Chá»‰ ngÆ°á»i gá»­i má»›i Ä‘Æ°á»£c xÃ³a
   if (String(tinNhan.nguoiGui) !== maNguoiDung) {
     throw new LoiUngDung('Ban khong co quyen xoa tin nhan nay', 403)
   }
@@ -312,7 +312,7 @@ export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
   tinNhan.noiDung = 'Tin nhan da bi xoa'
   await tinNhan.save()
 
-  // Gửi real-time
+  // Gá»­i real-time
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId)
   if (cuocTroChuyenModel) {
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
@@ -327,7 +327,7 @@ export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
 }
 
 /**
- * Thêm reaction vào tin nhắn
+ * ThÃªm reaction vÃ o tin nháº¯n
  */
 export async function themPhanUng(params: {
   maTinNhan: string
@@ -336,13 +336,13 @@ export async function themPhanUng(params: {
 }) {
   const tinNhan = await TinNhanModel.findById(params.maTinNhan)
   if (!tinNhan) {
-    throw new LoiUngDung('Khong tim thay tin nhan', 404)
+    throw new LoiUngDung('Không tìm thấy tin nhắn', 404)
   }
 
-  // Xóa reaction cũ của user này (nếu có)
+  // XÃ³a reaction cÅ© cá»§a user nÃ y (náº¿u cÃ³)
   tinNhan.phanUng = tinNhan.phanUng.filter((r: any) => String(r.nguoiDung) !== params.maNguoiDung)
 
-  // Thêm reaction mới
+  // ThÃªm reaction má»›i
   tinNhan.phanUng.push({
     nguoiDung: params.maNguoiDung as any,
     emoji: params.emoji,
@@ -350,7 +350,7 @@ export async function themPhanUng(params: {
 
   await tinNhan.save()
 
-  // Gửi real-time
+  // Gá»­i real-time
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId)
   if (cuocTroChuyenModel) {
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
@@ -365,3 +365,6 @@ export async function themPhanUng(params: {
 
   return tinNhan
 }
+
+
+

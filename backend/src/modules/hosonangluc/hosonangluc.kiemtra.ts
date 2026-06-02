@@ -1,4 +1,4 @@
-import { z } from 'zod'
+﻿import { z } from 'zod'
 
 const kiemTraMucThongTin = z.object({
   tieuDe: z.string().optional(),
@@ -53,7 +53,7 @@ export const kiemTraTaoHoSoNangLuc = z.object({
   duAnChiTiet: z.array(kiemTraDuAnChiTiet).optional(),
   fileCvTen: z.string().optional(),
   fileCvLoai: z.string().optional(),
-  fileCvData: z.string().optional(),
+  fileCvĐạta: z.string().optional(),
   loaiHoSo: z.enum(['builder', 'file_upload']).optional(),
   anhDaiDien: z.string().optional(),
   templateCv: z.string().optional(),
@@ -67,3 +67,4 @@ export const kiemTraTaoHoSoNangLuc = z.object({
 })
 
 export const kiemTraCapNhatHoSoNangLuc = kiemTraTaoHoSoNangLuc.partial()
+

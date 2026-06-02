@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 
 function damBaoChuyenTrangThaiHopLe(
   nhom: string,
@@ -10,7 +10,7 @@ function damBaoChuyenTrangThaiHopLe(
   const danhSach = choPhep[hienTai] ?? []
   if (danhSach.includes(moi)) return
   throw new LoiUngDung(
-    `Khong the chuyen trang thai ${nhom} tu "${hienTai}" sang "${moi}"`,
+    `Không thể chuyển trạng thái ${nhom} tu "${hienTai}" sang "${moi}"`,
     409,
     'INVALID_STATE_TRANSITION',
     undefined,
@@ -45,7 +45,7 @@ export function damBaoTrangThaiTinTuyenDung(vaiTro: string, hienTai?: string, mo
     return
   }
 
-  throw new LoiUngDung('Ban khong co quyen cap nhat trang thai tin tuyen dung', 403, 'FORBIDDEN')
+  throw new LoiUngDung('Bạn không có quyền cập nhật trạng thái tin tuyển dụng', 403, 'FORBIDDEN')
 }
 
 export function damBaoTrangThaiHoSoUngTuyen(vaiTro: string, hienTai?: string, moi?: string) {
@@ -77,7 +77,7 @@ export function damBaoTrangThaiHoSoUngTuyen(vaiTro: string, hienTai?: string, mo
     return
   }
 
-  throw new LoiUngDung('Ban khong co quyen cap nhat trang thai ho so ung tuyen', 403, 'FORBIDDEN')
+  throw new LoiUngDung('Bạn không có quyền cập nhật trạng thái hồ sơ ứng tuyển', 403, 'FORBIDDEN')
 }
 
 export function damBaoTrangThaiLichPhongVan(vaiTro: string, hienTai?: string, moi?: string) {
@@ -105,5 +105,6 @@ export function damBaoTrangThaiLichPhongVan(vaiTro: string, hienTai?: string, mo
     return
   }
 
-  throw new LoiUngDung('Ban khong co quyen cap nhat trang thai lich phong van', 403, 'FORBIDDEN')
+  throw new LoiUngDung('Bạn không có quyền cập nhật trạng thái lịch phỏng vấn', 403, 'FORBIDDEN')
 }
+

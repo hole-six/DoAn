@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../hosonangluc/hosonangluc.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
 import '../nguoidung/nguoidung.mohinh.js'
@@ -87,7 +87,7 @@ function chuanHoaUngTuyen(taiLieu: any) {
           duAnChiTiet: duLieu.maHoSoNangLuc.duAnChiTiet,
           fileCvTen: duLieu.maHoSoNangLuc.fileCvTen,
           fileCvLoai: duLieu.maHoSoNangLuc.fileCvLoai,
-          fileCvData: duLieu.maHoSoNangLuc.fileCvData,
+          fileCvĐạta: duLieu.maHoSoNangLuc.fileCvĐạta,
           anhDaiDien: duLieu.maHoSoNangLuc.anhDaiDien,
           templateCv: duLieu.maHoSoNangLuc.templateCv,
           mauChinh: duLieu.maHoSoNangLuc.mauChinh,
@@ -124,7 +124,7 @@ export const dichVuHoSoUngTuyen = {
       .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
       .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
       .populate('maHoSoNangLuc')
-    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404)
     return chuanHoaUngTuyen(duLieu)
   },
   async taoMoi(duLieu: unknown) {
@@ -139,14 +139,14 @@ export const dichVuHoSoUngTuyen = {
         if (maNguoiDungNhaTuyenDung) {
           await thongBaoHoSoMoiUngTuyen({
             maNhaTuyenDung: maNguoiDungNhaTuyenDung,
-            tenUngVien: hoSoMoi.ungVien?.nguoiDung?.hoTen ?? 'Ung vien',
+            tenUngVien: hoSoMoi.ungVien?.nguoiDung?.hoTen ?? 'Ứng viên',
             viTriUngTuyen: hoSoMoi.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen',
             maHoSoUngTuyen: hoSoMoi.id,
             kinhNghiem: `${hoSoMoi.ungVien?.kinhNghiem ?? 0} nam kinh nghiem`,
           })
         }
       } catch (error) {
-        console.error('Loi gui thong bao ho so moi:', error)
+        console.error('Lỗi gửi thông báo hồ sơ mới:', error)
       }
 
       return hoSoMoi
@@ -167,7 +167,7 @@ export const dichVuHoSoUngTuyen = {
       .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
       .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
       .populate('maHoSoNangLuc')
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ho so ung tuyen de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404)
     const ketQuaChuanHoa = chuanHoaUngTuyen(ketQua)
 
     try {
@@ -190,20 +190,23 @@ export const dichVuHoSoUngTuyen = {
         await thongBaoHeThong({
           maNguoiDung: maNguoiDungUngVien,
           tieuDe: trangThaiMoi === 'dat' ? 'Ho so ung tuyen da dat' : 'Ho so ung tuyen bi tu choi',
-          noiDung: `${tenCongTy} da cap nhat ket qua ho so ung tuyen vi tri ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Dat' : 'Tu choi'}.`,
+          noiDung: `${tenCongTy} đã cập nhật kết quả hồ sơ ung tuyen vi tri ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Đạt' : 'Từ chối'}.`,
           lienKet: '/ung-vien/ung-tuyen',
           mucDoUuTien: 'cao',
         })
       }
     } catch (error) {
-      console.error('Loi gui thong bao cap nhat ho so ung tuyen:', error)
+      console.error('Lỗi gửi thông báo cập nhật hồ sơ ứng tuyển:', error)
     }
 
     return ketQuaChuanHoa
   },
   async xoa(ma: string) {
     const ketQua = await (HoSoUngTuyen as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Khong tim thay ho so ung tuyen de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404)
     return chuanHoaUngTuyen(ketQua)
   },
 }
+
+
+

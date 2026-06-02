@@ -190,10 +190,10 @@ export default function TimKiemViecLam() {
         body: JSON.stringify({ cauHoi }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.thongBao ?? 'Khong hoi duoc AI')
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI')
       setAiAnswer(data.duLieu?.traLoi ?? '')
     } catch (error) {
-      setAiAnswer(error instanceof Error ? error.message : 'Khong hoi duoc AI')
+      setAiAnswer(error instanceof Error ? error.message : 'Không hỏi được AI')
     } finally {
       setAiBusy(false)
     }
@@ -322,16 +322,16 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Tro ly AI</h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Trợ lý AI</h3>
             <textarea
               value={aiQuestion}
               onChange={e => setAiQuestion(e.target.value)}
               rows={4}
-              placeholder="Hoi AI: tim viec frontend o Da Nang, job React junior, ..."
+              placeholder="Hỏi AI: tìm việc frontend ở Đà Nẵng, job React junior, ..."
               style={{ width: '100%', borderRadius: 10, border: '1px solid #dbe4f0', padding: 10, fontSize: 13, resize: 'vertical' }}
             />
             <button className="primary-button" style={{ width: '100%', marginTop: 8 }} onClick={() => void askAi()} disabled={aiBusy}>
-              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Dang tra loi...' : 'Hoi AI'}
+              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Đang trả lời...' : 'Hỏi AI'}
             </button>
             {aiAnswer && (
               <div style={{ marginTop: 10, borderRadius: 12, border: '1px solid #dbe4f0', background: '#f8fbff', padding: 12, fontSize: 13, lineHeight: 1.7, color: '#0f172a', whiteSpace: 'pre-line' }}>

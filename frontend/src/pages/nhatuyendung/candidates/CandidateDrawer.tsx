@@ -13,12 +13,12 @@ type ActionKey = 'view' | 'advance_review' | 'reject_screening' | 'schedule' | '
 const TRANG_THAI_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat'] as const
 
 const actionLabels: Record<ActionKey, string> = {
-  view: 'Da xem',
-  advance_review: 'Chuyen sang xet duyet',
-  reject_screening: 'Tu choi sang loc',
-  schedule: 'Moi phong van',
-  pass: 'Dat',
-  reject_interview: 'Tu choi sau phong van',
+  view: 'Đã xem',
+  advance_review: 'Chuyển sang xét duyệt',
+  reject_screening: 'Từ chối sàng lọc',
+  schedule: 'Mời phỏng vấn',
+  pass: 'Đạt',
+  reject_interview: 'Từ chối sau phỏng vấn',
 }
 
 function getActions(status: string): ActionKey[] {
@@ -37,19 +37,19 @@ function getActions(status: string): ActionKey[] {
 }
 
 const labelMap: Record<string, string> = {
-  tenDuAn: 'Du an',
-  ten: 'Ten',
-  thoiGian: 'Thoi gian',
-  duration: 'Thoi gian',
-  viTri: 'Vi tri',
-  position: 'Vi tri',
-  moTa: 'Mo ta',
-  description: 'Mo ta',
-  trachNhiem: 'Trach nhiem',
-  responsibilities: 'Trach nhiem',
-  congNghe: 'Cong nghe',
-  technologies: 'Cong nghe',
-  ngonNgu: 'Ngon ngu',
+  tenDuAn: 'Dự án',
+  ten: 'Tên',
+  thoiGian: 'Thời gian',
+  duration: 'Thời gian',
+  viTri: 'Vị trí',
+  position: 'Vị trí',
+  moTa: 'Mô tả',
+  description: 'Mô tả',
+  trachNhiem: 'Trách nhiệm',
+  responsibilities: 'Trách nhiệm',
+  congNghe: 'Công nghệ',
+  technologies: 'Công nghệ',
+  ngonNgu: 'Ngôn ngữ',
   framework: 'Framework',
   link: 'Link',
   url: 'Link',
@@ -93,7 +93,7 @@ function ProjectCard({ project, index }: { project: unknown; index: number }) {
   }
   const entries = Object.entries(project as Record<string, unknown>).filter(([, value]) => asText(value))
   if (!entries.length) return null
-  const title = asText((project as any).tenDuAn ?? (project as any).ten ?? (project as any).projectName) || `Du an ${index + 1}`
+  const title = asText((project as any).tenDuAn ?? (project as any).ten ?? (project as any).projectName) || `Dự án ${index + 1}`
   return (
     <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
       <h5 className="text-sm font-black text-slate-950">{title}</h5>
@@ -136,7 +136,7 @@ export function CandidateDrawer({
   const { moChatVoiNguoiDung } = useChat()
   const cv = item.hoSoNangLuc
   const candidateUserId = item.ungVien?.nguoiDung?.id ?? item.ungVien?.nguoiDung?._id
-  const candidateName = cv?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ung vien'
+  const candidateName = cv?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'
   const contact = [cv?.emailLienHe || item.ungVien?.nguoiDung?.email, cv?.soDienThoai || item.ungVien?.nguoiDung?.soDienThoai, cv?.github, cv?.portfolioUrl].filter(Boolean)
   const availableActions = useMemo(() => getActions(item.trangThai), [item.trangThai])
   const canChat = Boolean(candidateUserId) && TRANG_THAI_CHAT.includes(item.trangThai as any)
@@ -197,7 +197,7 @@ export function CandidateDrawer({
                   disabled={!action}
                   onClick={() => void executeAction()}
                 >
-                  {action ? actionLabels[action] : 'Ap dung'}
+                  {action ? actionLabels[action] : 'Áp dụng'}
                 </Button>
               </div>
             </div>
@@ -218,18 +218,18 @@ export function CandidateDrawer({
             <p className="mt-1 break-words text-sm font-semibold text-slate-500">{contact.join(' · ') || '-'}</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge tone={toneForApplicationStatus(item.trangThai)}>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
-              {cv && <Badge tone="blue">CV duoc dung de ung tuyen</Badge>}
-              {cv?.cvChinh && <Badge tone="green">CV chinh</Badge>}
-              {cv?.fileCvData && <Badge tone="gray">Co file goc</Badge>}
+              {cv && <Badge tone="blue">CV đã nộp</Badge>}
+              {cv?.cvChinh && <Badge tone="green">CV chính</Badge>}
+              {cv?.fileCvData && <Badge tone="gray">Có file gốc</Badge>}
             </div>
           </div>
         </section>
 
         <div className="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
           {[
-            ['overview', 'Tong quan'],
-            ['cv', 'CV ung vien'],
-            ['history', 'Lich su'],
+            ['overview', 'Tổng quan'],
+            ['cv', 'CV ứng viên'],
+            ['history', 'Lịch sử'],
           ].map(([key, label]) => (
             <button key={key} className={`min-h-10 min-w-28 flex-1 rounded-lg px-3 text-sm font-black ${tab === key ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500'}`} onClick={() => setTab(key as Tab)}>
               {label}
@@ -263,20 +263,20 @@ export function CandidateDrawer({
                     <div className="min-w-0">
                       <h3 className="break-words text-2xl font-black text-slate-950">{candidateName}</h3>
                       {cv.chucDanh && <p className="mt-1 text-sm font-bold text-blue-700">{cv.chucDanh}</p>}
-                      <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-600">{contact.join(' | ') || 'Chua co thong tin lien he'}</p>
+                      <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-600">{contact.join(' | ') || 'Chưa có thông tin liên hệ'}</p>
                     </div>
                     {cv.fileCvData && (
                       <a className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={cv.fileCvData} download={cv.fileCvTen || 'cv'}>
-                        <Download size={16} /> Tai file CV goc
+                        <Download size={16} /> Tải file CV gốc
                       </a>
                     )}
                   </div>
                 </div>
-                <CvSection title="Tom tat kinh nghiem" items={valuesAsLines(cv.tomTatKinhNghiem)} />
-                <CvSection title="Ky nang mem" items={valuesAsLines(cv.kyNangMem)} />
-                <CvSection title="Ky nang lap trinh" items={valuesAsLines(cv.kyNangLapTrinh)} />
-                <CvSection title="Hoc van" items={valuesAsLines(cv.hocVan)} />
-                <CvSection title="Kinh nghiem lam viec" items={valuesAsLines(cv.kinhNghiemLam)} />
+                <CvSection title="Tóm tắt kinh nghiệm" items={valuesAsLines(cv.tomTatKinhNghiem)} />
+                <CvSection title="Kỹ năng mềm" items={valuesAsLines(cv.kyNangMem)} />
+                <CvSection title="Kỹ năng lập trình" items={valuesAsLines(cv.kyNangLapTrinh)} />
+                <CvSection title="Học vấn" items={valuesAsLines(cv.hocVan)} />
+                <CvSection title="Kinh nghiệm làm việc" items={valuesAsLines(cv.kinhNghiemLam)} />
                 {Array.isArray(cv.duAnChiTiet) && cv.duAnChiTiet.length ? (
                   <section className="border-b border-slate-100 py-4 last:border-b-0">
                     <h4 className="text-sm font-black uppercase text-slate-800">Dự án có minh chứng</h4>

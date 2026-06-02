@@ -1,108 +1,209 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Check, ExternalLink, Inbox } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Check, ExternalLink, Eye, Inbox, MessageCircle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Button, ButtonGroup } from './ui/Button'
 import { apiCoXacThuc } from '../lib/auth'
 import { formatDateTime } from '../lib/format'
 import type { ThongBao } from '../types/recruitment'
+import { Button } from './ui/Button'
+
+type Props = {
+  items: ThongBao[]
+  onReload: () => Promise<void> | void
+}
 
 const FILTERS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'ho_so_ung_tuyen', label: 'Hồ sơ' },
-  { key: 'lich_phong_van', label: 'Lịch phỏng vấn' },
-  { key: 'ket_qua_phong_van', label: 'Kết quả' },
-  { key: 'tin_nhan', label: 'Tin nhắn' },
-  { key: 'he_thong', label: 'Hệ thống' },
-]
+  { key: 'all', label: 'Tất cả', icon: Inbox },
+  { key: 'ho_so_ung_tuyen', label: 'Hồ sơ', icon: Eye },
+  { key: 'lich_phong_van', label: 'Lịch phỏng vấn', icon: Check },
+  { key: 'ket_qua_phong_van', label: 'Kết quả', icon: Check },
+  { key: 'tin_nhan', label: 'Tin nhắn', icon: MessageCircle },
+  { key: 'he_thong', label: 'Hệ thống', icon: Inbox },
+] as const
 
-export function NotificationInbox({ items, onReload }: { items: ThongBao[]; onReload: () => Promise<void> }) {
+function notificationId(item: ThongBao) {
+  return item.id ?? item._id ?? ''
+}
+
+function priorityLabel(value?: string) {
+  if (value === 'khan_cap') return 'Khẩn cấp'
+  if (value === 'cao') return 'Ưu tiên cao'
+  if (value === 'thap') return 'Ưu tiên thấp'
+  return 'Thông báo'
+}
+
+export function NotificationInbox({ items, onReload }: Props) {
   const navigate = useNavigate()
-  const [filter, setFilter] = useState('all')
-  const [selectedId, setSelectedId] = useState('')
-  const filtered = useMemo(() => items.filter(item => filter === 'all' || item.loai === filter), [filter, items])
-  const selected = filtered.find(item => (item.id ?? item._id) === selectedId) ?? filtered[0]
+  const [filter, setFilter] = useState<string>('all')
+  const [selected, setSelected] = useState<ThongBao | null>(null)
+  const [busy, setBusy] = useState('')
 
-  useEffect(() => {
-    if (selected && !filtered.some(item => (item.id ?? item._id) === selectedId)) setSelectedId(String(selected.id ?? selected._id ?? ''))
-  }, [filtered, selected, selectedId])
+  const unreadCount = items.filter(item => !item.daDoc).length
+  const filteredItems = useMemo(
+    () => (filter === 'all' ? items : items.filter(item => item.loai === filter)),
+    [filter, items],
+  )
 
-  const markRead = async (item?: ThongBao) => {
-    const id = item?.id ?? item?._id
-    if (!id) return
-    await apiCoXacThuc(`/thongbao/${id}/danh-dau-da-doc`, { method: 'PATCH' })
-    await onReload()
+  const markRead = async (item: ThongBao) => {
+    const id = notificationId(item)
+    if (!id || item.daDoc) return
+    setBusy(id)
+    try {
+      await apiCoXacThuc(`/thongbao/${id}/danh-dau-da-doc`, { method: 'PATCH' })
+      await onReload()
+      setSelected(prev => (prev && notificationId(prev) === id ? { ...prev, daDoc: true } : prev))
+    } finally {
+      setBusy('')
+    }
   }
 
-  const openLink = async (item?: ThongBao, url?: string) => {
-    if (!item && !url) return
-    if (item && !item.daDoc) await markRead(item)
-    const target = url ?? item?.lienKet
+  const markAllRead = async () => {
+    setBusy('all')
+    try {
+      await apiCoXacThuc('/thongbao/danh-dau-tat-ca-da-doc', { method: 'POST' })
+      await onReload()
+      setSelected(prev => (prev ? { ...prev, daDoc: true } : prev))
+    } finally {
+      setBusy('')
+    }
+  }
+
+  const openLink = async (item: ThongBao, link?: string) => {
+    await markRead(item)
+    const target = link ?? item.lienKet
     if (target) navigate(target)
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)_minmax(320px,420px)]">
-      <aside className="rounded-2xl border border-slate-200 bg-white p-3">
-        <div className="mb-3 flex min-h-10 items-center gap-2 px-2 text-sm font-black text-slate-800"><Inbox size={16} /> Bộ lọc</div>
-        <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-1">
-          {FILTERS.map(item => (
-            <button key={item.key} className={`min-h-10 rounded-xl px-3 text-left text-sm font-black ${filter === item.key ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`} onClick={() => setFilter(item.key)}>
-              {item.label}
-            </button>
-          ))}
+    <section className="grid gap-4">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-700">
+              <Inbox size={22} />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-xl font-black text-slate-950">{items.length} thông báo</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                {unreadCount ? `${unreadCount} thông báo chưa đọc` : 'Tất cả thông báo đã được đọc'}
+              </p>
+            </div>
+          </div>
+          <Button icon={<Check size={16} />} disabled={!unreadCount || busy === 'all'} loading={busy === 'all'} onClick={() => void markAllRead()}>
+            Đọc tất cả
+          </Button>
         </div>
-      </aside>
 
-      <section className="min-w-0 rounded-2xl border border-slate-200 bg-white">
-        <div className="flex min-h-14 flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-4 py-2">
-          <strong className="text-sm text-slate-900">{filtered.length} thông báo</strong>
-          <Button size="sm" icon={<Check size={15} />} onClick={async () => { await apiCoXacThuc('/thongbao/danh-dau-tat-ca-da-doc', { method: 'POST' }); await onReload() }}>Đọc tất cả</Button>
-        </div>
-        <div className="max-h-[520px] overflow-auto">
-          {filtered.map(item => {
-            const id = item.id ?? item._id ?? item.tieuDe
-            const active = id === (selected?.id ?? selected?._id)
+        <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
+          {FILTERS.map(({ key, label, icon: Icon }) => {
+            const active = filter === key
             return (
-              <button key={id} className={`grid w-full min-w-0 gap-1 border-b border-slate-100 p-4 text-left ${active ? 'bg-blue-50' : 'bg-white hover:bg-slate-50'}`} onClick={() => setSelectedId(String(id))}>
-                <span className="flex min-w-0 items-start justify-between gap-3">
-                  <strong className="min-w-0 break-words text-sm text-slate-950">{item.tieuDe}</strong>
-                  {!item.daDoc && <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-blue-600" />}
-                </span>
-                <span className="line-clamp-2 break-words text-sm font-semibold leading-6 text-slate-600">{item.noiDung}</span>
-                <span className="text-xs font-bold text-slate-400">{formatDateTime(item.ngayTao)}</span>
+              <button
+                key={key}
+                type="button"
+                onClick={() => setFilter(key)}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
+                  active
+                    ? 'border-sky-700 bg-sky-700 text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800'
+                }`}
+              >
+                <Icon size={15} />
+                {label}
               </button>
             )
           })}
-          {!filtered.length && <div className="grid min-h-56 place-items-center p-6 text-sm font-bold text-slate-500">Không có thông báo.</div>}
         </div>
-      </section>
+      </div>
 
-      <aside className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
-        {selected ? (
-          <div className="grid gap-4">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        {filteredItems.length === 0 ? (
+          <div className="grid min-h-[260px] place-items-center p-8 text-center">
             <div>
-              <h2 className="break-words text-lg font-black text-slate-950">{selected.tieuDe}</h2>
-              <p className="mt-2 break-words text-sm font-semibold leading-7 text-slate-600">{selected.noiDung}</p>
-              <p className="mt-3 text-xs font-bold text-slate-400">{formatDateTime(selected.ngayTao)}</p>
+              <Inbox className="mx-auto text-slate-300" size={44} />
+              <p className="mt-4 text-base font-black text-slate-700">Không có thông báo trong mục này.</p>
+              <p className="mt-2 text-sm font-semibold text-slate-500">Khi có cập nhật mới, hệ thống sẽ hiển thị tại đây.</p>
             </div>
-            <ButtonGroup>
-              {!selected.daDoc && <Button icon={<Check size={16} />} onClick={() => void markRead(selected)}>Đánh dấu đã đọc</Button>}
-              {selected.lienKet && <Button variant="primary" icon={<ExternalLink size={16} />} onClick={() => void openLink(selected)}>Mở xử lý</Button>}
-            </ButtonGroup>
-            {selected.hanhDong?.length ? (
-              <div className="grid gap-2">
-                {selected.hanhDong.map(action => (
-                  <Button key={`${action.nhan}-${action.url}`} variant={action.loai === 'danger' ? 'danger' : action.loai === 'primary' ? 'primary' : 'secondary'} onClick={() => void openLink(selected, action.url)}>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {filteredItems.map(item => {
+              const id = notificationId(item)
+              return (
+                <article
+                  key={id}
+                  className={`relative grid gap-3 p-4 transition hover:bg-slate-50 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5 ${
+                    item.daDoc ? 'bg-white' : 'bg-sky-50/50'
+                  }`}
+                >
+                  {!item.daDoc && <span className="absolute left-0 top-5 h-10 w-1 rounded-r-full bg-sky-600" />}
+                  <button type="button" className="min-w-0 text-left" onClick={() => setSelected(item)}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="min-w-0 break-words text-base font-black text-slate-950">{item.tieuDe}</h3>
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${item.daDoc ? 'bg-slate-100 text-slate-500' : 'bg-sky-600 text-white'}`}>
+                        {item.daDoc ? 'Đã đọc' : 'Mới'}
+                      </span>
+                    </div>
+                    <p className="mt-2 line-clamp-2 break-words text-sm font-semibold leading-6 text-slate-600">{item.noiDung}</p>
+                    <p className="mt-2 text-xs font-black uppercase tracking-wide text-slate-400">{formatDateTime(item.ngayTao)}</p>
+                  </button>
+                  <div className="flex flex-wrap gap-2 sm:justify-end">
+                    <Button size="sm" icon={<Eye size={15} />} onClick={() => setSelected(item)}>
+                      Xem chi tiết
+                    </Button>
+                    {item.lienKet && (
+                      <Button size="sm" variant="primary" icon={<ExternalLink size={15} />} onClick={() => void openLink(item)}>
+                        Mở xử lý
+                      </Button>
+                    )}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {selected && (
+        <div className="fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
+          <div className="mx-auto flex h-full max-w-2xl items-center">
+            <div className="max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
+                <div className="min-w-0">
+                  <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-sky-700">
+                    {priorityLabel((selected as any).mucDoUuTien)}
+                  </span>
+                  <h3 className="mt-3 break-words text-2xl font-black text-slate-950">{selected.tieuDe}</h3>
+                  <p className="mt-1 text-sm font-bold text-slate-400">{formatDateTime(selected.ngayTao)}</p>
+                </div>
+                <button type="button" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50" onClick={() => setSelected(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="max-h-[55vh] overflow-y-auto p-5">
+                <p className="whitespace-pre-wrap break-words text-base font-semibold leading-7 text-slate-700">{selected.noiDung}</p>
+              </div>
+              <div className="flex flex-col gap-2 border-t border-slate-100 p-5 sm:flex-row sm:flex-wrap sm:justify-end">
+                {!selected.daDoc && (
+                  <Button icon={<Check size={16} />} loading={busy === notificationId(selected)} onClick={() => void markRead(selected)}>
+                    Đánh dấu đã đọc
+                  </Button>
+                )}
+                {selected.hanhDong?.map(action => (
+                  <Button key={`${action.nhan}-${action.url}`} variant={action.loai === 'primary' ? 'primary' : 'secondary'} icon={<ExternalLink size={16} />} onClick={() => void openLink(selected, action.url)}>
                     {action.nhan}
                   </Button>
                 ))}
+                {selected.lienKet && (
+                  <Button variant="primary" icon={<ExternalLink size={16} />} onClick={() => void openLink(selected)}>
+                    Mở xử lý
+                  </Button>
+                )}
+                <Button variant="ghost" onClick={() => setSelected(null)}>Đóng</Button>
               </div>
-            ) : null}
+            </div>
           </div>
-        ) : (
-          <div className="grid min-h-56 place-items-center text-center text-sm font-bold text-slate-500">Chọn thông báo để xem chi tiết.</div>
-        )}
-      </aside>
-    </div>
+        </div>
+      )}
+    </section>
   )
 }

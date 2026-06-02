@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 const mucThongTinSchema = new Schema(
   {
@@ -66,7 +66,7 @@ const hoSoNangLucSchema = new Schema(
     duAnChiTiet: [duAnChiTietSchema],
     fileCvTen: String,
     fileCvLoai: String,
-    fileCvData: String,
+    fileCvĐạta: String,
     loaiHoSo: { type: String, enum: ['builder', 'file_upload'], default: 'builder' },
     anhDaiDien: String,
     templateCv: { type: String, default: 'classic-blue' },
@@ -85,3 +85,4 @@ const hoSoNangLucSchema = new Schema(
 )
 
 export const HoSoNangLuc = model('HoSoNangLuc', hoSoNangLucSchema)
+

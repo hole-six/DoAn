@@ -84,7 +84,7 @@ async function lamMoiToken(duLieu) {
 async function layNguoiDungTuAccessToken(authorization) {
     const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';
     if (!token)
-        throw new loiungdung_js_1.LoiUngDung('Thieu access token', 401);
+        throw new loiungdung_js_1.LoiUngDung('Thiếu access token', 401);
     let payload;
     try {
         payload = jsonwebtoken_1.default.verify(token, bienmoitruong_js_1.bienMoiTruong.khoaJwt);

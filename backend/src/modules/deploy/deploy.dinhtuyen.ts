@@ -1,4 +1,4 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 
 export const dinhTuyenDeploy = Router()
 
@@ -11,3 +11,5 @@ dinhTuyenDeploy.get('/health', (_yeuCau, phanHoi) => {
     },
   })
 })
+
+

@@ -1,4 +1,4 @@
-import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
+﻿import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { dangNhap, dangNhapGoogle, lamMoiToken, layNguoiDungTuAccessToken } from './xacthuc.dichvu.js'
 import { kiemTraDangNhap, kiemTraDangNhapGoogle, kiemTraLamMoiToken } from './xacthuc.kiemtra.js'
 
@@ -8,7 +8,7 @@ export const dieuKhienXacThuc = {
     const ketQua = await dangNhap(duLieu)
 
     phanHoi.json({
-      thongBao: 'Dang nhap thanh cong',
+      thongBao: 'Đăng nhập thành công',
       duLieu: ketQua,
     })
   }),
@@ -18,7 +18,7 @@ export const dieuKhienXacThuc = {
     const ketQua = await dangNhapGoogle(duLieu)
 
     phanHoi.json({
-      thongBao: 'Dang nhap Google thanh cong',
+      thongBao: 'Đăng nhập Google thành công',
       duLieu: ketQua,
     })
   }),
@@ -28,7 +28,7 @@ export const dieuKhienXacThuc = {
     const ketQua = await lamMoiToken(duLieu)
 
     phanHoi.json({
-      thongBao: 'Lam moi token thanh cong',
+      thongBao: 'Làm mới token thành công',
       duLieu: ketQua,
     })
   }),
@@ -42,3 +42,5 @@ export const dieuKhienXacThuc = {
     phanHoi.status(204).send()
   }),
 }
+
+

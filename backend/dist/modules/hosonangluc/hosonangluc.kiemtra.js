@@ -51,7 +51,7 @@ exports.kiemTraTaoHoSoNangLuc = zod_1.z.object({
     duAnChiTiet: zod_1.z.array(kiemTraDuAnChiTiet).optional(),
     fileCvTen: zod_1.z.string().optional(),
     fileCvLoai: zod_1.z.string().optional(),
-    fileCvData: zod_1.z.string().optional(),
+    fileCvĐạta: zod_1.z.string().optional(),
     loaiHoSo: zod_1.z.enum(['builder', 'file_upload']).optional(),
     anhDaiDien: zod_1.z.string().optional(),
     templateCv: zod_1.z.string().optional(),

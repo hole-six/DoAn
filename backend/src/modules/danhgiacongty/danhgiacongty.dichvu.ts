@@ -1,4 +1,4 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
+﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../nguoidung/nguoidung.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
 import '../ungvien/ungvien.mohinh.js'
@@ -53,7 +53,7 @@ export const dichVuDanhGiaCongTy = {
       .findById(ma)
       .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
       .populate('maNhaTuyenDung', 'tenCongTy logo')
-    if (!duLieu) throw new LoiUngDung('Khong tim thay danh gia cong ty', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy đánh giá công ty', 404)
     return chuanHoaDanhGia(duLieu)
   },
 
@@ -68,7 +68,7 @@ export const dichVuDanhGiaCongTy = {
       .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
       .populate('maNhaTuyenDung', 'tenCongTy logo')
 
-    if (!ketQua) throw new LoiUngDung('Khong tim thay danh gia cong ty de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy đánh giá công ty de cap nhat', 404)
     return chuanHoaDanhGia(ketQua)
   },
 
@@ -77,7 +77,8 @@ export const dichVuDanhGiaCongTy = {
       .findByIdAndDelete(ma)
       .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
       .populate('maNhaTuyenDung', 'tenCongTy logo')
-    if (!ketQua) throw new LoiUngDung('Khong tim thay danh gia cong ty de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy đánh giá công ty de xoa', 404)
     return chuanHoaDanhGia(ketQua)
   },
 }
+

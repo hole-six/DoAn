@@ -1,4 +1,4 @@
-import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
+﻿import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { danhDauDaDoc, danhDauTatCaDaDoc, demThongBaoChuaDoc, taoVaGuiThongBao } from './thongbao.dichvu.js'
 import { kiemTraCapNhatThongBao, kiemTraTaoThongBao } from './thongbao.kiemtra.js'
@@ -6,7 +6,7 @@ import { ThongBao } from './thongbao.mohinh.js'
 
 function maNguoiDungTuRequest(yeuCau: any): string {
   const ma = String(yeuCau?.nguoiDung?._id ?? yeuCau?.user?.id ?? '')
-  if (!ma) throw new LoiUngDung('Ban can dang nhap de thuc hien thao tac nay', 401, 'UNAUTHORIZED')
+  if (!ma) throw new LoiUngDung('Bạn cần đăng nhập để thực hiện thao tác này', 401, 'UNAUTHORIZED')
   return ma
 }
 
@@ -28,7 +28,7 @@ export const dieuKhienThongBao = {
     const maNguoiDung = maNguoiDungTuRequest(yeuCau as any)
     const ma = String(yeuCau.params.ma ?? '')
     const duLieu = await (ThongBao as any).findOne({ _id: ma, maNguoiDung })
-    if (!duLieu) throw new LoiUngDung('Khong tim thay thong bao', 404, 'NOT_FOUND')
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND')
     phanHoi.json({ duLieu })
   }),
 
@@ -54,7 +54,7 @@ export const dieuKhienThongBao = {
       payload,
       { new: true, runValidators: true },
     )
-    if (!duLieu) throw new LoiUngDung('Khong tim thay thong bao de cap nhat', 404, 'NOT_FOUND')
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo de cap nhat', 404, 'NOT_FOUND')
     phanHoi.json({ duLieu })
   }),
 
@@ -62,7 +62,7 @@ export const dieuKhienThongBao = {
     const maNguoiDung = maNguoiDungTuRequest(yeuCau as any)
     const ma = String(yeuCau.params.ma ?? '')
     const duLieu = await (ThongBao as any).findOneAndDelete({ _id: ma, maNguoiDung })
-    if (!duLieu) throw new LoiUngDung('Khong tim thay thong bao de xoa', 404, 'NOT_FOUND')
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo de xoa', 404, 'NOT_FOUND')
     phanHoi.status(204).send()
   }),
 
@@ -71,7 +71,7 @@ export const dieuKhienThongBao = {
     const maNguoiDung = maNguoiDungTuRequest(yeuCau as any)
 
     const thongBao = await danhDauDaDoc(String(id), maNguoiDung)
-    if (!thongBao) throw new LoiUngDung('Khong tim thay thong bao', 404, 'NOT_FOUND')
+    if (!thongBao) throw new LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND')
 
     phanHoi.json({
       thongBao: 'Danh dau da doc thanh cong',
@@ -95,3 +95,4 @@ export const dieuKhienThongBao = {
     })
   }),
 }
+

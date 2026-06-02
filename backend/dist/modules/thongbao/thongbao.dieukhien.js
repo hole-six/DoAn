@@ -9,7 +9,7 @@ const thongbao_mohinh_js_1 = require("./thongbao.mohinh.js");
 function maNguoiDungTuRequest(yeuCau) {
     const ma = String(yeuCau?.nguoiDung?._id ?? yeuCau?.user?.id ?? '');
     if (!ma)
-        throw new loiungdung_js_1.LoiUngDung('Ban can dang nhap de thuc hien thao tac nay', 401, 'UNAUTHORIZED');
+        throw new loiungdung_js_1.LoiUngDung('Bạn cần đăng nhập để thực hiện thao tác này', 401, 'UNAUTHORIZED');
     return ma;
 }
 exports.dieuKhienThongBao = {
@@ -31,7 +31,7 @@ exports.dieuKhienThongBao = {
         const ma = String(yeuCau.params.ma ?? '');
         const duLieu = await thongbao_mohinh_js_1.ThongBao.findOne({ _id: ma, maNguoiDung });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay thong bao', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND');
         phanHoi.json({ duLieu });
     }),
     taoMoi: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
@@ -52,7 +52,7 @@ exports.dieuKhienThongBao = {
         const ma = String(yeuCau.params.ma ?? '');
         const duLieu = await thongbao_mohinh_js_1.ThongBao.findOneAndUpdate({ _id: ma, maNguoiDung }, payload, { new: true, runValidators: true });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay thong bao de cap nhat', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de cap nhat', 404, 'NOT_FOUND');
         phanHoi.json({ duLieu });
     }),
     xoa: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
@@ -60,7 +60,7 @@ exports.dieuKhienThongBao = {
         const ma = String(yeuCau.params.ma ?? '');
         const duLieu = await thongbao_mohinh_js_1.ThongBao.findOneAndDelete({ _id: ma, maNguoiDung });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay thong bao de xoa', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de xoa', 404, 'NOT_FOUND');
         phanHoi.status(204).send();
     }),
     danhDauDaDoc: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
@@ -68,7 +68,7 @@ exports.dieuKhienThongBao = {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         const thongBao = await (0, thongbao_dichvu_js_1.danhDauDaDoc)(String(id), maNguoiDung);
         if (!thongBao)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay thong bao', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND');
         phanHoi.json({
             thongBao: 'Danh dau da doc thanh cong',
             duLieu: thongBao,

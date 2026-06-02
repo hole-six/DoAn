@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 export const loaiThongBao = [
   'he_thong',
@@ -55,3 +55,5 @@ thongBaoSchema.index({ maNguoiDung: 1, daDoc: 1, ngayTao: -1 })
 thongBaoSchema.index({ hetHan: 1 }, { expireAfterSeconds: 0 })
 
 export const ThongBao = model<any>('ThongBao', thongBaoSchema)
+
+

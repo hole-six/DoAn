@@ -1,4 +1,4 @@
-import type { RequestHandler } from 'express'
+﻿import type { RequestHandler } from 'express'
 import { LoiUngDung } from './loiungdung.js'
 import { layNguoiDungTuAccessToken } from '../modules/xacthuc/xacthuc.dichvu.js'
 
@@ -27,7 +27,7 @@ export const yeuCauDangNhap: RequestHandler = async (yeuCau, _phanHoi, tiepTheo)
     ;(yeuCau as any).user = { ...nguoiDung, id: nguoiDung.id }
     tiepTheo()
   } catch {
-    tiepTheo(new LoiUngDung('Ban can dang nhap de thuc hien thao tac nay', 401, 'UNAUTHORIZED', undefined, 'Dang nhap lai va thu lai'))
+    tiepTheo(new LoiUngDung('Bạn cần đăng nhập để thực hiện thao tác này', 401, 'UNAUTHORIZED', undefined, 'Đăng nhập lại và thử lại'))
   }
 }
 
@@ -35,7 +35,7 @@ export function yeuCauVaiTro(vaiTroChoPhep: string[]): RequestHandler {
   return (yeuCau, _phanHoi, tiepTheo) => {
     const nguoiDung = (yeuCau as any).nguoiDung
     if (!nguoiDung) {
-      tiepTheo(new LoiUngDung('Ban can dang nhap de thuc hien thao tac nay', 401, 'UNAUTHORIZED'))
+      tiepTheo(new LoiUngDung('Bạn cần đăng nhập để thực hiện thao tác này', 401, 'UNAUTHORIZED'))
       return
     }
     if (!vaiTroChoPhep.includes(String(nguoiDung.vaiTro))) {
@@ -45,3 +45,4 @@ export function yeuCauVaiTro(vaiTroChoPhep: string[]): RequestHandler {
     tiepTheo()
   }
 }
+

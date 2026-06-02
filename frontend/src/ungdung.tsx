@@ -830,7 +830,7 @@ const ChatAdminPage = lazy(() => import('./pages/chat/TrangChat').then(module =>
 const TrangDangXayDungPage = lazy(() => import('./pages/TrangDangXayDung'))
 
 function RouteFallback() {
-  return <div className="route-loading">Dang tai...</div>
+  return <div className="route-loading">Đang tải...</div>
 }
 
 export default function UngDung() {

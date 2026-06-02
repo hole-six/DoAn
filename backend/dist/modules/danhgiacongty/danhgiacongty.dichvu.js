@@ -52,7 +52,7 @@ exports.dichVuDanhGiaCongTy = {
             .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
             .populate('maNhaTuyenDung', 'tenCongTy logo');
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay danh gia cong ty', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty', 404);
         return chuanHoaDanhGia(duLieu);
     },
     async taoMoi(duLieu) {
@@ -65,7 +65,7 @@ exports.dichVuDanhGiaCongTy = {
             .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
             .populate('maNhaTuyenDung', 'tenCongTy logo');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay danh gia cong ty de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty de cap nhat', 404);
         return chuanHoaDanhGia(ketQua);
     },
     async xoa(ma) {
@@ -74,7 +74,7 @@ exports.dichVuDanhGiaCongTy = {
             .populate({ path: 'maUngVien', select: 'maNguoiDung viTriMongMuon', populate: { path: 'maNguoiDung', select: 'hoTen email' } })
             .populate('maNhaTuyenDung', 'tenCongTy logo');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay danh gia cong ty de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty de xoa', 404);
         return chuanHoaDanhGia(ketQua);
     },
 };

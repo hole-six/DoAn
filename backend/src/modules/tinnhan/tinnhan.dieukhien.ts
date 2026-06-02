@@ -1,4 +1,4 @@
-import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
+﻿import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
@@ -36,57 +36,57 @@ async function timNguoiDungAdminDauTien() {
 async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: string, maHoSoUngTuyen?: string, maTinTuyenDung?: string) {
   const vaiTro = String(nguoiDung.vaiTro ?? '')
   const nguoiNhanDoc = await (NguoiDung as any).findById(nguoiNhan).select('_id vaiTro')
-  if (!nguoiNhanDoc) throw new LoiUngDung('Khong tim thay nguoi nhan chat', 404, 'RECIPIENT_NOT_FOUND')
+  if (!nguoiNhanDoc) throw new LoiUngDung('Không tìm thấy người nhận chat', 404, 'RECIPIENT_NOT_FOUND')
 
   if (vaiTro === 'nha_tuyen_dung') {
     if (String(nguoiNhanDoc.vaiTro ?? '') !== 'ung_vien') {
-      throw new LoiUngDung('Nha tuyen dung chi co the chat voi ung vien trong pipeline', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Nhà tuyển dụng chi co the chat voi ung vien trong pipeline', 409, 'INVALID_CHAT_TARGET')
     }
     if (!maHoSoUngTuyen && !maTinTuyenDung) {
-      throw new LoiUngDung('Can co thong tin ho so ung tuyen de mo chat', 422, 'CHAT_CONTEXT_REQUIRED')
+      throw new LoiUngDung('Cần có thông tin hồ sơ ứng tuyển để mở chat', 422, 'CHAT_CONTEXT_REQUIRED')
     }
     const hoSo = maHoSoUngTuyen
       ? await (HoSoUngTuyen as any).findById(maHoSoUngTuyen).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
       : await (HoSoUngTuyen as any).findOne({ maTinTuyenDung }).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
-    if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'APPLICATION_NOT_FOUND')
+    if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND')
     if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiDung._id)) {
       throw new LoiUngDung('Ban khong co quyen chat voi ung vien nay', 403, 'FORBIDDEN')
     }
     if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiNhanDoc)) {
-      throw new LoiUngDung('Nguoi nhan khong khop voi ung vien cua ho so', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Người nhận không khớp với ứng viên của hồ sơ', 409, 'INVALID_CHAT_TARGET')
     }
     if (!TRANG_THAI_CHAT_NTD_UV.includes(String(hoSo.trangThai ?? ''))) {
-      throw new LoiUngDung('Chi co the mo chat khi ho so da duoc xem va dang duoc xu ly', 409, 'CHAT_NOT_ALLOWED')
+      throw new LoiUngDung('Chỉ có thể mở chat khi hồ sơ đã được xem và đang được xử lý', 409, 'CHAT_NOT_ALLOWED')
     }
     return { loai: 'ung_vien_nha_tuyen_dung' as const, nguoiNhan: id(nguoiNhanDoc), context: { maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) } }
   }
 
   if (vaiTro === 'ung_vien') {
     if (String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
-      throw new LoiUngDung('Ung vien chi co the chat voi nha tuyen dung trong pipeline', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Ứng viên chỉ có thể chat với nhà tuyển dụng trong pipeline', 409, 'INVALID_CHAT_TARGET')
     }
     if (!maHoSoUngTuyen && !maTinTuyenDung) {
-      throw new LoiUngDung('Can co thong tin ho so ung tuyen de mo chat', 422, 'CHAT_CONTEXT_REQUIRED')
+      throw new LoiUngDung('Cần có thông tin hồ sơ ứng tuyển để mở chat', 422, 'CHAT_CONTEXT_REQUIRED')
     }
     const hoSo = maHoSoUngTuyen
       ? await (HoSoUngTuyen as any).findById(maHoSoUngTuyen).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
       : await (HoSoUngTuyen as any).findOne({ maTinTuyenDung }).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
-    if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'APPLICATION_NOT_FOUND')
+    if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND')
     if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiDung._id)) {
-      throw new LoiUngDung('Ban khong co quyen chat voi nha tuyen dung nay', 403, 'FORBIDDEN')
+      throw new LoiUngDung('Bạn không có quyền chat với nhà tuyển dụng này', 403, 'FORBIDDEN')
     }
     if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiNhanDoc)) {
-      throw new LoiUngDung('Nguoi nhan khong khop voi nha tuyen dung cua ho so', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Người nhận không khớp với nhà tuyển dụng của hồ sơ', 409, 'INVALID_CHAT_TARGET')
     }
     if (!TRANG_THAI_CHAT_NTD_UV.includes(String(hoSo.trangThai ?? ''))) {
-      throw new LoiUngDung('Chi co the chat khi ho so da duoc xem va dang duoc xu ly', 409, 'CHAT_NOT_ALLOWED')
+      throw new LoiUngDung('Chỉ có thể chat khi hồ sơ đã được xem và đang được xử lý', 409, 'CHAT_NOT_ALLOWED')
     }
     return { loai: 'ung_vien_nha_tuyen_dung' as const, nguoiNhan: id(nguoiNhanDoc), context: { maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) } }
   }
 
   if (vaiTro === 'admin') {
     if (String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
-      throw new LoiUngDung('Admin chi co the mo chat ho tro voi nha tuyen dung', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Admin chỉ có thể mở chat hỗ trợ với nhà tuyển dụng', 409, 'INVALID_CHAT_TARGET')
     }
     return { loai: 'admin_support' as const, nguoiNhan: id(nguoiNhanDoc), context: {} }
   }
@@ -215,3 +215,5 @@ export const dieuKhienTinNhan = {
     phanHoi.json({ thongBao: 'Them phan ung thanh cong' })
   }),
 }
+
+

@@ -44,7 +44,7 @@ exports.dichVuNhaTuyenDung = {
     async layTheoMa(ma) {
         const duLieu = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nha tuyen dung', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng', 404);
         return chuanHoaNhaTuyenDung(duLieu);
     },
     async taoMoi(duLieu) {
@@ -61,13 +61,13 @@ exports.dichVuNhaTuyenDung = {
             .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
             .populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nha tuyen dung de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng de cap nhat', 404);
         return chuanHoaNhaTuyenDung(ketQua);
     },
     async xoa(ma) {
         const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findByIdAndDelete(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay nha tuyen dung de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng de xoa', 404);
         return chuanHoaNhaTuyenDung(ketQua);
     },
 };

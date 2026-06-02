@@ -19,7 +19,7 @@ function normalizeJob(job: Partial<TinTuyenDung>) {
   return {
     ...job,
     tieuDe: String(job.tieuDe ?? '').trim(),
-    diaChi: String(job.diaChi ?? 'Da Nang').trim(),
+    diaChi: String(job.diaChi ?? 'Đà Nẵng').trim(),
     moTa: String(job.moTa ?? '').trim(),
     yeuCau: String(job.yeuCau ?? '').trim(),
     quyenLoi: String(job.quyenLoi ?? '').trim() || undefined,
@@ -48,7 +48,7 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
   const [job, setJob] = useState<Partial<TinTuyenDung>>({
     maNhaTuyenDung: companyId ?? '',
     tieuDe: '',
-    diaChi: 'Da Nang',
+    diaChi: 'Đà Nẵng',
     luongMin: 15000000,
     luongMax: 30000000,
     loaiHinh: 'hybrid',
@@ -65,6 +65,7 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [errors, setErrors] = useState<JobErrors>({})
+
   const uploadImage = async (file?: File) => {
     if (!file) return
     const formData = new FormData()
@@ -75,11 +76,12 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
       setJob(current => ({ ...current, anhDaiDien: data.duongDan ?? data.url }))
       setErrors({})
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : 'Khong upload duoc anh tin' })
+      setErrors({ form: error instanceof Error ? error.message : 'Không upload được ảnh tin' })
     } finally {
       setUploading(false)
     }
   }
+
   const submit = async () => {
     const payload = normalizeJob(job)
     const nextErrors = validateJob(payload)
@@ -97,25 +99,26 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
       setSaving(false)
     }
   }
+
   return (
     <Drawer title={job.id ? 'Sửa tin tuyển dụng' : 'Đăng tin tuyển dụng'} onClose={onClose} footer={<ButtonGroup><Button onClick={onClose}>Hủy</Button><Button form="job-form" type="submit" variant="primary" loading={saving} icon={<Save size={16} />}>Lưu tin</Button></ButtonGroup>}>
       <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-black text-slate-800">Anh/banner tin tuyen dung</p>
-            <p className="text-xs font-semibold text-slate-500">Hien thi o trang chi tiet viec lam, toi da 5MB.</p>
+            <p className="text-sm font-black text-slate-800">Ảnh/banner tin tuyển dụng</p>
+            <p className="text-xs font-semibold text-slate-500">Hiển thị ở trang chi tiết việc làm, tối đa 5MB.</p>
           </div>
           <label className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 text-sm font-black text-slate-700 transition-colors hover:bg-slate-50">
             <UploadCloud size={16} />
-            {uploading ? 'Dang tai...' : 'Tai anh'}
+            {uploading ? 'Đang tải...' : 'Tải ảnh'}
             <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={event => void uploadImage(event.target.files?.[0])} />
           </label>
         </div>
         {job.anhDaiDien && (
           <div className="mt-3 overflow-hidden rounded-xl border border-slate-200">
-            <img src={imageUrl(job.anhDaiDien)} alt="Banner tin tuyen dung" className="h-36 w-full object-cover" />
+            <img src={imageUrl(job.anhDaiDien)} alt="Banner tin tuyển dụng" className="h-36 w-full object-cover" />
             <button type="button" className="flex min-h-10 w-full items-center justify-center gap-2 border-t border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50" onClick={() => setJob(current => ({ ...current, anhDaiDien: '' }))}>
-              <X size={16} /> Xoa anh
+              <X size={16} /> Xóa ảnh
             </button>
           </div>
         )}

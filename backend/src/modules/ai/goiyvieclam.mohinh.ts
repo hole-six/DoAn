@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose'
+﻿import { Schema, model } from 'mongoose'
 
 const ketQuaGoiYSchema = new Schema(
   {
@@ -30,3 +30,5 @@ const goiYViecLamSchema = new Schema(
 goiYViecLamSchema.index({ maUngVien: 1, lanQuet: -1 })
 
 export const GoiYViecLam = model('GoiYViecLam', goiYViecLamSchema)
+
+

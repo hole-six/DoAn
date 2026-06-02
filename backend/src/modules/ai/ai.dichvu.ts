@@ -1,4 +1,4 @@
-import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
+﻿import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import '../danhmuckynang/danhmuckynang.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
@@ -112,14 +112,14 @@ function chuanHoaKetQua(doc: any) {
 async function layUngVienVaCv(nguoiDung: NguoiDungHienTai, maHoSoNangLuc?: string) {
   if (nguoiDung.vaiTro !== 'ung_vien') throw new LoiUngDung('Chi ung vien moi duoc quet goi y viec lam', 403, 'FORBIDDEN')
   const ungVien = await (UngVien as any).findOne({ maNguoiDung: nguoiDung.id }).populate('maNguoiDung', 'hoTen email')
-  if (!ungVien) throw new LoiUngDung('Ban can tao ho so ung vien truoc', 422, 'CANDIDATE_PROFILE_REQUIRED')
+  if (!ungVien) throw new LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước', 422, 'CANDIDATE_PROFILE_REQUIRED')
 
   const query: Record<string, unknown> = { maUngVien: ungVien._id }
   if (maHoSoNangLuc) query._id = maHoSoNangLuc
   const cv = maHoSoNangLuc
     ? await (HoSoNangLuc as any).findOne(query)
     : await (HoSoNangLuc as any).findOne({ maUngVien: ungVien._id, cvChinh: true })
-  if (!cv) throw new LoiUngDung('Ban can dat CV chinh truoc khi quet viec phu hop', 422, 'NO_PRIMARY_CV')
+  if (!cv) throw new LoiUngDung('Bạn cần đặt CV chính trước khi quét việc phù hợp', 422, 'NO_PRIMARY_CV')
   return { ungVien, cv }
 }
 
@@ -549,3 +549,6 @@ export function khoiDongCrawlerGoiYViecLam() {
     void chayCrawlerGoiYViecLam().catch((error) => console.error('Crawler goi y viec lam that bai:', error))
   }, intervalMs)
 }
+
+
+

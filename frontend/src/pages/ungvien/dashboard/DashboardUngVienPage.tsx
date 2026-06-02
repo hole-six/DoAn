@@ -34,7 +34,7 @@ export default function DashboardUngVienPage() {
       setGoiYError('')
     } catch (err) {
       setGoiY(null)
-      setGoiYError(err instanceof Error ? err.message : 'Khong tai duoc goi y viec lam')
+      setGoiYError(err instanceof Error ? err.message : 'Không tải được gợi ý việc làm')
     }
   }
 
@@ -70,25 +70,25 @@ export default function DashboardUngVienPage() {
 
   return (
     <Page
-      title="Tong quan ung vien"
-      desc="Theo doi ho so, lich phong van va cac viec can xu ly trong mot man hinh."
+      title="Tổng quan ứng viên"
+      desc="Theo dõi hồ sơ, lịch phỏng vấn và các việc cần xử lý trong một màn hình."
       action={(
         <>
           <Button variant="secondary" icon={<Sparkles size={16} />} onClick={() => setMoXacNhanQuet(true)} disabled={dangQuet}>
             {dangQuet ? 'Đang quét...' : 'Quét nhanh'}
           </Button>
-          <Button variant="primary" icon={<Briefcase size={16} />} onClick={() => { window.location.href = '/viec-lam' }}>Tim viec</Button>
+          <Button variant="primary" icon={<Briefcase size={16} />} onClick={() => { window.location.href = '/viec-lam' }}>Tìm việc</Button>
         </>
       )}
     >
       <ErrorState message={data.error} />
       {goiYError && <ErrorState message={goiYError} />}
       {moXacNhanQuet && (
-        <div className="fixed inset-0 z-[120] grid place-items-center bg-slate-950/45 px-4">
+        <div className="fixed inset-0 z-[1000] grid place-items-center bg-slate-950/45 px-4">
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <h3 className="text-lg font-black text-slate-950">Quét gợi ý việc làm</h3>
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-              Bạn muốn quét CV để tìm việc phù hợp trong hệ thống, hoặc quét xong rồi gửi email gợi ý cho chính mình?
+              Hệ thống sẽ dùng CV chính của bạn để tìm các việc làm đang mở và còn hạn nộp. Bạn có thể chỉ quét để xem kết quả, hoặc quét xong gửi danh sách gợi ý về email của mình.
             </p>
             <label className="mt-4 flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold text-slate-700">
               <input
