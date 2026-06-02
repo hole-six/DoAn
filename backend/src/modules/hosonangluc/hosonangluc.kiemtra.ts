@@ -54,6 +54,7 @@ export const kiemTraTaoHoSoNangLuc = z.object({
   fileCvTen: z.string().optional(),
   fileCvLoai: z.string().optional(),
   fileCvData: z.string().optional(),
+  loaiHoSo: z.enum(['builder', 'file_upload']).optional(),
   anhDaiDien: z.string().optional(),
   templateCv: z.string().optional(),
   mauChinh: z.string().optional(),

@@ -1,6 +1,8 @@
-import { Bell, Briefcase, Calendar, Plus, Users } from 'lucide-react'
+import { Bell, Briefcase, Calendar, MessageCircle, Plus, Users } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { DashboardSkeleton } from '../../../components/LoadingStates'
+import { useChat } from '../../../contexts/ChatContext'
 import { formatDateTime } from '../../../lib/format'
 import { employerApplicationStatusLabel, interviewStatusLabel, toneForApplicationStatus, toneForInterviewStatus } from '../../../lib/statusLabels'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
@@ -12,6 +14,8 @@ function Kpi({ icon: Icon, label, value }: { icon: typeof Briefcase; label: stri
 
 export default function DashboardNhaTuyenDungPage() {
   const data = useEmployerData()
+  const navigate = useNavigate()
+  const { moChatVoiNguoiDung } = useChat()
   if (data.loading) return <DashboardSkeleton />
 
   const openJobs = data.jobs.filter(item => item.trangThai === 'dang_mo')
@@ -20,7 +24,26 @@ export default function DashboardNhaTuyenDungPage() {
   const unread = data.notifications.filter(item => !item.daDoc).length
 
   return (
-    <Page title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'} desc="Pipeline tuyển dụng, lịch phỏng vấn và tin đang mở." action={<Button variant="primary" icon={<Plus size={16} />} onClick={() => { window.location.href = '/nha-tuyen-dung/quan-ly-tin?new=1' }}>Đăng tin</Button>}>
+    <Page
+      title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'}
+      desc="Pipeline tuyển dụng, lịch phỏng vấn và tin đang mở."
+      action={(
+        <>
+          <Button
+            variant="secondary"
+            icon={<MessageCircle size={16} />}
+            onClick={async () => {
+              const cuocTroChuyen = await moChatVoiNguoiDung('admin', { loai: 'admin_support' })
+              const id = (cuocTroChuyen as any)?._id ?? (cuocTroChuyen as any)?.id
+              navigate(id ? `/nha-tuyen-dung/chat?cuocTroChuyen=${id}` : '/nha-tuyen-dung/chat')
+            }}
+          >
+            Nhắn admin
+          </Button>
+          <Button variant="primary" icon={<Plus size={16} />} onClick={() => { window.location.href = '/nha-tuyen-dung/quan-ly-tin?new=1' }}>Đăng tin</Button>
+        </>
+      )}
+    >
       <ErrorState message={data.error} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi icon={Briefcase} label="Tin đang mở" value={openJobs.length} />

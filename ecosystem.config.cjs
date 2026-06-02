@@ -1,0 +1,22 @@
+module.exports = {
+  apps: [
+    {
+      name: 'itjob-backend',
+      script: 'backend/dist/maychu.js',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+    {
+      name: 'itjob-webhook',
+      script: 'deploy/webhook-server.cjs',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+  ],
+}

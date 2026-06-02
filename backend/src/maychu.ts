@@ -2,12 +2,14 @@ import { createServer } from 'http'
 import { bienMoiTruong } from './cauhinh/bienmoitruong.js'
 import { ketNoiDuLieu } from './cauhinh/ketnoidulieu.js'
 import { khoiTaoSocket } from './cauhinh/socket.js'
+import { khoiDongCrawlerGoiYViecLam } from './modules/ai/ai.dichvu.js'
 import { khoiDongCronCanhBaoQuanTri } from './modules/canhbaoquantri/canhbaoquantri.dichvu.js'
 import { taoUngDung } from './ungdung.js'
 
 async function khoiDongMayChu() {
   await ketNoiDuLieu()
   khoiDongCronCanhBaoQuanTri()
+  khoiDongCrawlerGoiYViecLam()
   const ungDung = taoUngDung()
   
   // Tạo HTTP server

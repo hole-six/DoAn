@@ -21,6 +21,8 @@ import {
   X,
 } from 'lucide-react'
 import logoWeb from '../assets/logoweb.png'
+import { useChat } from '../contexts/ChatContext'
+import { useThongBao } from '../contexts/ThongBaoContext'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 import AppIcon from './AppIcon'
 import BottomNav from './BottomNav'
@@ -144,6 +146,8 @@ export default function DashboardShell({ vaiTro }: Props) {
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('itjob_sidebar_collapsed') === 'true')
   const menu = menuMap[vaiTro]
   const nguoiDung = layNguoiDung()
+  const { soLuongChuaDoc: soThongBao } = useThongBao()
+  const { tongSoChuaDoc: soTinNhan } = useChat()
   const vaiTroCanCo = vaiTroCanCoMap[vaiTro]
   const shell = shellByRole[vaiTro]
 
@@ -216,7 +220,12 @@ export default function DashboardShell({ vaiTro }: Props) {
                   onClick={() => setOpen(false)}
                 >
                   <AppIcon icon={Icon} className="shrink-0 text-current" />
-                  <span className={clsx('truncate', collapsed && 'lg:hidden')}>{item.label}</span>
+                  <span className={clsx('min-w-0 flex-1 truncate', collapsed && 'lg:hidden')}>{item.label}</span>
+                  {(item.to.includes('thong-bao') && soThongBao > 0) || (item.to.includes('/chat') && soTinNhan > 0) ? (
+                    <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
+                      {item.to.includes('thong-bao') ? Math.min(99, soThongBao) : Math.min(99, soTinNhan)}
+                    </span>
+                  ) : null}
                 </NavLink>
               )
             })}
@@ -259,7 +268,22 @@ export default function DashboardShell({ vaiTro }: Props) {
             </button>
             <span className="text-lg font-black text-slate-900">{nhanMap[vaiTro]}</span>
             <div className="flex items-center gap-2.5">
-              <AppIcon icon={Bell} size={20} className="text-slate-700" />
+              <div className="relative">
+                <AppIcon icon={Bell} size={20} className="text-slate-700" />
+                {soThongBao > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white">
+                    {Math.min(99, soThongBao)}
+                  </span>
+                )}
+              </div>
+              {soTinNhan > 0 && (
+                <div className="relative">
+                  <AppIcon icon={MessageCircle} size={20} className="text-slate-700" />
+                  <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-violet-500 px-1 text-[9px] font-black text-white">
+                    {Math.min(99, soTinNhan)}
+                  </span>
+                </div>
+              )}
               <div className={clsx('inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-black text-white shadow-md', shellTone[vaiTro])}>
                 {initials}
               </div>

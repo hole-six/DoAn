@@ -95,6 +95,7 @@ dinhTuyenHoSoUngTuyen.post('/:ma/danh-gia', yeuCauVaiTro(['nha_tuyen_dung']), ba
   const duLieu = await dichVuWorkflowUngTuyen.danhGiaHoSo((yeuCau as any).nguoiDung, String(yeuCau.params.ma ?? ''), {
     trangThai: String(yeuCau.body?.trangThai ?? 'dang_xet_duyet') as 'dang_xet_duyet' | 'tu_choi',
     ghiChu: yeuCau.body?.ghiChu,
+    giaiDoanTuChoi: yeuCau.body?.giaiDoanTuChoi,
   })
   phanHoi.json({ duLieu })
 }))

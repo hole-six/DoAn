@@ -12,6 +12,8 @@ import { ScheduleModal } from '../interviews/ScheduleModal'
 import type { ScheduleValue } from '../interviews/ScheduleModal'
 import { CandidateDrawer } from './CandidateDrawer'
 
+const TRANG_THAI_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat'] as const
+
 export default function UngVienNhaTuyenDungPage() {
   const data = useEmployerData()
   const navigate = useNavigate()
@@ -38,12 +40,31 @@ export default function UngVienNhaTuyenDungPage() {
     await data.reload()
   }
 
-  const review = async (trangThai: 'dang_xet_duyet' | 'tu_choi') => {
+  const review = async (trangThai: 'dang_xet_duyet' | 'tu_choi', giaiDoanTuChoi: 'sang_loc' | 'phong_van' = 'sang_loc') => {
     if (!selected) return
     const ghiChu = trangThai === 'tu_choi'
-      ? window.prompt('Lý do từ chối hồ sơ?') ?? ''
-      : 'Nhà tuyển dụng đang xét duyệt hồ sơ'
-    const updated = await apiCoXacThuc(`/hosoungtuyen/${selected.id}/danh-gia`, { method: 'POST', body: JSON.stringify({ trangThai, ghiChu }) }) as HoSoUngTuyen
+      ? window.prompt(giaiDoanTuChoi === 'phong_van' ? 'Ly do tu choi sau phong van?' : 'Ly do tu choi sang loc?') ?? ''
+      : 'Nha tuyen dung dang xet duyet ho so'
+    const updated = await apiCoXacThuc(`/hosoungtuyen/${selected.id}/danh-gia`, {
+      method: 'POST',
+      body: JSON.stringify({ trangThai, ghiChu, giaiDoanTuChoi }),
+    }) as HoSoUngTuyen
+    setSelected(updated)
+    await data.reload()
+  }
+
+  const completeInterview = async (ketQua: 'dat' | 'khong_dat') => {
+    if (!selected) return
+    const lich = data.interviews.find(item => String((item as any).maHoSoUngTuyen?._id ?? item.maHoSoUngTuyen) === selected.id)
+    if (!lich) {
+      setScheduling(selected)
+      return
+    }
+    await apiCoXacThuc(`/lichphongvan/${lich.id}/hoan-thanh`, {
+      method: 'POST',
+      body: JSON.stringify({ ketQua, ghiChu: ketQua === 'dat' ? 'Ung vien dat phong van' : 'Ung vien khong dat phong van' }),
+    })
+    const updated = await apiCoXacThuc(`/hosoungtuyen/${selected.id}`) as HoSoUngTuyen
     setSelected(updated)
     await data.reload()
   }
@@ -58,7 +79,7 @@ export default function UngVienNhaTuyenDungPage() {
 
   const openChat = async (item: HoSoUngTuyen) => {
     const userId = item.ungVien?.nguoiDung?.id ?? item.ungVien?.nguoiDung?._id
-    if (!userId) return
+    if (!userId || !TRANG_THAI_CHAT.includes(item.trangThai as any)) return
     const cuocTroChuyen = await moChatVoiNguoiDung(userId, {
       loai: 'ung_vien_nha_tuyen_dung',
       maHoSoUngTuyen: item.id,
@@ -69,34 +90,49 @@ export default function UngVienNhaTuyenDungPage() {
   }
 
   return (
-    <Page title="Pipeline ứng viên" desc="Xem hồ sơ, đánh giá CV, mời phỏng vấn hoặc từ chối theo đúng workflow.">
+      <Page title="Pipeline ứng viên" desc="Xem hồ sơ, đánh giá CV, mời phỏng vấn hoặc từ chối theo đúng workflow.">
       <ErrorState message={data.error} />
       <Panel>
         <div className="mb-3 flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-500">
           <Search size={16} />
-          <span className="text-sm font-semibold">Danh sách hồ sơ ứng tuyển</span>
+              <span className="text-sm font-semibold">Danh sách hồ sơ ứng tuyển</span>
         </div>
         <div className="grid gap-2">
           {data.applications.length ? data.applications.map(item => (
             <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
               <span className="min-w-0">
-                <strong className="block truncate text-sm font-black text-slate-950">{item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'}</strong>
+                <strong className="block truncate text-sm font-black text-slate-950">{item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ung vien'}</strong>
                 <span className="mt-1 block truncate text-xs font-semibold text-slate-500">{item.tinTuyenDung?.tieuDe ?? '-'}</span>
                 <span className="mt-1 flex flex-wrap gap-1 text-xs font-bold text-slate-500">
                   {item.hoSoNangLuc?.tieuDe && <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5"><FileText size={12} /> {item.hoSoNangLuc.tieuDe}</span>}
-                  {item.hoSoNangLuc?.fileCvData && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Có file CV</span>}
+                  {item.hoSoNangLuc?.fileCvData && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Co file CV</span>}
                 </span>
               </span>
               <Badge tone={toneForApplicationStatus(item.trangThai)}>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
               <div className="flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => setSelected(item)}>Xem</Button>
-                <Button size="sm" icon={<MessageCircle size={15} />} disabled={!item.ungVien?.nguoiDung?.id} onClick={() => void openChat(item)}>Chat</Button>
+                <Button size="sm" icon={<Search size={14} />} onClick={() => setSelected(item)}>Xem</Button>
+                <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!item.ungVien?.nguoiDung?.id || !TRANG_THAI_CHAT.includes(item.trangThai as any)} onClick={() => void openChat(item)}>Chat</Button>
               </div>
             </article>
-          )) : <EmptyState>Chưa có ứng viên ứng tuyển.</EmptyState>}
+            )) : <EmptyState>Chưa có ứng viên ứng tuyển.</EmptyState>}
         </div>
       </Panel>
-      {selected && <CandidateDrawer item={selected} onClose={() => setSelected(null)} onView={() => void view()} onReview={() => void review('dang_xet_duyet')} onReject={() => void review('tu_choi')} onSchedule={() => setScheduling(selected)} />}
+      {selected && (
+      <CandidateDrawer
+        item={selected}
+        onClose={() => setSelected(null)}
+        onView={() => void view()}
+        onAdvance={(status) => {
+          if (status === 'dang_xet_duyet') return void review('dang_xet_duyet', 'sang_loc')
+          if (status === 'dat') return void completeInterview('dat')
+        }}
+        onReject={(phase) => {
+          if (phase === 'sang_loc') return void review('tu_choi', 'sang_loc')
+          return void completeInterview('khong_dat')
+        }}
+        onSchedule={() => setScheduling(selected)}
+      />
+      )}
       {scheduling && <ScheduleModal onClose={() => setScheduling(null)} onSubmit={schedule} />}
     </Page>
   )

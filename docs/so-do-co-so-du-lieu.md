@@ -139,6 +139,10 @@ Quan he:
 |  | kinhnghiemlam | NVARCHAR(MAX) |
 |  | chungchi | NVARCHAR(1000) |
 |  | duan | NVARCHAR(MAX) |
+|  | loaihoso | VARCHAR(30) |
+|  | filecvten | NVARCHAR(255) |
+|  | filecvloai | VARCHAR(100) |
+|  | filecvdata | VARCHAR(500) |
 |  | cvchinh | BIT |
 |  | congkhai | BIT |
 |  | ngaytao | DATETIME |
@@ -252,3 +256,72 @@ Quan he:
 - `HOSOUNGTUYEN` la trung tam cua quy trinh tuyen dung, lien ket den lich su trang thai, lich phong van va thong bao.
 - `DANHMUC_KYNANG` duoc dung chung cho ky nang ung vien va ky nang bat buoc cua tin tuyen dung.
 - `DANHGIA_CONGTY` gan danh gia cua ung vien voi nha tuyen dung va lich phong van lien quan.
+
+## So do ERD cap nhat
+
+```mermaid
+erDiagram
+  NGUOIDUNG ||--o| UNGVIEN : "so huu"
+  NGUOIDUNG ||--o| NHATUYENDUNG : "so huu"
+  NGUOIDUNG ||--o{ THONGBAO : "nhan"
+  UNGVIEN ||--o{ HOSONANGLUC : "quan ly CV"
+  UNGVIEN ||--o{ HOSOUNGTUYEN : "nop"
+  NHATUYENDUNG ||--o{ TINTUYENDUNG : "dang"
+  TINTUYENDUNG ||--o{ HOSOUNGTUYEN : "nhan"
+  HOSONANGLUC ||--o{ HOSOUNGTUYEN : "duoc dung"
+  HOSOUNGTUYEN ||--o{ LICHSU_HOSOUNGTUYEN : "ghi nhan"
+  HOSOUNGTUYEN ||--o{ LICHPHONGVAN : "len lich"
+  LICHPHONGVAN ||--o{ DANHGIA_CONGTY : "co danh gia"
+  NHATUYENDUNG ||--o{ DANHGIA_CONGTY : "duoc danh gia"
+  DANHMUC_KYNANG ||--o{ TINTUYENDUNG_KYNANG : "gan job"
+  TINTUYENDUNG ||--o{ TINTUYENDUNG_KYNANG : "yeu cau"
+
+  NGUOIDUNG {
+    int manguoidung PK
+    string email
+    string hoten
+    string vaitro
+    string trangthai
+  }
+
+  UNGVIEN {
+    int maungvien PK
+    int manguoidung FK
+    string vitrimongmuon
+    int kinhnghiem
+  }
+
+  NHATUYENDUNG {
+    int manhatuyendung PK
+    int manguoidung FK
+    string tencongty
+    string trangthaiduyet
+  }
+
+  HOSONANGLUC {
+    int mahosonangluc PK
+    int maungvien FK
+    string tieude
+    string loaihoso "builder | file_upload"
+    string filecvten
+    string filecvloai
+    string filecvdata
+    boolean cvchinh
+    boolean congkhai
+  }
+
+  TINTUYENDUNG {
+    int matintuyendung PK
+    int manhatuyendung FK
+    string tieude
+    string trangthai
+  }
+
+  HOSOUNGTUYEN {
+    int mahosoungtuyen PK
+    int maungvien FK
+    int matintuyendung FK
+    int mahosonangluc FK
+    string trangthai
+  }
+```

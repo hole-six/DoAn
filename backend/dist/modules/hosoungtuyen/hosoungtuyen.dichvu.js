@@ -31,6 +31,13 @@ function chuanHoaUngTuyen(taiLieu) {
                 nhaTuyenDung: tin.maNhaTuyenDung?._id
                     ? {
                         id: String(tin.maNhaTuyenDung._id),
+                        maNguoiDung: tin.maNhaTuyenDung.maNguoiDung?._id
+                            ? {
+                                id: String(tin.maNhaTuyenDung.maNguoiDung._id),
+                                hoTen: tin.maNhaTuyenDung.maNguoiDung.hoTen,
+                                email: tin.maNhaTuyenDung.maNguoiDung.email,
+                            }
+                            : tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
                         tenCongTy: tin.maNhaTuyenDung.tenCongTy,
                         logo: tin.maNhaTuyenDung.logo,
                     }
@@ -60,6 +67,7 @@ function chuanHoaUngTuyen(taiLieu) {
             ? {
                 id: String(duLieu.maHoSoNangLuc._id),
                 tieuDe: duLieu.maHoSoNangLuc.tieuDe,
+                loaiHoSo: duLieu.maHoSoNangLuc.loaiHoSo,
                 cvChinh: duLieu.maHoSoNangLuc.cvChinh,
                 congKhai: duLieu.maHoSoNangLuc.congKhai,
                 hoTenHienThi: duLieu.maHoSoNangLuc.hoTenHienThi,
@@ -101,7 +109,7 @@ function chuanHoaUngTuyen(taiLieu) {
 function query() {
     return hosoungtuyen_mohinh_js_1.HoSoUngTuyen
         .find()
-        .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo' } })
+        .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
         .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
         .populate('maHoSoNangLuc');
 }
@@ -113,7 +121,7 @@ exports.dichVuHoSoUngTuyen = {
     async layTheoMa(ma) {
         const duLieu = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
             .findById(ma)
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo' } })
+            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
             .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
             .populate('maHoSoNangLuc');
         if (!duLieu)
@@ -152,12 +160,12 @@ exports.dichVuHoSoUngTuyen = {
     async capNhat(ma, duLieu) {
         const truocKhiCapNhat = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
             .findById(ma)
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo' } })
+            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
             .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
             .populate('maHoSoNangLuc');
         const ketQua = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
             .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo' } })
+            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
             .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
             .populate('maHoSoNangLuc');
         if (!ketQua)

@@ -20,6 +20,8 @@ export type PhienDangNhap = {
   nguoiDung: NguoiDungDangNhap
 }
 
+let dangLamMoiPhien: Promise<PhienDangNhap> | null = null
+
 export const duongDanTheoVaiTro: Record<VaiTroNguoiDung, string> = {
   ung_vien: '/ung-vien',
   nha_tuyen_dung: '/nha-tuyen-dung/dashboard',
@@ -70,21 +72,31 @@ export function headerCoXacThuc() {
 }
 
 export async function lamMoiPhienDangNhap() {
+  if (dangLamMoiPhien) return dangLamMoiPhien
+
   const refreshToken = layRefreshToken()
   if (!refreshToken) throw new Error('Chua co refresh token')
 
-  const res = await fetch(`${API_URL}/xacthuc/lam-moi-token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  })
-  const data = await res.json()
-  if (!res.ok) {
-    xoaPhienDangNhap()
-    throw new Error(data.thongBao ?? 'Phien dang nhap da het han')
+  dangLamMoiPhien = (async () => {
+    const res = await fetch(`${API_URL}/xacthuc/lam-moi-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      xoaPhienDangNhap()
+      throw new Error(data.thongBao ?? 'Phien dang nhap da het han')
+    }
+    luuPhienDangNhap(data.duLieu)
+    return data.duLieu as PhienDangNhap
+  })()
+
+  try {
+    return await dangLamMoiPhien
+  } finally {
+    dangLamMoiPhien = null
   }
-  luuPhienDangNhap(data.duLieu)
-  return data.duLieu as PhienDangNhap
 }
 
 export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuLai = true) {
@@ -103,8 +115,13 @@ export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuL
   }
 
   if (res.status === 401 && thuLai && layRefreshToken()) {
-    await lamMoiPhienDangNhap()
-    return apiCoXacThuc(path, options, false)
+    try {
+      await lamMoiPhienDangNhap()
+      return apiCoXacThuc(path, options, false)
+    } catch (error) {
+      xoaPhienDangNhap()
+      throw error instanceof Error ? error : new Error('Phien dang nhap da het han')
+    }
   }
 
   if (!res.ok) {
@@ -139,8 +156,13 @@ export async function apiUploadCoXacThuc(path: string, formData: FormData, optio
   }
 
   if (res.status === 401 && thuLai && layRefreshToken()) {
-    await lamMoiPhienDangNhap()
-    return apiUploadCoXacThuc(path, formData, options, false)
+    try {
+      await lamMoiPhienDangNhap()
+      return apiUploadCoXacThuc(path, formData, options, false)
+    } catch (error) {
+      xoaPhienDangNhap()
+      throw error instanceof Error ? error : new Error('Phien dang nhap da het han')
+    }
   }
 
   if (!res.ok) throw new Error(data.thongBao || 'Upload that bai')

@@ -1,5 +1,7 @@
 import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
+import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import {
   layDanhSachCuocTroChuyenModel,
   layHoacTaoCuocTroChuyenModel,
@@ -13,6 +15,85 @@ import {
   thamGiaNhomCongDong,
 } from './tinnhan.dichvu.js'
 
+type NguoiDungHienTai = {
+  _id: string
+  id?: string
+  vaiTro: 'ung_vien' | 'nha_tuyen_dung' | 'admin'
+}
+
+const TRANG_THAI_CHAT_NTD_UV = ['dang_xet_duyet', 'moi_phong_van', 'dat']
+
+function id(value: any) {
+  return String(value?._id ?? value?.id ?? value ?? '')
+}
+
+async function timNguoiDungAdminDauTien() {
+  const admin = await (NguoiDung as any).findOne({ vaiTro: 'admin' }).select('_id')
+  if (!admin) throw new LoiUngDung('He thong chua co tai khoan quan tri vien', 409, 'ADMIN_NOT_FOUND')
+  return String(admin._id)
+}
+
+async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: string, maHoSoUngTuyen?: string, maTinTuyenDung?: string) {
+  const vaiTro = String(nguoiDung.vaiTro ?? '')
+  const nguoiNhanDoc = await (NguoiDung as any).findById(nguoiNhan).select('_id vaiTro')
+  if (!nguoiNhanDoc) throw new LoiUngDung('Khong tim thay nguoi nhan chat', 404, 'RECIPIENT_NOT_FOUND')
+
+  if (vaiTro === 'nha_tuyen_dung') {
+    if (String(nguoiNhanDoc.vaiTro ?? '') !== 'ung_vien') {
+      throw new LoiUngDung('Nha tuyen dung chi co the chat voi ung vien trong pipeline', 409, 'INVALID_CHAT_TARGET')
+    }
+    if (!maHoSoUngTuyen && !maTinTuyenDung) {
+      throw new LoiUngDung('Can co thong tin ho so ung tuyen de mo chat', 422, 'CHAT_CONTEXT_REQUIRED')
+    }
+    const hoSo = maHoSoUngTuyen
+      ? await (HoSoUngTuyen as any).findById(maHoSoUngTuyen).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
+      : await (HoSoUngTuyen as any).findOne({ maTinTuyenDung }).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
+    if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'APPLICATION_NOT_FOUND')
+    if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiDung._id)) {
+      throw new LoiUngDung('Ban khong co quyen chat voi ung vien nay', 403, 'FORBIDDEN')
+    }
+    if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiNhanDoc)) {
+      throw new LoiUngDung('Nguoi nhan khong khop voi ung vien cua ho so', 409, 'INVALID_CHAT_TARGET')
+    }
+    if (!TRANG_THAI_CHAT_NTD_UV.includes(String(hoSo.trangThai ?? ''))) {
+      throw new LoiUngDung('Chi co the mo chat khi ho so da duoc xem va dang duoc xu ly', 409, 'CHAT_NOT_ALLOWED')
+    }
+    return { loai: 'ung_vien_nha_tuyen_dung' as const, nguoiNhan: id(nguoiNhanDoc), context: { maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) } }
+  }
+
+  if (vaiTro === 'ung_vien') {
+    if (String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
+      throw new LoiUngDung('Ung vien chi co the chat voi nha tuyen dung trong pipeline', 409, 'INVALID_CHAT_TARGET')
+    }
+    if (!maHoSoUngTuyen && !maTinTuyenDung) {
+      throw new LoiUngDung('Can co thong tin ho so ung tuyen de mo chat', 422, 'CHAT_CONTEXT_REQUIRED')
+    }
+    const hoSo = maHoSoUngTuyen
+      ? await (HoSoUngTuyen as any).findById(maHoSoUngTuyen).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
+      : await (HoSoUngTuyen as any).findOne({ maTinTuyenDung }).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
+    if (!hoSo) throw new LoiUngDung('Khong tim thay ho so ung tuyen', 404, 'APPLICATION_NOT_FOUND')
+    if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiDung._id)) {
+      throw new LoiUngDung('Ban khong co quyen chat voi nha tuyen dung nay', 403, 'FORBIDDEN')
+    }
+    if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiNhanDoc)) {
+      throw new LoiUngDung('Nguoi nhan khong khop voi nha tuyen dung cua ho so', 409, 'INVALID_CHAT_TARGET')
+    }
+    if (!TRANG_THAI_CHAT_NTD_UV.includes(String(hoSo.trangThai ?? ''))) {
+      throw new LoiUngDung('Chi co the chat khi ho so da duoc xem va dang duoc xu ly', 409, 'CHAT_NOT_ALLOWED')
+    }
+    return { loai: 'ung_vien_nha_tuyen_dung' as const, nguoiNhan: id(nguoiNhanDoc), context: { maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) } }
+  }
+
+  if (vaiTro === 'admin') {
+    if (String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
+      throw new LoiUngDung('Admin chi co the mo chat ho tro voi nha tuyen dung', 409, 'INVALID_CHAT_TARGET')
+    }
+    return { loai: 'admin_support' as const, nguoiNhan: id(nguoiNhanDoc), context: {} }
+  }
+
+  throw new LoiUngDung('Ban khong co quyen mo chat nay', 403, 'FORBIDDEN')
+}
+
 export const dieuKhienTinNhan = {
   // ============================================
   // CONVERSATION CONTROLLERS
@@ -25,14 +106,34 @@ export const dieuKhienTinNhan = {
   }),
 
   layHoacTaoCuocTroChuyenModel: batLoiBatDongBo(async (yeuCau, phanHoi) => {
-    const maNguoiDung = (yeuCau as any).nguoiDung._id
-    const { nguoiNhan, maHoSoUngTuyen, maTinTuyenDung, loai } = yeuCau.body
+    const nguoiDung = (yeuCau as any).nguoiDung as NguoiDungHienTai
+    const maNguoiDung = id(nguoiDung)
+    const { nguoiNhan: nguoiNhanRaw, maHoSoUngTuyen, maTinTuyenDung, loai } = yeuCau.body
+    const nguoiNhan = String(nguoiNhanRaw ?? '')
     if (!nguoiNhan) throw new LoiUngDung('Thieu nguoi nhan tin nhan', 422, 'MISSING_RECEIVER')
+    let loaiCuocTroChuyen: 'ung_vien_nha_tuyen_dung' | 'admin_support' | 'nhom_cong_dong' = loai ?? 'ung_vien_nha_tuyen_dung'
+    let nguoiNhanThuc = nguoiNhan
+    let context: { maHoSoUngTuyen?: string; maTinTuyenDung?: string } = {}
+
+    if (loaiCuocTroChuyen === 'admin_support' || nguoiNhan === 'admin') {
+      if (!['nha_tuyen_dung', 'admin'].includes(String(nguoiDung.vaiTro ?? ''))) {
+        throw new LoiUngDung('Ban khong co quyen mo chat ho tro', 403, 'FORBIDDEN')
+      }
+      nguoiNhanThuc = await timNguoiDungAdminDauTien()
+      loaiCuocTroChuyen = 'admin_support'
+      context = {}
+    } else if (loaiCuocTroChuyen === 'ung_vien_nha_tuyen_dung') {
+      const ketQua = await xacThucChatUngTuyen(nguoiDung, nguoiNhanThuc, maHoSoUngTuyen, maTinTuyenDung)
+      loaiCuocTroChuyen = ketQua.loai
+      nguoiNhanThuc = ketQua.nguoiNhan
+      context = ketQua.context
+    }
+
     const cuocTroChuyenModel = await layHoacTaoCuocTroChuyenModel({
-      nguoiThamGia: [maNguoiDung, nguoiNhan],
-      loai,
-      maHoSoUngTuyen,
-      maTinTuyenDung,
+      nguoiThamGia: [maNguoiDung, nguoiNhanThuc],
+      loai: loaiCuocTroChuyen,
+      maHoSoUngTuyen: context.maHoSoUngTuyen ?? maHoSoUngTuyen,
+      maTinTuyenDung: context.maTinTuyenDung ?? maTinTuyenDung,
     })
     phanHoi.json({ thongBao: 'Lay cuoc tro chuyen thanh cong', duLieu: cuocTroChuyenModel })
   }),

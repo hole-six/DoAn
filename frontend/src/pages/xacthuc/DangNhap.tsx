@@ -48,9 +48,14 @@ export default function DangNhap() {
   const [loi, setLoi] = useState('')
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
+  const redirect = new URLSearchParams(window.location.search).get('redirect') ?? ''
 
   const hoanTatDangNhap = (duLieu: any) => {
     luuPhienDangNhap(duLieu)
+    if (redirect.startsWith('/')) {
+      navigate(redirect, { replace: true })
+      return
+    }
     navigate(duongDanTheoVaiTro[duLieu.nguoiDung.vaiTro as keyof typeof duongDanTheoVaiTro])
   }
 

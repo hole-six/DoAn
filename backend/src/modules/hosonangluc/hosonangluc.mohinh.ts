@@ -67,6 +67,7 @@ const hoSoNangLucSchema = new Schema(
     fileCvTen: String,
     fileCvLoai: String,
     fileCvData: String,
+    loaiHoSo: { type: String, enum: ['builder', 'file_upload'], default: 'builder' },
     anhDaiDien: String,
     templateCv: { type: String, default: 'classic-blue' },
     mauChinh: { type: String, default: '#2563eb' },

@@ -28,6 +28,7 @@ function chuanHoaHoSo(taiLieu: any) {
     fileCvTen: duLieu.fileCvTen,
     fileCvLoai: duLieu.fileCvLoai,
     fileCvData: duLieu.fileCvData,
+    loaiHoSo: duLieu.loaiHoSo ?? 'builder',
     anhDaiDien: duLieu.anhDaiDien,
     templateCv: duLieu.templateCv ?? 'classic-blue',
     mauChinh: duLieu.mauChinh ?? '#2563eb',

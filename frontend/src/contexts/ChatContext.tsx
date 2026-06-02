@@ -44,6 +44,10 @@ export interface NguoiThamGia {
 
 export interface CuocTroChuyenPreview {
   _id: string
+  loai?: 'ung_vien_nha_tuyen_dung' | 'admin_support' | 'nhom_cong_dong'
+  tenNhom?: string
+  moTaNhom?: string
+  anhNhom?: string
   nguoiThamGia: NguoiThamGia[]
   tinNhanCuoiCung?: {
     noiDung: string
@@ -52,6 +56,7 @@ export interface CuocTroChuyenPreview {
   }
   soChuaDocCuaToi?: number
   ngayCapNhat: string
+  soThanhVien?: number
 }
 
 export type ChatContextMeta = {

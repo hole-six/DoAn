@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Building2, Clock, DollarSign, FileText, Globe, MapPin, Share2, UploadCloud, Users, X } from 'lucide-react'
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { imageUrl } from '../../lib/format'
@@ -40,6 +40,7 @@ type HoSoNangLuc = {
   maUngVien: string
   tieuDe?: string
   cvChinh?: boolean
+  loaiHoSo?: 'builder' | 'file_upload'
   fileCvTen?: string
   fileCvLoai?: string
   fileCvData?: string
@@ -93,6 +94,8 @@ async function uploadFileCv(file: File) {
 
 export default function ChiTietViecLam() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const openedApplyRef = useRef(false)
   const [tab, setTab] = useState<'mo-ta' | 'cong-ty'>('mo-ta')
   const [viec, setViec] = useState<TinTuyenDung | null>(null)
   const [congTy, setCongTy] = useState<CongTy | null>(null)
@@ -144,6 +147,13 @@ export default function ChiTietViecLam() {
     return () => { active = false }
   }, [id])
 
+  useEffect(() => {
+    if (openedApplyRef.current) return
+    if (dangTai || loi || !viec || searchParams.get('apply') !== '1') return
+    openedApplyRef.current = true
+    void ungTuyenNgay()
+  }, [dangTai, loi, viec, searchParams])
+
   const kyNang = useMemo(() => (viec?.kyNang ?? []).map(skill => skill.tenKyNang).filter(Boolean) as string[], [viec])
   const yeuCau = tachDong(viec?.yeuCau)
   const quyenLoi = tachDong(viec?.quyenLoi)
@@ -153,7 +163,7 @@ export default function ChiTietViecLam() {
   const ungTuyenNgay = async () => {
     const nguoiDung = layNguoiDung()
     if (!nguoiDung) {
-      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(window.location.pathname)}`
+      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`
       return
     }
 
@@ -205,7 +215,8 @@ export default function ChiTietViecLam() {
     try {
       let maHoSoNangLuc = cvDangChon
       if (fileCvMoi) {
-        if (fileCvMoi.size > 10 * 1024 * 1024) throw new Error('File CV goc nen nho hon 10MB')
+        if (fileCvMoi.type !== 'application/pdf' && !fileCvMoi.name.toLowerCase().endsWith('.pdf')) throw new Error('Chi ho tro upload CV dang PDF')
+        if (fileCvMoi.size > 10 * 1024 * 1024) throw new Error('File CV PDF nen nho hon 10MB')
         const fileCvData = await uploadFileCv(fileCvMoi)
         const cvMoi = await apiCoXacThuc('/hosonangluc', {
           method: 'POST',
@@ -213,8 +224,9 @@ export default function ChiTietViecLam() {
             maUngVien: ungVienHienTai.id,
             tieuDe: fileCvMoi.name.replace(/\.[^.]+$/, '') || `CV ${viec.tieuDe}`,
             fileCvTen: fileCvMoi.name,
-            fileCvLoai: fileCvMoi.type || 'application/octet-stream',
+            fileCvLoai: 'application/pdf',
             fileCvData,
+            loaiHoSo: 'file_upload',
             cvChinh: cvList.length === 0,
             congKhai: false,
           }),
@@ -411,10 +423,10 @@ export default function ChiTietViecLam() {
               <label style={{ border: '1px dashed #94a3b8', borderRadius: 10, padding: 14, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', background: fileCvMoi ? '#f0fdf4' : '#f8fafc' }}>
                 <UploadCloud size={20} color="#0f766e" />
                 <span style={{ flex: 1 }}>
-                  <strong style={{ display: 'block', fontSize: 14, color: '#0f172a' }}>{fileCvMoi ? fileCvMoi.name : 'Upload CV moi'}</strong>
+                  <strong style={{ display: 'block', fontSize: 14, color: '#0f172a' }}>{fileCvMoi ? fileCvMoi.name : 'Upload CV PDF mới'}</strong>
                   <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>PDF, DOC, DOCX hoac file CV ca nhan.</span>
                 </span>
-                <input type="file" className="hidden" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={event => { const file = event.target.files?.[0] ?? null; setFileCvMoi(file); if (file) setCvDangChon('') }} />
+                <input type="file" className="hidden" accept="application/pdf,.pdf" onChange={event => { const file = event.target.files?.[0] ?? null; setFileCvMoi(file); if (file) setCvDangChon('') }} />
               </label>
               <label style={{ display: 'grid', gap: 8 }}>
                 <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Thu xin viec</span>

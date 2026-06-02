@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, Search, SlidersHorizontal } from 'lucide-react'
+import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, MessageCircle, Search, Send, Sparkles, SlidersHorizontal } from 'lucide-react'
 import timJobBg from '../../assets/timjob.png'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
@@ -84,6 +84,9 @@ export default function TimKiemViecLam() {
   const [capBacDangChon, setCapBacDangChon] = useState<string[]>([])
   const [loaiHinhDangChon, setLoaiHinhDangChon] = useState<string[]>([])
   const [searchActive, setSearchActive] = useState(false)
+  const [aiQuestion, setAiQuestion] = useState('')
+  const [aiAnswer, setAiAnswer] = useState('')
+  const [aiBusy, setAiBusy] = useState(false)
   const searchWrapRef = useRef<HTMLDivElement | null>(null)
   const { groups, loading, hasAny } = useSearchSuggestions({
     query: tuKhoa,
@@ -173,6 +176,27 @@ export default function TimKiemViecLam() {
       return
     }
     navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+  }
+
+  const askAi = async () => {
+    const cauHoi = aiQuestion.trim()
+    if (!cauHoi) return
+    setAiBusy(true)
+    setAiAnswer('')
+    try {
+      const res = await fetch(`${API_URL}/ai/chatbot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cauHoi }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.thongBao ?? 'Khong hoi duoc AI')
+      setAiAnswer(data.duLieu?.traLoi ?? '')
+    } catch (error) {
+      setAiAnswer(error instanceof Error ? error.message : 'Khong hoi duoc AI')
+    } finally {
+      setAiBusy(false)
+    }
   }
 
   const toggleSave = (id: string) => {
@@ -296,6 +320,24 @@ export default function TimKiemViecLam() {
                 <Briefcase size={15} /> <span>{loai}</span><em>{count}</em>
               </button>
             ))}
+          </section>
+          <section className="jobs-filter-group">
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Tro ly AI</h3>
+            <textarea
+              value={aiQuestion}
+              onChange={e => setAiQuestion(e.target.value)}
+              rows={4}
+              placeholder="Hoi AI: tim viec frontend o Da Nang, job React junior, ..."
+              style={{ width: '100%', borderRadius: 10, border: '1px solid #dbe4f0', padding: 10, fontSize: 13, resize: 'vertical' }}
+            />
+            <button className="primary-button" style={{ width: '100%', marginTop: 8 }} onClick={() => void askAi()} disabled={aiBusy}>
+              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Dang tra loi...' : 'Hoi AI'}
+            </button>
+            {aiAnswer && (
+              <div style={{ marginTop: 10, borderRadius: 12, border: '1px solid #dbe4f0', background: '#f8fbff', padding: 12, fontSize: 13, lineHeight: 1.7, color: '#0f172a', whiteSpace: 'pre-line' }}>
+                {aiAnswer}
+              </div>
+            )}
           </section>
           <button className="jobs-filter-clear" onClick={resetBoLoc}>Xóa bộ lọc</button>
         </aside>

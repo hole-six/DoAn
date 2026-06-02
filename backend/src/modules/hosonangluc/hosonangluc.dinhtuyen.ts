@@ -25,14 +25,8 @@ const taiAnhCv = multer({
   },
 })
 
-const duoiTepCvHopLe = new Set(['.pdf', '.doc', '.docx', '.txt', '.md'])
-const mimeCvHopLe = new Set([
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'text/markdown',
-])
+const duoiTepCvHopLe = new Set(['.pdf'])
+const mimeCvHopLe = new Set(['application/pdf'])
 
 const taiFileCv = multer({
   storage: multer.diskStorage({
@@ -43,7 +37,7 @@ const taiFileCv = multer({
   fileFilter: (_yeuCau, tep, goiLai) => {
     const duoiTep = path.extname(tep.originalname).toLowerCase()
     if (!duoiTepCvHopLe.has(duoiTep) && !mimeCvHopLe.has(tep.mimetype)) {
-      return goiLai(new Error('Chi cho phep upload CV dang PDF, DOC, DOCX, TXT hoac MD'))
+      return goiLai(new Error('Chi cho phep upload CV dang PDF'))
     }
     goiLai(null, true)
   },

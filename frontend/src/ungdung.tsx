@@ -4,7 +4,7 @@ import {
   Search, Briefcase,
   TrendingUp, Star, FileText, Sparkles, ChevronRight,
   Award, Zap, Globe, Shield,
-  ArrowRight, CheckCircle,
+  ArrowRight, Bot, CheckCircle, Send,
 } from 'lucide-react'
 import effortBg from './assets/EffortBackground.png'
 import './ungdung.css'
@@ -660,6 +660,115 @@ function SectionCTA() {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 // (moved to components/Footer.tsx)
 
+function HomeAiChat() {
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('Hỏi tôi về việc làm IT trong hệ thống: React ở Đà Nẵng, job remote cho junior, công ty đang tuyển Backend...')
+  const [busy, setBusy] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+
+  const ask = async () => {
+    const cauHoi = question.trim()
+    if (!cauHoi || busy) return
+    try {
+      setBusy(true)
+      const res = await fetch(`${API_URL}/ai/chatbot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cauHoi }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI')
+      setAnswer(data.duLieu?.traLoi ?? data.traLoi ?? 'Chưa có câu trả lời phù hợp trong hệ thống.')
+      setQuestion('')
+    } catch (error) {
+      setAnswer(error instanceof Error ? error.message : 'Không hỏi được AI lúc này.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!expanded) {
+    return (
+      <button
+        type="button"
+        onClick={() => setExpanded(true)}
+        style={{
+          position: 'fixed',
+          right: 18,
+          bottom: 18,
+          zIndex: 220,
+          minHeight: 54,
+          border: 0,
+          borderRadius: 18,
+          background: '#075985',
+          color: '#fff',
+          padding: '0 18px',
+          fontWeight: 900,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 10,
+          boxShadow: '0 20px 54px rgba(7,89,133,.35)',
+          cursor: 'pointer',
+        }}
+      >
+        <Bot size={22} /> Hỏi AI tìm việc
+      </button>
+    )
+  }
+
+  return (
+    <section
+      style={{
+        position: 'fixed',
+        right: 18,
+        bottom: 18,
+        zIndex: 220,
+        width: 'min(430px, calc(100vw - 28px))',
+      }}
+    >
+      <div style={{ display: 'grid', gap: 14, border: '1px solid #dbe7f3', borderRadius: 18, background: '#ffffff', padding: 16, boxShadow: '0 24px 70px rgba(15,23,42,.22)' }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <span style={{ display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: 14, background: '#e0f2fe', color: '#075985' }}><Bot size={22} /></span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#075985' }}>ITJob Gemini</p>
+            <h2 style={{ margin: '2px 0 0', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Trợ lý tìm việc từ database</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            aria-label="Đóng AI"
+            style={{ width: 34, height: 34, borderRadius: 12, border: '1px solid #cbd5e1', background: '#fff', color: '#334155', fontWeight: 900, cursor: 'pointer' }}
+          >
+            ×
+          </button>
+        </div>
+        <div style={{ display: 'grid', gap: 10 }}>
+          <div style={{ maxHeight: 190, overflowY: 'auto', minHeight: 88, borderRadius: 14, background: '#f8fafc', padding: 14, color: '#334155', fontWeight: 700, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{answer}</div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <input
+              value={question}
+              onChange={event => setQuestion(event.target.value)}
+              onKeyDown={event => {
+                if (event.key === 'Enter') void ask()
+              }}
+              placeholder="Ví dụ: Có job React junior remote nào còn hạn không?"
+              style={{ flex: '1 1 320px', minHeight: 46, borderRadius: 14, border: '1px solid #cbd5e1', padding: '0 14px', fontWeight: 700, outline: 'none' }}
+            />
+            <button
+              type="button"
+              onClick={() => void ask()}
+              disabled={busy || !question.trim()}
+              style={{ minHeight: 46, border: 0, borderRadius: 14, background: '#075985', color: '#fff', padding: '0 18px', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: busy ? 'wait' : 'pointer', opacity: busy || !question.trim() ? .65 : 1 }}
+            >
+              {busy ? <Sparkles size={18} /> : <Send size={18} />} {busy ? 'Đang trả lời...' : 'Hỏi AI'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── Trang chủ ────────────────────────────────────────────────────────────────
 
 function TrangChu() {
@@ -671,6 +780,7 @@ function TrangChu() {
       <ThanhTinhNang />
       <SectionNhaTuyenDung companies={data.companies} />
       <SectionTinTuyenDung jobs={data.jobs} />
+      <HomeAiChat />
       <SectionTechStack />
       <SectionLyDo />
       <SectionCTA />
@@ -797,6 +907,7 @@ export default function UngDung() {
           <Route path="ung-vien" element={<UngVienNhaTuyenDungPage />} />
           <Route path="lich-phong-van" element={<LichPhongVanNhaTuyenDungPage />} />
           <Route path="lich-phong-vaan" element={<Navigate to="/nha-tuyen-dung/lich-phong-van" replace />} />
+          <Route path="hat" element={<Navigate to="/nha-tuyen-dung/chat" replace />} />
           <Route path="cong-ty" element={<CongTyNhaTuyenDungPage />} />
           <Route path="chat" element={<ChatNhaTuyenDungPage />} />
           <Route path="thong-bao" element={<ThongBaoNhaTuyenDungPage />} />

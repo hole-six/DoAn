@@ -89,6 +89,24 @@ export const dichVuUngVien = {
     }
   },
 
+  async damBaoHoSoTheoNguoiDung(maNguoiDung: string) {
+    try {
+      const duLieu = await (UngVien as any)
+        .findOneAndUpdate(
+          { maNguoiDung },
+          { $setOnInsert: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } },
+          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
+        )
+        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
+        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+
+      return chuanHoaUngVien(duLieu)
+    } catch (error) {
+      console.error('Loi dam bao ho so ung vien:', error)
+      throw error
+    }
+  },
+
   async taoMoi(duLieu: unknown) {
     try {
       const ketQua = await (UngVien as any).create(duLieu)

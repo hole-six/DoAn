@@ -12,6 +12,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bienmoitruong_js_1 = require("../../cauhinh/bienmoitruong.js");
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
+const ungvien_dichvu_js_1 = require("../ungvien/ungvien.dichvu.js");
 function taoNguoiDungCongKhai(nguoiDung) {
     return {
         id: String(nguoiDung._id),
@@ -132,6 +133,9 @@ async function dangNhapGoogle(duLieu) {
         throw new loiungdung_js_1.LoiUngDung('Tai khoan Google nay da duoc gan vai tro khac', 403);
     }
     const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
+    if (nguoiDungCongKhai.vaiTro === 'ung_vien') {
+        await ungvien_dichvu_js_1.dichVuUngVien.damBaoHoSoTheoNguoiDung(nguoiDungCongKhai.id);
+    }
     return {
         ...taoToken(nguoiDungCongKhai),
         nguoiDung: nguoiDungCongKhai,

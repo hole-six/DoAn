@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
+import { dichVuUngVien } from '../ungvien/ungvien.dichvu.js'
 import type { kiemTraDangNhap, kiemTraDangNhapGoogle, kiemTraLamMoiToken } from './xacthuc.kiemtra.js'
 import type { z } from 'zod'
 
@@ -190,6 +191,10 @@ export async function dangNhapGoogle(duLieu: DuLieuDangNhapGoogle) {
   }
 
   const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung)
+  if (nguoiDungCongKhai.vaiTro === 'ung_vien') {
+    await dichVuUngVien.damBaoHoSoTheoNguoiDung(nguoiDungCongKhai.id)
+  }
+
   return {
     ...taoToken(nguoiDungCongKhai),
     nguoiDung: nguoiDungCongKhai,

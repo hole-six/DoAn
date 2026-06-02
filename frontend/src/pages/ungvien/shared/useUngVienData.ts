@@ -38,8 +38,8 @@ export function useUngVienData() {
     const current = layNguoiDung()
     try {
       setState(prev => ({ ...prev, loading: true, error: '', current }))
-      const [uvList, hoSoList, utList, lichList, tbList, tinList, kyNangList] = await Promise.all([
-        apiCoXacThuc('/ungvien') as Promise<UngVien[]>,
+      const [ungVien, hoSoList, utList, lichList, tbList, tinList, kyNangList] = await Promise.all([
+        apiCoXacThuc('/ungvien/toi') as Promise<UngVien>,
         apiCoXacThuc('/hosonangluc') as Promise<HoSoNangLuc[]>,
         apiCoXacThuc('/hosoungtuyen') as Promise<HoSoUngTuyen[]>,
         apiCoXacThuc('/lichphongvan') as Promise<LichPhongVan[]>,
@@ -47,7 +47,6 @@ export function useUngVienData() {
         apiCoXacThuc('/tintuyendung') as Promise<TinTuyenDung[]>,
         apiCoXacThuc('/danhmuckynang') as Promise<KyNang[]>,
       ])
-      const ungVien = uvList.find(item => sameId(String(item.maNguoiDung), current?.id) || sameId(item.nguoiDung?.id, current?.id))
       const hoSo = hoSoList.filter(item => sameId(item.maUngVien, ungVien?.id))
       const ungTuyen = utList.filter(item => sameId(item.maUngVien, ungVien?.id))
       const applicationIds = new Set(ungTuyen.map(item => item.id))

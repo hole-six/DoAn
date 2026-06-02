@@ -204,15 +204,18 @@ export const dichVuWorkflowUngTuyen = {
     return dichVuHoSoUngTuyen.layTheoMa(maHoSoUngTuyen)
   },
 
-  async danhGiaHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: { trangThai: 'dang_xet_duyet' | 'tu_choi'; ghiChu?: string }) {
+  async danhGiaHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: { trangThai: 'dang_xet_duyet' | 'tu_choi'; ghiChu?: string; giaiDoanTuChoi?: 'sang_loc' | 'phong_van' }) {
     const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
     if (!['dang_xet_duyet', 'tu_choi'].includes(duLieu.trangThai)) {
       throw new LoiUngDung('Trang thai danh gia khong hop le', 422, 'INVALID_REVIEW_STATUS')
     }
-    if (!['da_nop', 'da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) {
+    if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) {
       throw new LoiUngDung('Ho so khong con o trang thai co the danh gia', 409, 'INVALID_APPLICATION_STATE')
     }
-    await capNhatTrangThaiHoSo(hoSo, duLieu.trangThai, nguoiDung, duLieu.ghiChu)
+    const ghiChu = duLieu.trangThai === 'tu_choi'
+      ? `[tu_choi_${duLieu.giaiDoanTuChoi ?? 'sang_loc'}] ${duLieu.ghiChu ?? ''}`.trim()
+      : duLieu.ghiChu
+    await capNhatTrangThaiHoSo(hoSo, duLieu.trangThai, nguoiDung, ghiChu)
 
     if (duLieu.trangThai === 'tu_choi') {
       const info = thongTinThongBao(hoSo)
@@ -372,7 +375,10 @@ export const dichVuWorkflowUngTuyen = {
     await lich.save()
 
     const trangThaiHoSo = duLieu.ketQua === 'dat' ? 'dat' : 'tu_choi'
-    await capNhatTrangThaiHoSo(hoSo, trangThaiHoSo, nguoiDung, duLieu.ghiChu)
+    const ghiChuKetQua = duLieu.ketQua === 'dat'
+      ? duLieu.ghiChu
+      : `[tu_choi_phong_van] ${duLieu.ghiChu ?? ''}`.trim()
+    await capNhatTrangThaiHoSo(hoSo, trangThaiHoSo, nguoiDung, ghiChuKetQua)
 
     const info = thongTinThongBao(hoSo)
     if (info.maNguoiDungUngVien) {

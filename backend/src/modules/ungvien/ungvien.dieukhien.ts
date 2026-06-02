@@ -19,7 +19,10 @@ export const dieuKhienUngVien = {
       })
     }
     
-    const duLieu = await dichVuUngVien.layTheoMaNguoiDung(maNguoiDung)
+    const nguoiDung = (yeuCau as any).user || (yeuCau as any).nguoiDung
+    const duLieu = String(nguoiDung?.vaiTro ?? '') === 'ung_vien'
+      ? await dichVuUngVien.damBaoHoSoTheoNguoiDung(maNguoiDung)
+      : await dichVuUngVien.layTheoMaNguoiDung(maNguoiDung)
     return phanHoi.json({ duLieu })
   }),
   

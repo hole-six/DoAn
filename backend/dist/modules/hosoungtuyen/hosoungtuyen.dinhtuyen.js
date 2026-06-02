@@ -84,6 +84,7 @@ exports.dinhTuyenHoSoUngTuyen.post('/:ma/danh-gia', (0, xacthuc_js_1.yeuCauVaiTr
     const duLieu = await ungtuyen_dichvu_js_1.dichVuWorkflowUngTuyen.danhGiaHoSo(yeuCau.nguoiDung, String(yeuCau.params.ma ?? ''), {
         trangThai: String(yeuCau.body?.trangThai ?? 'dang_xet_duyet'),
         ghiChu: yeuCau.body?.ghiChu,
+        giaiDoanTuChoi: yeuCau.body?.giaiDoanTuChoi,
     });
     phanHoi.json({ duLieu });
 }));

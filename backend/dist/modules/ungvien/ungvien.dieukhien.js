@@ -17,7 +17,10 @@ exports.dieuKhienUngVien = {
                 thongBao: 'Vui lòng đăng nhập để xem hồ sơ'
             });
         }
-        const duLieu = await ungvien_dichvu_js_1.dichVuUngVien.layTheoMaNguoiDung(maNguoiDung);
+        const nguoiDung = yeuCau.user || yeuCau.nguoiDung;
+        const duLieu = String(nguoiDung?.vaiTro ?? '') === 'ung_vien'
+            ? await ungvien_dichvu_js_1.dichVuUngVien.damBaoHoSoTheoNguoiDung(maNguoiDung)
+            : await ungvien_dichvu_js_1.dichVuUngVien.layTheoMaNguoiDung(maNguoiDung);
         return phanHoi.json({ duLieu });
     }),
     // Cập nhật với kiểm tra quyền

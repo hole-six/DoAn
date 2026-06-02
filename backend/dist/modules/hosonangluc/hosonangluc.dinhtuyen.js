@@ -28,14 +28,8 @@ const taiAnhCv = (0, multer_1.default)({
         goiLai(null, true);
     },
 });
-const duoiTepCvHopLe = new Set(['.pdf', '.doc', '.docx', '.txt', '.md']);
-const mimeCvHopLe = new Set([
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-    'text/markdown',
-]);
+const duoiTepCvHopLe = new Set(['.pdf']);
+const mimeCvHopLe = new Set(['application/pdf']);
 const taiFileCv = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({
         destination: (_yeuCau, _tep, goiLai) => goiLai(null, thuMucUpload),
@@ -45,7 +39,7 @@ const taiFileCv = (0, multer_1.default)({
     fileFilter: (_yeuCau, tep, goiLai) => {
         const duoiTep = node_path_1.default.extname(tep.originalname).toLowerCase();
         if (!duoiTepCvHopLe.has(duoiTep) && !mimeCvHopLe.has(tep.mimetype)) {
-            return goiLai(new Error('Chi cho phep upload CV dang PDF, DOC, DOCX, TXT hoac MD'));
+            return goiLai(new Error('Chi cho phep upload CV dang PDF'));
         }
         goiLai(null, true);
     },

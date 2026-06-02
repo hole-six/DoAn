@@ -43,6 +43,7 @@ export type HoSoNangLuc = {
   _id?: Id
   maUngVien: Id
   tieuDe: string
+  loaiHoSo?: 'builder' | 'file_upload'
   cvChinh?: boolean
   congKhai?: boolean
   hoTenHienThi?: string
@@ -70,7 +71,10 @@ export type TinTuyenDung = {
   id: Id
   _id?: Id
   maNhaTuyenDung: Id
-  nhaTuyenDung?: Pick<NhaTuyenDung, 'id' | 'tenCongTy' | 'logo' | 'trangThaiDuyet'>
+  nhaTuyenDung?: Pick<NhaTuyenDung, 'id' | 'tenCongTy' | 'logo' | 'trangThaiDuyet'> & {
+    maNguoiDung?: Id | NguoiDungRef
+    nguoiDung?: NguoiDungRef
+  }
   tieuDe: string
   yeuCauKinhNghiem?: string
   diaChi?: string

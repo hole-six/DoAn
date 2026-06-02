@@ -1,0 +1,14 @@
+[Unit]
+Description=ITJob deploy webhook
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/itjob
+EnvironmentFile=/var/www/itjob/.env.production
+ExecStart=/usr/bin/node /var/www/itjob/deploy/webhook-server.cjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
