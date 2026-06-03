@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dinhTuyenHoSoNangLuc = void 0;
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
+const promises_1 = require("node:fs/promises");
 const multer_1 = __importDefault(require("multer"));
 const dinhtuyencoban_js_1 = require("../../dungchung/dinhtuyencoban.js");
 const xacthuc_js_1 = require("../../dungchung/xacthuc.js");
@@ -24,7 +25,7 @@ const taiAnhCv = (0, multer_1.default)({
     limits: { fileSize: 3 * 1024 * 1024 },
     fileFilter: (_yeuCau, tep, goiLai) => {
         if (!tep.mimetype.startsWith('image/'))
-            return goiLai(new Error('Chi cho phep upload file anh CV'));
+            return goiLai(new Error('Chỉ cho phép upload file ảnh CV'));
         goiLai(null, true);
     },
 });
@@ -39,29 +40,45 @@ const taiFileCv = (0, multer_1.default)({
     fileFilter: (_yeuCau, tep, goiLai) => {
         const duoiTep = node_path_1.default.extname(tep.originalname).toLowerCase();
         if (!duoiTepCvHopLe.has(duoiTep) && !mimeCvHopLe.has(tep.mimetype)) {
-            return goiLai(new Error('Chi cho phep upload CV dang PDF'));
+            return goiLai(new Error('Chỉ cho phép upload CV dạng PDF'));
         }
         goiLai(null, true);
     },
 });
-function phanHoiTepDaTaiLen(yeuCau, phanHoi, thongBaoThieuTep) {
+async function trichXuatTextPdf(duongDanTep) {
+    try {
+        const pdfParseModule = await import('pdf-parse');
+        const pdfParse = pdfParseModule.default ?? pdfParseModule;
+        const buffer = await (0, promises_1.readFile)(duongDanTep);
+        const ketQua = await pdfParse(buffer);
+        return String(ketQua?.text ?? '').replace(/\s+/g, ' ').trim().slice(0, 30_000);
+    }
+    catch {
+        return '';
+    }
+}
+async function phanHoiTepDaTaiLen(yeuCau, phanHoi, thongBaoThieuTep, coTrichXuatPdf = false) {
     if (!yeuCau.file)
         return phanHoi.status(400).json({ thongBao: thongBaoThieuTep });
     const duongDan = `/uploads/${yeuCau.file.filename}`;
     const gocUrl = `${yeuCau.protocol}://${yeuCau.get('host')}`;
+    const fileCvText = coTrichXuatPdf ? await trichXuatTextPdf(yeuCau.file.path) : '';
     return phanHoi.status(201).json({
         duLieu: {
             duongDan,
             url: `${gocUrl}${duongDan}`,
             tenTep: yeuCau.file.originalname,
             mimeLoai: yeuCau.file.mimetype,
+            fileCvText,
+            fileCvPath: duongDan,
+            fileCvTextStatus: coTrichXuatPdf ? (fileCvText ? 'ok' : 'empty') : undefined,
         },
     });
 }
 exports.dinhTuyenHoSoNangLuc = (0, dinhtuyencoban_js_1.taoDinhTuyenCoBan)(hosonangluc_dieukhien_js_1.dieuKhienHoSoNangLuc);
 exports.dinhTuyenHoSoNangLuc.post('/upload-anh', xacthuc_js_1.yeuCauDangNhap, (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien', 'admin']), taiAnhCv.single('anh'), (yeuCau, phanHoi) => {
-    return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chua co file anh CV');
+    return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chưa có file ảnh CV');
 });
-exports.dinhTuyenHoSoNangLuc.post('/upload-file', xacthuc_js_1.yeuCauDangNhap, (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien', 'admin']), taiFileCv.single('tep'), (yeuCau, phanHoi) => {
-    return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chua co file CV goc');
+exports.dinhTuyenHoSoNangLuc.post('/upload-file', xacthuc_js_1.yeuCauDangNhap, (0, xacthuc_js_1.yeuCauVaiTro)(['ung_vien', 'admin']), taiFileCv.single('tep'), async (yeuCau, phanHoi) => {
+    return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chưa có file CV gốc', true);
 });

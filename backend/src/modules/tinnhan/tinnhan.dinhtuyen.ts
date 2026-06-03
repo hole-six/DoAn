@@ -6,6 +6,7 @@ export const dinhTuyenTinNhan = Router()
 dinhTuyenTinNhan.use(yeuCauDangNhap)
 
 // Conversation routes
+dinhTuyenTinNhan.get('/admin-support/contacts', dieuKhienTinNhan.layDanhBaHoTroQuanTri)
 dinhTuyenTinNhan.get('/cuoc-tro-chuyen', dieuKhienTinNhan.layDanhSachCuocTroChuyenModel)
 dinhTuyenTinNhan.post('/cuoc-tro-chuyen', dieuKhienTinNhan.layHoacTaoCuocTroChuyenModel)
 dinhTuyenTinNhan.get('/cuoc-tro-chuyen/:id', dieuKhienTinNhan.layCuocTroChuyenModel)

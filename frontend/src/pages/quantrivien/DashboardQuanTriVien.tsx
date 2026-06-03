@@ -13,15 +13,15 @@ import {
   type StatCardModel,
 } from '../../components'
 import AppIcon from '../../components/AppIcon'
+import { layAccessToken } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import { CheckCircle, Clock, Users, Briefcase, Building2, AlertTriangle, RefreshCw, FileText, Server } from 'lucide-react'
 import './admin-styles.css'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 const panelClass = 'rounded-xl border border-slate-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]'
 
 function headers() {
-  const token = localStorage.getItem('itjob_token')
+  const token = layAccessToken()
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

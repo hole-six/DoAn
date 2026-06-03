@@ -4,9 +4,9 @@ import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, MessageCircle, 
 import timJobBg from '../../assets/timjob.png'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
+import { apiCoXacThuc, layNguoiDung } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import './vieclam-styles.css'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 type ViecLamItem = {
   id: string
@@ -160,6 +160,17 @@ export default function TimKiemViecLam() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    const nguoiDung = layNguoiDung()
+    if (nguoiDung?.vaiTro !== 'ung_vien') return
+    apiCoXacThuc('/viec-lam-da-luu')
+      .then((items: any[]) => {
+        const ids = (items ?? []).map(item => item.maTinTuyenDung).filter(Boolean)
+        setSavedIds(ids)
+      })
+      .catch(() => undefined)
+  }, [])
+
   const submitSearch = () => {
     const params = new URLSearchParams()
     if (tuKhoa.trim()) params.set('tuKhoa', tuKhoa.trim())
@@ -199,9 +210,21 @@ export default function TimKiemViecLam() {
     }
   }
 
-  const toggleSave = (id: string) => {
-    const next = savedIds.includes(id) ? savedIds.filter(item => item !== id) : [...savedIds, id]
+  const toggleSave = async (id: string) => {
+    const isSaved = savedIds.includes(id)
+    const next = isSaved ? savedIds.filter(item => item !== id) : [...savedIds, id]
+    const nguoiDung = layNguoiDung()
     setSavedIds(next)
+
+    if (nguoiDung?.vaiTro === 'ung_vien') {
+      try {
+        await apiCoXacThuc(`/viec-lam-da-luu/${id}`, { method: isSaved ? 'DELETE' : 'POST' })
+      } catch {
+        setSavedIds(savedIds)
+      }
+      return
+    }
+
     localStorage.setItem('itjob_saved_jobs', JSON.stringify(next))
   }
 
@@ -367,7 +390,7 @@ export default function TimKiemViecLam() {
                   <p><Briefcase size={14} /> {job.loai} · {job.capBac} · <Clock size={14} /> {job.ngay}</p>
                   <div className="jobs-real-skills">{job.kyNang.map(skill => <span key={skill.id}>{skill.ten}</span>)}</div>
                 </div>
-                <button onClick={() => toggleSave(job.id)} title={isSaved ? 'Bỏ lưu' : 'Lưu việc'}>
+                <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bỏ lưu' : 'Lưu việc'}>
                   <Bookmark size={21} fill={isSaved ? '#2563eb' : 'none'} color={isSaved ? '#2563eb' : '#94a3b8'} />
                 </button>
               </article>

@@ -4,9 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Lock, Mail, Phone, User } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import dangKyImg from '../../assets/dangky.png'
+import { API_URL } from '../../lib/env'
 import './auth-styles.css'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 const inputWrap =
   'mt-2 flex h-14 items-center overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm transition focus-within:border-[#0b5c91] focus-within:ring-4 focus-within:ring-[#0b5c91]/10'

@@ -29,7 +29,11 @@ function chuanHoaHoSo(taiLieu) {
         duAnChiTiet: duLieu.duAnChiTiet ?? [],
         fileCvTen: duLieu.fileCvTen,
         fileCvLoai: duLieu.fileCvLoai,
-        fileCvĐạta: duLieu.fileCvĐạta,
+        fileCvData: duLieu.fileCvData,
+        fileCvText: duLieu.fileCvText,
+        fileCvPath: duLieu.fileCvPath,
+        fileCvTextStatus: duLieu.fileCvTextStatus,
+        fileCvTextError: duLieu.fileCvTextError,
         loaiHoSo: duLieu.loaiHoSo ?? 'builder',
         anhDaiDien: duLieu.anhDaiDien,
         templateCv: duLieu.templateCv ?? 'classic-blue',
@@ -66,7 +70,7 @@ exports.dichVuHoSoNangLuc = {
         const payload = duLieu;
         const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findById(ma);
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực để cập nhật', 404);
         if (payload.cvChinh && payload.maUngVien) {
             await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ maUngVien: payload.maUngVien, _id: { $ne: ma } }, { $set: { cvChinh: false } });
         }
@@ -77,7 +81,7 @@ exports.dichVuHoSoNangLuc = {
     async xoa(ma) {
         const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findByIdAndDelete(ma);
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực để xóa', 404);
         return chuanHoaHoSo(ketQua);
     },
 };

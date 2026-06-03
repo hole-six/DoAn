@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState, type ReactNode } from 'react'
 import { boLangNgheEvent, kiemTraKetNoi, langNgheEvent, langNgheTrangThaiKetNoi } from '../lib/socket'
 import { layAccessToken, layNguoiDung } from '../lib/auth'
+import { API_URL } from '../lib/env'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const POLL_MS_KET_NOI = 45000
 const POLL_MS_MAT_KET_NOI = 15000
 

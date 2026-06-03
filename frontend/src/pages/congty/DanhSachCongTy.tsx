@@ -4,10 +4,9 @@ import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star,
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
+import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import './congty-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
 const logoDuPhong = 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80'
 
 type CongTy = {
@@ -76,9 +75,7 @@ function normalize(value: string) {
 }
 
 function imageUrl(value?: string) {
-  if (!value) return ''
-  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value
-  return `${API_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`
+  return taoUrlTaiNguyen(value)
 }
 
 function quyMoKey(quyMo?: number) {

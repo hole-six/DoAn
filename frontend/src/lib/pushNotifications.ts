@@ -3,7 +3,7 @@
  * Xử lý browser push notifications cho PWA
  */
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
+import { apiCoXacThuc, layAccessToken } from './auth'
 
 // VAPID public key (cần generate từ backend)
 const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY_HERE'
@@ -98,16 +98,12 @@ export async function huyDangKyPushSubscription(): Promise<boolean> {
  * Gửi subscription lên server
  */
 async function guiSubscriptionLenServer(subscription: PushSubscription): Promise<void> {
-  const token = localStorage.getItem('accessToken')
+  const token = layAccessToken()
   if (!token) return
 
   try {
-    await fetch(`${API_URL}/thongbao/push-subscription`, {
+    await apiCoXacThuc('/thongbao/push-subscription', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify(subscription),
     })
     console.log('✅ Subscription sent to server')
@@ -120,16 +116,12 @@ async function guiSubscriptionLenServer(subscription: PushSubscription): Promise
  * Xóa subscription trên server
  */
 async function xoaSubscriptionTrenServer(subscription: PushSubscription): Promise<void> {
-  const token = localStorage.getItem('accessToken')
+  const token = layAccessToken()
   if (!token) return
 
   try {
-    await fetch(`${API_URL}/thongbao/push-subscription`, {
+    await apiCoXacThuc('/thongbao/push-subscription', {
       method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ endpoint: subscription.endpoint }),
     })
     console.log('✅ Subscription removed from server')

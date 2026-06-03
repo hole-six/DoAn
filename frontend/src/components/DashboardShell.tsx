@@ -38,7 +38,6 @@ interface Props {
 const menuUngVien = [
   { to: '/ung-vien', icon: LayoutDashboard, label: 'Tổng quan', end: true },
   { to: '/ung-vien/ho-so', icon: FileText, label: 'Hồ sơ năng lực' },
-  { to: '/ung-vien/portfolio', icon: FileText, label: 'Portfolio HTML' },
   { to: '/ung-vien/viec-da-luu', icon: Star, label: 'Việc đã lưu' },
   { to: '/ung-vien/ung-tuyen', icon: Briefcase, label: 'Hồ sơ ứng tuyển' },
   { to: '/ung-vien/lich-phong-van', icon: Calendar, label: 'Lịch phỏng vấn' },
@@ -70,7 +69,6 @@ const menuAdmin = [
 const menuUngVienHienThi = [
   { to: '/ung-vien', icon: LayoutDashboard, label: 'Tổng quan', end: true },
   { to: '/ung-vien/ho-so', icon: FileText, label: 'Hồ sơ năng lực' },
-  { to: '/ung-vien/portfolio', icon: FileText, label: 'Portfolio HTML' },
   { to: '/ung-vien/viec-da-luu', icon: Star, label: 'Việc đã lưu' },
   { to: '/ung-vien/ung-tuyen', icon: Briefcase, label: 'Hồ sơ ứng tuyển' },
   { to: '/ung-vien/lich-phong-van', icon: Calendar, label: 'Lịch phỏng vấn' },

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.layHoacTaoCuocTroChuyenModel = layHoacTaoCuocTroChuyenModel;
+exports.damBaoCuocTroChuyenHoTroQuanTri = damBaoCuocTroChuyenHoTroQuanTri;
 exports.layDanhSachNhomCongDong = layDanhSachNhomCongDong;
 exports.thamGiaNhomCongDong = thamGiaNhomCongDong;
 exports.layDanhSachCuocTroChuyenModel = layDanhSachCuocTroChuyenModel;
@@ -14,6 +15,7 @@ const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const socket_js_1 = require("../../cauhinh/socket.js");
 const tinnhan_mohinh_js_1 = require("./tinnhan.mohinh.js");
 const thongbao_dichvu_js_1 = require("../thongbao/thongbao.dichvu.js");
+const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 // ============================================
 // CONVERSATION SERVICES
 // ============================================
@@ -44,6 +46,30 @@ async function layHoacTaoCuocTroChuyenModel(params) {
         await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro');
     }
     return cuocTroChuyenModel;
+}
+async function timAdminDauTien() {
+    return nguoidung_mohinh_js_1.NguoiDung.findOne({ vaiTro: 'admin', trangThai: { $ne: 'bi_khoa' } }).select('_id');
+}
+async function damBaoCuocTroChuyenHoTroQuanTri(maNguoiDung, vaiTro) {
+    if (vaiTro === 'admin') {
+        const nhaTuyenDungList = await nguoidung_mohinh_js_1.NguoiDung
+            .find({ vaiTro: 'nha_tuyen_dung', trangThai: { $ne: 'bi_khoa' } })
+            .select('_id')
+            .limit(500);
+        await Promise.all(nhaTuyenDungList.map((nguoiDung) => layHoacTaoCuocTroChuyenModel({
+            nguoiThamGia: [maNguoiDung, String(nguoiDung._id)],
+            loai: 'admin_support',
+        })));
+    }
+    if (vaiTro === 'nha_tuyen_dung') {
+        const admin = await timAdminDauTien();
+        if (admin) {
+            await layHoacTaoCuocTroChuyenModel({
+                nguoiThamGia: [maNguoiDung, String(admin._id)],
+                loai: 'admin_support',
+            });
+        }
+    }
 }
 async function layDanhSachNhomCongDong() {
     const danhSach = await tinnhan_mohinh_js_1.CuocTroChuyenModel.find({

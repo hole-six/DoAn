@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Building2, Clock, DollarSign, FileText, Globe, MapPin, Share2, UploadCloud, Users, X } from 'lucide-react'
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
 import './vieclam-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const logoDuPhong = 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT'
 
 type TinTuyenDung = {
@@ -44,6 +44,9 @@ type HoSoNangLuc = {
   fileCvTen?: string
   fileCvLoai?: string
   fileCvData?: string
+  fileCvText?: string
+  fileCvPath?: string
+  fileCvTextStatus?: 'ok' | 'empty' | 'gemini_pdf' | 'failed'
 }
 
 type CongTy = {
@@ -89,7 +92,12 @@ async function uploadFileCv(file: File) {
   const ketQua = await apiUploadCoXacThuc('/hosonangluc/upload-file', formData)
   const url = ketQua.url || ketQua.duongDan
   if (!url) throw new Error('Upload khong tra ve duong dan file')
-  return url
+  return {
+    url,
+    fileCvText: ketQua.fileCvText ?? '',
+    fileCvPath: ketQua.fileCvPath ?? ketQua.duongDan,
+    fileCvTextStatus: ketQua.fileCvTextStatus ?? (ketQua.fileCvText ? 'ok' : 'empty'),
+  }
 }
 
 export default function ChiTietViecLam() {
@@ -109,6 +117,7 @@ export default function ChiTietViecLam() {
   const [cvDangChon, setCvDangChon] = useState('')
   const [fileCvMoi, setFileCvMoi] = useState<File | null>(null)
   const [thuXinViec, setThuXinViec] = useState('')
+  const [daLuu, setDaLuu] = useState(false)
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
 
@@ -132,14 +141,17 @@ export default function ChiTietViecLam() {
 
         const nguoiDung = layNguoiDung()
         if (nguoiDung?.vaiTro === 'ung_vien') {
-          const [ungVienList, ungTuyenList] = await Promise.all([
+          const [ungVienList, ungTuyenList, viecDaLuuList] = await Promise.all([
             apiCoXacThuc('/ungvien').catch(() => []),
             apiCoXacThuc('/hosoungtuyen').catch(() => []),
+            apiCoXacThuc('/viec-lam-da-luu').catch(() => []),
           ])
           const ungVien = (ungVienList ?? []).find((item: any) => item.maNguoiDung === nguoiDung.id)
           setDaUngTuyen((ungTuyenList ?? []).some((item: any) => item.maUngVien === ungVien?.id && item.maTinTuyenDung === job.id && item.trangThai !== 'da_rut'))
+          setDaLuu((viecDaLuuList ?? []).some((item: any) => item.maTinTuyenDung === job.id))
         } else {
           setDaUngTuyen(false)
+          setDaLuu(JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]').includes(job.id))
         }
       })
       .catch(error => setLoi(error instanceof Error ? error.message : 'Không tải được chi tiết việc làm'))
@@ -208,6 +220,27 @@ export default function ChiTietViecLam() {
     }
   }
 
+  const toggleSave = async () => {
+    if (!viec) return
+    const nguoiDung = layNguoiDung()
+    const next = !daLuu
+    setDaLuu(next)
+
+    if (nguoiDung?.vaiTro === 'ung_vien') {
+      try {
+        await apiCoXacThuc(`/viec-lam-da-luu/${viec.id}`, { method: next ? 'POST' : 'DELETE' })
+      } catch (err) {
+        setDaLuu(!next)
+        setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không lưu được việc làm')
+      }
+      return
+    }
+
+    const saved: string[] = JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]')
+    const updated = next ? Array.from(new Set([...saved, viec.id])) : saved.filter(item => item !== viec.id)
+    localStorage.setItem('itjob_saved_jobs', JSON.stringify(updated))
+  }
+
   const nopHoSoUngTuyen = async () => {
     if (!viec || !ungVienHienTai) return
     setDangUngTuyen(true)
@@ -217,7 +250,7 @@ export default function ChiTietViecLam() {
       if (fileCvMoi) {
         if (fileCvMoi.type !== 'application/pdf' && !fileCvMoi.name.toLowerCase().endsWith('.pdf')) throw new Error('Chi ho tro upload CV dang PDF')
         if (fileCvMoi.size > 10 * 1024 * 1024) throw new Error('File CV PDF nen nho hon 10MB')
-        const fileCvData = await uploadFileCv(fileCvMoi)
+        const { url: fileCvData, fileCvText, fileCvPath, fileCvTextStatus } = await uploadFileCv(fileCvMoi)
         const cvMoi = await apiCoXacThuc('/hosonangluc', {
           method: 'POST',
           body: JSON.stringify({
@@ -226,6 +259,9 @@ export default function ChiTietViecLam() {
             fileCvTen: fileCvMoi.name,
             fileCvLoai: 'application/pdf',
             fileCvData,
+            fileCvText,
+            fileCvPath,
+            fileCvTextStatus,
             loaiHoSo: 'file_upload',
             cvChinh: cvList.length === 0,
             congKhai: false,
@@ -308,7 +344,7 @@ export default function ChiTietViecLam() {
                 <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Inter', system-ui, sans-serif" }}>
                   {dangUngTuyen ? 'Đang ứng tuyển...' : daUngTuyen ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </button>
-                <button style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Bookmark size={16} /> Lưu</button>
+                <button onClick={() => void toggleSave()} style={{ background: daLuu ? '#eff6ff' : '#f3f4f6', color: daLuu ? '#0058be' : '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Bookmark size={16} fill={daLuu ? '#0058be' : 'none'} /> {daLuu ? 'Đã lưu' : 'Lưu'}</button>
                 <button style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Share2 size={16} /> Chia sẻ</button>
               </div>
               {thongBaoUngTuyen && <div style={{ background: '#fff', borderRadius: 8, padding: '14px 18px', border: '1px solid #dbe4f0', color: daUngTuyen ? '#166534' : '#334155', fontWeight: 700 }}>{thongBaoUngTuyen}</div>}

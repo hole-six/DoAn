@@ -1,9 +1,5 @@
 import { io, Socket } from 'socket.io-client'
-
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ??
-  import.meta.env.VITE_API_URL?.replace('/api', '') ??
-  'http://localhost:5000'
+import { SOCKET_URL } from './env'
 
 const CONNECT_EVENT = 'connect'
 const DISCONNECT_EVENT = 'disconnect'

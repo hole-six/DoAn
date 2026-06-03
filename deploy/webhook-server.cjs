@@ -1,6 +1,25 @@
 const http = require('node:http')
 const crypto = require('node:crypto')
 const { execFile } = require('node:child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+
+function loadEnvFile(filePath) {
+  if (!filePath || !fs.existsSync(filePath)) return
+  const raw = fs.readFileSync(filePath, 'utf8')
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const index = trimmed.indexOf('=')
+    if (index < 1) continue
+    const key = trimmed.slice(0, index).trim()
+    const value = trimmed.slice(index + 1).trim().replace(/^["']|["']$/g, '')
+    if (!(key in process.env)) process.env[key] = value
+  }
+}
+
+loadEnvFile(process.env.DEPLOY_ENV_FILE ?? path.resolve(process.cwd(), '.env.production'))
+process.env.NODE_OPTIONS = process.env.NODE_OPTIONS || '--max-old-space-size=4096'
 
 const PORT = Number(process.env.DEPLOY_WEBHOOK_PORT ?? 9001)
 const SECRET = process.env.DEPLOY_WEBHOOK_SECRET ?? ''

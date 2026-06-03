@@ -4,12 +4,13 @@ import { ChevronRight, Download, ExternalLink, FileText, MessageCircle, ThumbsDo
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { formatDateTime, imageUrl } from '../../../lib/format'
 import { employerApplicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
-import type { HoSoUngTuyen } from '../../../types/recruitment'
+import type { HoSoNangLuc, HoSoUngTuyen } from '../../../types/recruitment'
 import { useChat } from '../../../contexts/ChatContext'
 import { Badge, Drawer } from '../shared/NtdAtoms'
 
 type Tab = 'overview' | 'cv' | 'history'
 type ActionKey = 'view' | 'advance_review' | 'reject_screening' | 'schedule' | 'pass' | 'reject_interview'
+
 const TRANG_THAI_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat'] as const
 
 const actionLabels: Record<ActionKey, string> = {
@@ -19,21 +20,6 @@ const actionLabels: Record<ActionKey, string> = {
   schedule: 'Mời phỏng vấn',
   pass: 'Đạt',
   reject_interview: 'Từ chối sau phỏng vấn',
-}
-
-function getActions(status: string): ActionKey[] {
-  switch (status) {
-    case 'da_nop':
-      return ['view']
-    case 'da_xem':
-      return ['advance_review', 'reject_screening']
-    case 'dang_xet_duyet':
-      return ['schedule', 'reject_screening']
-    case 'moi_phong_van':
-      return ['pass', 'reject_interview']
-    default:
-      return []
-  }
 }
 
 const labelMap: Record<string, string> = {
@@ -57,6 +43,21 @@ const labelMap: Record<string, string> = {
   demo: 'Demo',
 }
 
+function getActions(status: string): ActionKey[] {
+  switch (status) {
+    case 'da_nop':
+      return ['view']
+    case 'da_xem':
+      return ['advance_review', 'reject_screening']
+    case 'dang_xet_duyet':
+      return ['schedule', 'reject_screening']
+    case 'moi_phong_van':
+      return ['pass', 'reject_interview']
+    default:
+      return []
+  }
+}
+
 function asText(value: unknown): string {
   if (value === null || value === undefined) return ''
   if (Array.isArray(value)) return value.map(asText).filter(Boolean).join(', ')
@@ -74,6 +75,26 @@ function isUrl(value: string) {
   return /^https?:\/\//i.test(value)
 }
 
+function hasBuilderContent(cv?: HoSoNangLuc) {
+  if (!cv) return false
+  return [
+    cv.tomTatKinhNghiem,
+    cv.kyNangMem,
+    cv.kyNangLapTrinh,
+    cv.hocVan,
+    cv.kinhNghiemLam,
+    cv.duAnChiTiet,
+  ].some(value => valuesAsLines(value).length > 0)
+}
+
+function isPdfUpload(cv?: HoSoNangLuc) {
+  if (!cv?.fileCvData) return false
+  const type = String(cv.fileCvLoai ?? '').toLowerCase()
+  const name = String(cv.fileCvTen ?? '').toLowerCase()
+  const data = String(cv.fileCvData)
+  return cv.loaiHoSo === 'file_upload' || type.includes('pdf') || name.endsWith('.pdf') || data.startsWith('data:application/pdf')
+}
+
 function CvSection({ title, items }: { title: string; items: string[] }) {
   if (!items.length) return null
   return (
@@ -83,6 +104,36 @@ function CvSection({ title, items }: { title: string; items: string[] }) {
         {items.map((item, index) => <li key={`${title}-${index}`} className="list-disc break-words">{item}</li>)}
       </ul>
     </section>
+  )
+}
+
+function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {
+  return (
+    <div className="grid gap-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-sky-100 bg-sky-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-sm font-black text-sky-950">CV PDF ứng viên đã nộp</p>
+          <p className="mt-1 break-words text-sm font-semibold text-sky-700">{cv.fileCvTen || 'File CV đính kèm'}</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(cv.fileCvData, '_blank', 'noopener,noreferrer')}>
+            Mở tab mới
+          </Button>
+          <a
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-black text-slate-700"
+            href={cv.fileCvData}
+            download={cv.fileCvTen || 'cv.pdf'}
+          >
+            <Download size={15} /> Tải PDF
+          </a>
+        </div>
+      </div>
+      <iframe
+        title={cv.fileCvTen || 'CV PDF'}
+        src={cv.fileCvData}
+        className="h-[72vh] min-h-[520px] w-full rounded-xl border border-slate-200 bg-slate-100"
+      />
+    </div>
   )
 }
 
@@ -140,6 +191,8 @@ export function CandidateDrawer({
   const contact = [cv?.emailLienHe || item.ungVien?.nguoiDung?.email, cv?.soDienThoai || item.ungVien?.nguoiDung?.soDienThoai, cv?.github, cv?.portfolioUrl].filter(Boolean)
   const availableActions = useMemo(() => getActions(item.trangThai), [item.trangThai])
   const canChat = Boolean(candidateUserId) && TRANG_THAI_CHAT.includes(item.trangThai as any)
+  const builderContent = hasBuilderContent(cv)
+  const pdfUpload = isPdfUpload(cv)
 
   useEffect(() => {
     setAction(availableActions[0] ?? '')
@@ -255,42 +308,46 @@ export function CandidateDrawer({
         )}
 
         {tab === 'cv' && (
-          <section className="rounded-xl border border-slate-200 bg-white p-5">
+          <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
             {cv ? (
-              <>
-                <div className="border-b border-slate-200 pb-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <h3 className="break-words text-2xl font-black text-slate-950">{candidateName}</h3>
-                      {cv.chucDanh && <p className="mt-1 text-sm font-bold text-blue-700">{cv.chucDanh}</p>}
-                      <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-600">{contact.join(' | ') || 'Chưa có thông tin liên hệ'}</p>
+              pdfUpload && (!builderContent || cv.loaiHoSo === 'file_upload') ? (
+                <PdfCvViewer cv={cv} />
+              ) : (
+                <>
+                  <div className="border-b border-slate-200 pb-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="break-words text-2xl font-black text-slate-950">{candidateName}</h3>
+                        {cv.chucDanh && <p className="mt-1 text-sm font-bold text-blue-700">{cv.chucDanh}</p>}
+                        <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-600">{contact.join(' | ') || 'Chưa có thông tin liên hệ'}</p>
+                      </div>
+                      {cv.fileCvData && (
+                        <a className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={cv.fileCvData} download={cv.fileCvTen || 'cv'}>
+                          <Download size={16} /> Tải file CV gốc
+                        </a>
+                      )}
                     </div>
-                    {cv.fileCvData && (
-                      <a className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={cv.fileCvData} download={cv.fileCvTen || 'cv'}>
-                        <Download size={16} /> Tải file CV gốc
-                      </a>
-                    )}
                   </div>
-                </div>
-                <CvSection title="Tóm tắt kinh nghiệm" items={valuesAsLines(cv.tomTatKinhNghiem)} />
-                <CvSection title="Kỹ năng mềm" items={valuesAsLines(cv.kyNangMem)} />
-                <CvSection title="Kỹ năng lập trình" items={valuesAsLines(cv.kyNangLapTrinh)} />
-                <CvSection title="Học vấn" items={valuesAsLines(cv.hocVan)} />
-                <CvSection title="Kinh nghiệm làm việc" items={valuesAsLines(cv.kinhNghiemLam)} />
-                {Array.isArray(cv.duAnChiTiet) && cv.duAnChiTiet.length ? (
-                  <section className="border-b border-slate-100 py-4 last:border-b-0">
-                    <h4 className="text-sm font-black uppercase text-slate-800">Dự án có minh chứng</h4>
-                    <div className="mt-3 grid gap-3">
-                      {cv.duAnChiTiet.map((project, index) => <ProjectCard key={index} project={project} index={index} />)}
+                  <CvSection title="Tóm tắt kinh nghiệm" items={valuesAsLines(cv.tomTatKinhNghiem)} />
+                  <CvSection title="Kỹ năng mềm" items={valuesAsLines(cv.kyNangMem)} />
+                  <CvSection title="Kỹ năng lập trình" items={valuesAsLines(cv.kyNangLapTrinh)} />
+                  <CvSection title="Học vấn" items={valuesAsLines(cv.hocVan)} />
+                  <CvSection title="Kinh nghiệm làm việc" items={valuesAsLines(cv.kinhNghiemLam)} />
+                  {Array.isArray(cv.duAnChiTiet) && cv.duAnChiTiet.length ? (
+                    <section className="border-b border-slate-100 py-4 last:border-b-0">
+                      <h4 className="text-sm font-black uppercase text-slate-800">Dự án có minh chứng</h4>
+                      <div className="mt-3 grid gap-3">
+                        {cv.duAnChiTiet.map((project, index) => <ProjectCard key={index} project={project} index={index} />)}
+                      </div>
+                    </section>
+                  ) : null}
+                  {!builderContent && (
+                    <div className="grid min-h-40 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm font-bold text-slate-500">
+                      CV này chưa có dữ liệu builder. Nếu ứng viên có file PDF, hãy mở file gốc ở phía trên.
                     </div>
-                  </section>
-                ) : null}
-                {!valuesAsLines(cv.tomTatKinhNghiem).length && !valuesAsLines(cv.kyNangMem).length && !valuesAsLines(cv.kyNangLapTrinh).length && !valuesAsLines(cv.hocVan).length && !valuesAsLines(cv.kinhNghiemLam).length && !valuesAsLines(cv.duAnChiTiet).length && (
-                  <div className="grid min-h-40 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm font-bold text-slate-500">
-                    CV này chỉ có file đính kèm hoặc chưa có dữ liệu builder.
-                  </div>
-                )}
-              </>
+                  )}
+                </>
+              )
             ) : (
               <div className="grid min-h-48 place-items-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm font-bold text-slate-500">
                 <FileText size={28} />

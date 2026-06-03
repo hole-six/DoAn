@@ -15,18 +15,19 @@ const bienmoitruong_js_1 = require("./bienmoitruong.js");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const nguoidung_mohinh_js_1 = require("../modules/nguoidung/nguoidung.mohinh.js");
 let io = null;
-// Map Ä‘á»ƒ theo dÃµi user online
 const usersOnline = new Map(); // userId -> [socketId1, socketId2, ...]
 const typingUsers = new Map(); // conversationId -> Set<userId>
 function khoiTaoSocket(httpServer) {
+    const corsOrigins = Array.from(new Set([
+        bienmoitruong_js_1.bienMoiTruong.duongDanFrontend,
+        ...bienmoitruong_js_1.bienMoiTruong.corsOrigins,
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:5174',
+    ].filter(Boolean)));
     io = new socket_io_1.Server(httpServer, {
         cors: {
-            origin: [
-                bienmoitruong_js_1.bienMoiTruong.duongDanFrontend,
-                'http://localhost:3000',
-                'http://localhost:5173',
-                'http://localhost:5174',
-            ],
+            origin: corsOrigins,
             credentials: true,
         },
         transports: ['websocket', 'polling'],

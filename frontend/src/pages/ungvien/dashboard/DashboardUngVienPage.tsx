@@ -19,6 +19,23 @@ function Kpi({ icon: Icon, label, value }: { icon: typeof Briefcase; label: stri
   )
 }
 
+function GoiYWarning({ canhBao }: { canhBao?: { ma?: string; thongBao?: string } }) {
+  if (!canhBao?.ma) return null
+  const action = canhBao.ma === 'NO_PRIMARY_CV' ? 'Mở hồ sơ để đặt CV chính' : 'Quét nhanh để thử đọc PDF bằng AI'
+  const href = canhBao.ma === 'NO_PRIMARY_CV' ? '/ung-vien/ho-so' : undefined
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
+      <strong className="block text-base font-black">{canhBao.ma === 'NO_PRIMARY_CV' ? 'Chưa có CV chính' : 'CV PDF cần đọc lại nội dung'}</strong>
+      <p className="mt-1">{canhBao.thongBao}</p>
+      {href ? (
+        <a className="mt-3 inline-flex min-h-9 items-center rounded-lg bg-amber-600 px-3 text-sm font-black text-white" href={href}>{action}</a>
+      ) : (
+        <p className="mt-2 text-xs font-black uppercase tracking-wide text-amber-700">{action}</p>
+      )}
+    </div>
+  )
+}
+
 export default function DashboardUngVienPage() {
   const data = useUngVienData()
   const [dangQuet, setDangQuet] = useState(false)
@@ -88,7 +105,7 @@ export default function DashboardUngVienPage() {
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <h3 className="text-lg font-black text-slate-950">Quét gợi ý việc làm</h3>
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-              Hệ thống sẽ dùng CV chính của bạn để tìm các việc làm đang mở và còn hạn nộp. Bạn có thể chỉ quét để xem kết quả, hoặc quét xong gửi danh sách gợi ý về email của mình.
+              Hệ thống sẽ dùng CV chính để tìm việc đang mở. Nếu CV chính là PDF chưa đọc được nội dung, backend sẽ thử đọc lại bằng AI trước khi chấm điểm.
             </p>
             <label className="mt-4 flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-3 text-sm font-semibold text-slate-700">
               <input
@@ -148,8 +165,9 @@ export default function DashboardUngVienPage() {
         title="Việc làm gợi ý"
         action={<Button size="sm" variant="secondary" icon={<Sparkles size={14} />} onClick={() => void loadGoiY()}>Tải lại</Button>}
       >
+        {goiY?.canhBao && <GoiYWarning canhBao={goiY.canhBao} />}
         {goiY?.ketQua?.length ? (
-          <div className="grid gap-2">
+          <div className="mt-3 grid gap-2">
             {goiY.ketQua.slice(0, 5).map((item: any) => (
               <Row key={item.maTinTuyenDung} onClick={() => { window.location.href = `/viec-lam/${item.maTinTuyenDung}?apply=1` }}>
                 <div className="min-w-0">
@@ -161,7 +179,7 @@ export default function DashboardUngVienPage() {
             ))}
           </div>
         ) : (
-          <EmptyState>{goiYError || 'Chưa có kết quả gợi ý. Hãy quét nhanh để tạo danh sách phù hợp.'}</EmptyState>
+          !goiY?.canhBao && <EmptyState>Chưa có kết quả gợi ý. Hãy quét nhanh để tạo danh sách phù hợp.</EmptyState>
         )}
       </Panel>
     </Page>

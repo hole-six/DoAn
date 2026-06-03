@@ -3,9 +3,10 @@ import type { FormEvent } from 'react'
 import { clsx } from 'clsx'
 import { Edit3, Plus, RefreshCw, Search, Trash2, UserCheck, Users, X } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
+import { layAccessToken } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import './admin-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const PAGE_SIZE = 6
 
 type VaiTro = 'ung_vien' | 'nha_tuyen_dung' | 'admin'
@@ -67,7 +68,7 @@ const inputClass = 'min-h-11 w-full rounded-lg border border-slate-200 bg-white 
 const pageBtn = 'page-btn'
 
 function layHeader() {
-  const token = localStorage.getItem('itjob_token')
+  const token = layAccessToken()
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

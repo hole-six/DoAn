@@ -13,6 +13,7 @@ import {
   themPhanUng,
   layDanhSachNhomCongDong,
   thamGiaNhomCongDong,
+  damBaoCuocTroChuyenHoTroQuanTri,
 } from './tinnhan.dichvu.js'
 
 type NguoiDungHienTai = {
@@ -29,7 +30,7 @@ function id(value: any) {
 
 async function timNguoiDungAdminDauTien() {
   const admin = await (NguoiDung as any).findOne({ vaiTro: 'admin' }).select('_id')
-  if (!admin) throw new LoiUngDung('He thong chua co tai khoan quan tri vien', 409, 'ADMIN_NOT_FOUND')
+  if (!admin) throw new LoiUngDung('Hệ thống chưa có tài khoản quản trị viên', 409, 'ADMIN_NOT_FOUND')
   return String(admin._id)
 }
 
@@ -40,7 +41,7 @@ async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: strin
 
   if (vaiTro === 'nha_tuyen_dung') {
     if (String(nguoiNhanDoc.vaiTro ?? '') !== 'ung_vien') {
-      throw new LoiUngDung('Nhà tuyển dụng chi co the chat voi ung vien trong pipeline', 409, 'INVALID_CHAT_TARGET')
+      throw new LoiUngDung('Nhà tuyển dụng chỉ có thể chat với ứng viên trong pipeline', 409, 'INVALID_CHAT_TARGET')
     }
     if (!maHoSoUngTuyen && !maTinTuyenDung) {
       throw new LoiUngDung('Cần có thông tin hồ sơ ứng tuyển để mở chat', 422, 'CHAT_CONTEXT_REQUIRED')
@@ -50,7 +51,7 @@ async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: strin
       : await (HoSoUngTuyen as any).findOne({ maTinTuyenDung }).populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: '_id' } }).populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'maNguoiDung' } })
     if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND')
     if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiDung._id)) {
-      throw new LoiUngDung('Ban khong co quyen chat voi ung vien nay', 403, 'FORBIDDEN')
+      throw new LoiUngDung('Bạn không có quyền chat với ứng viên này', 403, 'FORBIDDEN')
     }
     if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiNhanDoc)) {
       throw new LoiUngDung('Người nhận không khớp với ứng viên của hồ sơ', 409, 'INVALID_CHAT_TARGET')
@@ -91,7 +92,7 @@ async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: strin
     return { loai: 'admin_support' as const, nguoiNhan: id(nguoiNhanDoc), context: {} }
   }
 
-  throw new LoiUngDung('Ban khong co quyen mo chat nay', 403, 'FORBIDDEN')
+  throw new LoiUngDung('Bạn không có quyền mở chat này', 403, 'FORBIDDEN')
 }
 
 export const dieuKhienTinNhan = {
@@ -100,9 +101,22 @@ export const dieuKhienTinNhan = {
   // ============================================
 
   layDanhSachCuocTroChuyenModel: batLoiBatDongBo(async (yeuCau, phanHoi) => {
-    const maNguoiDung = (yeuCau as any).nguoiDung._id
+    const nguoiDung = (yeuCau as any).nguoiDung
+    const maNguoiDung = nguoiDung._id
+    await damBaoCuocTroChuyenHoTroQuanTri(String(maNguoiDung), String(nguoiDung.vaiTro ?? ''))
     const danhSach = await layDanhSachCuocTroChuyenModel(maNguoiDung)
-    phanHoi.json({ thongBao: 'Lay danh sach cuoc tro chuyen thanh cong', duLieu: danhSach })
+    phanHoi.json({ thongBao: 'Lấy danh sách cuộc trò chuyện thành công', duLieu: danhSach })
+  }),
+
+  layDanhBaHoTroQuanTri: batLoiBatDongBo(async (yeuCau, phanHoi) => {
+    const nguoiDung = (yeuCau as any).nguoiDung
+    const maNguoiDung = nguoiDung._id
+    await damBaoCuocTroChuyenHoTroQuanTri(String(maNguoiDung), String(nguoiDung.vaiTro ?? ''))
+    const danhSach = await layDanhSachCuocTroChuyenModel(maNguoiDung)
+    phanHoi.json({
+      thongBao: 'Lấy danh bạ hỗ trợ quản trị thành công',
+      duLieu: danhSach.filter((item: any) => item.loai === 'admin_support'),
+    })
   }),
 
   layHoacTaoCuocTroChuyenModel: batLoiBatDongBo(async (yeuCau, phanHoi) => {
@@ -117,9 +131,17 @@ export const dieuKhienTinNhan = {
 
     if (loaiCuocTroChuyen === 'admin_support' || nguoiNhan === 'admin') {
       if (!['nha_tuyen_dung', 'admin'].includes(String(nguoiDung.vaiTro ?? ''))) {
-        throw new LoiUngDung('Ban khong co quyen mo chat ho tro', 403, 'FORBIDDEN')
+        throw new LoiUngDung('Bạn không có quyền mở chat hỗ trợ', 403, 'FORBIDDEN')
       }
-      nguoiNhanThuc = await timNguoiDungAdminDauTien()
+      if (String(nguoiDung.vaiTro ?? '') === 'nha_tuyen_dung') {
+        nguoiNhanThuc = await timNguoiDungAdminDauTien()
+      } else {
+        const nguoiNhanDoc = await (NguoiDung as any).findById(nguoiNhan).select('_id vaiTro')
+        if (!nguoiNhanDoc || String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
+          throw new LoiUngDung('Admin chỉ có thể mở chat hỗ trợ với nhà tuyển dụng', 409, 'INVALID_CHAT_TARGET')
+        }
+        nguoiNhanThuc = id(nguoiNhanDoc)
+      }
       loaiCuocTroChuyen = 'admin_support'
       context = {}
     } else if (loaiCuocTroChuyen === 'ung_vien_nha_tuyen_dung') {
@@ -135,7 +157,7 @@ export const dieuKhienTinNhan = {
       maHoSoUngTuyen: context.maHoSoUngTuyen ?? maHoSoUngTuyen,
       maTinTuyenDung: context.maTinTuyenDung ?? maTinTuyenDung,
     })
-    phanHoi.json({ thongBao: 'Lay cuoc tro chuyen thanh cong', duLieu: cuocTroChuyenModel })
+    phanHoi.json({ thongBao: 'Lấy cuộc trò chuyện thành công', duLieu: cuocTroChuyenModel })
   }),
 
   layCuocTroChuyenModel: batLoiBatDongBo(async (yeuCau, phanHoi) => {

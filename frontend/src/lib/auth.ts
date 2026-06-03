@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
+import { API_URL } from './env'
 
 export type VaiTroNguoiDung = 'ung_vien' | 'nha_tuyen_dung' | 'admin'
 
@@ -21,6 +21,7 @@ export type PhienDangNhap = {
 }
 
 let dangLamMoiPhien: Promise<PhienDangNhap> | null = null
+let daDangXuatDoHetPhien = false
 
 export const duongDanTheoVaiTro: Record<VaiTroNguoiDung, string> = {
   ung_vien: '/ung-vien',
@@ -48,6 +49,7 @@ export function luuPhienDangNhap(phien: PhienDangNhap) {
   const accessToken = phien.accessToken ?? phien.token
   if (!accessToken) throw new Error('Thiếu access token')
 
+  daDangXuatDoHetPhien = false
   localStorage.setItem('itjob_access_token', accessToken)
   localStorage.setItem('itjob_token', accessToken)
   localStorage.setItem('itjob_refresh_token', phien.refreshToken ?? '')
@@ -61,6 +63,23 @@ export function xoaPhienDangNhap() {
   localStorage.removeItem('itjob_token')
   localStorage.removeItem('itjob_nguoidung')
   window.dispatchEvent(new Event('itjob-auth-change'))
+}
+
+function layPayloadJwt(token: string): { exp?: number } | null {
+  try {
+    const [, payload] = token.split('.')
+    if (!payload) return null
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(window.atob(normalized))
+  } catch {
+    return null
+  }
+}
+
+function tokenSapHetHan(token: string, leewaySeconds = 120) {
+  const payload = layPayloadJwt(token)
+  if (!payload?.exp) return false
+  return payload.exp * 1000 - Date.now() <= leewaySeconds * 1000
 }
 
 export function headerCoXacThuc() {
@@ -85,7 +104,10 @@ export async function lamMoiPhienDangNhap() {
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
-      xoaPhienDangNhap()
+      if (!daDangXuatDoHetPhien) {
+        daDangXuatDoHetPhien = true
+        xoaPhienDangNhap()
+      }
       throw new Error(data.thongBao ?? 'Phiên đăng nhập đã hết hạn')
     }
     luuPhienDangNhap(data.duLieu)
@@ -99,42 +121,60 @@ export async function lamMoiPhienDangNhap() {
   }
 }
 
-export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuLai = true) {
+async function damBaoAccessTokenHopLe() {
+  const token = layAccessToken()
+  if (!token) return
+  if (tokenSapHetHan(token) && layRefreshToken()) {
+    await lamMoiPhienDangNhap()
+  }
+}
+
+function docBodyJson(rawText: string) {
+  if (!rawText) return {}
+  try {
+    return JSON.parse(rawText)
+  } catch {
+    return { thongBao: rawText, message: rawText }
+  }
+}
+
+function layThongBaoLoi(data: any, macDinh: string) {
+  const fieldErrors = data.fieldErrors ?? data.loi
+  const firstFieldError = fieldErrors && typeof fieldErrors === 'object'
+    ? Object.values(fieldErrors).flat().find(Boolean)
+    : ''
+  return String(firstFieldError || data.thongBao || data.message || macDinh)
+}
+
+export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuLai = true): Promise<any> {
+  if (thuLai) await damBaoAccessTokenHopLe()
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: { ...headerCoXacThuc(), ...(options.headers ?? {}) },
   })
-  const rawText = await res.text()
-  let data: any = {}
-  if (rawText) {
-    try {
-      data = JSON.parse(rawText)
-    } catch {
-      data = { thongBao: rawText, message: rawText }
-    }
-  }
+  const data = docBodyJson(await res.text())
 
   if (res.status === 401 && thuLai && layRefreshToken()) {
     try {
       await lamMoiPhienDangNhap()
       return apiCoXacThuc(path, options, false)
     } catch (error) {
-      xoaPhienDangNhap()
+      if (!daDangXuatDoHetPhien) {
+        daDangXuatDoHetPhien = true
+        xoaPhienDangNhap()
+      }
       throw error instanceof Error ? error : new Error('Phiên đăng nhập đã hết hạn')
     }
   }
 
-  if (!res.ok) {
-    const fieldErrors = data.fieldErrors ?? data.loi
-    const firstFieldError = fieldErrors && typeof fieldErrors === 'object'
-      ? Object.values(fieldErrors).flat().find(Boolean)
-      : ''
-    throw new Error(String(firstFieldError || data.thongBao || 'Thao tác thất bại'))
-  }
+  if (!res.ok) throw new Error(layThongBaoLoi(data, 'Thao tác thất bại'))
   return data.duLieu
 }
 
-export async function apiUploadCoXacThuc(path: string, formData: FormData, options: RequestInit = {}, thuLai = true) {
+export async function apiUploadCoXacThuc(path: string, formData: FormData, options: RequestInit = {}, thuLai = true): Promise<any> {
+  if (thuLai) await damBaoAccessTokenHopLe()
+
   const token = layAccessToken()
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -145,26 +185,21 @@ export async function apiUploadCoXacThuc(path: string, formData: FormData, optio
     },
     body: formData,
   })
-  const rawText = await res.text()
-  let data: any = {}
-  if (rawText) {
-    try {
-      data = JSON.parse(rawText)
-    } catch {
-      data = { thongBao: rawText, message: rawText }
-    }
-  }
+  const data = docBodyJson(await res.text())
 
   if (res.status === 401 && thuLai && layRefreshToken()) {
     try {
       await lamMoiPhienDangNhap()
       return apiUploadCoXacThuc(path, formData, options, false)
     } catch (error) {
-      xoaPhienDangNhap()
+      if (!daDangXuatDoHetPhien) {
+        daDangXuatDoHetPhien = true
+        xoaPhienDangNhap()
+      }
       throw error instanceof Error ? error : new Error('Phiên đăng nhập đã hết hạn')
     }
   }
 
-  if (!res.ok) throw new Error(data.thongBao || 'Upload thất bại')
+  if (!res.ok) throw new Error(layThongBaoLoi(data, 'Upload thất bại'))
   return data.duLieu
 }

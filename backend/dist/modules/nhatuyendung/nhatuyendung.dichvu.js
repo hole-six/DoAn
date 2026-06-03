@@ -53,6 +53,12 @@ exports.dichVuNhaTuyenDung = {
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
+        const hienTai = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma);
+        if (!hienTai)
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
+        if (hienTai.trangThaiDuyet === 'da_duyet' && duLieu.trangThaiDuyet === 'tu_choi') {
+            throw new loiungdung_js_1.LoiUngDung('Không thể từ chối công ty đã được duyệt. Nếu hồ sơ có vấn đề, hãy xóa hoặc khóa công ty.', 409, 'COMPANY_ALREADY_APPROVED');
+        }
         const duLieuCapNhat = {
             ...duLieu,
             ...(duLieu.trangThaiDuyet === 'da_duyet' ? { ngayDuyet: new Date(), lyDoTuChoi: undefined } : {}),
@@ -61,13 +67,13 @@ exports.dichVuNhaTuyenDung = {
             .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
             .populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
         return chuanHoaNhaTuyenDung(ketQua);
     },
     async xoa(ma) {
         const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findByIdAndDelete(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để xóa', 404);
         return chuanHoaNhaTuyenDung(ketQua);
     },
 };

@@ -1,10 +1,6 @@
-import { createContext, useContext, useEffect, useReducer, useRef, useCallback, useState } from 'react'
-import { langNgheEvent, boLangNgheEvent, guiEvent } from '../lib/socket'
-import { layNguoiDung, layAccessToken } from '../lib/auth'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { createContext, useCallback, useContext, useEffect, useReducer, useState } from 'react'
+import { boLangNgheEvent, guiEvent, langNgheEvent } from '../lib/socket'
+import { apiCoXacThuc, layAccessToken, layNguoiDung } from '../lib/auth'
 
 export interface NguoiGuiTinNhan {
   _id: string
@@ -44,6 +40,7 @@ export interface NguoiThamGia {
 
 export interface CuocTroChuyenPreview {
   _id: string
+  id?: string
   loai?: 'ung_vien_nha_tuyen_dung' | 'admin_support' | 'nhom_cong_dong'
   tenNhom?: string
   moTaNhom?: string
@@ -65,15 +62,13 @@ export type ChatContextMeta = {
   maTinTuyenDung?: string
 }
 
-// ─── State ────────────────────────────────────────────────────────────────────
-
 interface ChatState {
   moChat: boolean
   danhSachCuocTroChuyen: CuocTroChuyenPreview[]
   cuocTroChuyenHienTai: CuocTroChuyenPreview | null
   tinNhanList: TinNhan[]
   nguoiDungOnline: Set<string>
-  nguoiDangNhap: Set<string>  // userId đang gõ trong conversation hiện tại
+  nguoiDangNhap: Set<string>
   dangTaiCuocTroChuyen: boolean
   dangTaiTinNhan: boolean
   dangGui: boolean
@@ -88,102 +83,16 @@ type ChatAction =
   | { type: 'SET_CUOC_TRO_CHUYEN'; payload: CuocTroChuyenPreview | null }
   | { type: 'SET_TIN_NHAN'; payload: TinNhan[] }
   | { type: 'THEM_TIN_NHAN'; payload: TinNhan }
+  | { type: 'CAP_NHAT_TIN_NHAN'; payload: { tempId: string; tinNhan: TinNhan } }
   | { type: 'XOA_TIN_NHAN'; payload: string }
   | { type: 'CAP_NHAT_PHAN_UNG'; payload: { maTinNhan: string; nguoiDung: string; emoji: string } }
-  | { type: 'USER_ONLINE'; payload: string }
-  | { type: 'USER_OFFLINE'; payload: string }
-  | { type: 'SET_ONLINE_LIST'; payload: string[] }
-  | { type: 'USER_TYPING'; payload: { userId: string; isTyping: boolean } }
+  | { type: 'SET_ONLINE'; payload: { userId: string; online: boolean } }
+  | { type: 'SET_TYPING'; payload: { userId: string; isTyping: boolean } }
   | { type: 'SET_DANG_TAI_CUOC_TRO_CHUYEN'; payload: boolean }
   | { type: 'SET_DANG_TAI_TIN_NHAN'; payload: boolean }
   | { type: 'SET_DANG_GUI'; payload: boolean }
-  | { type: 'CAP_NHAT_SO_CHUA_DOC' }
   | { type: 'SET_TIN_NHAN_TRA_LOI'; payload: TinNhan | null }
   | { type: 'DANH_DAU_DA_DOC'; payload: string }
-
-function chatReducer(state: ChatState, action: ChatAction): ChatState {
-  switch (action.type) {
-    case 'MO_CHAT':
-      return { ...state, moChat: true }
-    case 'DONG_CHAT':
-      return { ...state, moChat: false, cuocTroChuyenHienTai: null, tinNhanList: [], tinNhanDangTraLoi: null }
-    case 'SET_DANH_SACH':
-      return {
-        ...state,
-        danhSachCuocTroChuyen: action.payload,
-        tongSoChuaDoc: action.payload.reduce((s, c) => s + (c.soChuaDocCuaToi || 0), 0),
-      }
-    case 'SET_CUOC_TRO_CHUYEN':
-      return { ...state, cuocTroChuyenHienTai: action.payload, tinNhanList: [], tinNhanDangTraLoi: null }
-    case 'SET_TIN_NHAN':
-      return { ...state, tinNhanList: action.payload }
-    case 'THEM_TIN_NHAN': {
-      const exists = state.tinNhanList.some(m => m.id === action.payload.id)
-      if (exists) return state
-      return { ...state, tinNhanList: [...state.tinNhanList, action.payload] }
-    }
-    case 'XOA_TIN_NHAN':
-      return {
-        ...state,
-        tinNhanList: state.tinNhanList.map(m =>
-          m.id === action.payload ? { ...m, daXoa: true, noiDung: 'Tin nhắn đã bị xóa' } : m
-        ),
-      }
-    case 'CAP_NHAT_PHAN_UNG':
-      return {
-        ...state,
-        tinNhanList: state.tinNhanList.map(m => {
-          if (m.id !== action.payload.maTinNhan) return m
-          const phanUng = (m.phanUng || []).filter(r => r.nguoiDung !== action.payload.nguoiDung)
-          if (action.payload.emoji) phanUng.push({ nguoiDung: action.payload.nguoiDung, emoji: action.payload.emoji })
-          return { ...m, phanUng }
-        }),
-      }
-    case 'USER_ONLINE': {
-      const newSet = new Set(state.nguoiDungOnline)
-      newSet.add(action.payload)
-      return { ...state, nguoiDungOnline: newSet }
-    }
-    case 'USER_OFFLINE': {
-      const newSet = new Set(state.nguoiDungOnline)
-      newSet.delete(action.payload)
-      return { ...state, nguoiDungOnline: newSet }
-    }
-    case 'SET_ONLINE_LIST':
-      return { ...state, nguoiDungOnline: new Set(action.payload) }
-    case 'USER_TYPING': {
-      const newSet = new Set(state.nguoiDangNhap)
-      if (action.payload.isTyping) newSet.add(action.payload.userId)
-      else newSet.delete(action.payload.userId)
-      return { ...state, nguoiDangNhap: newSet }
-    }
-    case 'SET_DANG_TAI_CUOC_TRO_CHUYEN':
-      return { ...state, dangTaiCuocTroChuyen: action.payload }
-    case 'SET_DANG_TAI_TIN_NHAN':
-      return { ...state, dangTaiTinNhan: action.payload }
-    case 'SET_DANG_GUI':
-      return { ...state, dangGui: action.payload }
-    case 'CAP_NHAT_SO_CHUA_DOC':
-      return {
-        ...state,
-        tongSoChuaDoc: state.danhSachCuocTroChuyen.reduce((s, c) => s + (c.soChuaDocCuaToi || 0), 0),
-      }
-    case 'SET_TIN_NHAN_TRA_LOI':
-      return { ...state, tinNhanDangTraLoi: action.payload }
-    case 'DANH_DAU_DA_DOC':
-      return {
-        ...state,
-        danhSachCuocTroChuyen: state.danhSachCuocTroChuyen.map(c =>
-          c._id === action.payload ? { ...c, soChuaDocCuaToi: 0 } : c
-        ),
-        tongSoChuaDoc: Math.max(0, state.tongSoChuaDoc - (
-          state.danhSachCuocTroChuyen.find(c => c._id === action.payload)?.soChuaDocCuaToi || 0
-        )),
-      }
-    default:
-      return state
-  }
-}
 
 const initialState: ChatState = {
   moChat: false,
@@ -199,10 +108,79 @@ const initialState: ChatState = {
   tinNhanDangTraLoi: null,
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
+function normalizedMessage(tinNhan: any): TinNhan {
+  return { ...tinNhan, id: String(tinNhan.id ?? tinNhan._id) }
+}
+
+function tinhTongChuaDoc(danhSach: CuocTroChuyenPreview[]) {
+  return danhSach.reduce((sum, item) => sum + (item.soChuaDocCuaToi || 0), 0)
+}
+
+function chatReducer(state: ChatState, action: ChatAction): ChatState {
+  switch (action.type) {
+    case 'MO_CHAT':
+      return { ...state, moChat: true }
+    case 'DONG_CHAT':
+      return { ...state, moChat: false, cuocTroChuyenHienTai: null, tinNhanList: [], tinNhanDangTraLoi: null }
+    case 'SET_DANH_SACH':
+      return { ...state, danhSachCuocTroChuyen: action.payload, tongSoChuaDoc: tinhTongChuaDoc(action.payload) }
+    case 'SET_CUOC_TRO_CHUYEN':
+      return { ...state, cuocTroChuyenHienTai: action.payload, tinNhanList: [], tinNhanDangTraLoi: null }
+    case 'SET_TIN_NHAN':
+      return { ...state, tinNhanList: action.payload.map(normalizedMessage) }
+    case 'THEM_TIN_NHAN':
+      if (state.tinNhanList.some(item => item.id === action.payload.id)) return state
+      return { ...state, tinNhanList: [...state.tinNhanList, normalizedMessage(action.payload)] }
+    case 'CAP_NHAT_TIN_NHAN':
+      return {
+        ...state,
+        tinNhanList: state.tinNhanList.map(item => item.id === action.payload.tempId ? normalizedMessage(action.payload.tinNhan) : item),
+      }
+    case 'XOA_TIN_NHAN':
+      return {
+        ...state,
+        tinNhanList: state.tinNhanList.map(item => item.id === action.payload ? { ...item, daXoa: true, noiDung: 'Tin nhắn đã bị xóa' } : item),
+      }
+    case 'CAP_NHAT_PHAN_UNG':
+      return {
+        ...state,
+        tinNhanList: state.tinNhanList.map(item => {
+          if (item.id !== action.payload.maTinNhan && item._id !== action.payload.maTinNhan) return item
+          const phanUng = (item.phanUng || []).filter(reaction => reaction.nguoiDung !== action.payload.nguoiDung)
+          if (action.payload.emoji) phanUng.push({ nguoiDung: action.payload.nguoiDung, emoji: action.payload.emoji })
+          return { ...item, phanUng }
+        }),
+      }
+    case 'SET_ONLINE': {
+      const next = new Set(state.nguoiDungOnline)
+      if (action.payload.online) next.add(action.payload.userId)
+      else next.delete(action.payload.userId)
+      return { ...state, nguoiDungOnline: next }
+    }
+    case 'SET_TYPING': {
+      const next = new Set(state.nguoiDangNhap)
+      if (action.payload.isTyping) next.add(action.payload.userId)
+      else next.delete(action.payload.userId)
+      return { ...state, nguoiDangNhap: next }
+    }
+    case 'SET_DANG_TAI_CUOC_TRO_CHUYEN':
+      return { ...state, dangTaiCuocTroChuyen: action.payload }
+    case 'SET_DANG_TAI_TIN_NHAN':
+      return { ...state, dangTaiTinNhan: action.payload }
+    case 'SET_DANG_GUI':
+      return { ...state, dangGui: action.payload }
+    case 'SET_TIN_NHAN_TRA_LOI':
+      return { ...state, tinNhanDangTraLoi: action.payload }
+    case 'DANH_DAU_DA_DOC': {
+      const danhSach = state.danhSachCuocTroChuyen.map(item => item._id === action.payload ? { ...item, soChuaDocCuaToi: 0 } : item)
+      return { ...state, danhSachCuocTroChuyen: danhSach, tongSoChuaDoc: tinhTongChuaDoc(danhSach) }
+    }
+    default:
+      return state
+  }
+}
 
 interface ChatContextValue extends ChatState {
-  moChat: boolean
   toggleChat: () => void
   moCuocTroChuyen: (cuocTroChuyen: CuocTroChuyenPreview) => Promise<void>
   quayLaiDanhSach: () => void
@@ -221,47 +199,49 @@ const ChatContext = createContext<ChatContextValue | null>(null)
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(chatReducer, initialState)
   const [authTick, setAuthTick] = useState(0)
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const nguoiDung = layNguoiDung()
   const token = layAccessToken()
+
+  const taiDanhSachCuocTroChuyen = useCallback(async () => {
+    if (!layAccessToken()) return
+    dispatch({ type: 'SET_DANG_TAI_CUOC_TRO_CHUYEN', payload: true })
+    try {
+      const danhSach = await apiCoXacThuc('/tinnhan/cuoc-tro-chuyen') as CuocTroChuyenPreview[]
+      dispatch({ type: 'SET_DANH_SACH', payload: danhSach || [] })
+    } catch (error) {
+      console.error('Lỗi tải cuộc trò chuyện:', error)
+    } finally {
+      dispatch({ type: 'SET_DANG_TAI_CUOC_TRO_CHUYEN', payload: false })
+    }
+  }, [])
 
   useEffect(() => {
     const capNhat = () => setAuthTick(value => value + 1)
     window.addEventListener('itjob-auth-change', capNhat)
-    return () => window.removeEventListener('itjob-auth-change', capNhat)
+    window.addEventListener('storage', capNhat)
+    return () => {
+      window.removeEventListener('itjob-auth-change', capNhat)
+      window.removeEventListener('storage', capNhat)
+    }
   }, [])
-
-  // ─── Socket listeners ──────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!token || !nguoiDung) return
 
     const xuLyTinNhanMoi = (data: { maCuocTroChuyenId: string; tinNhan: TinNhan }) => {
-      dispatch({ type: 'THEM_TIN_NHAN', payload: data.tinNhan })
-      // Cập nhật danh sách
-      taiDanhSachCuocTroChuyen()
+      if (state.cuocTroChuyenHienTai?._id === data.maCuocTroChuyenId) {
+        dispatch({ type: 'THEM_TIN_NHAN', payload: data.tinNhan })
+      }
+      void taiDanhSachCuocTroChuyen()
     }
-    const xuLyTinNhanXoa = (data: { maTinNhan: string }) => {
-      dispatch({ type: 'XOA_TIN_NHAN', payload: data.maTinNhan })
-    }
-
-    const xuLyPhanUng = (data: { maTinNhan: string; nguoiDung: string; emoji: string }) => {
-      dispatch({ type: 'CAP_NHAT_PHAN_UNG', payload: data })
-    }
-
-    const xuLyUserOnline = (data: { userId: string }) => {
-      dispatch({ type: 'USER_ONLINE', payload: data.userId })
-    }
-
-    const xuLyUserOffline = (data: { userId: string }) => {
-      dispatch({ type: 'USER_OFFLINE', payload: data.userId })
-    }
-
+    const xuLyTinNhanXoa = (data: { maTinNhan: string }) => dispatch({ type: 'XOA_TIN_NHAN', payload: data.maTinNhan })
+    const xuLyPhanUng = (data: { maTinNhan: string; nguoiDung: string; emoji: string }) => dispatch({ type: 'CAP_NHAT_PHAN_UNG', payload: data })
+    const xuLyUserOnline = (data: { userId: string }) => dispatch({ type: 'SET_ONLINE', payload: { userId: data.userId, online: true } })
+    const xuLyUserOffline = (data: { userId: string }) => dispatch({ type: 'SET_ONLINE', payload: { userId: data.userId, online: false } })
     const xuLyTyping = (data: { userId: string; isTyping: boolean }) => {
-      dispatch({ type: 'USER_TYPING', payload: data })
-      // Tự động clear sau 3s
+      dispatch({ type: 'SET_TYPING', payload: data })
       if (data.isTyping) {
-        setTimeout(() => dispatch({ type: 'USER_TYPING', payload: { userId: data.userId, isTyping: false } }), 3000)
+        setTimeout(() => dispatch({ type: 'SET_TYPING', payload: { userId: data.userId, isTyping: false } }), 3000)
       }
     }
 
@@ -272,8 +252,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     langNgheEvent('user_offline', xuLyUserOffline)
     langNgheEvent('user_typing', xuLyTyping)
 
-    // Tải danh sách ban đầu
-    taiDanhSachCuocTroChuyen()
+    void taiDanhSachCuocTroChuyen()
 
     return () => {
       boLangNgheEvent('tin_nhan_moi', xuLyTinNhanMoi)
@@ -283,98 +262,61 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       boLangNgheEvent('user_offline', xuLyUserOffline)
       boLangNgheEvent('user_typing', xuLyTyping)
     }
-  }, [token, nguoiDung?.id, authTick])
-
-  // ─── Actions ───────────────────────────────────────────────────────────────
-
-  const taiDanhSachCuocTroChuyen = useCallback(async () => {
-    if (!token) return
-    dispatch({ type: 'SET_DANG_TAI_CUOC_TRO_CHUYEN', payload: true })
-    try {
-      const res = await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      dispatch({ type: 'SET_DANH_SACH', payload: data.duLieu || [] })
-    } catch (err) {
-      console.error('Lỗi tải cuộc trò chuyện:', err)
-    } finally {
-      dispatch({ type: 'SET_DANG_TAI_CUOC_TRO_CHUYEN', payload: false })
-    }
-  }, [token])
+  }, [authTick, nguoiDung?.id, state.cuocTroChuyenHienTai?._id, taiDanhSachCuocTroChuyen, token])
 
   const toggleChat = useCallback(() => {
     if (state.moChat) {
-      if (state.cuocTroChuyenHienTai) {
-        guiEvent('leave_conversation', { conversationId: state.cuocTroChuyenHienTai._id })
-      }
+      if (state.cuocTroChuyenHienTai) guiEvent('leave_conversation', { conversationId: state.cuocTroChuyenHienTai._id })
       dispatch({ type: 'DONG_CHAT' })
     } else {
       dispatch({ type: 'MO_CHAT' })
-      taiDanhSachCuocTroChuyen()
+      void taiDanhSachCuocTroChuyen()
     }
-  }, [state.moChat, state.cuocTroChuyenHienTai, taiDanhSachCuocTroChuyen])
+  }, [state.cuocTroChuyenHienTai, state.moChat, taiDanhSachCuocTroChuyen])
 
   const moCuocTroChuyen = useCallback(async (cuocTroChuyen: CuocTroChuyenPreview) => {
-    // Leave previous
-    if (state.cuocTroChuyenHienTai) {
+    if (state.cuocTroChuyenHienTai?._id && state.cuocTroChuyenHienTai._id !== cuocTroChuyen._id) {
       guiEvent('leave_conversation', { conversationId: state.cuocTroChuyenHienTai._id })
     }
-
     dispatch({ type: 'SET_CUOC_TRO_CHUYEN', payload: cuocTroChuyen })
     dispatch({ type: 'SET_DANG_TAI_TIN_NHAN', payload: true })
-
     guiEvent('join_conversation', { conversationId: cuocTroChuyen._id })
 
     try {
-      const res = await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen/${cuocTroChuyen._id}/tin-nhan?limit=50`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await res.json()
-      dispatch({ type: 'SET_TIN_NHAN', payload: data.duLieu || [] })
-
-      // Đánh dấu đã đọc
+      const tinNhan = await apiCoXacThuc(`/tinnhan/cuoc-tro-chuyen/${cuocTroChuyen._id}/tin-nhan?limit=50`) as TinNhan[]
+      dispatch({ type: 'SET_TIN_NHAN', payload: tinNhan || [] })
       if ((cuocTroChuyen.soChuaDocCuaToi || 0) > 0) {
-        await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen/${cuocTroChuyen._id}/danh-dau-da-doc`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        await apiCoXacThuc(`/tinnhan/cuoc-tro-chuyen/${cuocTroChuyen._id}/danh-dau-da-doc`, { method: 'POST' })
         dispatch({ type: 'DANH_DAU_DA_DOC', payload: cuocTroChuyen._id })
       }
-    } catch (err) {
-      console.error('Lỗi tải tin nhắn:', err)
+    } catch (error) {
+      console.error('Lỗi tải tin nhắn:', error)
     } finally {
       dispatch({ type: 'SET_DANG_TAI_TIN_NHAN', payload: false })
     }
-  }, [state.cuocTroChuyenHienTai, token])
+  }, [state.cuocTroChuyenHienTai?._id])
 
   const quayLaiDanhSach = useCallback(() => {
-    if (state.cuocTroChuyenHienTai) {
-      guiEvent('leave_conversation', { conversationId: state.cuocTroChuyenHienTai._id })
-    }
+    if (state.cuocTroChuyenHienTai) guiEvent('leave_conversation', { conversationId: state.cuocTroChuyenHienTai._id })
     dispatch({ type: 'SET_CUOC_TRO_CHUYEN', payload: null })
-    taiDanhSachCuocTroChuyen()
+    void taiDanhSachCuocTroChuyen()
   }, [state.cuocTroChuyenHienTai, taiDanhSachCuocTroChuyen])
 
   const guiTinNhan = useCallback(async (noiDung: string) => {
-    if (!noiDung.trim() || !state.cuocTroChuyenHienTai || !token) return
+    if (!noiDung.trim() || !state.cuocTroChuyenHienTai || !nguoiDung) return
 
     dispatch({ type: 'SET_DANG_GUI', payload: true })
-
-    // Stop typing
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
     guiEvent('typing_stop', { conversationId: state.cuocTroChuyenHienTai._id })
 
-    // Optimistic UI — thêm tin nhắn tạm
     const tempId = `temp_${Date.now()}`
     const tempMsg: TinNhan = {
       id: tempId,
       maCuocTroChuyenId: state.cuocTroChuyenHienTai._id,
       nguoiGui: {
-        _id: nguoiDung!.id,
-        hoTen: nguoiDung!.hoTen,
-        email: nguoiDung!.email,
-        vaiTro: nguoiDung!.vaiTro,
+        _id: nguoiDung.id,
+        hoTen: nguoiDung.hoTen,
+        email: nguoiDung.email,
+        vaiTro: nguoiDung.vaiTro,
       },
       noiDung,
       loai: 'text',
@@ -385,91 +327,73 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_TIN_NHAN_TRA_LOI', payload: null })
 
     try {
-      const body: any = { noiDung }
+      const body: Record<string, string> = { noiDung }
       if (state.tinNhanDangTraLoi) body.traloiTinNhan = state.tinNhanDangTraLoi.id
-
-      const res = await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen/${state.cuocTroChuyenHienTai._id}/tin-nhan`, {
+      const tinNhan = await apiCoXacThuc(`/tinnhan/cuoc-tro-chuyen/${state.cuocTroChuyenHienTai._id}/tin-nhan`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
-      })
-      const data = await res.json()
-
-      // Thay thế tin nhắn tạm bằng tin nhắn thật
-      if (data.duLieu) {
-        dispatch({ type: 'XOA_TIN_NHAN', payload: tempId })
-        dispatch({ type: 'THEM_TIN_NHAN', payload: { ...data.duLieu, id: data.duLieu.id || data.duLieu._id } })
-      }
-    } catch (err) {
-      console.error('Lỗi gửi tin nhắn:', err)
+      }) as TinNhan
+      dispatch({ type: 'CAP_NHAT_TIN_NHAN', payload: { tempId, tinNhan } })
+      void taiDanhSachCuocTroChuyen()
+    } catch (error) {
+      console.error('Lỗi gửi tin nhắn:', error)
       dispatch({ type: 'XOA_TIN_NHAN', payload: tempId })
     } finally {
       dispatch({ type: 'SET_DANG_GUI', payload: false })
     }
-  }, [state.cuocTroChuyenHienTai, state.tinNhanDangTraLoi, token, nguoiDung])
+  }, [nguoiDung, state.cuocTroChuyenHienTai, state.tinNhanDangTraLoi, taiDanhSachCuocTroChuyen])
 
   const xoaTinNhan = useCallback(async (maTinNhan: string) => {
-    if (!token) return
     try {
-      await fetch(`${API_URL}/tinnhan/tin-nhan/${maTinNhan}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      await apiCoXacThuc(`/tinnhan/tin-nhan/${maTinNhan}`, { method: 'DELETE' })
       dispatch({ type: 'XOA_TIN_NHAN', payload: maTinNhan })
-    } catch (err) {
-      console.error('Lỗi xóa tin nhắn:', err)
+    } catch (error) {
+      console.error('Lỗi xóa tin nhắn:', error)
     }
-  }, [token])
+  }, [])
 
   const themPhanUng = useCallback(async (maTinNhan: string, emoji: string) => {
-    if (!token || !nguoiDung) return
+    if (!nguoiDung) return
     try {
-      await fetch(`${API_URL}/tinnhan/tin-nhan/${maTinNhan}/phan-ung`, {
+      await apiCoXacThuc(`/tinnhan/tin-nhan/${maTinNhan}/phan-ung`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ emoji }),
       })
       dispatch({ type: 'CAP_NHAT_PHAN_UNG', payload: { maTinNhan, nguoiDung: nguoiDung.id, emoji } })
-    } catch (err) {
-      console.error('Lỗi thêm phản ứng:', err)
+    } catch (error) {
+      console.error('Lỗi thêm phản ứng:', error)
     }
-  }, [token, nguoiDung])
+  }, [nguoiDung])
 
   const setTinNhanTraLoi = useCallback((tinNhan: TinNhan | null) => {
     dispatch({ type: 'SET_TIN_NHAN_TRA_LOI', payload: tinNhan })
   }, [])
 
   const moChatVoiNguoiDung = useCallback(async (maNguoiDungKhac: string, context?: ChatContextMeta) => {
-    if (!token || !nguoiDung) return
+    if (!nguoiDung) return
     try {
-      const res = await fetch(`${API_URL}/tinnhan/cuoc-tro-chuyen`, {
+      const cuocTroChuyen = await apiCoXacThuc('/tinnhan/cuoc-tro-chuyen', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           nguoiNhan: maNguoiDungKhac,
           loai: context?.loai,
           maHoSoUngTuyen: context?.maHoSoUngTuyen,
           maTinTuyenDung: context?.maTinTuyenDung,
         }),
-      })
-      const data = await res.json()
-      if (data.duLieu) {
-        dispatch({ type: 'MO_CHAT' })
-        await moCuocTroChuyen(data.duLieu)
-        return data.duLieu as CuocTroChuyenPreview
-      }
-    } catch (err) {
-      console.error('Lỗi mở chat:', err)
+      }) as CuocTroChuyenPreview
+      dispatch({ type: 'MO_CHAT' })
+      await moCuocTroChuyen(cuocTroChuyen)
+      return cuocTroChuyen
+    } catch (error) {
+      console.error('Lỗi mở chat:', error)
     }
-  }, [token, nguoiDung, moCuocTroChuyen])
+  }, [moCuocTroChuyen, nguoiDung])
 
   const layNguoiKhac = useCallback((cuocTroChuyen: CuocTroChuyenPreview) => {
-    return cuocTroChuyen.nguoiThamGia.find(ng => ng._id !== nguoiDung?.id)
+    return cuocTroChuyen.nguoiThamGia.find(item => item._id !== nguoiDung?.id)
   }, [nguoiDung?.id])
 
-  const kiemTraOnline = useCallback((userId: string) => {
-    return state.nguoiDungOnline.has(userId)
-  }, [state.nguoiDungOnline])
+  const kiemTraOnline = useCallback((userId: string) => state.nguoiDungOnline.has(userId), [state.nguoiDungOnline])
 
   return (
     <ChatContext.Provider value={{

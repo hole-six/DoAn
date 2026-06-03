@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { LogIn, LogOut, Menu, UserPlus, X } from 'lucide-react'
-import logoWeb from '../assets/logoweb.png'
+import logoWeb from '../assets/logodai.png'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 import AppIcon from './AppIcon'
 import { ThongBaoCenter } from './ThongBaoCenter'
@@ -93,8 +93,8 @@ export default function Header() {
           <AppIcon icon={menuMo ? X : Menu} size={20} />
         </button>
 
-        <Link to="/" className="brand" aria-label="ITJob">
-          <img src={logoWeb} alt="ITJob" className="logo-thuonghieu" />
+        <Link to="/" className="brand" aria-label="Effort Job">
+          <img src={logoWeb} alt="Effort Job" className="logo-thuonghieu" />
         </Link>
 
         <nav aria-label="Điều hướng chính">

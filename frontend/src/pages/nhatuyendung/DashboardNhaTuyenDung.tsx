@@ -3,9 +3,9 @@ import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { clsx } from 'clsx'
 import { Bell, Briefcase, Calendar, CheckCircle, Edit3, Eye, ImagePlus, Plus, Save, Trash2, Users, XCircle } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
+import { layAccessToken } from '../../lib/auth'
+import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
 const LOCKED_JOB_STATUSES = new Set(['dang_mo', 'tam_dong', 'het_han'])
 
 type Tone = 'blue' | 'green' | 'yellow' | 'red' | 'gray'
@@ -54,7 +54,7 @@ function currentUser() {
 }
 
 function headers() {
-  const token = localStorage.getItem('itjob_token')
+  const token = layAccessToken()
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 }
 
@@ -66,9 +66,7 @@ async function api(path: string, options: RequestInit = {}) {
 }
 
 function imageUrl(value?: string) {
-  if (!value) return ''
-  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value
-  return `${API_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`
+  return taoUrlTaiNguyen(value)
 }
 
 function formatDate(value?: string) {
@@ -561,7 +559,7 @@ export function CongTyNhaTuyenDungPage() {
       setError('')
       const body = new FormData()
       body.append('logo', file)
-      const token = localStorage.getItem('itjob_token')
+      const token = layAccessToken()
       const res = await fetch(`${API_URL}/nhatuyendung/upload-logo`, {
         method: 'POST',
         body,

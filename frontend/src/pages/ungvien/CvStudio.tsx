@@ -45,6 +45,10 @@ type CvData = {
   fileCvTen?: string
   fileCvLoai?: string
   fileCvData?: string
+  fileCvText?: string
+  fileCvPath?: string
+  fileCvTextStatus?: 'ok' | 'empty' | 'gemini_pdf' | 'failed'
+  fileCvTextError?: string
   loaiHoSo?: 'builder' | 'file_upload'
   anhDaiDien?: string
   templateCv?: string
@@ -277,6 +281,20 @@ async function taiLenTaiSanCv(path: string, tenTruong: string, file: File) {
   const url = ketQua.url || ketQua.duongDan
   if (!url) throw new Error('Upload khong tra ve duong dan file')
   return url
+}
+
+async function taiLenFileCv(file: File) {
+  const formData = new FormData()
+  formData.append('tep', file)
+  const ketQua = await apiUploadCoXacThuc('/hosonangluc/upload-file', formData)
+  const url = ketQua.url || ketQua.duongDan
+  if (!url) throw new Error('Upload không trả về đường dẫn file')
+  return {
+    url,
+    fileCvText: ketQua.fileCvText ?? '',
+    fileCvPath: ketQua.fileCvPath ?? ketQua.duongDan,
+    fileCvTextStatus: ketQua.fileCvTextStatus ?? (ketQua.fileCvText ? 'ok' : 'empty'),
+  }
 }
 
 function SectionTitle({ title, desc }: { title: string; desc?: string }) {
@@ -712,7 +730,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
     if (file.size > 10 * 1024 * 1024) return toast.warning('File CV PDF nên nhỏ hơn 10MB.')
     try {
       setDangTaiFileCv(true)
-      const url = await taiLenTaiSanCv('/hosonangluc/upload-file', 'tep', file)
+      const { url, fileCvText, fileCvPath, fileCvTextStatus } = await taiLenFileCv(file)
       await apiCoXacThuc('/hosonangluc', {
         method: 'POST',
         body: JSON.stringify({
@@ -721,6 +739,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           fileCvTen: file.name,
           fileCvLoai: 'application/pdf',
           fileCvData: url,
+          fileCvText,
+          fileCvPath,
+          fileCvTextStatus,
           loaiHoSo: 'file_upload',
           cvChinh: danhSachCvDaLuu.length === 0,
           congKhai: true,
@@ -769,12 +790,15 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
 
     if (laDataUrl(next.fileCvData)) {
       const fileCv = await dataUrlThanhFile(next.fileCvData as string, next.fileCvTen || 'cv-goc.pdf', next.fileCvLoai || 'application/pdf')
-      const urlCv = await taiLenTaiSanCv('/hosonangluc/upload-file', 'tep', fileCv)
+      const { url: urlCv, fileCvText, fileCvPath, fileCvTextStatus } = await taiLenFileCv(fileCv)
       next = {
         ...next,
         fileCvTen: next.fileCvTen || fileCv.name,
         fileCvLoai: next.fileCvLoai || fileCv.type || 'application/octet-stream',
         fileCvData: urlCv,
+        fileCvText,
+        fileCvPath,
+        fileCvTextStatus,
       }
     }
 

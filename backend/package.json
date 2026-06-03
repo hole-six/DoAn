@@ -7,7 +7,7 @@
     "dev": "node scripts/chay-dev.cjs",
     "build": "tsc",
     "start": "node dist/maychu.js",
-    "seed": "node --use-system-ca ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts"
+    "seed": "node ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@types/bull": "^3.15.9",
     "@types/nodemailer": "^8.0.0",
+    "@types/pdf-parse": "^1.1.5",
     "bcryptjs": "^3.0.3",
     "bull": "^4.16.5",
     "cors": "^2.8.6",
@@ -28,6 +29,7 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "nodemailer": "^7.0.13",
+    "pdf-parse": "^2.4.5",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "zod": "^4.4.3"

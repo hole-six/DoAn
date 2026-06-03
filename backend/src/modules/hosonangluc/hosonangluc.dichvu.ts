@@ -27,7 +27,11 @@ function chuanHoaHoSo(taiLieu: any) {
     duAnChiTiet: duLieu.duAnChiTiet ?? [],
     fileCvTen: duLieu.fileCvTen,
     fileCvLoai: duLieu.fileCvLoai,
-    fileCvĐạta: duLieu.fileCvĐạta,
+    fileCvData: duLieu.fileCvData,
+    fileCvText: duLieu.fileCvText,
+    fileCvPath: duLieu.fileCvPath,
+    fileCvTextStatus: duLieu.fileCvTextStatus,
+    fileCvTextError: duLieu.fileCvTextError,
     loaiHoSo: duLieu.loaiHoSo ?? 'builder',
     anhDaiDien: duLieu.anhDaiDien,
     templateCv: duLieu.templateCv ?? 'classic-blue',
@@ -62,7 +66,7 @@ export const dichVuHoSoNangLuc = {
   async capNhat(ma: string, duLieu: unknown) {
     const payload = duLieu as any
     const ketQua = await (HoSoNangLuc as any).findById(ma)
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực de cap nhat', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để cập nhật', 404)
 
     if (payload.cvChinh && payload.maUngVien) {
       await (HoSoNangLuc as any).updateMany(
@@ -77,7 +81,7 @@ export const dichVuHoSoNangLuc = {
   },
   async xoa(ma: string) {
     const ketQua = await (HoSoNangLuc as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để xóa', 404)
     return chuanHoaHoSo(ketQua)
   },
 }

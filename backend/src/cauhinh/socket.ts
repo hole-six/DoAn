@@ -25,19 +25,21 @@ import type { Socket } from 'socket.io'
 
 let io: SocketIOServer | null = null
 
-// Map Ä‘á»ƒ theo dÃµi user online
 const usersOnline = new Map<string, string[]>() // userId -> [socketId1, socketId2, ...]
 const typingUsers = new Map<string, Set<string>>() // conversationId -> Set<userId>
 
 export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
+  const corsOrigins = Array.from(new Set([
+    bienMoiTruong.duongDanFrontend,
+    ...bienMoiTruong.corsOrigins,
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ].filter(Boolean)))
+
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: [
-        bienMoiTruong.duongDanFrontend,
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'http://localhost:5174',
-      ],
+      origin: corsOrigins,
       credentials: true,
     },
     transports: ['websocket', 'polling'],

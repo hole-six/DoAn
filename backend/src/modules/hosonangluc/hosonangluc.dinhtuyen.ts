@@ -1,5 +1,6 @@
-﻿import fs from 'node:fs'
+import fs from 'node:fs'
 import path from 'node:path'
+import { readFile } from 'node:fs/promises'
 import multer from 'multer'
 import { taoDinhTuyenCoBan } from '../../dungchung/dinhtuyencoban.js'
 import { yeuCauDangNhap, yeuCauVaiTro } from '../../dungchung/xacthuc.js'
@@ -20,7 +21,7 @@ const taiAnhCv = multer({
   }),
   limits: { fileSize: 3 * 1024 * 1024 },
   fileFilter: (_yeuCau, tep, goiLai) => {
-    if (!tep.mimetype.startsWith('image/')) return goiLai(new Error('Chi cho phep upload file anh CV'))
+    if (!tep.mimetype.startsWith('image/')) return goiLai(new Error('Chỉ cho phép upload file ảnh CV'))
     goiLai(null, true)
   },
 })
@@ -37,22 +38,38 @@ const taiFileCv = multer({
   fileFilter: (_yeuCau, tep, goiLai) => {
     const duoiTep = path.extname(tep.originalname).toLowerCase()
     if (!duoiTepCvHopLe.has(duoiTep) && !mimeCvHopLe.has(tep.mimetype)) {
-      return goiLai(new Error('Chi cho phep upload CV dang PDF'))
+      return goiLai(new Error('Chỉ cho phép upload CV dạng PDF'))
     }
     goiLai(null, true)
   },
 })
 
-function phanHoiTepDaTaiLen(yeuCau: any, phanHoi: any, thongBaoThieuTep: string) {
+async function trichXuatTextPdf(duongDanTep: string) {
+  try {
+    const pdfParseModule = await import('pdf-parse')
+    const pdfParse = (pdfParseModule as any).default ?? pdfParseModule
+    const buffer = await readFile(duongDanTep)
+    const ketQua = await pdfParse(buffer)
+    return String(ketQua?.text ?? '').replace(/\s+/g, ' ').trim().slice(0, 30_000)
+  } catch {
+    return ''
+  }
+}
+
+async function phanHoiTepDaTaiLen(yeuCau: any, phanHoi: any, thongBaoThieuTep: string, coTrichXuatPdf = false) {
   if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: thongBaoThieuTep })
   const duongDan = `/uploads/${yeuCau.file.filename}`
   const gocUrl = `${yeuCau.protocol}://${yeuCau.get('host')}`
+  const fileCvText = coTrichXuatPdf ? await trichXuatTextPdf(yeuCau.file.path) : ''
   return phanHoi.status(201).json({
     duLieu: {
       duongDan,
       url: `${gocUrl}${duongDan}`,
       tenTep: yeuCau.file.originalname,
       mimeLoai: yeuCau.file.mimetype,
+      fileCvText,
+      fileCvPath: duongDan,
+      fileCvTextStatus: coTrichXuatPdf ? (fileCvText ? 'ok' : 'empty') : undefined,
     },
   })
 }
@@ -60,11 +77,9 @@ function phanHoiTepDaTaiLen(yeuCau: any, phanHoi: any, thongBaoThieuTep: string)
 export const dinhTuyenHoSoNangLuc = taoDinhTuyenCoBan(dieuKhienHoSoNangLuc)
 
 dinhTuyenHoSoNangLuc.post('/upload-anh', yeuCauDangNhap, yeuCauVaiTro(['ung_vien', 'admin']), taiAnhCv.single('anh'), (yeuCau, phanHoi) => {
-  return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chua co file anh CV')
+  return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chưa có file ảnh CV')
 })
 
-dinhTuyenHoSoNangLuc.post('/upload-file', yeuCauDangNhap, yeuCauVaiTro(['ung_vien', 'admin']), taiFileCv.single('tep'), (yeuCau, phanHoi) => {
-  return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chua co file CV goc')
+dinhTuyenHoSoNangLuc.post('/upload-file', yeuCauDangNhap, yeuCauVaiTro(['ung_vien', 'admin']), taiFileCv.single('tep'), async (yeuCau, phanHoi) => {
+  return phanHoiTepDaTaiLen(yeuCau, phanHoi, 'Chưa có file CV gốc', true)
 })
-
-

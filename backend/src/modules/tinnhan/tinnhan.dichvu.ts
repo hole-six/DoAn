@@ -2,6 +2,7 @@
 import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
 import { CuocTroChuyenModel, TinNhanModel } from './tinnhan.mohinh.js'
 import { taoVaGuiThongBao } from '../thongbao/thongbao.dichvu.js'
+import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 
 // ============================================
 // CONVERSATION SERVICES
@@ -44,6 +45,34 @@ export async function layHoacTaoCuocTroChuyenModel(params: {
   }
 
   return cuocTroChuyenModel
+}
+
+async function timAdminDauTien() {
+  return (NguoiDung as any).findOne({ vaiTro: 'admin', trangThai: { $ne: 'bi_khoa' } }).select('_id')
+}
+
+export async function damBaoCuocTroChuyenHoTroQuanTri(maNguoiDung: string, vaiTro: string) {
+  if (vaiTro === 'admin') {
+    const nhaTuyenDungList = await (NguoiDung as any)
+      .find({ vaiTro: 'nha_tuyen_dung', trangThai: { $ne: 'bi_khoa' } })
+      .select('_id')
+      .limit(500)
+
+    await Promise.all(nhaTuyenDungList.map((nguoiDung: any) => layHoacTaoCuocTroChuyenModel({
+      nguoiThamGia: [maNguoiDung, String(nguoiDung._id)],
+      loai: 'admin_support',
+    })))
+  }
+
+  if (vaiTro === 'nha_tuyen_dung') {
+    const admin = await timAdminDauTien()
+    if (admin) {
+      await layHoacTaoCuocTroChuyenModel({
+        nguoiThamGia: [maNguoiDung, String(admin._id)],
+        loai: 'admin_support',
+      })
+    }
+  }
 }
 
 export async function layDanhSachNhomCongDong() {

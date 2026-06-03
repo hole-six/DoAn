@@ -63,6 +63,10 @@ export type HoSoNangLuc = {
   fileCvTen?: string
   fileCvLoai?: string
   fileCvData?: string
+  fileCvText?: string
+  fileCvPath?: string
+  fileCvTextStatus?: 'ok' | 'empty' | 'gemini_pdf' | 'failed'
+  fileCvTextError?: string
   anhDaiDien?: string
   [key: string]: unknown
 }

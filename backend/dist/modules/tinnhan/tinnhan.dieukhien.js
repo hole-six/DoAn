@@ -13,7 +13,7 @@ function id(value) {
 async function timNguoiDungAdminDauTien() {
     const admin = await nguoidung_mohinh_js_1.NguoiDung.findOne({ vaiTro: 'admin' }).select('_id');
     if (!admin)
-        throw new loiungdung_js_1.LoiUngDung('He thong chua co tai khoan quan tri vien', 409, 'ADMIN_NOT_FOUND');
+        throw new loiungdung_js_1.LoiUngDung('Hệ thống chưa có tài khoản quản trị viên', 409, 'ADMIN_NOT_FOUND');
     return String(admin._id);
 }
 async function xacThucChatUngTuyen(nguoiDung, nguoiNhan, maHoSoUngTuyen, maTinTuyenDung) {
@@ -23,7 +23,7 @@ async function xacThucChatUngTuyen(nguoiDung, nguoiNhan, maHoSoUngTuyen, maTinTu
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người nhận chat', 404, 'RECIPIENT_NOT_FOUND');
     if (vaiTro === 'nha_tuyen_dung') {
         if (String(nguoiNhanDoc.vaiTro ?? '') !== 'ung_vien') {
-            throw new loiungdung_js_1.LoiUngDung('Nhà tuyển dụng chi co the chat voi ung vien trong pipeline', 409, 'INVALID_CHAT_TARGET');
+            throw new loiungdung_js_1.LoiUngDung('Nhà tuyển dụng chỉ có thể chat với ứng viên trong pipeline', 409, 'INVALID_CHAT_TARGET');
         }
         if (!maHoSoUngTuyen && !maTinTuyenDung) {
             throw new loiungdung_js_1.LoiUngDung('Cần có thông tin hồ sơ ứng tuyển để mở chat', 422, 'CHAT_CONTEXT_REQUIRED');
@@ -34,7 +34,7 @@ async function xacThucChatUngTuyen(nguoiDung, nguoiNhan, maHoSoUngTuyen, maTinTu
         if (!hoSo)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND');
         if (id(hoSo.maTinTuyenDung?.maNhaTuyenDung?.maNguoiDung) !== id(nguoiDung._id)) {
-            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen chat voi ung vien nay', 403, 'FORBIDDEN');
+            throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền chat với ứng viên này', 403, 'FORBIDDEN');
         }
         if (id(hoSo.maUngVien?.maNguoiDung) !== id(nguoiNhanDoc)) {
             throw new loiungdung_js_1.LoiUngDung('Người nhận không khớp với ứng viên của hồ sơ', 409, 'INVALID_CHAT_TARGET');
@@ -73,16 +73,28 @@ async function xacThucChatUngTuyen(nguoiDung, nguoiNhan, maHoSoUngTuyen, maTinTu
         }
         return { loai: 'admin_support', nguoiNhan: id(nguoiNhanDoc), context: {} };
     }
-    throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen mo chat nay', 403, 'FORBIDDEN');
+    throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền mở chat này', 403, 'FORBIDDEN');
 }
 exports.dieuKhienTinNhan = {
     // ============================================
     // CONVERSATION CONTROLLERS
     // ============================================
     layDanhSachCuocTroChuyenModel: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
-        const maNguoiDung = yeuCau.nguoiDung._id;
+        const nguoiDung = yeuCau.nguoiDung;
+        const maNguoiDung = nguoiDung._id;
+        await (0, tinnhan_dichvu_js_1.damBaoCuocTroChuyenHoTroQuanTri)(String(maNguoiDung), String(nguoiDung.vaiTro ?? ''));
         const danhSach = await (0, tinnhan_dichvu_js_1.layDanhSachCuocTroChuyenModel)(maNguoiDung);
-        phanHoi.json({ thongBao: 'Lay danh sach cuoc tro chuyen thanh cong', duLieu: danhSach });
+        phanHoi.json({ thongBao: 'Lấy danh sách cuộc trò chuyện thành công', duLieu: danhSach });
+    }),
+    layDanhBaHoTroQuanTri: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+        const nguoiDung = yeuCau.nguoiDung;
+        const maNguoiDung = nguoiDung._id;
+        await (0, tinnhan_dichvu_js_1.damBaoCuocTroChuyenHoTroQuanTri)(String(maNguoiDung), String(nguoiDung.vaiTro ?? ''));
+        const danhSach = await (0, tinnhan_dichvu_js_1.layDanhSachCuocTroChuyenModel)(maNguoiDung);
+        phanHoi.json({
+            thongBao: 'Lấy danh bạ hỗ trợ quản trị thành công',
+            duLieu: danhSach.filter((item) => item.loai === 'admin_support'),
+        });
     }),
     layHoacTaoCuocTroChuyenModel: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const nguoiDung = yeuCau.nguoiDung;
@@ -96,9 +108,18 @@ exports.dieuKhienTinNhan = {
         let context = {};
         if (loaiCuocTroChuyen === 'admin_support' || nguoiNhan === 'admin') {
             if (!['nha_tuyen_dung', 'admin'].includes(String(nguoiDung.vaiTro ?? ''))) {
-                throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen mo chat ho tro', 403, 'FORBIDDEN');
+                throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền mở chat hỗ trợ', 403, 'FORBIDDEN');
             }
-            nguoiNhanThuc = await timNguoiDungAdminDauTien();
+            if (String(nguoiDung.vaiTro ?? '') === 'nha_tuyen_dung') {
+                nguoiNhanThuc = await timNguoiDungAdminDauTien();
+            }
+            else {
+                const nguoiNhanDoc = await nguoidung_mohinh_js_1.NguoiDung.findById(nguoiNhan).select('_id vaiTro');
+                if (!nguoiNhanDoc || String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
+                    throw new loiungdung_js_1.LoiUngDung('Admin chỉ có thể mở chat hỗ trợ với nhà tuyển dụng', 409, 'INVALID_CHAT_TARGET');
+                }
+                nguoiNhanThuc = id(nguoiNhanDoc);
+            }
             loaiCuocTroChuyen = 'admin_support';
             context = {};
         }
@@ -114,7 +135,7 @@ exports.dieuKhienTinNhan = {
             maHoSoUngTuyen: context.maHoSoUngTuyen ?? maHoSoUngTuyen,
             maTinTuyenDung: context.maTinTuyenDung ?? maTinTuyenDung,
         });
-        phanHoi.json({ thongBao: 'Lay cuoc tro chuyen thanh cong', duLieu: cuocTroChuyenModel });
+        phanHoi.json({ thongBao: 'Lấy cuộc trò chuyện thành công', duLieu: cuocTroChuyenModel });
     }),
     layCuocTroChuyenModel: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = yeuCau.nguoiDung._id;

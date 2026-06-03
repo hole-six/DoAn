@@ -1,5 +1,5 @@
 [Unit]
-Description=ITJob deploy webhook
+Description=Effort Job deploy webhook
 After=network.target
 
 [Service]

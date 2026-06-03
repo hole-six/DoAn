@@ -484,46 +484,6 @@ async function gieoDuLieuUngVienDayDu(maNguoiDungUngVien, maNguoiDungNhaTuyenDun
             daDoc: false,
         },
     }, { upsert: true });
-    const lichPhongVanBoSung = [
-        {
-            thoiGianBatDau: new Date('2026-06-07T14:00:00+07:00'),
-            thoiGianKetThuc: new Date('2026-06-07T15:15:00+07:00'),
-            diaChi: 'TechNova Solutions, 120 Nguyen Van Linh, Hai Chau, Da Nang',
-            hinhThuc: 'offline',
-            linkHop: '',
-            ghiChu: 'Vòng phỏng vấn với Engineering Manager, mang theo CCCD để check-in tòa nhà.',
-            trangThai: 'da_xac_nhan',
-            ketQua: 'cho_ket_qua',
-        },
-        {
-            thoiGianBatDau: new Date('2026-05-18T10:00:00+07:00'),
-            thoiGianKetThuc: new Date('2026-05-18T11:00:00+07:00'),
-            diaChi: 'Google Meet',
-            hinhThuc: 'online',
-            linkHop: 'https://meet.google.com/itjob-final',
-            ghiChu: 'Da hoan thanh vong technical interview, dang cho thu offer.',
-            trangThai: 'hoan_thanh',
-            ketQua: 'dat',
-        },
-    ];
-    for (const lichMau of lichPhongVanBoSung) {
-        await lichphongvan_mohinh_js_1.LichPhongVan.updateOne({ maHoSoUngTuyen: ungTuyen._id, thoiGianBatDau: lichMau.thoiGianBatDau }, { $set: { maHoSoUngTuyen: ungTuyen._id, ...lichMau } }, { upsert: true });
-        const lichBoSung = await lichphongvan_mohinh_js_1.LichPhongVan.findOne({ maHoSoUngTuyen: ungTuyen._id, thoiGianBatDau: lichMau.thoiGianBatDau }).orFail();
-        await thongbao_mohinh_js_1.ThongBao.updateOne({ maNguoiDung: maNguoiDungUngVien, maLichPhongVan: lichBoSung._id }, {
-            $set: {
-                maNguoiDung: maNguoiDungUngVien,
-                loai: 'lich_phong_van',
-                tieuDe: lichMau.trangThai === 'hoan_thanh' ? 'Cập nhật kết quả phỏng vấn' : 'Bạn có lịch phỏng vấn',
-                noiDung: lichMau.trangThai === 'hoan_thanh'
-                    ? 'TechNova Solutions đã cập nhật kết quả phỏng vấn của bạn.'
-                    : 'TechNova Solutions đã mời bạn tham gia phỏng vấn Senior Fullstack Developer.',
-                lienKet: '/ung-vien/lich-phong-van',
-                maHoSoUngTuyen: ungTuyen._id,
-                maLichPhongVan: lichBoSung._id,
-                daDoc: lichMau.trangThai === 'hoan_thanh',
-            },
-        }, { upsert: true });
-    }
 }
 async function gieoDuLieuMau() {
     await (0, ketnoidulieu_js_1.ketNoiDuLieu)();

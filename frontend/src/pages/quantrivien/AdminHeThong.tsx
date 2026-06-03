@@ -7,9 +7,10 @@ import {
 } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
+import { layAccessToken } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import './admin-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const PAGE_SIZE = 6
 
 type ConfirmState = {
@@ -18,7 +19,7 @@ type ConfirmState = {
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function headers() {
-  const token = localStorage.getItem('itjob_token')
+  const token = layAccessToken()
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 }
 async function api(path: string, options: RequestInit = {}) {

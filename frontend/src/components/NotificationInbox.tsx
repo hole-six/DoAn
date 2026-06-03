@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Check, ExternalLink, Eye, Inbox, MessageCircle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { apiCoXacThuc } from '../lib/auth'
+import { useThongBao } from '../contexts/ThongBaoContext'
 import { formatDateTime } from '../lib/format'
 import type { ThongBao } from '../types/recruitment'
 import { Button } from './ui/Button'
@@ -33,6 +33,7 @@ function priorityLabel(value?: string) {
 
 export function NotificationInbox({ items, onReload }: Props) {
   const navigate = useNavigate()
+  const { danhDauDaDoc, danhDauTatCaDaDoc } = useThongBao()
   const [filter, setFilter] = useState<string>('all')
   const [selected, setSelected] = useState<ThongBao | null>(null)
   const [busy, setBusy] = useState('')
@@ -48,7 +49,7 @@ export function NotificationInbox({ items, onReload }: Props) {
     if (!id || item.daDoc) return
     setBusy(id)
     try {
-      await apiCoXacThuc(`/thongbao/${id}/danh-dau-da-doc`, { method: 'PATCH' })
+      await danhDauDaDoc(id)
       await onReload()
       setSelected(prev => (prev && notificationId(prev) === id ? { ...prev, daDoc: true } : prev))
     } finally {
@@ -57,9 +58,10 @@ export function NotificationInbox({ items, onReload }: Props) {
   }
 
   const markAllRead = async () => {
+    if (!unreadCount) return
     setBusy('all')
     try {
-      await apiCoXacThuc('/thongbao/danh-dau-tat-ca-da-doc', { method: 'POST' })
+      await danhDauTatCaDaDoc()
       await onReload()
       setSelected(prev => (prev ? { ...prev, daDoc: true } : prev))
     } finally {

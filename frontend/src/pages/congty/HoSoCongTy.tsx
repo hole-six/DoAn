@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Award, Briefcase, Globe, MapPin, Star, ThumbsUp, Users } from 'lucide-react'
+import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import './congty-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-const BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') ?? 'http://localhost:5000'
 const logoDuPhong = 'https://placehold.co/160x160/eaf2ff/2563eb?text=IT'
 const bannerDuPhong = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80'
 
@@ -12,7 +11,7 @@ const bannerDuPhong = 'https://images.unsplash.com/photo-1497366216548-375260702
 function layUrlLogo(logo?: string) {
   if (!logo) return logoDuPhong
   if (logo.startsWith('http://') || logo.startsWith('https://')) return logo
-  return `${BASE_URL}${logo}`
+  return taoUrlTaiNguyen(logo)
 }
 
 type CongTy = {

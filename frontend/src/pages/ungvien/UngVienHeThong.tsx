@@ -7,12 +7,12 @@ import {
 } from 'lucide-react'
 import CvStudio from './CvStudio'
 import { toast } from '../../lib/toast'
+import { layAccessToken } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import { DashboardSkeleton } from '../../components/LoadingStates'
 import { useConfirm } from '../../components/ConfirmDialog'
 import './ungvien-styles.css'
 import './ungvien-responsive.css'
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 type BadgeTone = 'blue' | 'green' | 'yellow' | 'red' | 'gray'
 
@@ -26,7 +26,7 @@ const toneClass: Record<BadgeTone, string> = {
 
 function user() { return JSON.parse(localStorage.getItem('itjob_nguoidung') ?? 'null') }
 function headers() {
-  const token = localStorage.getItem('itjob_token')
+  const token = layAccessToken()
   return { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }
 }
 async function api(path: string, options: RequestInit = {}) {

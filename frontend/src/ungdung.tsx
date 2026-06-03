@@ -4,9 +4,12 @@ import {
   Search, Briefcase,
   TrendingUp, Star, FileText, Sparkles, ChevronRight,
   Award, Zap, Globe, Shield,
-  ArrowRight, Bot, CheckCircle, Send,
+  ArrowRight, Bot, CheckCircle, Send, X,
 } from 'lucide-react'
 import effortBg from './assets/EffortBackground.png'
+import mascotFrame1 from './assets/anhdong1.png'
+import mascotFrame2 from './assets/anhdong2.png'
+import mascotFrame3 from './assets/anhdong3.png'
 import './ungdung.css'
 import './pages/trangchu/trangchu-styles.css'
 import './realtime.css'
@@ -21,6 +24,7 @@ import { ChatProvider } from './contexts/ChatContext'
 import { ThongBaoProvider } from './contexts/ThongBaoContext'
 import { ThongBaoToastContainer } from './components/ThongBaoCenter'
 import { layAccessToken } from './lib/auth'
+import { API_URL } from './lib/env'
 
 // ─── Dữ liệu tĩnh ────────────────────────────────────────────────────────────
 
@@ -172,8 +176,6 @@ const lyDo = [
 // (moved to components/Header.tsx)
 
 // ─── Hero trang chủ ───────────────────────────────────────────────────────────
-
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 
 type HomeJob = {
   id: string
@@ -599,14 +601,14 @@ function SectionTechStack() {
   )
 }
 
-// ─── Tại sao chọn ITJob ───────────────────────────────────────────────────────
+// ─── Tại sao chọn Effort Job ─────────────────────────────────────────────────
 
 function SectionLyDo() {
   return (
     <section className="section">
       <div className="section-title">
         <div>
-          <p className="eyebrow">Tại sao chọn ITJob</p>
+          <p className="eyebrow">Tại sao chọn Effort Job</p>
           <h2>Nền tảng được tin dùng bởi<br />hàng trăm nghìn lập trình viên</h2>
         </div>
       </div>
@@ -630,16 +632,16 @@ function SectionLyDo() {
 
 function SectionCTA() {
   return (
-    <section className="section" style={{ paddingBottom: 0 }}>
+    <section className="section home-cta-section" style={{ paddingBottom: 0 }}>
       <div
-        className="dashboard-hero"
+        className="dashboard-hero home-cta-card"
         style={{ borderRadius: 24, marginTop: 0 }}
       >
         <div>
           <p className="eyebrow">Bắt đầu ngay hôm nay</p>
           <h2>Sẵn sàng bước vào<br />cơ hội tiếp theo?</h2>
           <p>Tạo hồ sơ miễn phí, kết nối với nhà tuyển dụng và nhận offer trong 7 ngày.</p>
-          <div className="detail-actions" style={{ border: 0, padding: '20px 0 0' }}>
+          <div className="detail-actions home-cta-actions" style={{ border: 0, padding: '20px 0 0' }}>
             <Link to="/dang-ky" className="primary-button large">
               Tạo hồ sơ miễn phí <ArrowRight size={18} />
             </Link>
@@ -730,7 +732,7 @@ function HomeAiChat() {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: 14, background: '#e0f2fe', color: '#075985' }}><Bot size={22} /></span>
           <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ margin: 0, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#075985' }}>ITJob Gemini</p>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#075985' }}>Effort Job Gemini</p>
             <h2 style={{ margin: '2px 0 0', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Trợ lý tìm việc từ database</h2>
           </div>
           <button
@@ -771,6 +773,140 @@ function HomeAiChat() {
 
 // ─── Trang chủ ────────────────────────────────────────────────────────────────
 
+void HomeAiChat
+
+type HomeAiJobSuggestion = {
+  id: string
+  tieuDe: string
+  congTy: string
+  diaChi?: string
+  luong?: string
+  diem?: number
+  lyDo?: string
+  url: string
+}
+
+const mascotFrames = [mascotFrame1, mascotFrame2, mascotFrame3]
+const homeAiQuickPrompts = [
+  'Tìm job React Đà Nẵng',
+  'CV tôi hợp job nào?',
+  'Công ty nào đang tuyển Backend?',
+  'Lộ trình học để ứng tuyển Frontend?',
+]
+
+function HomeAiMascotChat() {
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('Xin chào, mình là trợ lý Effort Job. Bạn có thể hỏi mình về lộ trình nghề nghiệp, CV, phỏng vấn hoặc tìm việc trong database.')
+  const [jobs, setJobs] = useState<HomeAiJobSuggestion[]>([])
+  const [quickPrompts, setQuickPrompts] = useState(homeAiQuickPrompts)
+  const [busy, setBusy] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [frameIndex, setFrameIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setFrameIndex(value => (value + 1) % mascotFrames.length)
+    }, busy ? 420 : 650)
+    return () => window.clearInterval(timer)
+  }, [busy])
+
+  const ask = async (nextQuestion?: string) => {
+    const cauHoi = (nextQuestion ?? question).trim()
+    if (!cauHoi || busy) return
+    try {
+      setBusy(true)
+      const res = await fetch(`${API_URL}/ai/chatbot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cauHoi }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI lúc này.')
+      const payload = data.duLieu ?? data
+      setAnswer(payload.traLoi ?? 'Mình chưa có câu trả lời phù hợp, bạn thử hỏi cụ thể hơn nhé.')
+      setJobs(Array.isArray(payload.goiYViecLam) ? payload.goiYViecLam : [])
+      if (Array.isArray(payload.goiYCauHoi) && payload.goiYCauHoi.length) {
+        setQuickPrompts(payload.goiYCauHoi.slice(0, 4))
+      }
+      setQuestion('')
+    } catch (error) {
+      setAnswer(error instanceof Error ? error.message : 'Không hỏi được AI lúc này.')
+      setJobs([])
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!expanded) {
+    return (
+      <button type="button" className="home-ai-mascot-fab" onClick={() => setExpanded(true)} aria-label="Mở trợ lý AI Effort Job">
+        <span className="home-ai-mascot-glow" />
+        <img src={mascotFrames[frameIndex]} alt="" />
+        <span>Hỏi AI</span>
+      </button>
+    )
+  }
+
+  return (
+    <section className="home-ai-panel" aria-label="Trợ lý AI Effort Job">
+      <div className="home-ai-panel-header">
+        <div className="home-ai-avatar">
+          <img src={mascotFrames[frameIndex]} alt="Linh vật Effort Job" />
+        </div>
+        <div className="min-w-0">
+          <p>Effort Job AI</p>
+          <h2>Trợ lý nghề nghiệp</h2>
+        </div>
+        <button type="button" className="home-ai-close" onClick={() => setExpanded(false)} aria-label="Đóng trợ lý AI">
+          <X size={18} />
+        </button>
+      </div>
+
+      <div className="home-ai-answer">
+        <p>{answer}</p>
+        {jobs.length > 0 && (
+          <div className="home-ai-jobs">
+            {jobs.map(job => (
+              <Link key={job.id} to={job.url} className="home-ai-job-card">
+                <span className="home-ai-score">{Math.round(Number(job.diem ?? 0)) || 'AI'}</span>
+                <span className="home-ai-job-main">
+                  <strong>{job.tieuDe}</strong>
+                  <small>{job.congTy} · {job.diaChi || 'Đang cập nhật'} · {job.luong || 'Thỏa thuận'}</small>
+                  {job.lyDo && <em>{job.lyDo}</em>}
+                </span>
+                <ArrowRight size={16} />
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="home-ai-prompts">
+        {quickPrompts.map(prompt => (
+          <button key={prompt} type="button" onClick={() => void ask(prompt)} disabled={busy}>
+            {prompt}
+          </button>
+        ))}
+      </div>
+
+      <div className="home-ai-input-row">
+        <input
+          value={question}
+          onChange={event => setQuestion(event.target.value)}
+          onKeyDown={event => {
+            if (event.key === 'Enter') void ask()
+          }}
+          placeholder="Hỏi AI về job, CV, phỏng vấn hoặc lộ trình nghề nghiệp..."
+        />
+        <button type="button" onClick={() => void ask()} disabled={busy || !question.trim()}>
+          {busy ? <Sparkles size={18} /> : <Send size={18} />}
+          {busy ? 'Đang trả lời' : 'Gửi'}
+        </button>
+      </div>
+    </section>
+  )
+}
+
 function TrangChu() {
   const data = useTrangChuData()
 
@@ -780,7 +916,7 @@ function TrangChu() {
       <ThanhTinhNang />
       <SectionNhaTuyenDung companies={data.companies} />
       <SectionTinTuyenDung jobs={data.jobs} />
-      <HomeAiChat />
+      <HomeAiMascotChat />
       <SectionTechStack />
       <SectionLyDo />
       <SectionCTA />
@@ -810,7 +946,6 @@ const UngTuyenPage = lazy(() => import('./pages/ungvien/ungtuyen/UngTuyenPage'))
 const LichPhongVanPage = lazy(() => import('./pages/ungvien/lichphongvan/LichPhongVanPage'))
 const ThongBaoUngVienPage = lazy(() => import('./pages/ungvien/thongbao/ThongBaoUngVienPage'))
 const CaiDatUngVienPage = lazy(() => import('./pages/ungvien/caidat/CaiDatUngVienPage'))
-const PortfolioGeneratorPage = lazy(() => import('./pages/ungvien/PortfolioGenerator'))
 const DashboardNhaTuyenDung = lazy(() => import('./pages/nhatuyendung/dashboard/DashboardNhaTuyenDungPage'))
 const QuanLyTinNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/jobs/QuanLyTinNhaTuyenDungPage'))
 const UngVienNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/candidates/UngVienNhaTuyenDungPage'))
@@ -889,7 +1024,6 @@ export default function UngDung() {
         <Route path="/ung-vien" element={<DashboardShell vaiTro="ungvien" />}>
           <Route index element={<DashboardUngVien />} />
           <Route path="ho-so" element={<HoSoUngVienPage />} />
-          <Route path="portfolio" element={<PortfolioGeneratorPage />} />
           <Route path="viec-da-luu" element={<ViecDaLuuPage />} />
           <Route path="ung-tuyen" element={<UngTuyenPage />} />
           <Route path="lich-phong-van" element={<LichPhongVanPage />} />

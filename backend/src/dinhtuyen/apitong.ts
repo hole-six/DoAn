@@ -10,11 +10,11 @@ import { dinhTuyenLichPhongVan } from '../modules/lichphongvan/lichphongvan.dinh
 import { dinhTuyenLichSuHoSoUngTuyen } from '../modules/lichsuhosoungtuyen/lichsuhosoungtuyen.dinhtuyen.js'
 import { dinhTuyenNguoiDung } from '../modules/nguoidung/nguoidung.dinhtuyen.js'
 import { dinhTuyenNhaTuyenDung } from '../modules/nhatuyendung/nhatuyendung.dinhtuyen.js'
-import { dinhTuyenPortfolio } from '../modules/portfolio/portfolio.dinhtuyen.js'
 import { dinhTuyenThongBao } from '../modules/thongbao/thongbao.dinhtuyen.js'
 import { dinhTuyenTinNhan } from '../modules/tinnhan/tinnhan.dinhtuyen.js'
 import { dinhTuyenTinTuyenDung } from '../modules/tintuyendung/tintuyendung.dinhtuyen.js'
 import { dinhTuyenUngVien } from '../modules/ungvien/ungvien.dinhtuyen.js'
+import { dinhTuyenViecLamDaLuu } from '../modules/vieclamdaluu/vieclamdaluu.dinhtuyen.js'
 import { dinhTuyenXacThuc } from '../modules/xacthuc/xacthuc.dinhtuyen.js'
 import { ganNguoiDungNeuCo } from '../dungchung/xacthuc.js'
 
@@ -33,9 +33,9 @@ apiTong.use('/ungvien', dinhTuyenUngVien)
 apiTong.use('/hosonangluc', dinhTuyenHoSoNangLuc)
 apiTong.use('/nhatuyendung', dinhTuyenNhaTuyenDung)
 apiTong.use('/tintuyendung', dinhTuyenTinTuyenDung)
+apiTong.use('/viec-lam-da-luu', dinhTuyenViecLamDaLuu)
 apiTong.use('/danhmuckynang', dinhTuyenDanhMucKyNang)
 apiTong.use('/hosoungtuyen', dinhTuyenHoSoUngTuyen)
-apiTong.use('/portfolio', dinhTuyenPortfolio)
 apiTong.use('/lichsuhosoungtuyen', dinhTuyenLichSuHoSoUngTuyen)
 apiTong.use('/lichphongvan', dinhTuyenLichPhongVan)
 apiTong.use('/thongbao', dinhTuyenThongBao)

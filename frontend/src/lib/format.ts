@@ -1,5 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
-const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
+import { taoUrlTaiNguyen } from './env'
 
 export function formatDateTime(value?: string | Date) {
   return value ? new Date(value).toLocaleString('vi-VN', { hour12: false }) : '-'
@@ -14,7 +13,5 @@ export function formatMoney(value?: number) {
 }
 
 export function imageUrl(value?: string) {
-  if (!value) return ''
-  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value
-  return `${API_ORIGIN}${value.startsWith('/') ? value : `/${value}`}`
+  return taoUrlTaiNguyen(value)
 }

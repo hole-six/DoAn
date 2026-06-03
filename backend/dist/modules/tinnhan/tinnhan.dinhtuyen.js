@@ -7,6 +7,7 @@ const xacthuc_js_1 = require("../../dungchung/xacthuc.js");
 exports.dinhTuyenTinNhan = (0, express_1.Router)();
 exports.dinhTuyenTinNhan.use(xacthuc_js_1.yeuCauDangNhap);
 // Conversation routes
+exports.dinhTuyenTinNhan.get('/admin-support/contacts', tinnhan_dieukhien_js_1.dieuKhienTinNhan.layDanhBaHoTroQuanTri);
 exports.dinhTuyenTinNhan.get('/cuoc-tro-chuyen', tinnhan_dieukhien_js_1.dieuKhienTinNhan.layDanhSachCuocTroChuyenModel);
 exports.dinhTuyenTinNhan.post('/cuoc-tro-chuyen', tinnhan_dieukhien_js_1.dieuKhienTinNhan.layHoacTaoCuocTroChuyenModel);
 exports.dinhTuyenTinNhan.get('/cuoc-tro-chuyen/:id', tinnhan_dieukhien_js_1.dieuKhienTinNhan.layCuocTroChuyenModel);

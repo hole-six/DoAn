@@ -16,7 +16,7 @@ export default function Footer() {
             Nền tảng kết nối kỹ sư phần mềm với doanh nghiệp công nghệ uy tín tại Việt Nam.
           </p>
           <div className="footer-skill-row">
-            {danhMucKyNang.map((muc) => (
+            {danhMucKyNang.map(muc => (
               <span key={muc}>{muc}</span>
             ))}
           </div>

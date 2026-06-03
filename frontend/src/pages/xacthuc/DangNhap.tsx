@@ -5,9 +5,9 @@ import { ArrowLeft, Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import dangNhapImg from '../../assets/dangnhap.png'
 import { duongDanTheoVaiTro, luuPhienDangNhap } from '../../lib/auth'
+import { API_URL } from '../../lib/env'
 import './auth-styles.css'
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 const vaiTroApi = {
