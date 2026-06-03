@@ -293,15 +293,15 @@ export default function ChiTietViecLam() {
   if (loi || !viec) return <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center', color: '#991b1b' }}>{loi || 'Không tìm thấy việc làm'}</main>
 
   return (
-    <main style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
-      <div style={{ position: 'relative', height: 280, overflow: 'hidden', background: 'linear-gradient(135deg, #0b1c30 0%, #1e3a5f 100%)' }}>
+    <main className="job-detail-page" style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
+      <div className="job-detail-hero" style={{ position: 'relative', height: 280, overflow: 'hidden', background: 'linear-gradient(135deg, #0b1c30 0%, #1e3a5f 100%)' }}>
         <div style={{ position: 'absolute', inset: 0, background: `url(${viec.anhDaiDien ? imageUrl(viec.anhDaiDien) : 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1400&q=80'})`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: viec.anhDaiDien ? 0.32 : 0.15 }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
-            <div style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+          <div className="job-detail-hero-content" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
+            <div className="job-detail-logo" style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
               <img src={logo} alt={tenCongTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.currentTarget as HTMLImageElement).src = logoDuPhong }} />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="job-detail-title" style={{ flex: 1 }}>
               <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 4, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>{viec.tieuDe}</h1>
               <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{tenCongTy}</p>
             </div>
@@ -331,16 +331,16 @@ export default function ChiTietViecLam() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gap: 16 }}>
+      <div className="job-detail-layout" style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
+        <div className="job-detail-main" style={{ display: 'grid', gap: 16 }}>
           {tab === 'mo-ta' && (
             <>
-              <div style={{ background: '#fff', borderRadius: 8, padding: '16px 20px' }}>
+              <div className="job-detail-card" style={{ background: '#fff', borderRadius: 8, padding: '16px 20px' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {[...kyNang, viec.capBac, viec.loaiHinh].filter(Boolean).map(kn => <span key={kn} style={{ background: '#f0f0f0', borderRadius: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600, color: '#374151' }}>{kn}</span>)}
                 </div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 8, padding: '20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <div className="job-detail-card job-detail-actions-card" style={{ background: '#fff', borderRadius: 8, padding: '20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Inter', system-ui, sans-serif" }}>
                   {dangUngTuyen ? 'Đang ứng tuyển...' : daUngTuyen ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </button>
@@ -368,7 +368,7 @@ export default function ChiTietViecLam() {
           )}
 
           {tab === 'cong-ty' && (
-            <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
+            <div className="job-detail-card" style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: '#0b1c30' }}>Về {tenCongTy}</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px 24px', marginBottom: 24 }}>
                 {[
@@ -389,8 +389,8 @@ export default function ChiTietViecLam() {
           )}
         </div>
 
-        <div style={{ position: 'sticky', top: 90 }}>
-          <div style={{ background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16 }}>
+        <div className="job-detail-sidebar" style={{ position: 'sticky', top: 90 }}>
+          <div className="job-detail-side-card" style={{ background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <div style={{ width: 56, height: 56, borderRadius: 10, border: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#fff' }}>
                 <img src={logo} alt={tenCongTy} style={{ width: '80%', height: '80%', objectFit: 'contain' }} onError={e => { (e.currentTarget as HTMLImageElement).src = logoDuPhong }} />
@@ -435,16 +435,16 @@ export default function ChiTietViecLam() {
         </div>
       </div>
       {moModalUngTuyen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,42,0.58)', display: 'grid', placeItems: 'center', padding: '88px 16px 18px' }}>
-          <div style={{ width: 'min(720px, 100%)', maxHeight: 'calc(100vh - 106px)', overflow: 'hidden', background: '#fff', borderRadius: 12, boxShadow: '0 24px 80px rgba(15,23,42,0.28)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
-            <div style={{ minHeight: 64, padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <div className="job-apply-modal" style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(15,23,42,0.58)', display: 'grid', placeItems: 'center', padding: '88px 16px 18px' }}>
+          <div className="job-apply-card" style={{ width: 'min(720px, 100%)', maxHeight: 'calc(100vh - 106px)', overflow: 'hidden', background: '#fff', borderRadius: 12, boxShadow: '0 24px 80px rgba(15,23,42,0.28)', display: 'grid', gridTemplateRows: 'auto 1fr auto' }}>
+            <div className="job-apply-header" style={{ minHeight: 64, padding: '16px 20px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a' }}>Ứng tuyển {viec.tieuDe}</h2>
                 <p style={{ margin: '4px 0 0', fontSize: 13, fontWeight: 600, color: '#64748b' }}>Chọn CV trong hệ thống hoặc upload CV mới để gửi cho nhà tuyển dụng.</p>
               </div>
               <button onClick={() => setMoModalUngTuyen(false)} style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid #e5e7eb', background: '#fff', display: 'grid', placeItems: 'center', cursor: 'pointer' }}><X size={18} /></button>
             </div>
-            <div style={{ overflow: 'auto', padding: 20, display: 'grid', gap: 14 }}>
+            <div className="job-apply-body" style={{ overflow: 'auto', padding: 20, display: 'grid', gap: 14 }}>
               <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: 14, display: 'grid', gap: 10 }}>
                 <strong style={{ fontSize: 14, color: '#0f172a' }}>CV có sẵn</strong>
                 {cvList.length ? cvList.map(cv => (
@@ -470,7 +470,7 @@ export default function ChiTietViecLam() {
               </label>
               {thongBaoUngTuyen && <div style={{ borderRadius: 10, border: '1px solid #fecaca', background: '#fef2f2', color: '#991b1b', padding: 12, fontSize: 14, fontWeight: 700 }}>{thongBaoUngTuyen}</div>}
             </div>
-            <div style={{ minHeight: 64, padding: 16, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+            <div className="job-apply-footer" style={{ minHeight: 64, padding: 16, borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
               <button onClick={() => setMoModalUngTuyen(false)} style={{ minWidth: 96, minHeight: 42, borderRadius: 10, border: '1px solid #cbd5e1', background: '#fff', fontWeight: 800, cursor: 'pointer' }}>Hủy</button>
               <button onClick={nopHoSoUngTuyen} disabled={dangUngTuyen || (!cvDangChon && !fileCvMoi)} style={{ minWidth: 150, minHeight: 42, borderRadius: 10, border: '1px solid #0058be', background: '#0058be', color: '#fff', fontWeight: 800, cursor: dangUngTuyen ? 'wait' : 'pointer', opacity: (!cvDangChon && !fileCvMoi) ? 0.55 : 1 }}>{dangUngTuyen ? 'Đang gửi...' : 'Gửi ứng tuyển'}</button>
             </div>

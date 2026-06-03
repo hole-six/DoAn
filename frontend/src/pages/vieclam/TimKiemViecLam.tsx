@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, MessageCircle, Search, Send, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, MessageCircle, Search, Send, Sparkles, SlidersHorizontal, X } from 'lucide-react'
 import timJobBg from '../../assets/timjob.png'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
@@ -84,6 +84,7 @@ export default function TimKiemViecLam() {
   const [capBacDangChon, setCapBacDangChon] = useState<string[]>([])
   const [loaiHinhDangChon, setLoaiHinhDangChon] = useState<string[]>([])
   const [searchActive, setSearchActive] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiAnswer, setAiAnswer] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
@@ -101,7 +102,10 @@ export default function TimKiemViecLam() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSearchActive(false)
+      if (event.key === 'Escape') {
+        setSearchActive(false)
+        setFilterOpen(false)
+      }
     }
     const onMouseDown = (event: MouseEvent) => {
       if (!searchWrapRef.current) return
@@ -116,9 +120,9 @@ export default function TimKiemViecLam() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = searchActive ? 'hidden' : 'unset'
+    document.body.style.overflow = searchActive || filterOpen ? 'hidden' : 'unset'
     return () => { document.body.style.overflow = 'unset' }
-  }, [searchActive])
+  }, [searchActive, filterOpen])
 
   useEffect(() => {
     let active = true
@@ -307,8 +311,21 @@ export default function TimKiemViecLam() {
       </section>
 
       <section className="jobs-real-body">
-        <aside className="jobs-real-filter">
-          <div><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></div>
+        {filterOpen && (
+          <button
+            className="jobs-filter-backdrop"
+            type="button"
+            aria-label="Đóng bộ lọc"
+            onClick={() => setFilterOpen(false)}
+          />
+        )}
+        <aside className={`jobs-real-filter ${filterOpen ? 'is-mobile-open' : ''}`}>
+          <div className="jobs-mobile-filter-head">
+            <span><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></span>
+            <button type="button" onClick={() => setFilterOpen(false)} aria-label="Đóng bộ lọc">
+              <X size={18} />
+            </button>
+          </div>
           <section className="jobs-filter-group">
             <h3>Danh mục kỹ năng</h3>
             {boLocDong.loai.map(([loai, count]) => (
@@ -363,6 +380,7 @@ export default function TimKiemViecLam() {
             )}
           </section>
           <button className="jobs-filter-clear" onClick={resetBoLoc}>Xóa bộ lọc</button>
+          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Áp dụng bộ lọc</button>
         </aside>
 
         <div className="jobs-real-list">
@@ -371,6 +389,10 @@ export default function TimKiemViecLam() {
               <h2>{dangTai ? 'Đang tải việc làm' : `Tìm thấy ${ketQua.length} việc làm`}</h2>
               <p>Bộ lọc sinh động từ dữ liệu kỹ năng thật: chọn danh mục để thu hẹp kỹ năng, chọn nhiều kỹ năng để lọc việc giao nhau.</p>
             </div>
+            <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
+              <SlidersHorizontal size={18} />
+              Bộ lọc
+            </button>
           </div>
           {loi && <div className="jobs-real-error">{loi}</div>}
           {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>}

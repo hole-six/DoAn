@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { layNguoiDung } from '../lib/auth'
 import AppIcon from './AppIcon'
+import './bottom-nav.css'
 
 export default function BottomNav() {
   const nguoiDung = layNguoiDung()
@@ -26,7 +27,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-[80] hidden h-[72px] grid-cols-4 gap-1 border-t border-[#0e4d7d]/10 bg-white/95 px-2 py-1.5 shadow-[0_-6px_18px_rgba(15,23,42,0.08)] backdrop-blur md:grid lg:hidden"
+      className="dashboard-bottom-nav fixed inset-x-0 bottom-0 z-[80] grid h-[72px] grid-cols-4 gap-1 border-t border-[#0e4d7d]/10 bg-white/95 px-2 py-1.5 shadow-[0_-6px_18px_rgba(15,23,42,0.08)] backdrop-blur md:hidden"
       aria-label="Điều hướng nhanh"
     >
       {navItems.map(item => {

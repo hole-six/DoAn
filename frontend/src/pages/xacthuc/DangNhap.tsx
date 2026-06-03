@@ -186,7 +186,7 @@ export default function DangNhap() {
               </Link>
             </p>
 
-            <div className="mt-8 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
+            <div className="auth-role-switch mt-8 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
               {(['ungvien', 'nhatuyendung', 'quantrivien'] as const).map(role => (
                 <button
                   key={role}

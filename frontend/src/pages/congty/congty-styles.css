@@ -531,3 +531,247 @@
 }
 
 /* ========================================================================== */
+/* Responsive riêng cho trang danh sách công ty và hồ sơ công ty */
+.company-real-page .jobs-filter-backdrop,
+.company-real-page .jobs-mobile-filter-trigger,
+.company-real-page .jobs-mobile-filter-close,
+.company-real-page .jobs-filter-apply-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .company-real-page .jobs-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 101;
+    display: block;
+    border: 0;
+    background: rgba(2, 6, 23, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .company-real-page .company-real-body {
+    grid-template-columns: 1fr !important;
+    padding: 18px 12px 96px !important;
+  }
+
+  .company-real-page .company-real-filter {
+    display: none !important;
+  }
+
+  .company-real-page .company-real-filter.is-mobile-open {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 102;
+    display: grid !important;
+    max-height: min(84dvh, 720px);
+    padding: 18px 16px calc(22px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -24px 54px rgba(15, 23, 42, 0.24);
+  }
+
+  .company-real-page .jobs-mobile-filter-close,
+  .company-real-page .jobs-filter-apply-mobile,
+  .company-real-page .jobs-mobile-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .company-real-page .jobs-mobile-filter-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+
+  .company-real-page .jobs-filter-apply-mobile {
+    min-height: 48px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 14px;
+    background: #0e4d7d;
+    color: #ffffff;
+    font-weight: 900;
+  }
+
+  .company-real-page .jobs-mobile-filter-trigger {
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid rgba(14, 77, 125, 0.18);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0e4d7d;
+    font-weight: 900;
+  }
+
+  .company-real-page .result-toolbar {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  .company-real-page .result-toolbar select {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .company-real-page .company-real-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .company-real-page .company-real-card {
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .company-real-page .company-real-card-head {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: start !important;
+  }
+
+  .company-real-page .company-real-logo {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .company-real-page .company-real-card h2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 17px !important;
+    line-height: 1.25 !important;
+  }
+
+  .company-real-page .company-card-foot {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .company-real-page .company-card-foot a {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .company-profile-page {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+
+  .company-profile-hero {
+    height: auto !important;
+    min-height: 232px;
+  }
+
+  .company-profile-hero > div:last-child {
+    position: relative !important;
+    padding-top: 104px;
+  }
+
+  .company-profile-hero-content {
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 0 16px 18px !important;
+  }
+
+  .company-profile-logo {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 16px !important;
+  }
+
+  .company-profile-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    min-width: 0;
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+
+  .company-profile-tabs-shell > div {
+    padding: 0 12px !important;
+  }
+
+  .company-profile-meta {
+    gap: 8px !important;
+    padding-top: 12px !important;
+  }
+
+  .company-profile-meta span {
+    max-width: 100%;
+    padding: 8px 10px;
+    border-radius: 999px;
+    background: #f8fafc;
+    line-height: 1.25;
+  }
+
+  .company-profile-tabs {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .company-profile-tabs button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .company-profile-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 16px 12px 18px !important;
+  }
+
+  .company-profile-main {
+    gap: 14px !important;
+  }
+
+  .company-profile-card {
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
+
+  .company-profile-info-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .company-profile-map {
+    aspect-ratio: 16 / 11;
+  }
+
+  .company-profile-map iframe {
+    height: 100% !important;
+    min-height: 220px;
+  }
+
+  .company-profile-sidebar {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .company-profile-sidebar-card {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 900px) {
+  .company-profile-info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}

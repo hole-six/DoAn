@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, Zap } from 'lucide-react'
+import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, X, Zap } from 'lucide-react'
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
@@ -133,6 +133,7 @@ export default function DanhSachCongTy() {
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
   const [searchActive, setSearchActive] = useState(false)
+  const [filterOpen, setFilterOpen] = useState(false)
   const searchWrapRef = useRef<HTMLDivElement | null>(null)
   const { groups, loading, hasAny } = useSearchSuggestions({
     query: tuKhoa,
@@ -157,7 +158,10 @@ export default function DanhSachCongTy() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSearchActive(false)
+      if (event.key === 'Escape') {
+        setSearchActive(false)
+        setFilterOpen(false)
+      }
     }
     const onMouseDown = (event: MouseEvent) => {
       if (!searchWrapRef.current) return
@@ -170,6 +174,11 @@ export default function DanhSachCongTy() {
       window.removeEventListener('mousedown', onMouseDown)
     }
   }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = searchActive || filterOpen ? 'hidden' : 'unset'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [searchActive, filterOpen])
 
   const stats = useMemo(() => {
     const jobCount = new Map<string, number>()
@@ -305,8 +314,19 @@ export default function DanhSachCongTy() {
       </section>
 
       <section className="jobs-real-body company-real-body">
-        <aside className="jobs-real-filter company-real-filter">
+        {filterOpen && (
+          <button
+            className="jobs-filter-backdrop"
+            type="button"
+            aria-label="Đóng bộ lọc"
+            onClick={() => setFilterOpen(false)}
+          />
+        )}
+        <aside className={`jobs-real-filter company-real-filter ${filterOpen ? 'is-mobile-open' : ''}`}>
           <div><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></div>
+          <button className="jobs-mobile-filter-close" type="button" onClick={() => setFilterOpen(false)} aria-label="Đóng bộ lọc">
+            <X size={18} />
+          </button>
           <section className="jobs-filter-group">
             <h3>Quy mô</h3>
             {boLocDong.quyMo.map(([label, count]) => (
@@ -351,11 +371,16 @@ export default function DanhSachCongTy() {
             ))}
           </section>
           <button className="jobs-filter-clear" onClick={xoaBoLoc}>Xóa bộ lọc</button>
+          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Áp dụng bộ lọc</button>
         </aside>
 
         <div>
           <div className="result-toolbar">
             <p>{dangTai ? 'Đang tải...' : <>Tìm thấy <strong>{ketQua.length}</strong> công ty</>}</p>
+            <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
+              <SlidersHorizontal size={18} />
+              Bộ lọc
+            </button>
             <select value={sapXep} onChange={e => setSapXep(e.target.value)}>
               <option value="de_xuat">Đề xuất</option>
               <option value="danh_gia">Đánh giá cao</option>

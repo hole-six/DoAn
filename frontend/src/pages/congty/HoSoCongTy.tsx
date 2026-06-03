@@ -143,29 +143,29 @@ export default function HoSoCongTy() {
   const moTa = congTy.moTa || 'Công ty chưa cập nhật mô tả.'
 
   return (
-    <main style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
-      <div style={{ position: 'relative', height: 280, overflow: 'hidden' }}>
+    <main className="company-profile-page" style={{ background: '#f5f5f5', minHeight: '100vh', paddingTop: 0 }}>
+      <div className="company-profile-hero" style={{ position: 'relative', height: 280, overflow: 'hidden' }}>
         <img src={bannerDuPhong} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.6) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
-            <div style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+          <div className="company-profile-hero-content" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'flex-end', gap: 18 }}>
+            <div className="company-profile-logo" style={{ width: 88, height: 88, background: '#fff', border: '2px solid rgba(255,255,255,0.9)', borderRadius: 12, overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
               <img src={layUrlLogo(congTy.logo)} alt={congTy.tenCongTy} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 0, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>{congTy.tenCongTy}</h1>
+            <h1 className="company-profile-title" style={{ fontSize: 26, fontWeight: 800, color: '#fff', marginBottom: 0, textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>{congTy.tenCongTy}</h1>
           </div>
         </div>
       </div>
 
-      <div style={{ background: '#fff', borderBottom: '1px solid #ebebeb' }}>
+      <div className="company-profile-tabs-shell" style={{ background: '#fff', borderBottom: '1px solid #ebebeb' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, padding: '14px 0 0', fontSize: 13, color: '#6b7280' }}>
+          <div className="company-profile-meta" style={{ display: 'flex', flexWrap: 'wrap', gap: 20, padding: '14px 0 0', fontSize: 13, color: '#6b7280' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Globe size={13} /> {congTy.website ?? 'Đang cập nhật'}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Users size={13} /> {quymo}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><MapPin size={13} /> {congTy.diaChi ?? 'Đà Nẵng'}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#f59e0b', fontWeight: 700 }}><Star size={13} fill="#f59e0b" /> {diemTrungBinh || 'Chưa có'} ({danhGia.length} đánh giá)</span>
           </div>
-          <div style={{ display: 'flex', gap: 0, marginTop: 8 }}>
+          <div className="company-profile-tabs" style={{ display: 'flex', gap: 0, marginTop: 8 }}>
             {[
               { key: 'gioi-thieu', label: 'Giới thiệu' },
               { key: 'danh-gia', label: `Đánh giá ${danhGia.length}` },
@@ -179,13 +179,13 @@ export default function HoSoCongTy() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gap: 16 }}>
+      <div className="company-profile-layout" style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
+        <div className="company-profile-main" style={{ display: 'grid', gap: 16 }}>
           {tab === 'gioi-thieu' && (
             <>
-              <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
+              <div className="company-profile-card" style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: '#0b1c30' }}>Thông tin chung</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 24px' }}>
+                <div className="company-profile-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px 24px' }}>
                   {[
                     { label: 'Lĩnh vực công ty', val: congTy.nganh ?? 'Công nghệ thông tin' },
                     { label: 'Quy mô công ty', val: quymo },
@@ -201,7 +201,7 @@ export default function HoSoCongTy() {
                   ))}
                 </div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 8, padding: 24, border: '1px solid #fed7aa' }}>
+              <div className="company-profile-card" style={{ background: '#fff', borderRadius: 8, padding: 24, border: '1px solid #fed7aa' }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#f97316' }}><Award size={18} style={{ display: 'inline', marginRight: 8, verticalAlign: 'middle' }} />Điểm nổi bật</h2>
                 <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700 }}><Star size={14} fill="#f59e0b" color="#f59e0b" /> {diemTrungBinh || 5}/5</span>
@@ -209,14 +209,14 @@ export default function HoSoCongTy() {
                   <span style={{ fontWeight: 700 }}><Briefcase size={14} /> {tinTuyenDung.length} tin đang mở</span>
                 </div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
+              <div className="company-profile-card" style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}>Giới thiệu công ty</h2>
                 <div style={{ fontSize: 14, color: '#374151', lineHeight: 1.8 }}>{moTa.split('\n').map((p, i) => p.trim() && <p key={i} style={{ marginBottom: 12 }}>{p}</p>)}</div>
               </div>
-              <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
+              <div className="company-profile-card" style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: '#0b1c30' }}><MapPin size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: 'middle', color: '#e11d48' }} />Địa chỉ</h2>
                 <p style={{ fontSize: 14, color: '#374151', marginBottom: 16 }}>{congTy.diaChi ?? 'Đà Nẵng'}</p>
-                <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #ebebeb' }}>
+                <div className="company-profile-map" style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #ebebeb' }}>
                   <iframe title="Bản đồ" src={`https://maps.google.com/maps?q=${encodeURIComponent(congTy.diaChi ?? 'Đà Nẵng')}&output=embed`} width="100%" height="280" style={{ border: 'none', display: 'block' }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
                 </div>
               </div>
@@ -247,8 +247,8 @@ export default function HoSoCongTy() {
           {tab === 'bai-viet' && <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}><p style={{ color: '#9ca3af', textAlign: 'center', padding: '40px 0' }}>Chưa có bài viết nào.</p></div>}
         </div>
 
-        <div style={{ position: 'sticky', top: 90 }}>
-          <div style={{ background: '#fff', borderRadius: 8, padding: 20 }}>
+        <div className="company-profile-sidebar" style={{ position: 'sticky', top: 90 }}>
+          <div className="company-profile-card company-profile-sidebar-card" style={{ background: '#fff', borderRadius: 8, padding: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0b1c30', marginBottom: 4 }}>{tinTuyenDung.length} việc làm đang tuyển dụng</h3>
             <p style={{ fontSize: 13, color: '#9ca3af', marginBottom: 4 }}>tại {congTy.tenCongTy}</p>
             <div style={{ borderTop: '1px solid #f0f0f0', marginTop: 12 }}>

@@ -43,6 +43,11 @@ export default function Header() {
     }
   }, [])
 
+  useEffect(() => {
+    document.body.classList.toggle('mobile-menu-open-rong', menuMo)
+    return () => document.body.classList.remove('mobile-menu-open-rong')
+  }, [menuMo])
+
   const dashboardPath = nguoiDung ? duongDanTheoVaiTro[nguoiDung.vaiTro] : '/dang-nhap'
   const tenHienThi = nguoiDung?.hoTen?.trim() || nguoiDung?.email || 'Tài khoản'
 
@@ -140,7 +145,14 @@ export default function Header() {
       </div>
 
       {menuMo && (
-        <div className="mobile-menu-rong">
+        <>
+          <button
+            className="mobile-menu-backdrop-rong"
+            type="button"
+            aria-label="Đóng menu"
+            onClick={() => setMenuMo(false)}
+          />
+          <div className="mobile-menu-rong">
           {mobileLinks.map(item => (
             <Link key={`${item.to}-${item.label}`} to={item.to} onClick={() => setMenuMo(false)}>
               {item.label}
@@ -152,7 +164,8 @@ export default function Header() {
               Đăng xuất
             </button>
           )}
-        </div>
+          </div>
+        </>
       )}
     </header>
   )

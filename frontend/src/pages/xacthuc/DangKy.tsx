@@ -159,7 +159,7 @@ export default function DangKy() {
               </Link>
             </p>
 
-            <div className="mt-8 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
+            <div className="auth-role-switch auth-role-switch--register mt-8 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
               <button
                 type="button"
                 style={vaiTro === 'ungvien' ? navyButtonStyle : { backgroundColor: '#ffffff', border: '1px solid transparent', color: '#334155' }}

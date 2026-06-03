@@ -1223,3 +1223,285 @@
 }
 
 /* ========================================================================== */
+/* Responsive riêng cho trang danh sách việc làm và chi tiết việc làm */
+.jobs-filter-backdrop,
+.jobs-mobile-filter-trigger,
+.jobs-mobile-filter-close,
+.jobs-filter-apply-mobile {
+  display: none;
+}
+
+.jobs-mobile-filter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jobs-mobile-filter-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jobs-mobile-filter-head > button {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .jobs-real-page .jobs-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 101;
+    display: block;
+    border: 0;
+    background: rgba(2, 6, 23, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .jobs-real-page .jobs-real-body {
+    grid-template-columns: 1fr !important;
+    padding: 18px 12px 96px !important;
+  }
+
+  .jobs-real-page .jobs-real-filter {
+    display: none !important;
+  }
+
+  .jobs-real-page .jobs-real-filter.is-mobile-open {
+    position: fixed !important;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 102;
+    display: grid !important;
+    max-height: min(84dvh, 720px);
+    padding: 18px 16px calc(22px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -24px 54px rgba(15, 23, 42, 0.24);
+  }
+
+  .jobs-real-page .jobs-mobile-filter-head > button,
+  .jobs-real-page .jobs-mobile-filter-close,
+  .jobs-real-page .jobs-filter-apply-mobile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .jobs-real-page .jobs-mobile-filter-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+
+  .jobs-real-page .jobs-filter-apply-mobile {
+    min-height: 48px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 14px;
+    background: #0e4d7d;
+    color: #ffffff;
+    font-weight: 900;
+  }
+
+  .jobs-real-page .jobs-mobile-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 14px;
+    border: 1px solid rgba(14, 77, 125, 0.18);
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0e4d7d;
+    font-weight: 900;
+    box-shadow: 0 8px 20px rgba(14, 77, 125, 0.08);
+  }
+
+  .jobs-real-page .jobs-real-heading {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .jobs-real-page .jobs-real-heading p {
+    display: none;
+  }
+
+  .jobs-real-page .jobs-real-card {
+    grid-template-columns: 58px minmax(0, 1fr) 42px !important;
+    gap: 12px !important;
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .jobs-real-page .jobs-real-logo {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .jobs-real-page .jobs-real-info {
+    min-width: 0;
+  }
+
+  .jobs-real-page .jobs-real-info h3,
+  .jobs-real-page .jobs-real-info h2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+  }
+
+  .jobs-real-page .jobs-real-meta,
+  .jobs-real-page .jobs-real-skills {
+    gap: 6px !important;
+  }
+
+  .jobs-real-page .jobs-real-save {
+    width: 42px !important;
+    height: 42px !important;
+    align-self: start;
+  }
+
+  .job-detail-page {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+
+  .job-detail-hero {
+    height: auto !important;
+    min-height: 232px;
+  }
+
+  .job-detail-hero > div:last-child {
+    position: relative !important;
+    padding-top: 92px;
+  }
+
+  .job-detail-hero-content {
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 0 16px 18px !important;
+  }
+
+  .job-detail-logo {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 16px !important;
+  }
+
+  .job-detail-title {
+    min-width: 0;
+  }
+
+  .job-detail-title h1 {
+    font-size: 21px !important;
+    line-height: 1.22 !important;
+    margin-bottom: 6px !important;
+  }
+
+  .job-detail-title p {
+    font-size: 13px !important;
+    line-height: 1.35 !important;
+  }
+
+  .job-detail-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    padding: 16px 12px 18px !important;
+  }
+
+  .job-detail-main {
+    gap: 14px !important;
+  }
+
+  .job-detail-card,
+  .job-detail-side-card {
+    border-radius: 16px !important;
+    padding: 16px !important;
+  }
+
+  .job-detail-actions-card {
+    display: grid !important;
+    grid-template-columns: 1fr 52px 52px;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .job-detail-actions-card button {
+    min-width: 0 !important;
+    justify-content: center !important;
+    min-height: 48px;
+    padding: 0 12px !important;
+  }
+
+  .job-detail-actions-card button:first-child {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .job-detail-sidebar {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .job-apply-modal {
+    align-items: end !important;
+    place-items: end stretch !important;
+    padding: 0 !important;
+  }
+
+  .job-apply-card {
+    width: 100% !important;
+    max-height: 94dvh !important;
+    border-radius: 22px 22px 0 0 !important;
+  }
+
+  .job-apply-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 14px 16px !important;
+  }
+
+  .job-apply-header h2 {
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+  }
+
+  .job-apply-header p {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .job-apply-body {
+    padding: 14px 16px !important;
+  }
+
+  .job-apply-footer {
+    position: sticky;
+    bottom: 0;
+    display: grid !important;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px !important;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+    background: #ffffff;
+  }
+
+  .job-apply-footer button {
+    width: 100%;
+    min-width: 0 !important;
+  }
+}

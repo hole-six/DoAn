@@ -623,3 +623,27 @@
     grid-column: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .uv-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .uv-kpi {
+    min-height: 112px !important;
+    padding: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .uv-kpi p {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    margin-top: 8px !important;
+  }
+
+  .uv-kpi strong {
+    font-size: 28px !important;
+    line-height: 1.05 !important;
+  }
+}
