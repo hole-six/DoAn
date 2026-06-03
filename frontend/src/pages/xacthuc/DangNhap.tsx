@@ -5,10 +5,8 @@ import { ArrowLeft, Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import dangNhapImg from '../../assets/dangnhap.png'
 import { duongDanTheoVaiTro, luuPhienDangNhap } from '../../lib/auth'
-import { API_URL } from '../../lib/env'
+import { API_URL, GOOGLE_CLIENT_ID } from '../../lib/env'
 import './auth-styles.css'
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 const vaiTroApi = {
   ungvien: 'ung_vien',
@@ -89,10 +87,11 @@ export default function DangNhap() {
       })
 
       googleButtonRef.current.innerHTML = ''
+      const width = Math.max(240, Math.min(360, googleButtonRef.current.clientWidth || 360))
       google.accounts.id.renderButton(googleButtonRef.current, {
         theme: 'outline',
         size: 'large',
-        width: 360,
+        width,
         text: 'continue_with',
       })
     }

@@ -17,6 +17,7 @@ export const API_URL = layApiUrl()
 export const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
 export const PUBLIC_URL = boDauGachCuoi(import.meta.env.VITE_PUBLIC_URL || layOriginHienTai())
 export const SOCKET_URL = boDauGachCuoi(import.meta.env.VITE_SOCKET_URL || API_ORIGIN)
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 export function taoUrlPublic(path: string) {
   if (/^https?:\/\//i.test(path)) return path

@@ -1,0 +1,439 @@
+/* System-wide responsive overrides.
+   This file is imported last from the app shell because many pages use page-owned CSS
+   and inline layout styles. Keep the rules broad, predictable, and mobile-first. */
+
+html,
+body,
+#root {
+  max-width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+main,
+section,
+article,
+aside,
+form,
+.app-page,
+.section,
+.panel,
+.job-card,
+.company-card,
+.uv-page,
+.ntd-page,
+.admin-page {
+  min-width: 0;
+}
+
+.section,
+.page-hero,
+.hero-section,
+.list-layout,
+.detail-layout,
+.split-section,
+.jobs-real-body,
+.company-real-body {
+  width: min(100%, var(--container, 1280px));
+}
+
+table {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button,
+a {
+  max-width: 100%;
+}
+
+.topbar-actions,
+.detail-actions,
+.job-actions,
+.uv-actions,
+.ntd-actions,
+.admin-actions,
+.uv-form-actions,
+.ntd-form-actions,
+.home-cta-actions {
+  flex-wrap: wrap;
+}
+
+.filter-panel,
+.jobs-filter-panel,
+.company-real-filter,
+.uv-panel,
+.ntd-panel,
+.admin-panel,
+.detail-main,
+.side-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1180px) {
+  .hero-section,
+  .page-hero,
+  .split-section,
+  .detail-layout,
+  .jobs-real-body,
+  .company-real-body,
+  .uv-interview-layout,
+  .ntd-split,
+  .admin-split,
+  main [style*="grid-template-columns"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .hero-visual,
+  .page-hero img,
+  .hero-mini-panel,
+  .detail-sidebar,
+  .filter-panel,
+  .jobs-filter-panel,
+  .company-real-filter {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .section {
+    padding: 48px 16px 0 !important;
+  }
+
+  .section-title {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .section-title h2,
+  .page-hero h1,
+  .hero-copy h1,
+  .auth-panel h1,
+  .dashboard-topbar h1,
+  .uv-header h1,
+  .ntd-header h1,
+  .admin-header h1 {
+    font-size: clamp(28px, 8vw, 40px) !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere;
+  }
+
+  .section-title p:not(.eyebrow),
+  .page-hero p:not(.eyebrow),
+  .hero-copy p:not(.eyebrow),
+  .uv-header p,
+  .ntd-header p,
+  .admin-header p {
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+  }
+
+  .hero-section,
+  .page-hero {
+    min-height: 0 !important;
+    padding: 42px 16px 28px !important;
+  }
+
+  .hero-search,
+  .search-board,
+  .company-real-search,
+  .trangchu-khop-timkiem,
+  .uv-filterbar,
+  .ntd-filterbar,
+  .admin-filterbar,
+  .uv-form,
+  .ntd-form,
+  .admin-form,
+  .form-grid,
+  .stats-grid,
+  .role-grid,
+  .bento-grid,
+  .company-grid,
+  .ntd-price-grid,
+  .uv-kpi-grid,
+  .ntd-kpi-grid,
+  .admin-kpi-grid,
+  .uv-nested-row,
+  .uv-portfolio-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .hero-search,
+  .search-board,
+  .company-real-search,
+  .trangchu-khop-timkiem {
+    gap: 10px !important;
+  }
+
+  .hero-search > *,
+  .search-board > *,
+  .company-real-search > *,
+  .trangchu-khop-timkiem > *,
+  .uv-filterbar > *,
+  .ntd-filterbar > *,
+  .admin-filterbar > *,
+  .uv-form-actions > *,
+  .ntd-form-actions > *,
+  .admin-form-actions > * {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .job-card {
+    grid-template-columns: 64px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .job-card .job-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .job-actions > *,
+  .detail-actions > *,
+  .topbar-actions > *,
+  .uv-actions > *,
+  .ntd-actions > *,
+  .admin-actions > * {
+    flex: 1 1 150px;
+  }
+
+  .logo-box,
+  .large-logo {
+    height: 64px !important;
+    width: 64px !important;
+  }
+
+  .job-heading {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .job-heading h3,
+  .company-content h3,
+  .uv-panel-head h2,
+  .ntd-panel-head h2,
+  .admin-panel-head h2 {
+    font-size: 18px !important;
+    line-height: 1.28 !important;
+  }
+
+  .meta-row,
+  .tag-row,
+  .company-meta,
+  .company-footer,
+  .uv-tabs,
+  .ntd-tabs,
+  .admin-tabs {
+    gap: 8px !important;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .uv-tabs,
+  .ntd-tabs,
+  .admin-tabs {
+    flex-wrap: nowrap !important;
+    scrollbar-width: none;
+  }
+
+  .uv-tabs::-webkit-scrollbar,
+  .ntd-tabs::-webkit-scrollbar,
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .uv-row,
+  .ntd-row,
+  .admin-row,
+  .company-card-foot {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+  }
+
+  .uv-detail-grid,
+  .ntd-detail-grid,
+  .admin-detail-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .uv-modal,
+  .ntd-modal,
+  .admin-modal,
+  .uv-drawer,
+  .ntd-drawer,
+  .admin-drawer {
+    padding: 10px !important;
+  }
+
+  .uv-modal-card,
+  .ntd-modal-card,
+  .admin-modal-card,
+  .uv-drawer-card,
+  .ntd-drawer-card,
+  .admin-drawer-card {
+    border-radius: 16px !important;
+    max-height: calc(100dvh - 20px) !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .chat-layout {
+    height: calc(100dvh - 120px) !important;
+    min-height: 0 !important;
+  }
+
+  .chat-window {
+    bottom: 0 !important;
+    height: min(720px, calc(100dvh - 10px)) !important;
+    max-width: none !important;
+    right: 0 !important;
+    width: min(100vw, 460px) !important;
+  }
+
+  .chat-fab {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    right: 14px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    min-width: 320px;
+  }
+
+  .section,
+  .page-hero,
+  .hero-section,
+  .list-layout,
+  .detail-layout,
+  .jobs-real-body,
+  .company-real-body,
+  .uv-page,
+  .ntd-page,
+  .admin-page {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .btn-primary,
+  .btn-subtle,
+  .btn-danger,
+  .btn-primary-uv {
+    justify-content: center !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .job-card,
+  .job-card.compact,
+  .jobs-real-card,
+  .company-real-card {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .job-card .logo-box,
+  .jobs-real-card img,
+  .company-real-logo {
+    height: 56px !important;
+    width: 56px !important;
+  }
+
+  .company-real-card-head {
+    grid-template-columns: 62px minmax(0, 1fr) !important;
+  }
+
+  .meta-row,
+  .tag-row {
+    align-items: flex-start !important;
+  }
+
+  .meta-row span,
+  .tag-row span,
+  .uv-badge,
+  .ntd-badge,
+  .admin-badge {
+    max-width: 100%;
+    white-space: normal !important;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .chat-window {
+    border-radius: 0 !important;
+    height: 100dvh !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+  }
+
+  .chat-header {
+    padding-top: max(14px, env(safe-area-inset-top, 0px)) !important;
+  }
+
+  .thongbao-popup {
+    border-radius: 18px 18px 0 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    max-height: 82dvh !important;
+    max-width: none !important;
+    position: fixed !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100vw !important;
+  }
+
+  .thongbao-toast-stack {
+    left: 10px !important;
+    max-width: none !important;
+    right: 10px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .section-title h2,
+  .page-hero h1,
+  .hero-copy h1,
+  .trangchu-hero-noidung h1,
+  .uv-header h1,
+  .ntd-header h1,
+  .admin-header h1 {
+    font-size: clamp(26px, 9vw, 34px) !important;
+  }
+
+  .section,
+  .page-hero,
+  .hero-section {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .uv-panel,
+  .ntd-panel,
+  .admin-panel,
+  .company-real-card,
+  .jobs-real-card,
+  .detail-main,
+  .side-card {
+    border-radius: 14px !important;
+    padding: 14px !important;
+  }
+}

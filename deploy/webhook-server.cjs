@@ -61,8 +61,8 @@ async function deploy() {
   try {
     await run('git', ['fetch', '--all', '--prune'], REPO_DIR)
     await run('git', ['reset', '--hard', `origin/${BRANCH}`], REPO_DIR)
-    await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci'], BACKEND_DIR)
-    await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci'], FRONTEND_DIR)
+    await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci', '--include=dev'], BACKEND_DIR)
+    await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['ci', '--include=dev'], FRONTEND_DIR)
     await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'build'], BACKEND_DIR)
     await run(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'build'], FRONTEND_DIR)
     await run('rsync', ['-a', '--delete', `${FRONTEND_DIR}/dist/`, `${NGINX_WEB_ROOT}/`], REPO_DIR)

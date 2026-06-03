@@ -14,6 +14,7 @@ import './ungdung.css'
 import './pages/trangchu/trangchu-styles.css'
 import './realtime.css'
 import './components/chat-notification.css'
+import './styles/global/responsive-system.css'
 
 // ✨ Import Real-time Components
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'

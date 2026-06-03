@@ -36,11 +36,37 @@ function id(value: any) {
   return String(value?._id ?? value?.id ?? value ?? '')
 }
 
-function asText(value: unknown): string {
+function asText(value: unknown, seen = new WeakSet<object>(), depth = 0): string {
   if (value === null || value === undefined) return ''
-  if (Array.isArray(value)) return value.map(asText).filter(Boolean).join('\n')
-  if (typeof value === 'object') return Object.values(value as Record<string, unknown>).map(asText).filter(Boolean).join('\n')
-  return String(value).trim()
+  if (typeof value === 'string') return value.trim()
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value).trim()
+  if (value instanceof Date) return value.toISOString()
+  if (typeof value !== 'object') return ''
+
+  const obj = value as any
+  if (Buffer.isBuffer(obj)) return ''
+  if (typeof obj.toHexString === 'function' && (obj._bsontype || obj.constructor?.name === 'ObjectId')) return String(obj)
+  if (seen.has(obj) || depth > 8) return ''
+  seen.add(obj)
+
+  if (Array.isArray(obj)) return obj.map((item) => asText(item, seen, depth + 1)).filter(Boolean).join('\n')
+  if (obj instanceof Map) return [...obj.values()].map((item) => asText(item, seen, depth + 1)).filter(Boolean).join('\n')
+
+  if (typeof obj.toObject === 'function') {
+    try {
+      const plain = obj.toObject({ virtuals: false, depopulate: true, versionKey: false, flattenMaps: true })
+      if (plain && plain !== obj) return asText(plain, seen, depth + 1)
+    } catch {
+      // Fall back to enumerable fields below.
+    }
+  }
+
+  const ignoredKeys = new Set(['$__', '_doc', 'isNew', 'schema', 'collection', 'db', 'base', 'model'])
+  return Object.entries(obj)
+    .filter(([key, item]) => !key.startsWith('$') && !ignoredKeys.has(key) && typeof item !== 'function')
+    .map(([, item]) => asText(item, seen, depth + 1))
+    .filter(Boolean)
+    .join('\n')
 }
 
 function lowerText(value: unknown): string {
