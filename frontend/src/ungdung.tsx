@@ -29,9 +29,9 @@ import { API_URL } from './lib/env'
 // â”€â”€â”€ Dá»¯ liá»‡u tÄ©nh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const thongDiepChayNgang =
-  'ðŸ”¥ HÆ¡n 12.000 viá»‡c lÃ m IT Ä‘ang tuyá»ƒn Â· LÆ°Æ¡ng Backend Senior lÃªn Ä‘áº¿n 80 triá»‡u Â· ' +
-  'Má»Ÿ CV áº©n danh â€“ nhÃ  tuyá»ƒn dá»¥ng tÃ¬m báº¡n Â· Phá»ng váº¥n thá»±c táº¿ má»—i tuáº§n Â· ' +
-  'Top cÃ´ng ty cÃ´ng nghá»‡ Ä‘ang tuyá»ƒn gáº¥p Â· Ná»™p há»“ sÆ¡ chá»‰ 1 click Â· '
+  'Hơn 12.000 việc làm IT đang tuyển · Lương Backend Senior lên đến 80 triệu · ' +
+  'Mở CV ẩn danh để nhà tuyển dụng tìm bạn · Phỏng vấn thực tế mỗi tuần · ' +
+  'Top công ty công nghệ đang tuyển gấp · Nộp hồ sơ chỉ 1 click · '
 
 const tinhNangNoiBat: Array<{
   icon: React.ElementType
@@ -50,7 +50,7 @@ const nhaTuyenDung = [
     ten: 'Samsung Electronics HCMC',
     logo: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg',
     logoBg: '#000000',
-    diaDiem: 'TP Há»“ ChÃ­ Minh',
+    diaDiem: 'TP Hồ Chí Minh',
     soViec: 2,
     kyNang: ['Embedded', 'Android', 'ReactJS', 'OOP', 'C++', 'Python'],
   },
@@ -59,7 +59,7 @@ const nhaTuyenDung = [
     ten: 'FPT Software',
     logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/200px-FPT_logo_2010.svg.png',
     logoBg: '#ffffff',
-    diaDiem: 'HÃ  Ná»™i Â· TP.HCM Â· ÄÃ  Náºµng',
+    diaDiem: 'Hà Nội · TP.HCM · Đà Nẵng',
     soViec: 142,
     kyNang: ['Java', 'React', '.NET', 'Python', 'AWS', 'DevOps'],
   },
@@ -68,7 +68,7 @@ const nhaTuyenDung = [
     ten: 'Viettel Group',
     logo: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Viettel_logo_2021.svg',
     logoBg: '#ffffff',
-    diaDiem: 'HÃ  Ná»™i Â· TP Há»“ ChÃ­ Minh',
+    diaDiem: 'Hà Nội · TP Hồ Chí Minh',
     soViec: 7,
     kyNang: ['JavaScript', 'Python', 'PHP', 'UI/UX', 'MySQL', 'MVC'],
   },
@@ -104,15 +104,15 @@ const nhaTuyenDung = [
 const tinTuyenDung = [
   {
     id: 1,
-    tieuDe: '[ÄÃ  Náºµng] Senior Backend Engineer (Node.js)',
+    tieuDe: '[Đà Nẵng] Senior Backend Engineer (Node.js)',
     congTy: 'VNEXT SOFTWARE',
     logo: 'https://placehold.co/80x80/fff3e8/f97316?text=VN',
-    diaDiem: 'Táº¡i vÄƒn phÃ²ng Â· ÄÃ  Náºµng',
+    diaDiem: 'Tại văn phòng · Đà Nẵng',
     luong: '30.000.000 - 45.000.000 VND',
     loaiViec: 'backend',
     kyNang: ['Node.js', 'PostgreSQL', 'Redis'],
     badge: 'SUPER HOT',
-    ngayDang: '1 ngÃ y trÆ°á»›c',
+    ngayDang: '1 ngày trước',
     featured: true,
   },
   {
@@ -120,12 +120,12 @@ const tinTuyenDung = [
     tieuDe: 'Frontend Engineer React/TypeScript',
     congTy: 'VisionTech Global',
     logo: 'https://placehold.co/80x80/e0f2fe/2563eb?text=VT',
-    diaDiem: 'LÃ m tá»« xa Â· TP Há»“ ChÃ­ Minh',
+    diaDiem: 'Làm từ xa · TP Hồ Chí Minh',
     luong: '25.000.000 - 38.000.000 VND',
     loaiViec: 'frontend',
     kyNang: ['React', 'TypeScript', 'Tailwind CSS'],
     badge: 'SUPER HOT',
-    ngayDang: '3 ngÃ y trÆ°á»›c',
+    ngayDang: '3 ngày trước',
     featured: true,
   },
   {
@@ -133,12 +133,12 @@ const tinTuyenDung = [
     tieuDe: '[Remote] DevOps Engineer (AWS/Kubernetes)',
     congTy: 'Edge8',
     logo: 'https://placehold.co/80x80/111827/ffffff?text=E8',
-    diaDiem: 'LÃ m tá»« xa Â· HÃ  Ná»™i',
+    diaDiem: 'Làm từ xa · Hà Nội',
     luong: '35.000.000 - 55.000.000 VND',
     loaiViec: 'devops',
     kyNang: ['AWS', 'Kubernetes', 'CI/CD'],
     badge: null,
-    ngayDang: '4 ngÃ y trÆ°á»›c',
+    ngayDang: '4 ngày trước',
     featured: false,
   },
   {
@@ -146,12 +146,12 @@ const tinTuyenDung = [
     tieuDe: 'Senior Full-stack Developer (React/Node.js)',
     congTy: 'CodeLink',
     logo: 'https://placehold.co/80x80/ecfeff/0891b2?text=CL',
-    diaDiem: 'Linh hoáº¡t Â· TP Há»“ ChÃ­ Minh',
+    diaDiem: 'Linh hoạt · TP Hồ Chí Minh',
     luong: '32.000.000 - 48.000.000 VND',
     loaiViec: 'fullstack',
     kyNang: ['React', 'Node.js', 'MongoDB'],
     badge: 'HOT',
-    ngayDang: '13 ngÃ y trÆ°á»›c',
+    ngayDang: '13 ngày trước',
     featured: false,
   },
 ]
@@ -159,12 +159,12 @@ const tinTuyenDung = [
 
 
 const lyDo = [
-  { icon: Zap,          tieu: 'á»¨ng tuyá»ƒn siÃªu nhanh',    mo: 'Chá»‰ 1 click Ä‘á»ƒ ná»™p há»“ sÆ¡. Há»‡ thá»‘ng tá»± Ä‘iá»n thÃ´ng tin tá»« CV cá»§a báº¡n.' },
-  { icon: Shield,       tieu: 'CV áº©n danh báº£o máº­t',      mo: 'Báº­t cháº¿ Ä‘á»™ tÃ¬m viá»‡c thá»¥ Ä‘á»™ng. NhÃ  tuyá»ƒn dá»¥ng tÃ¬m báº¡n mÃ  khÃ´ng lá»™ danh tÃ­nh.' },
-  { icon: Globe,        tieu: 'Máº¡ng lÆ°á»›i rá»™ng kháº¯p',     mo: 'Káº¿t ná»‘i vá»›i 3.200+ cÃ´ng ty tá»« startup Ä‘áº¿n táº­p Ä‘oÃ n Ä‘a quá»‘c gia.' },
-  { icon: CheckCircle,  tieu: 'XÃ¡c thá»±c cÃ´ng ty',         mo: 'Má»i nhÃ  tuyá»ƒn dá»¥ng Ä‘á»u Ä‘Æ°á»£c xÃ¡c minh. KhÃ´ng lo lá»«a Ä‘áº£o, khÃ´ng lo máº¥t thá»i gian.' },
-  { icon: TrendingUp,   tieu: 'BÃ¡o cÃ¡o lÆ°Æ¡ng thá»±c táº¿',   mo: 'Dá»¯ liá»‡u lÆ°Æ¡ng tá»« 50.000+ láº­p trÃ¬nh viÃªn. Biáº¿t giÃ¡ trá»‹ thá»±c cá»§a báº¡n trÃªn thá»‹ trÆ°á»ng.' },
-  { icon: Award,        tieu: 'Há»— trá»£ phá»ng váº¥n',        mo: 'CÃ¢u há»i phá»ng váº¥n thá»±c táº¿, tips tá»« senior developer, mock interview online.' },
+  { icon: Zap,          tieu: 'Ứng tuyển siêu nhanh',    mo: 'Chỉ 1 click để nộp hồ sơ. Hệ thống tự điền thông tin từ CV của bạn.' },
+  { icon: Shield,       tieu: 'CV ẩn danh bảo mật',      mo: 'Bật chế độ tìm việc thụ động. Nhà tuyển dụng tìm bạn mà không lộ danh tính.' },
+  { icon: Globe,        tieu: 'Mạng lưới rộng khắp',     mo: 'Kết nối với các công ty từ startup đến tập đoàn công nghệ.' },
+  { icon: CheckCircle,  tieu: 'Xác thực công ty',        mo: 'Nhà tuyển dụng được kiểm duyệt để ứng viên yên tâm ứng tuyển.' },
+  { icon: TrendingUp,   tieu: 'Dữ liệu tuyển dụng rõ ràng', mo: 'Tin tuyển dụng trình bày rõ mức lương, kỹ năng, hình thức và quyền lợi.' },
+  { icon: Award,        tieu: 'Hỗ trợ phỏng vấn',        mo: 'Gợi ý câu hỏi phỏng vấn, cách viết CV và lộ trình chuẩn bị cho từng vai trò IT.' },
 ]
 
 // â”€â”€â”€ Brand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -224,14 +224,14 @@ function useTrangChuData() {
             .map((job: any, index: number) => ({
               id: job.id,
               tieuDe: job.tieuDe,
-              congTy: job.nhaTuyenDung?.tenCongTy ?? 'NhÃ  tuyá»ƒn dá»¥ng',
+              congTy: job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng',
               logo: job.nhaTuyenDung?.logo || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
-              diaDiem: job.diaChi ?? 'ÄÃ  Náºµng',
-              luong: job.luongMin || job.luongMax ? `${job.luongMin?.toLocaleString('vi-VN') ?? '?'} - ${job.luongMax?.toLocaleString('vi-VN') ?? '?'} VND` : 'Thá»a thuáº­n',
+              diaDiem: job.diaChi ?? 'Đà Nẵng',
+              luong: job.luongMin || job.luongMax ? `${job.luongMin?.toLocaleString('vi-VN') ?? '?'} - ${job.luongMax?.toLocaleString('vi-VN') ?? '?'} VND` : 'Thỏa thuận',
               loaiViec: job.loaiHinh ?? 'toan_thoi_gian',
               kyNang: (job.kyNang ?? []).map((skill: any) => skill.tenKyNang ?? skill.maKyNang?.tenKyNang).filter(Boolean).slice(0, 4),
               badge: index < 2 ? 'HOT' : null,
-              ngayDang: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Má»›i Ä‘Äƒng',
+              ngayDang: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
               featured: index < 2,
             })),
           companies: rawCompanies
@@ -242,9 +242,9 @@ function useTrangChuData() {
               ten: company.tenCongTy,
               logo: company.logo || 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80',
               logoBg: '#ffffff',
-              diaDiem: company.diaChi ?? 'ÄÃ  Náºµng',
+              diaDiem: company.diaChi ?? 'Đà Nẵng',
               soViec: jobsByCompany[company.id] ?? 0,
-              kyNang: [company.nganh, company.quyMo ? `${company.quyMo}+ nhÃ¢n sá»±` : '', company.trangThaiDuyet === 'da_duyet' ? 'ÄÃ£ xÃ¡c thá»±c' : ''].filter(Boolean),
+              kyNang: [company.nganh, company.quyMo ? `${company.quyMo}+ nhân sự` : '', company.trangThaiDuyet === 'da_duyet' ? 'Đã xác thực' : ''].filter(Boolean),
             })),
         })
       } catch {
@@ -315,15 +315,15 @@ function HeroTrangChu() {
           type="button"
           className="search-overlay"
           onClick={() => setSearchActive(false)}
-          aria-label="ÄÃ³ng gá»£i Ã½ tÃ¬m kiáº¿m"
+          aria-label="Đóng gợi ý tìm kiếm"
         />
       )}
 
 
       <div className={`trangchu-hero-noidung${searchActive ? ' search-focus-active' : ''}`}>
-        <p className="eyebrow">Ná»n táº£ng tuyá»ƒn dá»¥ng CNTT</p>
+        <p className="eyebrow">Nền tảng tuyển dụng CNTT</p>
         <h1>
-         TÃ¬m viá»‡c cháº¥t IT ÄÃ  Náºµng
+         Tìm việc chất IT Đà Nẵng
         </h1>
 
         
@@ -333,7 +333,7 @@ function HeroTrangChu() {
             <Search size={20} />
             <input
               type="text"
-              placeholder="TÃªn vá»‹ trÃ­, cÃ´ng ty, ká»¹ nÄƒng..."
+              placeholder="Tên vị trí, công ty, kỹ năng..."
               value={tuKhoa}
               onChange={e => setTuKhoa(e.target.value)}
               onFocus={() => setSearchActive(true)}
@@ -342,7 +342,7 @@ function HeroTrangChu() {
           </label>
           <button className="primary-button large" onClick={timKiem}>
             <Search size={18} />
-            TÃ¬m kiáº¿m
+            Tìm kiếm
           </button>
           {searchActive && (
             <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
@@ -351,7 +351,7 @@ function HeroTrangChu() {
 
         {/* Gá»£i Ã½ tá»« khoÃ¡ */}
         <div className="trangchu-goiy">
-          <span>Ká»¹ nÄƒng ná»•i báº­t:</span>
+          <span>Kỹ năng nổi bật:</span>
           {['React', 'Node.js', 'TypeScript', 'Java', 'DevOps', 'Data Engineer'].map(kn => (
             <button key={kn} onClick={() => navigate(`/viec-lam?tuKhoa=${encodeURIComponent(kn)}`)}>{kn}</button>
           ))}
@@ -359,7 +359,7 @@ function HeroTrangChu() {
 
         {/* Thanh chá»¯ cháº¡y ngang */}
         <div className="bang-chay-thong-bao">
-          <span className="bang-chay-icon">ðŸ”¥</span>
+          <span className="bang-chay-icon">HOT</span>
           <div className="bang-chay-cua-so">
             <div className="bang-chay-duong">
               <span className="bang-chay-muc">{thongDiepChayNgang}</span>
@@ -410,12 +410,12 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
     <section className="section section-why-full">
       <div className="section-title">
         <div>
-          <p className="eyebrow">Äá»‘i tÃ¡c tuyá»ƒn dá»¥ng</p>
-          <h2>NhÃ  tuyá»ƒn dá»¥ng hÃ ng Ä‘áº§u</h2>
-          <p>CÃ¡c cÃ´ng ty cÃ´ng nghá»‡ lá»›n nháº¥t Viá»‡t Nam Ä‘ang tuyá»ƒn dá»¥ng tÃ­ch cá»±c</p>
+          <p className="eyebrow">Đối tác tuyển dụng</p>
+          <h2>Nhà tuyển dụng hàng đầu</h2>
+          <p>Các công ty công nghệ đang tuyển dụng tích cực trên Effort Job</p>
         </div>
           <Link to="/cong-ty" className="text-link">
-          Xem táº¥t cáº£ <ChevronRight size={16} />
+          Xem tất cả <ChevronRight size={16} />
         </Link>
       </div>
 
@@ -444,8 +444,8 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
               <span className="ntd-dia-diem">{cty.diaDiem}</span>
               <div className="ntd-viec">
                 <span className="ntd-dot" />
-                <span>{cty.soViec} Viá»‡c lÃ m</span>
-                <span className="ntd-arrow">â€º</span>
+                <span>{cty.soViec} việc làm</span>
+                <span className="ntd-arrow">›</span>
               </div>
             </div>
           </Link>
@@ -461,7 +461,7 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
   const items = jobs?.length ? jobs : tinTuyenDung.map(item => ({ ...item, id: String(item.id) }))
   const nhanBadge = (badge: string | null) => {
     if (!badge) return null
-    return badge === 'SUPER HOT' ? 'Æ¯u tiÃªn' : 'Ná»•i báº­t'
+    return badge === 'SUPER HOT' ? 'Ưu tiên' : 'Nổi bật'
   }
 
   const dinhDangLoaiViec = (loaiViec: string) =>
@@ -476,12 +476,12 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
     <section className="section">
       <div className="section-title">
         <div>
-          <p className="eyebrow">CÆ¡ há»™i viá»‡c lÃ m</p>
-          <h2>Viá»‡c lÃ m IT ná»•i báº­t</h2>
-          <p>Cáº­p nháº­t má»›i nháº¥t tá»« cÃ¡c cÃ´ng ty cÃ´ng nghá»‡ hÃ ng Ä‘áº§u</p>
+          <p className="eyebrow">Cơ hội việc làm</p>
+          <h2>Việc làm IT nổi bật</h2>
+          <p>Cập nhật mới nhất từ các công ty công nghệ hàng đầu</p>
         </div>
         <Link to="/viec-lam" className="text-link">
-          Xem táº¥t cáº£ <ChevronRight size={16} />
+          Xem tất cả <ChevronRight size={16} />
         </Link>
       </div>
 
@@ -498,7 +498,7 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
               </span>
             )}
 
-            <p className="vl-time">ÄÄƒng {tin.ngayDang}</p>
+            <p className="vl-time">Đăng {tin.ngayDang}</p>
             <h3 className="vl-title">{tin.tieuDe}</h3>
             <div className="vl-company">
               <img
@@ -510,13 +510,13 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
               <span className="vl-company-name">{tin.congTy}</span>
             </div>
             <div className="vl-salary-wrap">
-              <span className="vl-label">Má»©c lÆ°Æ¡ng</span>
+              <span className="vl-label">Mức lương</span>
               <p className="vl-salary">{tin.luong}</p>
             </div>
             <hr className="vl-divider" />
             <div className="vl-meta">
-              <span><strong>NgÃ nh:</strong> {dinhDangLoaiViec(tin.loaiViec)}</span>
-              <span><strong>Khu vá»±c:</strong> {tin.diaDiem}</span>
+              <span><strong>Ngành:</strong> {dinhDangLoaiViec(tin.loaiViec)}</span>
+              <span><strong>Khu vực:</strong> {tin.diaDiem}</span>
             </div>
             <div className="vl-tags">
               {tin.kyNang.map(kn => (
@@ -570,9 +570,9 @@ function SectionTechStack() {
     <section className="section section-tech-stack">
       <div className="section-title">
         <div>
-          <p className="eyebrow">CÃ´ng nghá»‡ phá»• biáº¿n</p>
-          <h2>Ká»¹ nÄƒng Ä‘Æ°á»£c tuyá»ƒn dá»¥ng nhiá»u nháº¥t</h2>
-          <p>CÃ¡c cÃ´ng nghá»‡ hÃ ng Ä‘áº§u mÃ  nhÃ  tuyá»ƒn dá»¥ng Ä‘ang tÃ¬m kiáº¿m</p>
+          <p className="eyebrow">Công nghệ phổ biến</p>
+          <h2>Kỹ năng được tuyển dụng nhiều nhất</h2>
+          <p>Các công nghệ hàng đầu mà nhà tuyển dụng đang tìm kiếm</p>
         </div>
       </div>
 
@@ -605,8 +605,8 @@ function SectionLyDo() {
     <section className="section">
       <div className="section-title">
         <div>
-          <p className="eyebrow">Táº¡i sao chá»n Effort Job</p>
-          <h2>Ná»n táº£ng Ä‘Æ°á»£c tin dÃ¹ng bá»Ÿi<br />hÃ ng trÄƒm nghÃ¬n láº­p trÃ¬nh viÃªn</h2>
+          <p className="eyebrow">Tại sao chọn Effort Job</p>
+          <h2>Nền tảng được xây dựng cho<br />ứng viên và nhà tuyển dụng IT</h2>
         </div>
       </div>
       <div className="bento-grid">
@@ -635,21 +635,21 @@ function SectionCTA() {
         style={{ borderRadius: 24, marginTop: 0 }}
       >
         <div>
-          <p className="eyebrow">Báº¯t Ä‘áº§u ngay hÃ´m nay</p>
-          <h2>Sáºµn sÃ ng bÆ°á»›c vÃ o<br />cÆ¡ há»™i tiáº¿p theo?</h2>
-          <p>Táº¡o há»“ sÆ¡ miá»…n phÃ­, káº¿t ná»‘i vá»›i nhÃ  tuyá»ƒn dá»¥ng vÃ  nháº­n offer trong 7 ngÃ y.</p>
+          <p className="eyebrow">Bắt đầu ngay hôm nay</p>
+          <h2>Sẵn sàng bước vào<br />cơ hội tiếp theo?</h2>
+          <p>Tạo hồ sơ miễn phí, kết nối với nhà tuyển dụng và theo dõi quá trình ứng tuyển rõ ràng.</p>
           <div className="detail-actions home-cta-actions" style={{ border: 0, padding: '20px 0 0' }}>
             <Link to="/dang-ky" className="primary-button large">
-              Táº¡o há»“ sÆ¡ miá»…n phÃ­ <ArrowRight size={18} />
+              Tạo hồ sơ miễn phí <ArrowRight size={18} />
             </Link>
             <Link to="/viec-lam" className="ghost-button large">
-              KhÃ¡m phÃ¡ viá»‡c lÃ m
+              Khám phá việc làm
             </Link>
           </div>
         </div>
         <img
           src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=720&q=80"
-          alt="Team lÃ m viá»‡c"
+          alt="Team làm việc"
         />
       </div>
     </section>
@@ -661,7 +661,7 @@ function SectionCTA() {
 
 function HomeAiChat() {
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('Há»i tÃ´i vá» viá»‡c lÃ m IT trong há»‡ thá»‘ng: React á»Ÿ ÄÃ  Náºµng, job remote cho junior, cÃ´ng ty Ä‘ang tuyá»ƒn Backend...')
+  const [answer, setAnswer] = useState('Hỏi tôi về việc làm IT trong hệ thống: React ở Đà Nẵng, job remote cho junior, công ty đang tuyển Backend...')
   const [busy, setBusy] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
@@ -691,11 +691,11 @@ function HomeAiChat() {
         body: JSON.stringify({ cauHoi }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.thongBao ?? 'KhÃ´ng há»i Ä‘Æ°á»£c AI')
-      setAnswer(data.duLieu?.traLoi ?? data.traLoi ?? 'ChÆ°a cÃ³ cÃ¢u tráº£ lá»i phÃ¹ há»£p trong há»‡ thá»‘ng.')
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI')
+      setAnswer(data.duLieu?.traLoi ?? data.traLoi ?? 'Chưa có câu trả lời phù hợp trong hệ thống.')
       setQuestion('')
     } catch (error) {
-      setAnswer(error instanceof Error ? error.message : 'KhÃ´ng há»i Ä‘Æ°á»£c AI lÃºc nÃ y.')
+      setAnswer(error instanceof Error ? error.message : 'Không hỏi được AI lúc này.')
     } finally {
       setBusy(false)
     }
@@ -725,7 +725,7 @@ function HomeAiChat() {
           cursor: 'pointer',
         }}
       >
-        <Bot size={22} /> Há»i AI tÃ¬m viá»‡c
+        <Bot size={22} /> Hỏi AI tìm việc
       </button>
     )
   }
@@ -745,15 +745,15 @@ function HomeAiChat() {
           <span style={{ display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: 14, background: '#e0f2fe', color: '#075985' }}><Bot size={22} /></span>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ margin: 0, fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.12em', color: '#075985' }}>Effort Job Gemini</p>
-            <h2 style={{ margin: '2px 0 0', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Trá»£ lÃ½ tÃ¬m viá»‡c tá»« database</h2>
+            <h2 style={{ margin: '2px 0 0', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>Trợ lý tìm việc từ database</h2>
           </div>
           <button
             type="button"
             onClick={() => setExpanded(false)}
-            aria-label="ÄÃ³ng AI"
+            aria-label="Đóng AI"
             style={{ width: 34, height: 34, borderRadius: 12, border: '1px solid #cbd5e1', background: '#fff', color: '#334155', fontWeight: 900, cursor: 'pointer' }}
           >
-            Ã—
+            ×
           </button>
         </div>
         <div style={{ display: 'grid', gap: 10 }}>
@@ -765,7 +765,7 @@ function HomeAiChat() {
               onKeyDown={event => {
                 if (event.key === 'Enter') void ask()
               }}
-              placeholder="VÃ­ dá»¥: CÃ³ job React junior remote nÃ o cÃ²n háº¡n khÃ´ng?"
+              placeholder="Ví dụ: Có job React junior remote nào còn hạn không?"
               style={{ flex: '1 1 320px', minHeight: 46, borderRadius: 14, border: '1px solid #cbd5e1', padding: '0 14px', fontWeight: 700, outline: 'none' }}
             />
             <button
@@ -774,7 +774,7 @@ function HomeAiChat() {
               disabled={busy || !question.trim()}
               style={{ minHeight: 46, border: 0, borderRadius: 14, background: '#075985', color: '#fff', padding: '0 18px', fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: 8, cursor: busy ? 'wait' : 'pointer', opacity: busy || !question.trim() ? .65 : 1 }}
             >
-              {busy ? <Sparkles size={18} /> : <Send size={18} />} {busy ? 'Äang tráº£ lá»i...' : 'Há»i AI'}
+              {busy ? <Sparkles size={18} /> : <Send size={18} />} {busy ? 'Đang trả lời...' : 'Hỏi AI'}
             </button>
           </div>
         </div>
@@ -800,15 +800,15 @@ type HomeAiJobSuggestion = {
 
 const mascotFrames = [mascotFrame1, mascotFrame2, mascotFrame3]
 const homeAiQuickPrompts = [
-  'TÃ¬m job React ÄÃ  Náºµng',
-  'CV tÃ´i há»£p job nÃ o?',
-  'CÃ´ng ty nÃ o Ä‘ang tuyá»ƒn Backend?',
-  'Lá»™ trÃ¬nh há»c Ä‘á»ƒ á»©ng tuyá»ƒn Frontend?',
+  'Tìm job React Đà Nẵng',
+  'CV tôi hợp job nào?',
+  'Công ty nào đang tuyển Backend?',
+  'Lộ trình học để ứng tuyển Frontend?',
 ]
 
 function HomeAiMascotChat() {
   const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('Xin chÃ o, mÃ¬nh lÃ  trá»£ lÃ½ Effort Job. Báº¡n cÃ³ thá»ƒ há»i mÃ¬nh vá» lá»™ trÃ¬nh nghá» nghiá»‡p, CV, phá»ng váº¥n hoáº·c tÃ¬m viá»‡c trong database.')
+  const [answer, setAnswer] = useState('Xin chào, mình là trợ lý Effort Job. Bạn có thể hỏi mình về lộ trình nghề nghiệp, CV, phỏng vấn hoặc tìm việc trong database.')
   const [jobs, setJobs] = useState<HomeAiJobSuggestion[]>([])
   const [quickPrompts, setQuickPrompts] = useState(homeAiQuickPrompts)
   const [busy, setBusy] = useState(false)
@@ -833,16 +833,16 @@ function HomeAiMascotChat() {
         body: JSON.stringify({ cauHoi }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.thongBao ?? 'KhÃ´ng há»i Ä‘Æ°á»£c AI lÃºc nÃ y.')
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI lúc này.')
       const payload = data.duLieu ?? data
-      setAnswer(payload.traLoi ?? 'MÃ¬nh chÆ°a cÃ³ cÃ¢u tráº£ lá»i phÃ¹ há»£p, báº¡n thá»­ há»i cá»¥ thá»ƒ hÆ¡n nhÃ©.')
+      setAnswer(payload.traLoi ?? 'Mình chưa có câu trả lời phù hợp, bạn thử hỏi cụ thể hơn nhé.')
       setJobs(Array.isArray(payload.goiYViecLam) ? payload.goiYViecLam : [])
       if (Array.isArray(payload.goiYCauHoi) && payload.goiYCauHoi.length) {
         setQuickPrompts(payload.goiYCauHoi.slice(0, 4))
       }
       setQuestion('')
     } catch (error) {
-      setAnswer(error instanceof Error ? error.message : 'KhÃ´ng há»i Ä‘Æ°á»£c AI lÃºc nÃ y.')
+      setAnswer(error instanceof Error ? error.message : 'Không hỏi được AI lúc này.')
       setJobs([])
     } finally {
       setBusy(false)
@@ -851,25 +851,25 @@ function HomeAiMascotChat() {
 
   if (!expanded) {
     return (
-      <button type="button" className="home-ai-mascot-fab" onClick={() => setExpanded(true)} aria-label="Má»Ÿ trá»£ lÃ½ AI Effort Job">
+      <button type="button" className="home-ai-mascot-fab" onClick={() => setExpanded(true)} aria-label="Mở trợ lý AI Effort Job">
         <span className="home-ai-mascot-glow" />
         <img src={mascotFrames[frameIndex]} alt="" />
-        <span>Há»i AI</span>
+        <span>Hỏi AI</span>
       </button>
     )
   }
 
   return (
-    <section className="home-ai-panel" aria-label="Trá»£ lÃ½ AI Effort Job">
+    <section className="home-ai-panel" aria-label="Trợ lý AI Effort Job">
       <div className="home-ai-panel-header">
         <div className="home-ai-avatar">
-          <img src={mascotFrames[frameIndex]} alt="Linh váº­t Effort Job" />
+          <img src={mascotFrames[frameIndex]} alt="Trợ lý Effort Job" />
         </div>
         <div className="min-w-0">
           <p>Effort Job AI</p>
-          <h2>Trá»£ lÃ½ nghá» nghiá»‡p</h2>
+          <h2>Trợ lý nghề nghiệp</h2>
         </div>
-        <button type="button" className="home-ai-close" onClick={() => setExpanded(false)} aria-label="ÄÃ³ng trá»£ lÃ½ AI">
+        <button type="button" className="home-ai-close" onClick={() => setExpanded(false)} aria-label="Đóng trợ lý AI">
           <X size={18} />
         </button>
       </div>
@@ -883,7 +883,7 @@ function HomeAiMascotChat() {
                 <span className="home-ai-score">{Math.round(Number(job.diem ?? 0)) || 'AI'}</span>
                 <span className="home-ai-job-main">
                   <strong>{job.tieuDe}</strong>
-                  <small>{job.congTy} Â· {job.diaChi || 'Äang cáº­p nháº­t'} Â· {job.luong || 'Thá»a thuáº­n'}</small>
+                  <small>{job.congTy} · {job.diaChi || 'Đang cập nhật'} · {job.luong || 'Thỏa thuận'}</small>
                   {job.lyDo && <em>{job.lyDo}</em>}
                 </span>
                 <ArrowRight size={16} />
@@ -908,11 +908,11 @@ function HomeAiMascotChat() {
           onKeyDown={event => {
             if (event.key === 'Enter') void ask()
           }}
-          placeholder="Há»i AI vá» job, CV, phá»ng váº¥n hoáº·c lá»™ trÃ¬nh nghá» nghiá»‡p..."
+          placeholder="Hỏi AI về job, CV, phỏng vấn hoặc lộ trình nghề nghiệp..."
         />
         <button type="button" onClick={() => void ask()} disabled={busy || !question.trim()}>
           {busy ? <Sparkles size={18} /> : <Send size={18} />}
-          {busy ? 'Äang tráº£ lá»i' : 'Gá»­i'}
+          {busy ? 'Đang trả lời' : 'Gửi'}
         </button>
       </div>
     </section>
@@ -979,7 +979,7 @@ const ChatAdminPage = lazy(() => import('./pages/chat/TrangChat').then(module =>
 const TrangDangXayDungPage = lazy(() => import('./pages/TrangDangXayDung'))
 
 function RouteFallback() {
-  return <div className="route-loading">Äang táº£i...</div>
+  return <div className="route-loading">Đang tải...</div>
 }
 
 export default function UngDung() {
@@ -1021,12 +1021,12 @@ export default function UngDung() {
           <Route path="/cong-ty" element={<DanhSachCongTy />} />
           <Route path="/cong-ty/:id" element={<HoSoCongTy />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:id" element={<TrangDangXayDungPage ten="BÃ i viáº¿t" />} />
-          <Route path="/luong" element={<TrangDangXayDungPage ten="BÃ¡o cÃ¡o lÆ°Æ¡ng" />} />
-          <Route path="/gioi-thieu" element={<TrangDangXayDungPage ten="Giá»›i thiá»‡u" />} />
-          <Route path="/lien-he" element={<TrangDangXayDungPage ten="LiÃªn há»‡" />} />
-          <Route path="/dieu-khoan" element={<TrangDangXayDungPage ten="Äiá»u khoáº£n" />} />
-          <Route path="/bao-mat" element={<TrangDangXayDungPage ten="Báº£o máº­t" />} />
+          <Route path="/blog/:id" element={<TrangDangXayDungPage ten="Bài viết" />} />
+          <Route path="/luong" element={<TrangDangXayDungPage ten="Báo cáo lương" />} />
+          <Route path="/gioi-thieu" element={<TrangDangXayDungPage ten="Giới thiệu" />} />
+          <Route path="/lien-he" element={<TrangDangXayDungPage ten="Liên hệ" />} />
+          <Route path="/dieu-khoan" element={<TrangDangXayDungPage ten="Điều khoản" />} />
+          <Route path="/bao-mat" element={<TrangDangXayDungPage ten="Bảo mật" />} />
         </Route>
 
         {/* Auth routes (khÃ´ng cÃ³ Header/Footer) */}
@@ -1074,7 +1074,7 @@ export default function UngDung() {
           <Route path="chat" element={<ChatAdminPage />} />
         </Route>
 
-        <Route path="*" element={<TrangDangXayDungPage ten="404 â€“ KhÃ´ng tÃ¬m tháº¥y" />} />
+        <Route path="*" element={<TrangDangXayDungPage ten="404 - Không tìm thấy" />} />
       </Routes>
       </Suspense>
         </ChatProvider>

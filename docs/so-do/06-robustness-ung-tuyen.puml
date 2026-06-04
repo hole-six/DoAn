@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+skinparam shadowing false
+title Robustness Diagram - Ung vien ung tuyen
+
+actor "Ung vien" as Candidate
+boundary "ChiTietViecLamPage" as JobDetail
+boundary "ApplyModal" as ApplyModal
+control "HoSoUngTuyenController" as ApplicationController
+control "UngTuyenService" as ApplicationService
+entity "TinTuyenDungModel" as JobModel
+entity "HoSoNangLucModel" as CVModel
+entity "HoSoUngTuyenModel" as ApplicationModel
+entity "ThongBaoModel" as NotificationModel
+database "MongoDB" as DB
+
+Candidate --> JobDetail : xem tin
+Candidate --> ApplyModal : chon ung tuyen
+ApplyModal --> ApplicationController : POST /hosoungtuyen
+ApplicationController --> ApplicationService : tao ho so ung tuyen
+ApplicationService --> JobModel : kiem tra tin dang mo
+ApplicationService --> CVModel : kiem tra CV
+ApplicationService --> ApplicationModel : kiem tra trung/tac tao
+ApplicationModel --> DB : luu ho so ung tuyen
+ApplicationService --> NotificationModel : tao thong bao cho nha tuyen dung
+NotificationModel --> DB : luu thong bao
+ApplyModal --> Candidate : ket qua ung tuyen
+@enduml
+

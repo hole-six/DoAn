@@ -1,0 +1,49 @@
+@startuml
+skinparam shadowing false
+title Sequence Diagram - Quen mat khau bang Email Token
+
+actor User
+participant "ForgotPasswordPage" as ForgotPage
+participant "ResetPasswordPage" as ResetPage
+participant "XacthucController" as AuthController
+participant "XacthucService" as AuthService
+participant "NguoiDungModel" as UserModel
+participant "EmailService" as EmailService
+database "MongoDB" as DB
+
+User -> ForgotPage : nhap email
+ForgotPage -> AuthController : POST /api/xacthuc/quen-mat-khau
+AuthController -> AuthService : tao yeu cau reset
+AuthService -> UserModel : tim email
+UserModel -> DB : findOne(email)
+DB --> UserModel : user/null
+alt email ton tai
+  AuthService -> UserModel : luu resetTokenHash, expires
+  UserModel -> DB : update user
+  AuthService -> EmailService : gui link reset
+  EmailService --> User : email reset password
+  AuthController --> ForgotPage : thong bao da gui email
+else email khong ton tai
+  AuthController --> ForgotPage : thong bao email khong ton tai
+end
+
+User -> ResetPage : click link reset
+ResetPage -> AuthController : GET /api/xacthuc/dat-lai-mat-khau/:token
+AuthController -> AuthService : kiem tra token
+AuthService -> UserModel : tim token hash con han
+UserModel -> DB : query token
+DB --> UserModel : user/null
+alt token hop le
+  AuthController --> ResetPage : token hop le
+  User -> ResetPage : nhap mat khau moi
+  ResetPage -> AuthController : POST /api/xacthuc/dat-lai-mat-khau
+  AuthController -> AuthService : cap nhat mat khau
+  AuthService -> UserModel : set passwordHash, clear token
+  UserModel -> DB : update
+  AuthController --> ResetPage : thanh cong
+  ResetPage --> User : chuyen ve dang nhap
+else token khong hop le
+  AuthController --> ResetPage : token het han/khong hop le
+end
+@enduml
+

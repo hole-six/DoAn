@@ -1,0 +1,36 @@
+@startuml
+skinparam shadowing false
+title Activity Diagram - Nha tuyen dung dang tin va Admin duyet tin
+
+start
+:Nha tuyen dung mo trang quan ly tin;
+if (Cong ty da duoc duyet?) then (Co)
+  :Nhap thong tin tin tuyen dung;
+  :Chon ky nang, muc luong, han nop, anh dai dien;
+  if (Du lieu hop le?) then (Co)
+    :POST /api/tintuyendung;
+    :Tao tin trang thai cho_duyet;
+    :Gui thong bao den Admin;
+    :Admin mo danh sach tin cho duyet;
+    :Admin xem chi tiet tin;
+    if (Tin hop le?) then (Co)
+      :Cap nhat trang thai dang_mo;
+      :Gui thong bao tin duoc duyet cho nha tuyen dung;
+      :Tin hien thi cong khai;
+      stop
+    else (Khong)
+      :Cap nhat trang thai tu_choi;
+      :Gui ly do tu choi cho nha tuyen dung;
+      stop
+    endif
+  else (Khong)
+    :Hien thi loi form;
+    stop
+  endif
+else (Khong)
+  :Chan tao tin;
+  :Hien thi huong dan hoan thien ho so cong ty;
+  stop
+endif
+@enduml
+

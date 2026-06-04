@@ -2,7 +2,7 @@
 
 /* san-bong-main inspired application polish */
 :root {
-  --font-ui: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Lexend", sans-serif;
   --sport-primary: #0e4d7d;
   --sport-primary-dark: #0a3659;
   --sport-accent: #ef4444;
@@ -247,7 +247,7 @@ textarea {
 
 /* Final san-bong-main overrides: keep this block last. */
 :root {
-  --font-ui: "Be Vietnam Pro", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Lexend", sans-serif;
   --sport-primary: #0e4d7d;
   --sport-primary-dark: #0a3659;
   --sport-accent: #ef4444;

@@ -38,12 +38,12 @@ const nhanLoaiKyNang: Record<string, string> = {
   thiet_ke: 'Design',
   phan_tich: 'Business Analyst',
   quan_ly: 'Product / Management',
-  ngon_ngu: 'NgÃ´n ngá»¯',
-  ky_nang_mem: 'Ká»¹ nÄƒng má»m',
+  ngon_ngu: 'Ngôn ngữ',
+  ky_nang_mem: 'Kỹ năng mềm',
 }
 
 function formatLuong(min?: number, max?: number) {
-  if (!min && !max) return 'Thá»a thuáº­n'
+  if (!min && !max) return 'Thỏa thuận'
   return `${min?.toLocaleString('vi-VN') ?? '?'} - ${max?.toLocaleString('vi-VN') ?? '?'} VND`
 }
 
@@ -52,7 +52,7 @@ function normalize(value: string) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/Ä‘/g, 'd')
+    .replace(/đ/g, 'd')
     .replace(/reactjs/g, 'react')
     .replace(/node\.?js/g, 'nodejs')
     .replace(/vue\.?js/g, 'vuejs')
@@ -137,10 +137,10 @@ export default function TimKiemViecLam() {
           .map((job: any, index: number) => ({
             id: job.id,
             tieuDe: job.tieuDe,
-            congTy: job.nhaTuyenDung?.tenCongTy ?? 'NhÃ  tuyá»ƒn dá»¥ng',
+            congTy: job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng',
             logo: job.nhaTuyenDung?.logo || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
             anhDaiDien: job.anhDaiDien,
-            diaDiem: job.diaChi ?? 'ÄÃ  Náºµng',
+            diaDiem: job.diaChi ?? 'Đà Nẵng',
             luong: formatLuong(job.luongMin, job.luongMax),
             loai: job.loaiHinh ?? 'toan_thoi_gian',
             capBac: job.capBac ?? 'junior',
@@ -154,14 +154,14 @@ export default function TimKiemViecLam() {
               .slice(0, 8),
             moTa: job.moTa ?? '',
             yeuCau: job.yeuCau ?? '',
-            ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Má»›i Ä‘Äƒng',
+            ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
             featured: index < 3,
           }))
         setViecLam(items)
         setDangTai(false)
       })
       .catch(() => {
-        setLoi('KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u viá»‡c lÃ m tá»« API.')
+        setLoi('Không tải được dữ liệu việc làm từ API.')
         setDangTai(false)
       })
     return () => { active = false }
@@ -207,10 +207,10 @@ export default function TimKiemViecLam() {
         body: JSON.stringify({ cauHoi }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.thongBao ?? 'KhÃ´ng há»i Ä‘Æ°á»£c AI')
+      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI')
       setAiAnswer(data.duLieu?.traLoi ?? '')
     } catch (error) {
-      setAiAnswer(error instanceof Error ? error.message : 'KhÃ´ng há»i Ä‘Æ°á»£c AI')
+      setAiAnswer(error instanceof Error ? error.message : 'Không hỏi được AI')
     } finally {
       setAiBusy(false)
     }
@@ -294,20 +294,20 @@ export default function TimKiemViecLam() {
         <img src={timJobBg} alt="" />
         <div />
         <article>
-          <h1>TÃ¬m viá»‡c IT báº±ng dá»¯ liá»‡u tuyá»ƒn dá»¥ng tháº­t</h1>
-          <p>{dangTai ? 'Äang táº£i dá»¯ liá»‡u...' : `${ketQua.length} viá»‡c lÃ m phÃ¹ há»£p tá»« há»‡ thá»‘ng ITJob`}</p>
+          <h1>Tìm việc IT bằng dữ liệu tuyển dụng thật</h1>
+          <p>{dangTai ? 'Đang tải dữ liệu...' : `${ketQua.length} việc làm phù hợp từ hệ thống ITJob`}</p>
           <div ref={searchWrapRef} className={`jobs-real-search${searchActive ? ' search-shell-active' : ''}`}>
             <label>
               <Search size={18} />
-              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chá»©c danh, ká»¹ nÄƒng, cÃ´ng ty..." />
+              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chức danh, kỹ năng, công ty..." />
             </label>
-            <button className="primary-button" onClick={submitSearch}><Search size={17} /> TÃ¬m viá»‡c</button>
+            <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm việc</button>
             {searchActive && (
               <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
             )}
           </div>
           {searchActive && (loading || hasAny) && (
-            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="ÄÃ³ng gá»£i Ã½ tÃ¬m kiáº¿m" />
+            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="Đóng gợi ý tìm kiếm" />
           )}
           <div className="jobs-real-tags">
             {goiYKyNang.map(skill => <button key={skill.id} onClick={() => setKyNangDangChon(prev => toggleValue(prev, skill.id))}>{skill.ten}</button>)}
@@ -320,19 +320,19 @@ export default function TimKiemViecLam() {
           <button
             className="jobs-filter-backdrop"
             type="button"
-            aria-label="ÄÃ³ng bá»™ lá»c"
+            aria-label="Đóng bộ lọc"
             onClick={() => setFilterOpen(false)}
           />
         )}
         <aside className={`jobs-real-filter ${filterOpen ? 'is-mobile-open' : ''}`}>
           <div className="jobs-mobile-filter-head">
-            <span><SlidersHorizontal size={18} /><strong>Bá»™ lá»c nhanh</strong></span>
-            <button type="button" onClick={() => setFilterOpen(false)} aria-label="ÄÃ³ng bá»™ lá»c">
+            <span><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></span>
+            <button type="button" onClick={() => setFilterOpen(false)} aria-label="Đóng bộ lọc">
               <X size={18} />
             </button>
           </div>
           <section className="jobs-filter-group">
-            <h3>Danh má»¥c ká»¹ nÄƒng</h3>
+            <h3>Danh mục kỹ năng</h3>
             {boLocDong.loai.map(([loai, count]) => (
               <button className={loaiDangChon.includes(loai) ? 'active' : ''} key={loai} onClick={() => setLoaiDangChon(prev => toggleValue(prev, loai))}>
                 <Filter size={15} /> <span>{nhanLoaiKyNang[loai] ?? loai}</span><em>{count}</em>
@@ -340,7 +340,7 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3>Ká»¹ nÄƒng liÃªn quan</h3>
+            <h3>Kỹ năng liên quan</h3>
             {boLocDong.kyNang
               .filter(skill => !loaiDangChon.length || loaiDangChon.includes(skill.loai))
               .slice(0, 18)
@@ -351,7 +351,7 @@ export default function TimKiemViecLam() {
               ))}
           </section>
           <section className="jobs-filter-group two-col">
-            <h3>Cáº¥p báº­c</h3>
+            <h3>Cấp bậc</h3>
             {boLocDong.capBac.map(([capBac, count]) => (
               <button className={capBacDangChon.includes(capBac) ? 'active' : ''} key={capBac} onClick={() => setCapBacDangChon(prev => toggleValue(prev, capBac))}>
                 <span>{capBac}</span><em>{count}</em>
@@ -359,7 +359,7 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3>HÃ¬nh thá»©c</h3>
+            <h3>Hình thức</h3>
             {boLocDong.loaiHinh.map(([loai, count]) => (
               <button className={loaiHinhDangChon.includes(loai) ? 'active' : ''} key={loai} onClick={() => setLoaiHinhDangChon(prev => toggleValue(prev, loai))}>
                 <Briefcase size={15} /> <span>{loai}</span><em>{count}</em>
@@ -367,16 +367,16 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Trá»£ lÃ½ AI</h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Trợ lý AI</h3>
             <textarea
               value={aiQuestion}
               onChange={e => setAiQuestion(e.target.value)}
               rows={4}
-              placeholder="Há»i AI: tÃ¬m viá»‡c frontend á»Ÿ ÄÃ  Náºµng, job React junior, ..."
+              placeholder="Hỏi AI: tìm việc frontend ở Đà Nẵng, job React junior, ..."
               style={{ width: '100%', borderRadius: 10, border: '1px solid #dbe4f0', padding: 10, fontSize: 13, resize: 'vertical' }}
             />
             <button className="primary-button" style={{ width: '100%', marginTop: 8 }} onClick={() => void askAi()} disabled={aiBusy}>
-              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Äang tráº£ lá»i...' : 'Há»i AI'}
+              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Đang trả lời...' : 'Hỏi AI'}
             </button>
             {aiAnswer && (
               <div style={{ marginTop: 10, borderRadius: 12, border: '1px solid #dbe4f0', background: '#f8fbff', padding: 12, fontSize: 13, lineHeight: 1.7, color: '#0f172a', whiteSpace: 'pre-line' }}>
@@ -384,23 +384,23 @@ export default function TimKiemViecLam() {
               </div>
             )}
           </section>
-          <button className="jobs-filter-clear" onClick={resetBoLoc}>XÃ³a bá»™ lá»c</button>
-          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Ãp dá»¥ng bá»™ lá»c</button>
+          <button className="jobs-filter-clear" onClick={resetBoLoc}>Xóa bộ lọc</button>
+          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Áp dụng bộ lọc</button>
         </aside>
 
         <div className="jobs-real-list">
           <div className="jobs-real-heading">
             <div>
-              <h2>{dangTai ? 'Äang táº£i viá»‡c lÃ m' : `TÃ¬m tháº¥y ${ketQua.length} viá»‡c lÃ m`}</h2>
-              <p>Bá»™ lá»c sinh Ä‘á»™ng tá»« dá»¯ liá»‡u ká»¹ nÄƒng tháº­t: chá»n danh má»¥c Ä‘á»ƒ thu háº¹p ká»¹ nÄƒng, chá»n nhiá»u ká»¹ nÄƒng Ä‘á»ƒ lá»c viá»‡c giao nhau.</p>
+              <h2>{dangTai ? 'Đang tải việc làm' : `Tìm thấy ${ketQua.length} việc làm`}</h2>
+              <p>Bộ lọc sinh động từ dữ liệu kỹ năng thật: chọn danh mục để thu hẹp kỹ năng, chọn nhiều kỹ năng để lọc việc giao nhau.</p>
             </div>
             <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
               <SlidersHorizontal size={18} />
-              Bá»™ lá»c
+              Bộ lọc
             </button>
           </div>
           {loi && <div className="jobs-real-error">{loi}</div>}
-          {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">KhÃ´ng cÃ³ viá»‡c lÃ m phÃ¹ há»£p bá»™ lá»c hiá»‡n táº¡i.</div>}
+          {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>}
           {ketQua.length > 0 && (
             <Pagination
               page={pageHienTai}
@@ -423,10 +423,10 @@ export default function TimKiemViecLam() {
                   <strong>{job.congTy}</strong>
                   <p><MapPin size={14} /> {job.diaDiem}</p>
                   <p><DollarSign size={14} /> {job.luong}</p>
-                  <p><Briefcase size={14} /> {job.loai} Â· {job.capBac} Â· <Clock size={14} /> {job.ngay}</p>
+                  <p><Briefcase size={14} /> {job.loai} · {job.capBac} · <Clock size={14} /> {job.ngay}</p>
                   <div className="jobs-real-skills">{job.kyNang.map(skill => <span key={skill.id}>{skill.ten}</span>)}</div>
                 </div>
-                <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bá» lÆ°u' : 'LÆ°u viá»‡c'}>
+                <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bỏ lưu' : 'Lưu việc'}>
                   <Bookmark size={21} fill={isSaved ? '#2563eb' : 'none'} color={isSaved ? '#2563eb' : '#94a3b8'} />
                 </button>
               </article>

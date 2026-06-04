@@ -1,0 +1,28 @@
+@startuml
+skinparam shadowing false
+title Sequence Diagram - Chat realtime
+
+actor "Nguoi gui" as Sender
+actor "Nguoi nhan" as Receiver
+participant "TrangChat" as ChatPage
+participant "TinNhanController" as ChatController
+participant "TinNhanService" as ChatService
+participant "CuocTroChuyenModel" as ConversationModel
+participant "TinNhanModel" as MessageModel
+participant "Socket.IO Server" as Socket
+database "MongoDB" as DB
+
+Sender -> ChatPage : nhap tin nhan
+ChatPage -> ChatController : POST /api/tinnhan
+ChatController -> ChatService : gui tin nhan
+ChatService -> ConversationModel : kiem tra cuoc tro chuyen/quyen
+ConversationModel -> DB : find conversation
+DB --> ConversationModel : conversation
+ChatService -> MessageModel : tao tin nhan
+MessageModel -> DB : insert message
+ChatService -> Socket : emit message:new
+Socket --> Receiver : day tin nhan realtime
+ChatController --> ChatPage : message da luu
+ChatPage --> Sender : cap nhat hoi thoai
+@enduml
+

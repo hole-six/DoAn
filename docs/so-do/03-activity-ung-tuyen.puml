@@ -1,0 +1,41 @@
+@startuml
+skinparam shadowing false
+title Activity Diagram - Ung vien ung tuyen vao tin tuyen dung
+
+start
+:Ung vien xem chi tiet tin tuyen dung;
+if (Da dang nhap?) then (Co)
+  if (Vai tro la ung vien?) then (Co)
+    if (Tin tuyen dung dang mo?) then (Co)
+      :Kiem tra CV/ho so nang luc;
+      if (Co CV hop le?) then (Co)
+        :Ung vien chon CV de ung tuyen;
+        :Gui POST /api/hosoungtuyen;
+        if (Da ung tuyen tin nay?) then (Chua)
+          :Tao ho so ung tuyen trang thai da_nop;
+          :Ghi lich su ho so ung tuyen;
+          :Gui thong bao cho nha tuyen dung;
+          :Thong bao ung tuyen thanh cong;
+          stop
+        else (Roi)
+          :Thong bao khong duoc ung tuyen trung;
+          stop
+        endif
+      else (Khong)
+        :Yeu cau tao hoac upload CV;
+        stop
+      endif
+    else (Khong)
+      :Thong bao tin da dong/het han;
+      stop
+    endif
+  else (Khong)
+    :Thong bao chi ung vien moi duoc ung tuyen;
+    stop
+  endif
+else (Khong)
+  :Chuyen den trang dang nhap;
+  stop
+endif
+@enduml
+

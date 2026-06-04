@@ -32,7 +32,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
   const openChat = async (item: LichPhongVan) => {
     const userId = candidateUserId(item)
     if (!userId) {
-      setChatError('Lá»‹ch phá»ng váº¥n nÃ y chÆ°a cÃ³ thÃ´ng tin tÃ i khoáº£n á»©ng viÃªn Ä‘á»ƒ má»Ÿ chat.')
+      setChatError('Lịch phỏng vấn này chưa có thông tin tài khoản ứng viên để mở chat.')
       return
     }
     setChatError('')
@@ -65,38 +65,40 @@ export default function LichPhongVanNhaTuyenDungPage() {
     await data.reload()
   }
   return (
-    <Page title="Lá»‹ch phá»ng váº¥n" desc="Quáº£n lÃ½ lá»‹ch, Ä‘á»•i lá»‹ch khi á»©ng viÃªn yÃªu cáº§u vÃ  cáº­p nháº­t káº¿t quáº£ sau buá»•i phá»ng váº¥n.">
+    <Page title="Lịch phỏng vấn" desc="Quản lý lịch, đổi lịch khi ứng viên yêu cầu và cập nhật kết quả sau buổi phỏng vấn.">
       <ErrorState message={data.error || chatError} />
       <Panel>
-        <div className="grid gap-2">
+        <div className="ntd-list grid gap-2">
           {data.interviews.length ? data.interviews.map(item => {
             const userId = candidateUserId(item)
             return (
-              <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="min-w-0">
+              <article key={item.id} className="ntd-list-card grid gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="ntd-list-main min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="truncate text-base font-black text-slate-950">{item.hoSoUngTuyen?.ungVien?.nguoiDung?.hoTen ?? 'á»¨ng viÃªn'}</h2>
+                    <h2 className="truncate text-base font-black text-slate-950">{item.hoSoUngTuyen?.ungVien?.nguoiDung?.hoTen ?? 'Ứng viên'}</h2>
                     <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai]}</Badge>
                   </div>
-                  <p className="mt-1 truncate text-sm font-semibold text-slate-500">
-                    {item.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? 'Phá»ng váº¥n'} Â· {item.hoSoUngTuyen?.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? '-'}
+                  <p className="ntd-list-meta mt-1 truncate text-sm font-semibold text-slate-500">
+                    {item.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? 'Phỏng vấn'} · {item.hoSoUngTuyen?.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? '-'}
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{formatDateTime(item.thoiGianBatDau)} Â· {item.linkHop || item.diaChi || '-'}</p>
+                  <p className="ntd-list-meta mt-1 text-sm font-semibold text-slate-500">{formatDateTime(item.thoiGianBatDau)} · {item.linkHop || item.diaChi || '-'}</p>
                 </div>
+                <div className="ntd-list-actions">
                 <ButtonGroup>
                   <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!userId || ['hoan_thanh', 'da_huy'].includes(item.trangThai)} onClick={() => void openChat(item)}>
-                    Nháº¯n á»©ng viÃªn
+                    Nhắn ứng viên
                   </Button>
-                  <Button size="sm" icon={<Edit3 size={15} />} disabled={['hoan_thanh', 'da_huy'].includes(item.trangThai)} onClick={() => setEditing(item)}>Cáº­p nháº­t</Button>
-                  <Button size="sm" variant="success" icon={<CalendarCheck size={15} />} disabled={!['da_len_lich', 'da_xac_nhan'].includes(item.trangThai)} onClick={() => openResultModal(item, 'dat')}>Äáº¡t</Button>
-                  <Button size="sm" variant="danger" disabled={!['da_len_lich', 'da_xac_nhan'].includes(item.trangThai)} onClick={() => openResultModal(item, 'khong_dat')}>KhÃ´ng Ä‘áº¡t</Button>
+                  <Button size="sm" icon={<Edit3 size={15} />} disabled={['hoan_thanh', 'da_huy'].includes(item.trangThai)} onClick={() => setEditing(item)}>Cập nhật</Button>
+                  <Button size="sm" variant="success" icon={<CalendarCheck size={15} />} disabled={!['da_len_lich', 'da_xac_nhan'].includes(item.trangThai)} onClick={() => openResultModal(item, 'dat')}>Đạt</Button>
+                  <Button size="sm" variant="danger" disabled={!['da_len_lich', 'da_xac_nhan'].includes(item.trangThai)} onClick={() => openResultModal(item, 'khong_dat')}>Không đạt</Button>
                 </ButtonGroup>
+                </div>
               </article>
             )
-          }) : <EmptyState>ChÆ°a cÃ³ lá»‹ch phá»ng váº¥n.</EmptyState>}
+          }) : <EmptyState>Chưa có lịch phỏng vấn.</EmptyState>}
         </div>
       </Panel>
-      {editing && <ScheduleModal title="Cáº­p nháº­t lá»‹ch" initial={{ thoiGianBatDau: editing.thoiGianBatDau?.slice(0, 16), thoiGianKetThuc: editing.thoiGianKetThuc?.slice(0, 16), hinhThuc: editing.hinhThuc ?? 'online', diaChi: editing.diaChi, linkHop: editing.linkHop, ghiChu: editing.ghiChu }} onClose={() => setEditing(null)} onSubmit={update} />}
+      {editing && <ScheduleModal title="Cập nhật lịch" initial={{ thoiGianBatDau: editing.thoiGianBatDau?.slice(0, 16), thoiGianKetThuc: editing.thoiGianKetThuc?.slice(0, 16), hinhThuc: editing.hinhThuc ?? 'online', diaChi: editing.diaChi, linkHop: editing.linkHop, ghiChu: editing.ghiChu }} onClose={() => setEditing(null)} onSubmit={update} />}
       {resultTarget && (
         <div className="fixed inset-0 z-[1000] grid place-items-center bg-slate-950/60 p-4">
           <section className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl">

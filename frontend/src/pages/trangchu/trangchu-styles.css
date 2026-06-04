@@ -1022,6 +1022,10 @@
   grid-template-columns: repeat(3, 1fr);
 }
 
+.section:has(.ntd-grid) {
+  background: #ffffff !important;
+}
+
 .ntd-card {
   border: 1px solid #e2e8f0;
   border-radius: 10px;

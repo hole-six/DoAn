@@ -3,7 +3,14 @@
 /* Real API jobs page */
 .jobs-real-page {
   background: #f6f8fb;
-  font-family: Roboto, Inter, system-ui, sans-serif;
+  font-family: "Lexend", sans-serif;
+}
+
+.jobs-real-page *,
+.jobs-real-page input,
+.jobs-real-page button,
+.jobs-real-page textarea {
+  font-family: "Lexend", sans-serif !important;
 }
 
 .jobs-real-hero {

@@ -5,13 +5,20 @@
 
 /* Employer Page Container */
 .ntd-page {
+  --font-ui: "Lexend", sans-serif !important;
   color: var(--wave-admin-text, #1a1a2e) !important;
   display: grid !important;
   gap: 22px !important;
   margin: 0 !important;
   max-width: none !important;
   width: 100% !important;
-  font-family: var(--font-ui, Roboto, Inter, system-ui, -apple-system, sans-serif) !important;
+  font-family: var(--font-ui, "Lexend", sans-serif) !important;
+  font-weight: 400 !important;
+}
+
+.ntd-page,
+.ntd-page * {
+  font-family: "Lexend", sans-serif !important;
 }
 
 /* Employer Header */
@@ -157,6 +164,56 @@
 
 .ntd-panel:hover {
   box-shadow: var(--wave-admin-shadow-lg, 0 10px 40px rgba(14, 77, 125, 0.12)) !important;
+}
+
+/* List cards used by employer job/interview pages */
+.ntd-list {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.ntd-list-card {
+  align-items: center !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(14, 77, 125, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 18px rgba(14, 77, 125, 0.06) !important;
+  display: grid !important;
+  gap: 16px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  min-width: 0 !important;
+  padding: 18px !important;
+}
+
+.ntd-list-main {
+  min-width: 0 !important;
+}
+
+.ntd-list-main h2 {
+  color: var(--wave-admin-text, #1a1a2e) !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
+}
+
+.ntd-list-meta {
+  color: var(--wave-admin-muted, #64748b) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  overflow: visible !important;
+  overflow-wrap: anywhere !important;
+  text-overflow: initial !important;
+  white-space: normal !important;
+}
+
+.ntd-list-actions {
+  min-width: 0 !important;
+}
+
+.ntd-list-actions .ui-btn-group {
+  justify-content: flex-end !important;
 }
 
 .ntd-panel-head {
@@ -709,6 +766,32 @@
     padding: 16px !important;
   }
 
+  .ntd-list-card {
+    align-items: stretch !important;
+    grid-template-columns: 1fr !important;
+    padding: 14px !important;
+  }
+
+  .ntd-list-main h2 {
+    font-size: 15px !important;
+  }
+
+  .ntd-list-meta {
+    font-size: 13px !important;
+  }
+
+  .ntd-list-actions .ui-btn-group {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    justify-content: stretch !important;
+    width: 100% !important;
+  }
+
+  .ntd-list-actions .ui-btn {
+    min-height: 42px !important;
+    width: 100% !important;
+  }
+
   .ntd-form {
     grid-template-columns: 1fr !important;
   }
@@ -761,6 +844,10 @@
   }
 
   .ntd-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ntd-list-actions .ui-btn-group {
     grid-template-columns: 1fr !important;
   }
 }

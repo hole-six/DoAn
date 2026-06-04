@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '../../../components/ui/Button'
 import type { Tone } from '../../../lib/statusLabels'
+import '../ntd-styles.css'
 
 const toneClass: Record<Tone, string> = {
   blue: 'border-sky-200 bg-sky-50 text-sky-800',
@@ -13,8 +14,8 @@ const toneClass: Record<Tone, string> = {
 
 export function Page({ title, desc, action, children }: { title: string; desc: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <div className="mx-auto grid w-full max-w-[1360px] gap-4 pb-24 sm:pb-6">
-      <header className="flex min-w-0 flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="ntd-page mx-auto grid w-full max-w-[1360px] gap-4 pb-24 sm:pb-6">
+      <header className="ntd-header flex min-w-0 flex-col gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-[11px] font-black uppercase tracking-[0.12em] text-sky-800">ITJob Employer</p>
           <h1 className="mt-1 break-words text-2xl font-black leading-tight text-slate-950">{title}</h1>
@@ -29,7 +30,7 @@ export function Page({ title, desc, action, children }: { title: string; desc: s
 
 export function Panel({ title, action, children, className }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
-    <section className={clsx('min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_6px_18px_rgba(15,23,42,0.05)]', className)}>
+    <section className={clsx('ntd-panel min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_6px_18px_rgba(15,23,42,0.05)]', className)}>
       {(title || action) && <div className="mb-3 flex items-center justify-between gap-3">{title && <h2 className="truncate text-base font-black text-slate-950">{title}</h2>}{action}</div>}
       {children}
     </section>
@@ -37,7 +38,7 @@ export function Panel({ title, action, children, className }: { title?: string; 
 }
 
 export function Badge({ children, tone = 'blue' }: { children: ReactNode; tone?: Tone }) {
-  return <span className={clsx('inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-xs font-black', toneClass[tone])}>{children}</span>
+  return <span className={clsx('ntd-badge inline-flex w-fit items-center rounded-full border px-2.5 py-1 text-xs font-black', tone, toneClass[tone])}>{children}</span>
 }
 
 export function EmptyState({ children }: { children: ReactNode }) {

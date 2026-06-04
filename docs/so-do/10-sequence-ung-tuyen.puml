@@ -1,0 +1,39 @@
+@startuml
+skinparam shadowing false
+title Sequence Diagram - Ung vien ung tuyen
+
+actor "Ung vien" as Candidate
+participant "ChiTietViecLamPage" as JobDetail
+participant "ApplyModal" as ApplyModal
+participant "HoSoUngTuyenController" as AppController
+participant "UngTuyenService" as AppService
+participant "TinTuyenDungModel" as JobModel
+participant "HoSoNangLucModel" as CVModel
+participant "HoSoUngTuyenModel" as AppModel
+participant "ThongBaoService" as NotiService
+database "MongoDB" as DB
+
+Candidate -> JobDetail : chon Ung tuyen
+JobDetail -> ApplyModal : mo modal chon CV
+Candidate -> ApplyModal : chon CV va gui
+ApplyModal -> AppController : POST /api/hosoungtuyen
+AppController -> AppService : tao ho so ung tuyen
+AppService -> JobModel : kiem tra tin dang_mo
+JobModel -> DB : find job
+DB --> JobModel : job
+AppService -> CVModel : kiem tra CV thuoc ung vien
+CVModel -> DB : find CV
+DB --> CVModel : CV
+AppService -> AppModel : kiem tra da ung tuyen
+AppModel -> DB : find existing
+alt hop le va chua ung tuyen
+  AppService -> AppModel : tao ho so da_nop
+  AppModel -> DB : insert application
+  AppService -> NotiService : thong bao nha tuyen dung
+  AppController --> ApplyModal : ung tuyen thanh cong
+  ApplyModal --> Candidate : hien thong bao thanh cong
+else khong hop le
+  AppController --> ApplyModal : thong bao loi
+end
+@enduml
+
