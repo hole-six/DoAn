@@ -16,6 +16,7 @@ const socket_js_1 = require("../../cauhinh/socket.js");
 const tinnhan_mohinh_js_1 = require("./tinnhan.mohinh.js");
 const thongbao_dichvu_js_1 = require("../thongbao/thongbao.dichvu.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
+const nhatuyendung_mohinh_js_1 = require("../nhatuyendung/nhatuyendung.mohinh.js");
 // ============================================
 // CONVERSATION SERVICES
 // ============================================
@@ -50,18 +51,24 @@ async function layHoacTaoCuocTroChuyenModel(params) {
 async function timAdminDauTien() {
     return nguoidung_mohinh_js_1.NguoiDung.findOne({ vaiTro: 'admin', trangThai: { $ne: 'bi_khoa' } }).select('_id');
 }
+async function congTyDaDuyet(maNguoiDung) {
+    const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung }).select('_id trangThaiDuyet');
+    return Boolean(congTy && congTy.trangThaiDuyet === 'da_duyet');
+}
 async function damBaoCuocTroChuyenHoTroQuanTri(maNguoiDung, vaiTro) {
     if (vaiTro === 'admin') {
-        const nhaTuyenDungList = await nguoidung_mohinh_js_1.NguoiDung
-            .find({ vaiTro: 'nha_tuyen_dung', trangThai: { $ne: 'bi_khoa' } })
-            .select('_id')
+        const congTyList = await nhatuyendung_mohinh_js_1.NhaTuyenDung
+            .find({ trangThaiDuyet: 'da_duyet' })
+            .select('maNguoiDung')
             .limit(500);
-        await Promise.all(nhaTuyenDungList.map((nguoiDung) => layHoacTaoCuocTroChuyenModel({
-            nguoiThamGia: [maNguoiDung, String(nguoiDung._id)],
+        await Promise.all(congTyList.map((congTy) => layHoacTaoCuocTroChuyenModel({
+            nguoiThamGia: [maNguoiDung, String(congTy.maNguoiDung)],
             loai: 'admin_support',
         })));
     }
     if (vaiTro === 'nha_tuyen_dung') {
+        if (!await congTyDaDuyet(maNguoiDung))
+            return;
         const admin = await timAdminDauTien();
         if (admin) {
             await layHoacTaoCuocTroChuyenModel({

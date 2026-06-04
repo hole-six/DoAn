@@ -105,7 +105,7 @@ export function NotificationInbox({ items, onReload }: Props) {
                 onClick={() => setFilter(key)}
                 className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
                   active
-                    ? 'border-sky-700 bg-sky-700 text-white shadow-sm'
+                    ? 'notification-filter-active border-sky-700 bg-sky-700 text-white shadow-sm'
                     : 'border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800'
                 }`}
               >

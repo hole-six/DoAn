@@ -520,6 +520,99 @@ html {
   /* Add dark mode styles if needed */
 }
 
+/* Candidate role: dashboard and CV Studio targeted mobile fixes */
+@media (max-width: 768px) {
+  .uv-dashboard-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .uv-dashboard-kpi-card {
+    min-height: 108px;
+    border-radius: 16px !important;
+  }
+
+  .cv-studio-shell {
+    border-radius: 18px !important;
+    padding: 14px !important;
+  }
+
+  .cv-studio-top {
+    gap: 14px !important;
+  }
+
+  .cv-studio-top h2 {
+    font-size: 21px !important;
+    line-height: 1.18 !important;
+  }
+
+  .cv-studio-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch !important;
+    width: 100%;
+  }
+
+  .cv-studio-actions > button,
+  .cv-studio-actions > a {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cv-studio-shell .rounded-2xl > .mb-2.flex,
+  .cv-studio-shell .mb-3.flex,
+  .cv-studio-shell .mb-4.grid + .grid,
+  .cv-studio-shell .flex.items-start.justify-between,
+  .cv-studio-shell .flex.items-center.justify-between {
+    align-items: stretch !important;
+  }
+
+  .cv-studio-shell .rounded-2xl > .mb-2.flex,
+  .cv-studio-shell .mb-3.flex,
+  .cv-studio-shell .flex.items-center.justify-between {
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  .cv-studio-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cv-studio-editor-grid {
+    gap: 14px !important;
+  }
+
+  .cv-studio-shell input,
+  .cv-studio-shell textarea,
+  .cv-studio-shell select {
+    font-size: 16px !important;
+  }
+
+  .cv-studio-preview-panel {
+    position: static !important;
+  }
+
+  .cv-preview-scroll {
+    max-width: calc(100vw - 48px);
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .cv-preview-scroll .cv-a4-preview {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cv-studio-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-preview-scroll {
+    max-width: calc(100vw - 36px);
+  }
+}
+
 
 
 

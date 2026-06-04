@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Clock, DollarSign, Filter, MapPin, MessageCircle, Search, Send, Sparkles, SlidersHorizontal, X } from 'lucide-react'
 import timJobBg from '../../assets/timjob.png'
+import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { apiCoXacThuc, layNguoiDung } from '../../lib/auth'
@@ -13,6 +14,7 @@ type ViecLamItem = {
   tieuDe: string
   congTy: string
   logo: string
+  anhDaiDien?: string
   diaDiem: string
   luong: string
   loai: string
@@ -36,12 +38,12 @@ const nhanLoaiKyNang: Record<string, string> = {
   thiet_ke: 'Design',
   phan_tich: 'Business Analyst',
   quan_ly: 'Product / Management',
-  ngon_ngu: 'Ngôn ngữ',
-  ky_nang_mem: 'Kỹ năng mềm',
+  ngon_ngu: 'NgÃ´n ngá»¯',
+  ky_nang_mem: 'Ká»¹ nÄƒng má»m',
 }
 
 function formatLuong(min?: number, max?: number) {
-  if (!min && !max) return 'Thỏa thuận'
+  if (!min && !max) return 'Thá»a thuáº­n'
   return `${min?.toLocaleString('vi-VN') ?? '?'} - ${max?.toLocaleString('vi-VN') ?? '?'} VND`
 }
 
@@ -50,7 +52,7 @@ function normalize(value: string) {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/g, 'd')
+    .replace(/Ä‘/g, 'd')
     .replace(/reactjs/g, 'react')
     .replace(/node\.?js/g, 'nodejs')
     .replace(/vue\.?js/g, 'vuejs')
@@ -74,7 +76,6 @@ export default function TimKiemViecLam() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [tuKhoa, setTuKhoa] = useState(searchParams.get('tuKhoa') ?? '')
-  const [diaDiem, setDiaDiem] = useState(searchParams.get('diaDiem') ?? '')
   const [viecLam, setViecLam] = useState<ViecLamItem[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
@@ -85,6 +86,8 @@ export default function TimKiemViecLam() {
   const [loaiHinhDangChon, setLoaiHinhDangChon] = useState<string[]>([])
   const [searchActive, setSearchActive] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiAnswer, setAiAnswer] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
@@ -97,7 +100,6 @@ export default function TimKiemViecLam() {
 
   useEffect(() => {
     setTuKhoa(searchParams.get('tuKhoa') ?? '')
-    setDiaDiem(searchParams.get('diaDiem') ?? '')
   }, [searchParams])
 
   useEffect(() => {
@@ -135,9 +137,10 @@ export default function TimKiemViecLam() {
           .map((job: any, index: number) => ({
             id: job.id,
             tieuDe: job.tieuDe,
-            congTy: job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng',
+            congTy: job.nhaTuyenDung?.tenCongTy ?? 'NhÃ  tuyá»ƒn dá»¥ng',
             logo: job.nhaTuyenDung?.logo || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
-            diaDiem: job.diaChi ?? 'Đà Nẵng',
+            anhDaiDien: job.anhDaiDien,
+            diaDiem: job.diaChi ?? 'ÄÃ  Náºµng',
             luong: formatLuong(job.luongMin, job.luongMax),
             loai: job.loaiHinh ?? 'toan_thoi_gian',
             capBac: job.capBac ?? 'junior',
@@ -151,14 +154,14 @@ export default function TimKiemViecLam() {
               .slice(0, 8),
             moTa: job.moTa ?? '',
             yeuCau: job.yeuCau ?? '',
-            ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
+            ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Má»›i Ä‘Äƒng',
             featured: index < 3,
           }))
         setViecLam(items)
         setDangTai(false)
       })
       .catch(() => {
-        setLoi('Không tải được dữ liệu việc làm từ API.')
+        setLoi('KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u viá»‡c lÃ m tá»« API.')
         setDangTai(false)
       })
     return () => { active = false }
@@ -178,7 +181,6 @@ export default function TimKiemViecLam() {
   const submitSearch = () => {
     const params = new URLSearchParams()
     if (tuKhoa.trim()) params.set('tuKhoa', tuKhoa.trim())
-    if (diaDiem.trim()) params.set('diaDiem', diaDiem.trim())
     setSearchActive(false)
     setSearchParams(params)
   }
@@ -205,10 +207,10 @@ export default function TimKiemViecLam() {
         body: JSON.stringify({ cauHoi }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.thongBao ?? 'Không hỏi được AI')
+      if (!res.ok) throw new Error(data.thongBao ?? 'KhÃ´ng há»i Ä‘Æ°á»£c AI')
       setAiAnswer(data.duLieu?.traLoi ?? '')
     } catch (error) {
-      setAiAnswer(error instanceof Error ? error.message : 'Không hỏi được AI')
+      setAiAnswer(error instanceof Error ? error.message : 'KhÃ´ng há»i Ä‘Æ°á»£c AI')
     } finally {
       setAiBusy(false)
     }
@@ -238,12 +240,19 @@ export default function TimKiemViecLam() {
     const skillTypes = job.kyNang.map(skill => skill.loai)
     const text = `${job.tieuDe} ${job.congTy} ${job.capBac} ${job.loai} ${skillText} ${job.moTa} ${job.yeuCau}`
     return includesNormalized(text, tuKhoa)
-      && includesNormalized(job.diaDiem, diaDiem)
       && (!loaiDangChon.length || loaiDangChon.some(loai => skillTypes.includes(loai)))
       && (!kyNangDangChon.length || kyNangDangChon.every(skillId => skillIds.includes(skillId)))
       && (!capBacDangChon.length || capBacDangChon.includes(job.capBac))
       && (!loaiHinhDangChon.length || loaiHinhDangChon.includes(job.loai))
   })
+
+  useEffect(() => {
+    setPage(1)
+  }, [tuKhoa, loaiDangChon, kyNangDangChon, capBacDangChon, loaiHinhDangChon])
+
+  const tongTrang = Math.max(1, Math.ceil(ketQua.length / pageSize))
+  const pageHienTai = Math.min(page, tongTrang)
+  const ketQuaPhanTrang = ketQua.slice((pageHienTai - 1) * pageSize, pageHienTai * pageSize)
 
   const boLocDong = useMemo(() => {
     const loaiMap = new Map<string, number>()
@@ -285,24 +294,20 @@ export default function TimKiemViecLam() {
         <img src={timJobBg} alt="" />
         <div />
         <article>
-          <h1>Tìm việc IT bằng dữ liệu tuyển dụng thật</h1>
-          <p>{dangTai ? 'Đang tải dữ liệu...' : `${ketQua.length} việc làm phù hợp từ hệ thống ITJob`}</p>
+          <h1>TÃ¬m viá»‡c IT báº±ng dá»¯ liá»‡u tuyá»ƒn dá»¥ng tháº­t</h1>
+          <p>{dangTai ? 'Äang táº£i dá»¯ liá»‡u...' : `${ketQua.length} viá»‡c lÃ m phÃ¹ há»£p tá»« há»‡ thá»‘ng ITJob`}</p>
           <div ref={searchWrapRef} className={`jobs-real-search${searchActive ? ' search-shell-active' : ''}`}>
             <label>
               <Search size={18} />
-              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chức danh, kỹ năng, công ty..." />
+              <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chá»©c danh, ká»¹ nÄƒng, cÃ´ng ty..." />
             </label>
-            <label>
-              <MapPin size={18} />
-              <input value={diaDiem} onChange={e => setDiaDiem(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Địa điểm" />
-            </label>
-            <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm việc</button>
+            <button className="primary-button" onClick={submitSearch}><Search size={17} /> TÃ¬m viá»‡c</button>
             {searchActive && (
               <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
             )}
           </div>
           {searchActive && (loading || hasAny) && (
-            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="Đóng gợi ý tìm kiếm" />
+            <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="ÄÃ³ng gá»£i Ã½ tÃ¬m kiáº¿m" />
           )}
           <div className="jobs-real-tags">
             {goiYKyNang.map(skill => <button key={skill.id} onClick={() => setKyNangDangChon(prev => toggleValue(prev, skill.id))}>{skill.ten}</button>)}
@@ -315,19 +320,19 @@ export default function TimKiemViecLam() {
           <button
             className="jobs-filter-backdrop"
             type="button"
-            aria-label="Đóng bộ lọc"
+            aria-label="ÄÃ³ng bá»™ lá»c"
             onClick={() => setFilterOpen(false)}
           />
         )}
         <aside className={`jobs-real-filter ${filterOpen ? 'is-mobile-open' : ''}`}>
           <div className="jobs-mobile-filter-head">
-            <span><SlidersHorizontal size={18} /><strong>Bộ lọc nhanh</strong></span>
-            <button type="button" onClick={() => setFilterOpen(false)} aria-label="Đóng bộ lọc">
+            <span><SlidersHorizontal size={18} /><strong>Bá»™ lá»c nhanh</strong></span>
+            <button type="button" onClick={() => setFilterOpen(false)} aria-label="ÄÃ³ng bá»™ lá»c">
               <X size={18} />
             </button>
           </div>
           <section className="jobs-filter-group">
-            <h3>Danh mục kỹ năng</h3>
+            <h3>Danh má»¥c ká»¹ nÄƒng</h3>
             {boLocDong.loai.map(([loai, count]) => (
               <button className={loaiDangChon.includes(loai) ? 'active' : ''} key={loai} onClick={() => setLoaiDangChon(prev => toggleValue(prev, loai))}>
                 <Filter size={15} /> <span>{nhanLoaiKyNang[loai] ?? loai}</span><em>{count}</em>
@@ -335,7 +340,7 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3>Kỹ năng liên quan</h3>
+            <h3>Ká»¹ nÄƒng liÃªn quan</h3>
             {boLocDong.kyNang
               .filter(skill => !loaiDangChon.length || loaiDangChon.includes(skill.loai))
               .slice(0, 18)
@@ -346,7 +351,7 @@ export default function TimKiemViecLam() {
               ))}
           </section>
           <section className="jobs-filter-group two-col">
-            <h3>Cấp bậc</h3>
+            <h3>Cáº¥p báº­c</h3>
             {boLocDong.capBac.map(([capBac, count]) => (
               <button className={capBacDangChon.includes(capBac) ? 'active' : ''} key={capBac} onClick={() => setCapBacDangChon(prev => toggleValue(prev, capBac))}>
                 <span>{capBac}</span><em>{count}</em>
@@ -354,7 +359,7 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3>Hình thức</h3>
+            <h3>HÃ¬nh thá»©c</h3>
             {boLocDong.loaiHinh.map(([loai, count]) => (
               <button className={loaiHinhDangChon.includes(loai) ? 'active' : ''} key={loai} onClick={() => setLoaiHinhDangChon(prev => toggleValue(prev, loai))}>
                 <Briefcase size={15} /> <span>{loai}</span><em>{count}</em>
@@ -362,16 +367,16 @@ export default function TimKiemViecLam() {
             ))}
           </section>
           <section className="jobs-filter-group">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Trợ lý AI</h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MessageCircle size={15} /> Trá»£ lÃ½ AI</h3>
             <textarea
               value={aiQuestion}
               onChange={e => setAiQuestion(e.target.value)}
               rows={4}
-              placeholder="Hỏi AI: tìm việc frontend ở Đà Nẵng, job React junior, ..."
+              placeholder="Há»i AI: tÃ¬m viá»‡c frontend á»Ÿ ÄÃ  Náºµng, job React junior, ..."
               style={{ width: '100%', borderRadius: 10, border: '1px solid #dbe4f0', padding: 10, fontSize: 13, resize: 'vertical' }}
             />
             <button className="primary-button" style={{ width: '100%', marginTop: 8 }} onClick={() => void askAi()} disabled={aiBusy}>
-              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Đang trả lời...' : 'Hỏi AI'}
+              {aiBusy ? <Sparkles size={17} /> : <Send size={17} />} {aiBusy ? 'Äang tráº£ lá»i...' : 'Há»i AI'}
             </button>
             {aiAnswer && (
               <div style={{ marginTop: 10, borderRadius: 12, border: '1px solid #dbe4f0', background: '#f8fbff', padding: 12, fontSize: 13, lineHeight: 1.7, color: '#0f172a', whiteSpace: 'pre-line' }}>
@@ -379,28 +384,37 @@ export default function TimKiemViecLam() {
               </div>
             )}
           </section>
-          <button className="jobs-filter-clear" onClick={resetBoLoc}>Xóa bộ lọc</button>
-          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Áp dụng bộ lọc</button>
+          <button className="jobs-filter-clear" onClick={resetBoLoc}>XÃ³a bá»™ lá»c</button>
+          <button className="jobs-filter-apply-mobile" onClick={() => setFilterOpen(false)}>Ãp dá»¥ng bá»™ lá»c</button>
         </aside>
 
         <div className="jobs-real-list">
           <div className="jobs-real-heading">
             <div>
-              <h2>{dangTai ? 'Đang tải việc làm' : `Tìm thấy ${ketQua.length} việc làm`}</h2>
-              <p>Bộ lọc sinh động từ dữ liệu kỹ năng thật: chọn danh mục để thu hẹp kỹ năng, chọn nhiều kỹ năng để lọc việc giao nhau.</p>
+              <h2>{dangTai ? 'Äang táº£i viá»‡c lÃ m' : `TÃ¬m tháº¥y ${ketQua.length} viá»‡c lÃ m`}</h2>
+              <p>Bá»™ lá»c sinh Ä‘á»™ng tá»« dá»¯ liá»‡u ká»¹ nÄƒng tháº­t: chá»n danh má»¥c Ä‘á»ƒ thu háº¹p ká»¹ nÄƒng, chá»n nhiá»u ká»¹ nÄƒng Ä‘á»ƒ lá»c viá»‡c giao nhau.</p>
             </div>
             <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
               <SlidersHorizontal size={18} />
-              Bộ lọc
+              Bá»™ lá»c
             </button>
           </div>
           {loi && <div className="jobs-real-error">{loi}</div>}
-          {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>}
-          {ketQua.map(job => {
+          {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">KhÃ´ng cÃ³ viá»‡c lÃ m phÃ¹ há»£p bá»™ lá»c hiá»‡n táº¡i.</div>}
+          {ketQua.length > 0 && (
+            <Pagination
+              page={pageHienTai}
+              pageSize={pageSize}
+              total={ketQua.length}
+              onPageChange={setPage}
+              onPageSizeChange={(next) => { setPageSize(next); setPage(1) }}
+            />
+          )}
+          {ketQuaPhanTrang.map(job => {
             const isSaved = savedIds.includes(job.id)
             return (
               <article className="jobs-real-card" key={job.id}>
-                <img src={job.logo} alt={job.congTy} />
+                <img src={job.anhDaiDien || job.logo} alt={job.congTy} />
                 <div>
                   <div className="jobs-real-title">
                     <Link to={`/viec-lam/${job.id}`}>{job.tieuDe}</Link>
@@ -409,17 +423,27 @@ export default function TimKiemViecLam() {
                   <strong>{job.congTy}</strong>
                   <p><MapPin size={14} /> {job.diaDiem}</p>
                   <p><DollarSign size={14} /> {job.luong}</p>
-                  <p><Briefcase size={14} /> {job.loai} · {job.capBac} · <Clock size={14} /> {job.ngay}</p>
+                  <p><Briefcase size={14} /> {job.loai} Â· {job.capBac} Â· <Clock size={14} /> {job.ngay}</p>
                   <div className="jobs-real-skills">{job.kyNang.map(skill => <span key={skill.id}>{skill.ten}</span>)}</div>
                 </div>
-                <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bỏ lưu' : 'Lưu việc'}>
+                <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bá» lÆ°u' : 'LÆ°u viá»‡c'}>
                   <Bookmark size={21} fill={isSaved ? '#2563eb' : 'none'} color={isSaved ? '#2563eb' : '#94a3b8'} />
                 </button>
               </article>
             )
           })}
+          {ketQua.length > pageSize && (
+            <Pagination
+              page={pageHienTai}
+              pageSize={pageSize}
+              total={ketQua.length}
+              onPageChange={setPage}
+              onPageSizeChange={(next) => { setPageSize(next); setPage(1) }}
+            />
+          )}
         </div>
       </section>
     </main>
   )
 }
+

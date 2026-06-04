@@ -1,6 +1,7 @@
 ﻿import { batLoiBatDongBo } from '../../dungchung/batloibatdongbo.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
+import { NhaTuyenDung } from '../nhatuyendung/nhatuyendung.mohinh.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import {
   layDanhSachCuocTroChuyenModel,
@@ -32,6 +33,13 @@ async function timNguoiDungAdminDauTien() {
   const admin = await (NguoiDung as any).findOne({ vaiTro: 'admin' }).select('_id')
   if (!admin) throw new LoiUngDung('Hệ thống chưa có tài khoản quản trị viên', 409, 'ADMIN_NOT_FOUND')
   return String(admin._id)
+}
+
+async function damBaoNhaTuyenDungDaDuyet(maNguoiDung: string) {
+  const congTy = await (NhaTuyenDung as any).findOne({ maNguoiDung }).select('_id trangThaiDuyet tenCongTy')
+  if (!congTy || congTy.trangThaiDuyet !== 'da_duyet') {
+    throw new LoiUngDung('Công ty chưa được duyệt nên chưa thể mở chat hỗ trợ', 403, 'EMPLOYER_NOT_APPROVED')
+  }
 }
 
 async function xacThucChatUngTuyen(nguoiDung: NguoiDungHienTai, nguoiNhan: string, maHoSoUngTuyen?: string, maTinTuyenDung?: string) {
@@ -134,12 +142,14 @@ export const dieuKhienTinNhan = {
         throw new LoiUngDung('Bạn không có quyền mở chat hỗ trợ', 403, 'FORBIDDEN')
       }
       if (String(nguoiDung.vaiTro ?? '') === 'nha_tuyen_dung') {
+        await damBaoNhaTuyenDungDaDuyet(maNguoiDung)
         nguoiNhanThuc = await timNguoiDungAdminDauTien()
       } else {
         const nguoiNhanDoc = await (NguoiDung as any).findById(nguoiNhan).select('_id vaiTro')
         if (!nguoiNhanDoc || String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
           throw new LoiUngDung('Admin chỉ có thể mở chat hỗ trợ với nhà tuyển dụng', 409, 'INVALID_CHAT_TARGET')
         }
+        await damBaoNhaTuyenDungDaDuyet(id(nguoiNhanDoc))
         nguoiNhanThuc = id(nguoiNhanDoc)
       }
       loaiCuocTroChuyen = 'admin_support'

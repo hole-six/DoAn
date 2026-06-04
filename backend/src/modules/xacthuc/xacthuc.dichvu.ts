@@ -1,15 +1,19 @@
 ﻿import bcrypt from 'bcryptjs'
+import crypto from 'node:crypto'
 import jwt from 'jsonwebtoken'
 import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
+import { guiEmail } from '../../dungchung/email.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { dichVuUngVien } from '../ungvien/ungvien.dichvu.js'
-import type { kiemTraDangNhap, kiemTraDangNhapGoogle, kiemTraLamMoiToken } from './xacthuc.kiemtra.js'
+import type { kiemTraDangNhap, kiemTraDangNhapGoogle, kiemTraDatLaiMatKhau, kiemTraLamMoiToken, kiemTraQuenMatKhau } from './xacthuc.kiemtra.js'
 import type { z } from 'zod'
 
 type DuLieuDangNhap = z.infer<typeof kiemTraDangNhap>
 type DuLieuLamMoiToken = z.infer<typeof kiemTraLamMoiToken>
 type DuLieuDangNhapGoogle = z.infer<typeof kiemTraDangNhapGoogle>
+type DuLieuQuenMatKhau = z.infer<typeof kiemTraQuenMatKhau>
+type DuLieuDatLaiMatKhau = z.infer<typeof kiemTraDatLaiMatKhau>
 type NguoiDungDangNhap = {
   _id: unknown
   email: string
@@ -18,6 +22,8 @@ type NguoiDungDangNhap = {
   soDienThoai?: string
   vaiTro: string
   trangThai: string
+  maDatLaiMatKhauHash?: string
+  maDatLaiMatKhauHetHan?: Date
 }
 
 type TokenPayload = {
@@ -72,6 +78,23 @@ function taoToken(nguoiDungCongKhai: ReturnType<typeof taoNguoiDungCongKhai>) {
   }
 }
 
+function hashToken(token: string) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
+function taoLinkDatLaiMatKhau(token: string) {
+  return `${bienMoiTruong.duongDanFrontend.replace(/\/$/, '')}/dat-lai-mat-khau?token=${encodeURIComponent(token)}`
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 export async function dangNhap(duLieu: DuLieuDangNhap) {
   const nguoiDung = await (NguoiDung as any).findOne({ email: duLieu.email.toLowerCase().trim() }) as NguoiDungDangNhap | null
 
@@ -122,6 +145,74 @@ export async function lamMoiToken(duLieu: DuLieuLamMoiToken) {
     ...taoToken(nguoiDungCongKhai),
     nguoiDung: nguoiDungCongKhai,
   }
+}
+
+export async function quenMatKhau(duLieu: DuLieuQuenMatKhau) {
+  const email = duLieu.email.toLowerCase().trim()
+  const nguoiDung = await (NguoiDung as any).findOne({ email }) as NguoiDungDangNhap | null
+
+  if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    return { ok: true }
+  }
+
+  const token = crypto.randomBytes(32).toString('hex')
+  const hetHan = new Date(Date.now() + 30 * 60 * 1000)
+
+  await (NguoiDung as any).findByIdAndUpdate(nguoiDung._id, {
+    maDatLaiMatKhauHash: hashToken(token),
+    maDatLaiMatKhauHetHan: hetHan,
+  })
+
+  const link = taoLinkDatLaiMatKhau(token)
+  await guiEmail({
+    to: email,
+    subject: 'Dat lai mat khau Effort Job',
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+        <h2>Dat lai mat khau Effort Job</h2>
+        <p>Chao ${escapeHtml(nguoiDung.hoTen || email)},</p>
+        <p>Ban vua yeu cau dat lai mat khau. Link nay co hieu luc trong 30 phut va chi dung mot lan.</p>
+        <p><a href="${link}" style="display:inline-block;background:#0b5c91;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700">Dat lai mat khau</a></p>
+        <p>Neu ban khong yeu cau, hay bo qua email nay.</p>
+      </div>
+    `,
+  })
+
+  return { ok: true }
+}
+
+export async function kiemTraTokenDatLaiMatKhau(token: string) {
+  const nguoiDung = await (NguoiDung as any).findOne({
+    maDatLaiMatKhauHash: hashToken(token),
+    maDatLaiMatKhauHetHan: { $gt: new Date() },
+  }) as NguoiDungDangNhap | null
+
+  if (!nguoiDung) {
+    throw new LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID')
+  }
+
+  return { ok: true, email: nguoiDung.email.replace(/^(.{2}).+(@.+)$/, '$1***$2') }
+}
+
+export async function datLaiMatKhau(duLieu: DuLieuDatLaiMatKhau) {
+  const nguoiDung = await (NguoiDung as any).findOne({
+    maDatLaiMatKhauHash: hashToken(duLieu.token),
+    maDatLaiMatKhauHetHan: { $gt: new Date() },
+  }) as NguoiDungDangNhap | null
+
+  if (!nguoiDung) {
+    throw new LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID')
+  }
+
+  await (NguoiDung as any).findByIdAndUpdate(nguoiDung._id, {
+    matKhau: await bcrypt.hash(duLieu.matKhau, 10),
+    $unset: {
+      maDatLaiMatKhauHash: '',
+      maDatLaiMatKhauHetHan: '',
+    },
+  })
+
+  return { ok: true }
 }
 
 export async function layNguoiDungTuAccessToken(authorization?: string) {

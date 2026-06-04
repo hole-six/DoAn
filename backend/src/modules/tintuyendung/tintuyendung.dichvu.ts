@@ -1,6 +1,23 @@
 ﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import '../nhatuyendung/nhatuyendung.mohinh.js'
+import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
+
+async function layAdminIds() {
+  const admins = await (NguoiDung as any).find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id')
+  return admins.map((item: any) => String(item._id))
+}
+
+async function guiThongBaoAdminTinCanDuyet(tin: any) {
+  const adminIds = await layAdminIds()
+  await Promise.all(adminIds.map((maAdmin: string) => thongBaoAdminTinTuyenDungCanDuyet({
+    maAdmin,
+    tenCongTy: tin.maNhaTuyenDung?.tenCongTy ?? 'Nha tuyen dung',
+    tieuDeTin: tin.tieuDe,
+    maTinTuyenDung: String(tin._id),
+  })))
+}
 
 function chuanHoaTin(taiLieu: any) {
   const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
@@ -66,14 +83,19 @@ export const dichVuTinTuyenDung = {
 
   async taoMoi(duLieu: unknown) {
     const ketQua = await (TinTuyenDung as any).create(duLieu)
-    return chuanHoaTin(await (TinTuyenDung as any)
+    const dayDu = await (TinTuyenDung as any)
       .findById(ketQua._id)
       .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang'))
+      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+    if (dayDu?.trangThai === 'cho_duyet') {
+      await guiThongBaoAdminTinCanDuyet(dayDu)
+    }
+    return chuanHoaTin(dayDu)
   },
 
   async capNhat(ma: string, duLieuNhan: unknown) {
     const duLieu = duLieuNhan as Record<string, unknown>
+    const hienTai = await (TinTuyenDung as any).findById(ma).populate('maNhaTuyenDung', 'tenCongTy maNguoiDung')
     const duLieuCapNhat = {
       ...duLieu,
       ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
@@ -84,6 +106,14 @@ export const dichVuTinTuyenDung = {
       .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
 
     if (!ketQua) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
+    if (hienTai && hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
+      await thongBaoNhaTuyenDungKetQuaDuyetTin({
+        maNguoiDung: String(ketQua.maNhaTuyenDung?.maNguoiDung ?? hienTai.maNhaTuyenDung?.maNguoiDung),
+        tieuDeTin: ketQua.tieuDe,
+        maTinTuyenDung: String(ketQua._id),
+        trangThai: ketQua.trangThai,
+      })
+    }
     return chuanHoaTin(ketQua)
   },
 

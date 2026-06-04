@@ -72,3 +72,32 @@
     transition: none;
   }
 }
+
+@media (max-width: 640px) {
+  .dashboard-shell-root .ui-btn-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .dashboard-shell-root .ui-btn-group .ui-btn {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .dashboard-shell-root .ui-btn {
+    min-height: 42px;
+    white-space: normal;
+  }
+
+  .dashboard-shell-root .ui-btn__label {
+    line-height: 1.15;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-shell-root .ui-btn-group {
+    grid-template-columns: 1fr;
+  }
+}

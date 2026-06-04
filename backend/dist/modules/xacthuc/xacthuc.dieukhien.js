@@ -29,6 +29,27 @@ exports.dieuKhienXacThuc = {
             duLieu: ketQua,
         });
     }),
+    quenMatKhau: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+        const duLieu = xacthuc_kiemtra_js_1.kiemTraQuenMatKhau.parse(yeuCau.body);
+        const ketQua = await (0, xacthuc_dichvu_js_1.quenMatKhau)(duLieu);
+        phanHoi.json({
+            thongBao: 'Nếu email tồn tại, hệ thống đã gửi hướng dẫn đặt lại mật khẩu',
+            duLieu: ketQua,
+        });
+    }),
+    kiemTraTokenDatLaiMatKhau: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+        const token = String(yeuCau.params.token ?? '');
+        const ketQua = await (0, xacthuc_dichvu_js_1.kiemTraTokenDatLaiMatKhau)(token);
+        phanHoi.json({ duLieu: ketQua });
+    }),
+    datLaiMatKhau: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+        const duLieu = xacthuc_kiemtra_js_1.kiemTraDatLaiMatKhau.parse(yeuCau.body);
+        const ketQua = await (0, xacthuc_dichvu_js_1.datLaiMatKhau)(duLieu);
+        phanHoi.json({
+            thongBao: 'Đặt lại mật khẩu thành công',
+            duLieu: ketQua,
+        });
+    }),
     toi: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const nguoiDung = await (0, xacthuc_dichvu_js_1.layNguoiDungTuAccessToken)(yeuCau.headers.authorization);
         phanHoi.json({ duLieu: nguoiDung });

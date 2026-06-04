@@ -303,11 +303,11 @@
 }
 
 .company-real-hero.jobs-real-hero > img {
-  opacity: 0.36 !important;
+  opacity: 0.5 !important;
 }
 
 .company-real-hero.jobs-real-hero > div {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.56) 0%, rgba(30, 58, 138, 0.46) 100%) !important;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.52) 0%, rgba(30, 58, 138, 0.34) 100%) !important;
 }
 
 /* Company filter correction: no sideways scrolling, readable labels. */

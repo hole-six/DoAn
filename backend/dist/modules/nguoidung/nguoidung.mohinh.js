@@ -11,6 +11,8 @@ const nguoiDungSchema = new mongoose_1.Schema({
     soDienThoai: { type: String, trim: true },
     vaiTro: { type: String, enum: exports.vaiTroNguoiDung, default: 'ung_vien' },
     trangThai: { type: String, enum: exports.trangThaiTaiKhoan, default: 'hoat_dong' },
+    maDatLaiMatKhauHash: String,
+    maDatLaiMatKhauHetHan: Date,
 }, {
     collection: 'nguoi_dung',
     timestamps: { createdAt: 'ngayTao', updatedAt: 'ngayCapNhat' },

@@ -7,9 +7,10 @@
   margin: 0;
   max-width: none;
   min-height: 540px;
-  overflow: hidden;
+  overflow: visible;
   padding: 36px max(24px, calc((100vw - 1520px) / 2)) 62px;
   position: relative;
+  z-index: 3;
 }
 
 .trangchu-hero-nen {
@@ -19,6 +20,7 @@
   object-position: center;
   position: absolute;
   width: 100%;
+  z-index: -1;
 }
 
 .trangchu-hero-phu {
@@ -47,6 +49,8 @@
   grid-template-columns: minmax(0, 1fr) 300px;
   margin-top: 30px;
   max-width: 1500px;
+  position: relative;
+  z-index: 5;
 }
 
 .trangchu-khop-timkiem label {
@@ -324,7 +328,7 @@
 .bai-dang-grid {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .nha-tuyen-dung-card {
@@ -545,6 +549,32 @@
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.section-why-full {
+  background: linear-gradient(135deg, #061429 0%, #0b5c91 52%, #064e6f 100%);
+  color: #ffffff;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  max-width: none;
+  padding-left: max(24px, calc((100vw - 1440px) / 2));
+  padding-right: max(24px, calc((100vw - 1440px) / 2));
+}
+
+.section-why-full .section-title,
+.section-why-full .bento-grid {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1440px;
+}
+
+.section-why-full .eyebrow,
+.section-why-full .section-title h2 {
+  color: #ffffff;
+}
+
+.section-why-full .bento-card {
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .chuyen-mon-item {
@@ -1747,6 +1777,31 @@
   line-height: 1.75;
   margin-top: 14px;
   max-width: 420px;
+}
+
+.footer-author {
+  align-items: center;
+  background: rgba(14, 165, 233, 0.14);
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 14px;
+  color: #dbeafe;
+  display: inline-flex;
+  gap: 9px;
+  margin-top: 16px;
+  padding: 10px 12px;
+}
+
+.footer-author span {
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.footer-author strong {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
 }
 
 .footer-skill-row {

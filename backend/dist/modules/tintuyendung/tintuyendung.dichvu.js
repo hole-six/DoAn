@@ -2,8 +2,23 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuTinTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
+const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 require("../nhatuyendung/nhatuyendung.mohinh.js");
+const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
+async function layAdminIds() {
+    const admins = await nguoidung_mohinh_js_1.NguoiDung.find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id');
+    return admins.map((item) => String(item._id));
+}
+async function guiThongBaoAdminTinCanDuyet(tin) {
+    const adminIds = await layAdminIds();
+    await Promise.all(adminIds.map((maAdmin) => (0, thongbao_helper_js_1.thongBaoAdminTinTuyenDungCanDuyet)({
+        maAdmin,
+        tenCongTy: tin.maNhaTuyenDung?.tenCongTy ?? 'Nha tuyen dung',
+        tieuDeTin: tin.tieuDe,
+        maTinTuyenDung: String(tin._id),
+    })));
+}
 function chuanHoaTin(taiLieu) {
     const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
     return {
@@ -64,13 +79,18 @@ exports.dichVuTinTuyenDung = {
     },
     async taoMoi(duLieu) {
         const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create(duLieu);
-        return chuanHoaTin(await tintuyendung_mohinh_js_1.TinTuyenDung
+        const dayDu = await tintuyendung_mohinh_js_1.TinTuyenDung
             .findById(ketQua._id)
             .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang'));
+            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
+        if (dayDu?.trangThai === 'cho_duyet') {
+            await guiThongBaoAdminTinCanDuyet(dayDu);
+        }
+        return chuanHoaTin(dayDu);
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
+        const hienTai = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(ma).populate('maNhaTuyenDung', 'tenCongTy maNguoiDung');
         const duLieuCapNhat = {
             ...duLieu,
             ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
@@ -81,6 +101,14 @@ exports.dichVuTinTuyenDung = {
             .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
+        if (hienTai && hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
+            await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetTin)({
+                maNguoiDung: String(ketQua.maNhaTuyenDung?.maNguoiDung ?? hienTai.maNhaTuyenDung?.maNguoiDung),
+                tieuDeTin: ketQua.tieuDe,
+                maTinTuyenDung: String(ketQua._id),
+                trangThai: ketQua.trangThai,
+            });
+        }
         return chuanHoaTin(ketQua);
     },
     async xoa(ma) {

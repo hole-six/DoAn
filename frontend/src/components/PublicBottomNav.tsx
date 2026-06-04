@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BookOpen, Briefcase, Building2, Home, LogIn, User } from 'lucide-react'
+import { Briefcase, Building2, Home, LogIn, User } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { duongDanTheoVaiTro, layNguoiDung } from '../lib/auth'
@@ -23,7 +23,6 @@ export default function PublicBottomNav() {
     { to: '/', icon: Home, label: 'Trang chủ', end: true },
     { to: '/viec-lam', icon: Briefcase, label: 'Việc làm' },
     { to: '/cong-ty', icon: Building2, label: 'Công ty' },
-    { to: '/blog', icon: BookOpen, label: 'Blog' },
     nguoiDung
       ? { to: duongDanTheoVaiTro[nguoiDung.vaiTro], icon: User, label: 'Hồ sơ' }
       : { to: '/dang-nhap', icon: LogIn, label: 'Đăng nhập' },

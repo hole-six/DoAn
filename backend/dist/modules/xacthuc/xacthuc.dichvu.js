@@ -5,11 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dangNhap = dangNhap;
 exports.lamMoiToken = lamMoiToken;
+exports.quenMatKhau = quenMatKhau;
+exports.kiemTraTokenDatLaiMatKhau = kiemTraTokenDatLaiMatKhau;
+exports.datLaiMatKhau = datLaiMatKhau;
 exports.layNguoiDungTuAccessToken = layNguoiDungTuAccessToken;
 exports.dangNhapGoogle = dangNhapGoogle;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const node_crypto_1 = __importDefault(require("node:crypto"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bienmoitruong_js_1 = require("../../cauhinh/bienmoitruong.js");
+const email_js_1 = require("../../dungchung/email.js");
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const ungvien_dichvu_js_1 = require("../ungvien/ungvien.dichvu.js");
@@ -38,6 +43,20 @@ function taoToken(nguoiDungCongKhai) {
         expiresIn: 15 * 60,
         tokenType: 'Bearer',
     };
+}
+function hashToken(token) {
+    return node_crypto_1.default.createHash('sha256').update(token).digest('hex');
+}
+function taoLinkDatLaiMatKhau(token) {
+    return `${bienmoitruong_js_1.bienMoiTruong.duongDanFrontend.replace(/\/$/, '')}/dat-lai-mat-khau?token=${encodeURIComponent(token)}`;
+}
+function escapeHtml(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 async function dangNhap(duLieu) {
     const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({ email: duLieu.email.toLowerCase().trim() });
@@ -80,6 +99,61 @@ async function lamMoiToken(duLieu) {
         ...taoToken(nguoiDungCongKhai),
         nguoiDung: nguoiDungCongKhai,
     };
+}
+async function quenMatKhau(duLieu) {
+    const email = duLieu.email.toLowerCase().trim();
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({ email });
+    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+        return { ok: true };
+    }
+    const token = node_crypto_1.default.randomBytes(32).toString('hex');
+    const hetHan = new Date(Date.now() + 30 * 60 * 1000);
+    await nguoidung_mohinh_js_1.NguoiDung.findByIdAndUpdate(nguoiDung._id, {
+        maDatLaiMatKhauHash: hashToken(token),
+        maDatLaiMatKhauHetHan: hetHan,
+    });
+    const link = taoLinkDatLaiMatKhau(token);
+    await (0, email_js_1.guiEmail)({
+        to: email,
+        subject: 'Dat lai mat khau Effort Job',
+        html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+        <h2>Dat lai mat khau Effort Job</h2>
+        <p>Chao ${escapeHtml(nguoiDung.hoTen || email)},</p>
+        <p>Ban vua yeu cau dat lai mat khau. Link nay co hieu luc trong 30 phut va chi dung mot lan.</p>
+        <p><a href="${link}" style="display:inline-block;background:#0b5c91;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700">Dat lai mat khau</a></p>
+        <p>Neu ban khong yeu cau, hay bo qua email nay.</p>
+      </div>
+    `,
+    });
+    return { ok: true };
+}
+async function kiemTraTokenDatLaiMatKhau(token) {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({
+        maDatLaiMatKhauHash: hashToken(token),
+        maDatLaiMatKhauHetHan: { $gt: new Date() },
+    });
+    if (!nguoiDung) {
+        throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
+    }
+    return { ok: true, email: nguoiDung.email.replace(/^(.{2}).+(@.+)$/, '$1***$2') };
+}
+async function datLaiMatKhau(duLieu) {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({
+        maDatLaiMatKhauHash: hashToken(duLieu.token),
+        maDatLaiMatKhauHetHan: { $gt: new Date() },
+    });
+    if (!nguoiDung) {
+        throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
+    }
+    await nguoidung_mohinh_js_1.NguoiDung.findByIdAndUpdate(nguoiDung._id, {
+        matKhau: await bcryptjs_1.default.hash(duLieu.matKhau, 10),
+        $unset: {
+            maDatLaiMatKhauHash: '',
+            maDatLaiMatKhauHetHan: '',
+        },
+    });
+    return { ok: true };
 }
 async function layNguoiDungTuAccessToken(authorization) {
     const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';

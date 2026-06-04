@@ -269,6 +269,93 @@ export async function thongBaoCongTyMoiDangKy(params: {
   })
 }
 
+export async function thongBaoAdminCongTyCanDuyet(params: {
+  maAdmin: string
+  tenCongTy: string
+  tenNguoiDangKy: string
+  maNhaTuyenDung: string
+  capNhatLai?: boolean
+}) {
+  return taoVaGuiThongBao({
+    maNguoiDung: params.maAdmin,
+    loai: 'he_thong',
+    tieuDe: params.capNhatLai ? 'Cong ty cap nhat ho so can duyet lai' : 'Cong ty moi can duyet',
+    noiDung: `${params.tenNguoiDangKy} ${params.capNhatLai ? 'da cap nhat lai ho so cong ty' : 'da dang ky cong ty'} ${params.tenCongTy}.`,
+    lienKet: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`,
+    mucDoUuTien: 'cao',
+    icon: 'building',
+    mauSac: '#8b5cf6',
+    hanhDong: [
+      { nhan: 'Duyet cong ty', url: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`, loai: 'primary' },
+    ],
+  })
+}
+
+export async function thongBaoAdminTinTuyenDungCanDuyet(params: {
+  maAdmin: string
+  tenCongTy: string
+  tieuDeTin: string
+  maTinTuyenDung: string
+}) {
+  return taoVaGuiThongBao({
+    maNguoiDung: params.maAdmin,
+    loai: 'tin_tuyen_dung',
+    tieuDe: 'Tin tuyen dung moi can duyet',
+    noiDung: `${params.tenCongTy} vua gui tin "${params.tieuDeTin}" cho duyet.`,
+    lienKet: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`,
+    mucDoUuTien: 'cao',
+    icon: 'briefcase',
+    mauSac: '#0ea5e9',
+    maTinTuyenDung: params.maTinTuyenDung,
+    hanhDong: [
+      { nhan: 'Duyet tin', url: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`, loai: 'primary' },
+    ],
+  })
+}
+
+export async function thongBaoNhaTuyenDungKetQuaDuyetCongTy(params: {
+  maNguoiDung: string
+  tenCongTy: string
+  trangThaiDuyet: string
+  lyDoTuChoi?: string
+}) {
+  const daDuyet = params.trangThaiDuyet === 'da_duyet'
+  return taoVaGuiThongBao({
+    maNguoiDung: params.maNguoiDung,
+    loai: 'he_thong',
+    tieuDe: daDuyet ? 'Cong ty da duoc duyet' : 'Ho so cong ty bi tu choi',
+    noiDung: daDuyet
+      ? `${params.tenCongTy} da duoc duyet. Ban co the dang tin tuyen dung.`
+      : `${params.tenCongTy} chua duoc duyet.${params.lyDoTuChoi ? ` Ly do: ${params.lyDoTuChoi}` : ''}`,
+    lienKet: '/nha-tuyen-dung/cong-ty',
+    mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
+    icon: daDuyet ? 'check' : 'warning',
+    mauSac: daDuyet ? '#10b981' : '#ef4444',
+  })
+}
+
+export async function thongBaoNhaTuyenDungKetQuaDuyetTin(params: {
+  maNguoiDung: string
+  tieuDeTin: string
+  maTinTuyenDung: string
+  trangThai: string
+}) {
+  const daDuyet = params.trangThai === 'dang_mo'
+  return taoVaGuiThongBao({
+    maNguoiDung: params.maNguoiDung,
+    loai: 'tin_tuyen_dung',
+    tieuDe: daDuyet ? 'Tin tuyen dung da duoc duyet' : 'Tin tuyen dung bi tu choi',
+    noiDung: daDuyet
+      ? `Tin "${params.tieuDeTin}" da duoc mo cong khai.`
+      : `Tin "${params.tieuDeTin}" chua duoc duyet.`,
+    lienKet: `/nha-tuyen-dung/quan-ly-tin?tin=${params.maTinTuyenDung}`,
+    mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
+    icon: daDuyet ? 'check' : 'warning',
+    mauSac: daDuyet ? '#10b981' : '#ef4444',
+    maTinTuyenDung: params.maTinTuyenDung,
+  })
+}
+
 export async function thongBaoHeThong(params: {
   maNguoiDung: string
   tieuDe: string

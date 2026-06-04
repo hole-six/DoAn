@@ -15,7 +15,7 @@
 }
 
 .search-shell-active {
-  z-index: 65;
+  z-index: 420;
   transform: scale(1.015);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -42,7 +42,7 @@
   position: absolute;
   right: 0;
   top: 100%;
-  z-index: 70;
+  z-index: 430;
 }
 
 .search-suggest-loading {

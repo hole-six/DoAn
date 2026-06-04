@@ -3,6 +3,7 @@ import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
 import { CuocTroChuyenModel, TinNhanModel } from './tinnhan.mohinh.js'
 import { taoVaGuiThongBao } from '../thongbao/thongbao.dichvu.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
+import { NhaTuyenDung } from '../nhatuyendung/nhatuyendung.mohinh.js'
 
 // ============================================
 // CONVERSATION SERVICES
@@ -51,20 +52,26 @@ async function timAdminDauTien() {
   return (NguoiDung as any).findOne({ vaiTro: 'admin', trangThai: { $ne: 'bi_khoa' } }).select('_id')
 }
 
+async function congTyDaDuyet(maNguoiDung: string) {
+  const congTy = await (NhaTuyenDung as any).findOne({ maNguoiDung }).select('_id trangThaiDuyet')
+  return Boolean(congTy && congTy.trangThaiDuyet === 'da_duyet')
+}
+
 export async function damBaoCuocTroChuyenHoTroQuanTri(maNguoiDung: string, vaiTro: string) {
   if (vaiTro === 'admin') {
-    const nhaTuyenDungList = await (NguoiDung as any)
-      .find({ vaiTro: 'nha_tuyen_dung', trangThai: { $ne: 'bi_khoa' } })
-      .select('_id')
+    const congTyList = await (NhaTuyenDung as any)
+      .find({ trangThaiDuyet: 'da_duyet' })
+      .select('maNguoiDung')
       .limit(500)
 
-    await Promise.all(nhaTuyenDungList.map((nguoiDung: any) => layHoacTaoCuocTroChuyenModel({
-      nguoiThamGia: [maNguoiDung, String(nguoiDung._id)],
+    await Promise.all(congTyList.map((congTy: any) => layHoacTaoCuocTroChuyenModel({
+      nguoiThamGia: [maNguoiDung, String(congTy.maNguoiDung)],
       loai: 'admin_support',
     })))
   }
 
   if (vaiTro === 'nha_tuyen_dung') {
+    if (!await congTyDaDuyet(maNguoiDung)) return
     const admin = await timAdminDauTien()
     if (admin) {
       await layHoacTaoCuocTroChuyenModel({

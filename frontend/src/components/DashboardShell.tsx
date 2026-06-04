@@ -173,7 +173,8 @@ export default function DashboardShell({ vaiTro }: Props) {
     <>
       <div
         className={clsx(
-          'min-h-dvh bg-[#edf3f8] text-slate-900 lg:flex lg:h-dvh lg:overflow-hidden',
+          'dashboard-shell-root min-h-dvh bg-[#edf3f8] text-slate-900 lg:flex lg:h-dvh lg:overflow-hidden',
+          `dashboard-role-${vaiTro}`,
           collapsed ? 'itdash-collapsed' : 'itdash-expanded',
         )}
         data-role={vaiTro}
@@ -255,8 +256,8 @@ export default function DashboardShell({ vaiTro }: Props) {
           </Link>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="sticky top-0 z-[60] flex h-16 items-center justify-between border-b border-[#0e4d7d]/10 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden">
+        <div className="dashboard-content-shell flex min-w-0 flex-1 flex-col">
+          <div className="dashboard-mobilebar sticky top-0 z-[60] flex h-16 items-center justify-between border-b border-[#0e4d7d]/10 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden">
             <button
               className={clsx('inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white', shell.mobileButton)}
               onClick={() => setOpen(!open)}
@@ -296,7 +297,7 @@ export default function DashboardShell({ vaiTro }: Props) {
             />
           )}
 
-          <main className="min-w-0 flex-1 overflow-visible p-3 pb-32 sm:p-4 sm:pb-32 lg:h-dvh lg:overflow-y-auto lg:p-6 lg:pb-6">
+          <main className="dashboard-main min-w-0 flex-1 overflow-visible p-3 pb-32 sm:p-4 sm:pb-32 lg:h-dvh lg:overflow-y-auto lg:p-6 lg:pb-6">
             <Outlet />
           </main>
         </div>

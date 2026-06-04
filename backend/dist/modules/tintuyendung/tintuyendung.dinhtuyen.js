@@ -35,7 +35,7 @@ const taiAnhTin = (0, multer_1.default)({
     },
 });
 async function layCongTyTheoNguoiDung(maNguoiDung) {
-    return nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung }).select('_id');
+    return nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung }).select('_id trangThaiDuyet');
 }
 const damBaoQuyenTaoTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, _phanHoi, tiepTheo) => {
     const nguoiDung = await (0, xacthuc_dichvu_js_1.layNguoiDungTuAccessToken)(yeuCau.headers.authorization);
@@ -46,6 +46,9 @@ const damBaoQuyenTaoTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCa
         const congTy = await layCongTyTheoNguoiDung(nguoiDung.id);
         if (!congTy)
             throw new loiungdung_js_1.LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422);
+        if (congTy.trangThaiDuyet !== 'da_duyet') {
+            throw new loiungdung_js_1.LoiUngDung('Công ty chưa được duyệt nên chưa thể tạo tin tuyển dụng', 403, 'EMPLOYER_NOT_APPROVED');
+        }
         yeuCau.body = {
             ...yeuCau.body,
             maNhaTuyenDung: String(congTy._id),

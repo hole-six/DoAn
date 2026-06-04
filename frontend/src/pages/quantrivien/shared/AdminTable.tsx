@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button'
 
 export function AdminPage({ title, desc, action, children }: { title: string; desc: string; action?: ReactNode; children: ReactNode }) {
@@ -18,8 +18,12 @@ export function AdminPanel({ children }: { children: ReactNode }) {
 }
 
 export function AdminTable({ heads, children, minWidth = 820 }: { heads: string[]; children: ReactNode; minWidth?: number }) {
+  const labelStyle = heads.reduce<Record<string, string>>((style, head, index) => {
+    return { ...style, [`--admin-table-head-${index + 1}`]: `"${head}"` }
+  }, {}) as CSSProperties
+
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200">
+    <div className="admin-responsive-table overflow-x-auto rounded-xl border border-slate-200" style={labelStyle}>
       <table className="w-full border-collapse text-left" style={{ minWidth }}>
         <thead><tr>{heads.map(head => <th key={head} className="bg-slate-50 px-3 py-2.5 text-xs font-black uppercase tracking-wide text-slate-500">{head}</th>)}</tr></thead>
         <tbody className="[&_td]:border-t [&_td]:border-slate-100 [&_td]:px-3 [&_td]:py-3 [&_td]:align-middle">{children}</tbody>

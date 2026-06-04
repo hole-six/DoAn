@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, X, Zap } from 'lucide-react'
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
+import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
@@ -134,6 +135,8 @@ export default function DanhSachCongTy() {
   const [loi, setLoi] = useState('')
   const [searchActive, setSearchActive] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
   const searchWrapRef = useRef<HTMLDivElement | null>(null)
   const { groups, loading, hasAny } = useSearchSuggestions({
     query: tuKhoa,
@@ -186,8 +189,9 @@ export default function DanhSachCongTy() {
     const skillMap = new Map<string, { id: string; ten: string; loai: string; count: number }>()
     const companySkillMap = new Map<string, Set<string>>()
     const companySkillTypeMap = new Map<string, Set<string>>()
+    const approvedCompanyIds = new Set(companies.map(company => company.id))
 
-    jobs.filter(job => job.trangThai === 'dang_mo').forEach(job => {
+    jobs.filter(job => job.trangThai === 'dang_mo' && approvedCompanyIds.has(job.maNhaTuyenDung)).forEach(job => {
       jobCount.set(job.maNhaTuyenDung, (jobCount.get(job.maNhaTuyenDung) ?? 0) + 1)
       const companySkills = companySkillMap.get(job.maNhaTuyenDung) ?? new Set<string>()
       const companySkillTypes = companySkillTypeMap.get(job.maNhaTuyenDung) ?? new Set<string>()
@@ -209,7 +213,7 @@ export default function DanhSachCongTy() {
     })
 
     return { jobCount, reviewMap, skillMap, companySkillMap, companySkillTypeMap }
-  }, [jobs, reviews])
+  }, [companies, jobs, reviews])
 
   const boLocDong = useMemo(() => {
     const quyMoMap = new Map<string, number>()
@@ -260,6 +264,14 @@ export default function DanhSachCongTy() {
     }
     return (stats.jobCount.get(b.id) ?? 0) - (stats.jobCount.get(a.id) ?? 0)
   })
+
+  useEffect(() => {
+    setPage(1)
+  }, [tuKhoa, quyMoDangChon, linhVucDangChon, loaiKyNangDangChon, kyNangDangChon, danhGiaToiThieu, sapXep])
+
+  const tongTrang = Math.max(1, Math.ceil(ketQua.length / pageSize))
+  const pageHienTai = Math.min(page, tongTrang)
+  const ketQuaPhanTrang = ketQua.slice((pageHienTai - 1) * pageSize, pageHienTai * pageSize)
 
   const xoaBoLoc = () => {
     setTuKhoa('')
@@ -388,13 +400,22 @@ export default function DanhSachCongTy() {
             </select>
           </div>
           {loi && <div className="jobs-real-error">{loi}</div>}
+          {ketQua.length > 0 && (
+            <Pagination
+              page={pageHienTai}
+              pageSize={pageSize}
+              total={ketQua.length}
+              onPageChange={setPage}
+              onPageSizeChange={(next) => { setPageSize(next); setPage(1) }}
+            />
+          )}
           <div className="company-real-grid">
-            {ketQua.map((cty, index) => {
+            {ketQuaPhanTrang.map((cty, index) => {
               const reviewStat = stats.reviewMap.get(cty.id)
               const rating = reviewStat ? Math.round((reviewStat.total / reviewStat.count) * 10) / 10 : 5
               const soReview = reviewStat?.count ?? 0
               const soViec = stats.jobCount.get(cty.id) ?? 0
-              const hot = index < 3 || soViec >= 3
+              const hot = ((pageHienTai - 1) * pageSize + index) < 3 || soViec >= 3
 
               return (
                 <article key={cty.id} className={`company-real-card${hot ? ' hot' : ''}`}>
@@ -421,6 +442,15 @@ export default function DanhSachCongTy() {
               )
             })}
           </div>
+          {ketQua.length > pageSize && (
+            <Pagination
+              page={pageHienTai}
+              pageSize={pageSize}
+              total={ketQua.length}
+              onPageChange={setPage}
+              onPageSizeChange={(next) => { setPageSize(next); setPage(1) }}
+            />
+          )}
         </div>
       </section>
     </main>

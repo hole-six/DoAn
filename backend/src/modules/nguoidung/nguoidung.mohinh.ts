@@ -11,6 +11,8 @@ const nguoiDungSchema = new Schema(
     soDienThoai: { type: String, trim: true },
     vaiTro: { type: String, enum: vaiTroNguoiDung, default: 'ung_vien' },
     trangThai: { type: String, enum: trangThaiTaiKhoan, default: 'hoat_dong' },
+    maDatLaiMatKhauHash: String,
+    maDatLaiMatKhauHetHan: Date,
   },
   {
     collection: 'nguoi_dung',

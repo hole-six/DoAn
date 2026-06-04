@@ -458,3 +458,60 @@ aside nav.grid.gap-1 a span {
   }
 }
 
+/* Role dashboard final mobile overrides */
+.dashboard-shell-root {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.dashboard-shell-root .dashboard-content-shell,
+.dashboard-shell-root .dashboard-main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-shell-root[data-role="ungvien"] .dashboard-main,
+  .dashboard-shell-root[data-role="nhatuyendung"] .dashboard-main {
+    padding-bottom: max(132px, calc(132px + env(safe-area-inset-bottom))) !important;
+  }
+
+  .dashboard-shell-root[data-role="quantrivien"] .dashboard-main {
+    padding-bottom: max(28px, calc(28px + env(safe-area-inset-bottom))) !important;
+  }
+
+  .dashboard-mobilebar > span {
+    min-width: 0;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dashboard-shell-root[data-role="quantrivien"] .bottom-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .uv-dashboard-kpi-grid,
+  .ntd-dashboard-kpi-grid,
+  .admin-dashboard-kpi-grid,
+  .admin-kpi-grid,
+  .uv-kpi-grid,
+  .ntd-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .uv-dashboard-kpi-grid,
+  .ntd-dashboard-kpi-grid,
+  .admin-dashboard-kpi-grid,
+  .admin-kpi-grid,
+  .uv-kpi-grid,
+  .ntd-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+

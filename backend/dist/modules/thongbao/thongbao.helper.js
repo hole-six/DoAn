@@ -11,6 +11,10 @@ exports.thongBaoHoSoMoiUngTuyen = thongBaoHoSoMoiUngTuyen;
 exports.thongBaoUngVienChapNhanLich = thongBaoUngVienChapNhanLich;
 exports.thongBaoUngVienTuChoiLich = thongBaoUngVienTuChoiLich;
 exports.thongBaoCongTyMoiDangKy = thongBaoCongTyMoiDangKy;
+exports.thongBaoAdminCongTyCanDuyet = thongBaoAdminCongTyCanDuyet;
+exports.thongBaoAdminTinTuyenDungCanDuyet = thongBaoAdminTinTuyenDungCanDuyet;
+exports.thongBaoNhaTuyenDungKetQuaDuyetCongTy = thongBaoNhaTuyenDungKetQuaDuyetCongTy;
+exports.thongBaoNhaTuyenDungKetQuaDuyetTin = thongBaoNhaTuyenDungKetQuaDuyetTin;
 exports.thongBaoHeThong = thongBaoHeThong;
 const thongbao_dichvu_js_1 = require("./thongbao.dichvu.js");
 async function thongBaoHoSoDuocXem(params) {
@@ -192,6 +196,68 @@ async function thongBaoCongTyMoiDangKy(params) {
         hanhDong: [
             { nhan: 'Duyệt công ty', url: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`, loai: 'primary' },
         ],
+    });
+}
+async function thongBaoAdminCongTyCanDuyet(params) {
+    return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
+        maNguoiDung: params.maAdmin,
+        loai: 'he_thong',
+        tieuDe: params.capNhatLai ? 'Cong ty cap nhat ho so can duyet lai' : 'Cong ty moi can duyet',
+        noiDung: `${params.tenNguoiDangKy} ${params.capNhatLai ? 'da cap nhat lai ho so cong ty' : 'da dang ky cong ty'} ${params.tenCongTy}.`,
+        lienKet: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`,
+        mucDoUuTien: 'cao',
+        icon: 'building',
+        mauSac: '#8b5cf6',
+        hanhDong: [
+            { nhan: 'Duyet cong ty', url: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`, loai: 'primary' },
+        ],
+    });
+}
+async function thongBaoAdminTinTuyenDungCanDuyet(params) {
+    return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
+        maNguoiDung: params.maAdmin,
+        loai: 'tin_tuyen_dung',
+        tieuDe: 'Tin tuyen dung moi can duyet',
+        noiDung: `${params.tenCongTy} vua gui tin "${params.tieuDeTin}" cho duyet.`,
+        lienKet: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`,
+        mucDoUuTien: 'cao',
+        icon: 'briefcase',
+        mauSac: '#0ea5e9',
+        maTinTuyenDung: params.maTinTuyenDung,
+        hanhDong: [
+            { nhan: 'Duyet tin', url: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`, loai: 'primary' },
+        ],
+    });
+}
+async function thongBaoNhaTuyenDungKetQuaDuyetCongTy(params) {
+    const daDuyet = params.trangThaiDuyet === 'da_duyet';
+    return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
+        maNguoiDung: params.maNguoiDung,
+        loai: 'he_thong',
+        tieuDe: daDuyet ? 'Cong ty da duoc duyet' : 'Ho so cong ty bi tu choi',
+        noiDung: daDuyet
+            ? `${params.tenCongTy} da duoc duyet. Ban co the dang tin tuyen dung.`
+            : `${params.tenCongTy} chua duoc duyet.${params.lyDoTuChoi ? ` Ly do: ${params.lyDoTuChoi}` : ''}`,
+        lienKet: '/nha-tuyen-dung/cong-ty',
+        mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
+        icon: daDuyet ? 'check' : 'warning',
+        mauSac: daDuyet ? '#10b981' : '#ef4444',
+    });
+}
+async function thongBaoNhaTuyenDungKetQuaDuyetTin(params) {
+    const daDuyet = params.trangThai === 'dang_mo';
+    return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
+        maNguoiDung: params.maNguoiDung,
+        loai: 'tin_tuyen_dung',
+        tieuDe: daDuyet ? 'Tin tuyen dung da duoc duyet' : 'Tin tuyen dung bi tu choi',
+        noiDung: daDuyet
+            ? `Tin "${params.tieuDeTin}" da duoc mo cong khai.`
+            : `Tin "${params.tieuDeTin}" chua duoc duyet.`,
+        lienKet: `/nha-tuyen-dung/quan-ly-tin?tin=${params.maTinTuyenDung}`,
+        mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
+        icon: daDuyet ? 'check' : 'warning',
+        mauSac: daDuyet ? '#10b981' : '#ef4444',
+        maTinTuyenDung: params.maTinTuyenDung,
     });
 }
 async function thongBaoHeThong(params) {

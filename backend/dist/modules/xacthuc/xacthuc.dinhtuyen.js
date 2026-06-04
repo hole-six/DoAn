@@ -7,5 +7,8 @@ exports.dinhTuyenXacThuc = (0, express_1.Router)();
 exports.dinhTuyenXacThuc.post('/dang-nhap', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangNhap);
 exports.dinhTuyenXacThuc.post('/dang-nhap-google', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangNhapGoogle);
 exports.dinhTuyenXacThuc.post('/lam-moi-token', xacthuc_dieukhien_js_1.dieuKhienXacThuc.lamMoiToken);
+exports.dinhTuyenXacThuc.post('/quen-mat-khau', xacthuc_dieukhien_js_1.dieuKhienXacThuc.quenMatKhau);
+exports.dinhTuyenXacThuc.get('/dat-lai-mat-khau/:token', xacthuc_dieukhien_js_1.dieuKhienXacThuc.kiemTraTokenDatLaiMatKhau);
+exports.dinhTuyenXacThuc.post('/dat-lai-mat-khau', xacthuc_dieukhien_js_1.dieuKhienXacThuc.datLaiMatKhau);
 exports.dinhTuyenXacThuc.get('/toi', xacthuc_dieukhien_js_1.dieuKhienXacThuc.toi);
 exports.dinhTuyenXacThuc.post('/dang-xuat', xacthuc_dieukhien_js_1.dieuKhienXacThuc.dangXuat);

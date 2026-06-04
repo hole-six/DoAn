@@ -931,7 +931,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   }
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_16px_46px_rgba(15,23,42,0.08)] sm:p-5">
+    <section className="cv-studio-shell rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_16px_46px_rgba(15,23,42,0.08)] sm:p-5">
       <style>{`
         #cv-print-root { display: none; }
         .cv-a4-preview {
@@ -1100,7 +1100,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           }
         }
       `}</style>
-      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="cv-studio-top mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0b5c91]">CV Studio</p>
           <div className="mt-1 flex flex-wrap items-center gap-3">
@@ -1112,7 +1112,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           </div>
           <p className="mt-1 max-w-3xl text-sm font-semibold text-slate-500">Nhập đủ thông tin như mẫu CV trong `index.html`: thông tin cá nhân, summary, kỹ năng, học vấn, bài viết kỹ thuật và kinh nghiệm theo dự án.</p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="cv-studio-actions flex flex-wrap items-center justify-end gap-2">
           <button type="button" className={secondaryBtn} onClick={taoCvMoi}><Plus size={16} /> Tạo CV mới</button>
           <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()}><FileUp size={16} /> Upload CV PDF</button>
           <button type="button" className={secondaryBtn} onClick={goiYAi}><Brain size={16} /> Gợi ý nội dung</button>
@@ -1198,8 +1198,8 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
         </div>
       )}
 
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(430px,560px)_minmax(620px,1fr)]">
-        <div className="grid gap-4">
+      <div className="cv-studio-main-grid grid items-start gap-5 xl:grid-cols-[minmax(430px,560px)_minmax(620px,1fr)]">
+        <div className="cv-studio-editor-grid grid gap-4">
           <div className={panelCls}>
             <SectionTitle title="Thông tin cá nhân" desc={`Độ hoàn thiện CV: ${progress}%${cv.fileCvTen ? ` - đã upload ${cv.fileCvTen}` : ''}`} />
             <div className="mb-4 grid gap-3 md:grid-cols-[132px_minmax(0,1fr)]">
@@ -1254,12 +1254,12 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           <ProjectEditor value={cv.duAnChiTiet} onChange={v => capNhatCv({ ...cv, duAnChiTiet: v })} />
         </div>
 
-        <div className="min-w-0 xl:sticky xl:top-4">
+        <div className="cv-studio-preview-panel min-w-0 xl:sticky xl:top-4">
           <div className="mb-3 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <span className="text-sm font-black text-slate-700">Preview A4 - linh hoạt theo nội dung</span>
             <button type="button" className={smallBtn} onClick={() => taiPdf()} disabled={!coNoiDungDeIn}><Download size={14} /> Tải PDF</button>
           </div>
-          <div>
+          <div className="cv-preview-scroll">
             <Preview cv={cv} data={data} />
           </div>
         </div>

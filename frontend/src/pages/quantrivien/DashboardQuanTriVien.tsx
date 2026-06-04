@@ -200,7 +200,7 @@ export default function DashboardQuanTriVien() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="admin-dashboard-kpi-grid grid grid-cols-2 gap-2.5 max-[360px]:grid-cols-1 sm:gap-3 xl:grid-cols-4">
         {thongKe.map((item) => <StatCard key={item.nhan} item={item} />)}
       </div>
 

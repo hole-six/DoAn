@@ -635,3 +635,36 @@
     top: 74px;
   }
 }
+@media (max-width: 768px) {
+  .chat-page {
+    min-height: calc(100dvh - 96px) !important;
+  }
+
+  .chat-list-panel,
+  .chat-thread-panel {
+    border-radius: 18px !important;
+    max-width: 100%;
+  }
+
+  .chat-list-panel > div:last-child {
+    max-height: calc(100dvh - 250px) !important;
+  }
+
+  .chat-thread-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: calc(100dvh - 118px);
+  }
+
+  .chat-thread-panel form,
+  .chat-thread-panel > div:last-child {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+  }
+
+  .chat-thread-panel textarea,
+  .chat-thread-panel input {
+    font-size: 16px;
+  }
+}

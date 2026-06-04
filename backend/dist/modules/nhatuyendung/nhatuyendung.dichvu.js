@@ -2,8 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuNhaTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-require("../nguoidung/nguoidung.mohinh.js");
+const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
+const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const nhatuyendung_mohinh_js_1 = require("./nhatuyendung.mohinh.js");
+async function layAdminIds() {
+    const admins = await nguoidung_mohinh_js_1.NguoiDung.find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id');
+    return admins.map((item) => String(item._id));
+}
+async function guiThongBaoAdminCongTy(params) {
+    const adminIds = await layAdminIds();
+    await Promise.all(adminIds.map((maAdmin) => (0, thongbao_helper_js_1.thongBaoAdminCongTyCanDuyet)({ maAdmin, ...params })));
+}
 function chuanHoaNhaTuyenDung(taiLieu) {
     const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
     return {
@@ -49,11 +58,19 @@ exports.dichVuNhaTuyenDung = {
     },
     async taoMoi(duLieu) {
         const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.create(duLieu);
-        return chuanHoaNhaTuyenDung(await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ketQua._id).populate('maNguoiDung', 'hoTen email soDienThoai'));
+        const dayDu = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ketQua._id).populate('maNguoiDung', 'hoTen email soDienThoai');
+        if (dayDu?.trangThaiDuyet === 'cho_duyet') {
+            await guiThongBaoAdminCongTy({
+                tenCongTy: dayDu.tenCongTy,
+                tenNguoiDangKy: dayDu.maNguoiDung?.hoTen ?? 'Nha tuyen dung',
+                maNhaTuyenDung: String(dayDu._id),
+            });
+        }
+        return chuanHoaNhaTuyenDung(dayDu);
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
-        const hienTai = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma);
+        const hienTai = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
         if (hienTai.trangThaiDuyet === 'da_duyet' && duLieu.trangThaiDuyet === 'tu_choi') {
@@ -68,6 +85,25 @@ exports.dichVuNhaTuyenDung = {
             .populate('maNguoiDung', 'hoTen email soDienThoai');
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
+        const trangThaiCu = hienTai.trangThaiDuyet;
+        const trangThaiMoi = ketQua.trangThaiDuyet;
+        if (trangThaiCu !== trangThaiMoi && ['da_duyet', 'tu_choi'].includes(trangThaiMoi)) {
+            await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetCongTy)({
+                maNguoiDung: String(ketQua.maNguoiDung?._id ?? ketQua.maNguoiDung),
+                tenCongTy: ketQua.tenCongTy,
+                trangThaiDuyet: trangThaiMoi,
+                lyDoTuChoi: ketQua.lyDoTuChoi,
+            });
+        }
+        const coCapNhatNoiDung = Object.keys(duLieu).some(key => !['trangThaiDuyet', 'lyDoTuChoi', 'ngayDuyet'].includes(key));
+        if (trangThaiCu === 'tu_choi' && coCapNhatNoiDung && trangThaiMoi !== 'da_duyet') {
+            await guiThongBaoAdminCongTy({
+                tenCongTy: ketQua.tenCongTy,
+                tenNguoiDangKy: ketQua.maNguoiDung?.hoTen ?? 'Nha tuyen dung',
+                maNhaTuyenDung: String(ketQua._id),
+                capNhatLai: true,
+            });
+        }
         return chuanHoaNhaTuyenDung(ketQua);
     },
     async xoa(ma) {

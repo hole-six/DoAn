@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { LogIn, LogOut, Menu, UserPlus, X } from 'lucide-react'
 import logoWeb from '../assets/logodai.png'
@@ -24,9 +24,9 @@ const techLogos = [
 ]
 
 const vaiTroLabel = {
-  ung_vien: 'Ứng viên',
-  nha_tuyen_dung: 'Nhà tuyển dụng',
-  admin: 'Quản trị viên',
+  ung_vien: 'á»¨ng viÃªn',
+  nha_tuyen_dung: 'NhÃ  tuyá»ƒn dá»¥ng',
+  admin: 'Quáº£n trá»‹ viÃªn',
 } as const
 
 export default function Header() {
@@ -49,15 +49,15 @@ export default function Header() {
   }, [menuMo])
 
   const dashboardPath = nguoiDung ? duongDanTheoVaiTro[nguoiDung.vaiTro] : '/dang-nhap'
-  const tenHienThi = nguoiDung?.hoTen?.trim() || nguoiDung?.email || 'Tài khoản'
+  const tenHienThi = nguoiDung?.hoTen?.trim() || nguoiDung?.email || 'TÃ i khoáº£n'
 
   const actionTheoVaiTro = !nguoiDung
-    ? { to: '/dang-nhap', eyebrow: 'Dành cho nhà tuyển dụng', label: 'Đăng tin tuyển dụng' }
+    ? { to: '/dang-nhap', eyebrow: 'DÃ nh cho nhÃ  tuyá»ƒn dá»¥ng', label: 'ÄÄƒng tin tuyá»ƒn dá»¥ng' }
     : nguoiDung.vaiTro === 'nha_tuyen_dung'
-      ? { to: '/nha-tuyen-dung/tao-tin', eyebrow: 'Nhà tuyển dụng', label: 'Đăng tin tuyển dụng' }
+      ? { to: '/nha-tuyen-dung/tao-tin', eyebrow: 'NhÃ  tuyá»ƒn dá»¥ng', label: 'ÄÄƒng tin tuyá»ƒn dá»¥ng' }
       : nguoiDung.vaiTro === 'admin'
-        ? { to: '/quan-tri/dashboard', eyebrow: 'Quản trị hệ thống', label: 'Vào admin' }
-        : { to: '/ung-vien', eyebrow: 'Ứng viên', label: 'Hồ sơ của tôi' }
+        ? { to: '/quan-tri/dashboard', eyebrow: 'Quáº£n trá»‹ há»‡ thá»‘ng', label: 'VÃ o admin' }
+        : { to: '/ung-vien', eyebrow: 'á»¨ng viÃªn', label: 'Há»“ sÆ¡ cá»§a tÃ´i' }
 
   const dangXuat = () => {
     xoaPhienDangNhap()
@@ -66,17 +66,15 @@ export default function Header() {
   }
 
   const mobileLinks = [
-    { to: '/', label: 'Trang chủ' },
-    { to: '/viec-lam', label: 'Việc làm IT' },
-    { to: '/cong-ty', label: 'Công ty' },
-    { to: '/luong', label: 'Báo cáo lương' },
-    { to: '/blog', label: 'Blog' },
+    { to: '/', label: 'Trang chá»§' },
+    { to: '/viec-lam', label: 'Viá»‡c lÃ m IT' },
+    { to: '/cong-ty', label: 'CÃ´ng ty' },
     actionTheoVaiTro,
     ...(nguoiDung
       ? [{ to: dashboardPath, label: `Dashboard ${vaiTroLabel[nguoiDung.vaiTro]}` }]
       : [
-          { to: '/dang-nhap', label: 'Đăng nhập' },
-          { to: '/dang-ky', label: 'Đăng ký' },
+          { to: '/dang-nhap', label: 'ÄÄƒng nháº­p' },
+          { to: '/dang-ky', label: 'ÄÄƒng kÃ½' },
         ]),
   ]
 
@@ -102,12 +100,10 @@ export default function Header() {
           <img src={logoWeb} alt="Effort Job" className="logo-thuonghieu" />
         </Link>
 
-        <nav aria-label="Điều hướng chính">
-          <NavLink to="/" end>Trang chủ</NavLink>
-          <NavLink to="/viec-lam">Việc làm IT</NavLink>
-          <NavLink to="/cong-ty">Công ty</NavLink>
-          <NavLink to="/luong">Báo cáo lương</NavLink>
-          <NavLink to="/blog">Blog</NavLink>
+        <nav aria-label="Äiá»u hÆ°á»›ng chÃ­nh">
+          <NavLink to="/" end>Trang chá»§</NavLink>
+          <NavLink to="/viec-lam">Viá»‡c lÃ m IT</NavLink>
+          <NavLink to="/cong-ty">CÃ´ng ty</NavLink>
         </nav>
 
         <div className="nav-actions-rong">
@@ -133,11 +129,11 @@ export default function Header() {
             <>
               <Link to="/dang-nhap" className="nav-pill-rong">
                 <AppIcon icon={LogIn} size={17} />
-                <span>Đăng nhập</span>
+                <span>ÄÄƒng nháº­p</span>
               </Link>
               <Link to="/dang-ky" className="nav-pill-rong strong">
                 <AppIcon icon={UserPlus} size={17} />
-                <span>Đăng ký</span>
+                <span>ÄÄƒng kÃ½</span>
               </Link>
             </>
           )}
@@ -149,7 +145,7 @@ export default function Header() {
           <button
             className="mobile-menu-backdrop-rong"
             type="button"
-            aria-label="Đóng menu"
+            aria-label="ÄÃ³ng menu"
             onClick={() => setMenuMo(false)}
           />
           <div className="mobile-menu-rong">
@@ -161,7 +157,7 @@ export default function Header() {
           {nguoiDung && (
             <button onClick={dangXuat}>
               <AppIcon icon={LogOut} size={18} />
-              Đăng xuất
+              ÄÄƒng xuáº¥t
             </button>
           )}
           </div>
@@ -170,3 +166,4 @@ export default function Header() {
     </header>
   )
 }
+

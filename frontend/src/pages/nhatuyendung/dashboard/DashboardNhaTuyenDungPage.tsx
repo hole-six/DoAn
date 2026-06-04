@@ -9,7 +9,7 @@ import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
 
 function Kpi({ icon: Icon, label, value }: { icon: typeof Briefcase; label: string; value: number }) {
-  return <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_6px_18px_rgba(15,23,42,0.05)]"><Icon size={20} className="mb-3 text-sky-800" /><p className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</p><strong className="mt-1 block text-3xl font-black text-slate-950">{value}</strong></div>
+  return <div className="ntd-dashboard-kpi-card rounded-xl border border-slate-200 bg-white p-3 shadow-[0_6px_18px_rgba(15,23,42,0.05)] sm:p-4"><Icon size={20} className="mb-2 text-sky-800 sm:mb-3" /><p className="text-[11px] font-black uppercase leading-snug tracking-wide text-slate-500 sm:text-xs">{label}</p><strong className="mt-1 block text-2xl font-black leading-none text-slate-950 sm:text-3xl">{value}</strong></div>
 }
 
 export default function DashboardNhaTuyenDungPage() {
@@ -45,7 +45,7 @@ export default function DashboardNhaTuyenDungPage() {
       )}
     >
       <ErrorState message={data.error} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="ntd-dashboard-kpi-grid grid grid-cols-2 gap-2.5 max-[360px]:grid-cols-1 sm:gap-3 xl:grid-cols-4">
         <Kpi icon={Briefcase} label="Tin đang mở" value={openJobs.length} />
         <Kpi icon={Users} label="Ứng viên" value={data.applications.length} />
         <Kpi icon={Calendar} label="Lịch sắp tới" value={upcoming.length} />

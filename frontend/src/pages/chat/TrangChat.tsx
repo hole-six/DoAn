@@ -181,8 +181,8 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
   }
 
   return (
-    <div className="grid min-h-[calc(100dvh-140px)] gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
-      <aside className={clsx('min-h-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm', selected && 'max-lg:hidden')}>
+    <div className="chat-page grid min-h-[calc(100dvh-140px)] gap-4 lg:grid-cols-[340px_minmax(0,1fr)]">
+      <aside className={clsx('chat-list-panel min-h-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm', selected && 'max-lg:hidden')}>
         <div className="border-b border-slate-200 p-4">
           <div className="text-[11px] font-black uppercase tracking-[0.12em] text-sky-700">{titleByRole[vaiTro]}</div>
           <h1 className="mt-1 text-2xl font-black text-slate-950">Tin nhắn</h1>
@@ -255,7 +255,7 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
         </div>
       </aside>
 
-      <section className={clsx('min-h-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm', !selected && 'max-lg:hidden')}>
+      <section className={clsx('chat-thread-panel min-h-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm', !selected && 'max-lg:hidden')}>
         {selected ? (
           <div className="flex h-full min-h-0 flex-col">
             <header className="flex items-center gap-3 border-b border-slate-200 px-4 py-3">

@@ -792,3 +792,50 @@
     line-height: 1.05 !important;
   }
 }
+
+/* Employer role: targeted responsive fixes for the current route pages */
+@media (max-width: 768px) {
+  .ntd-dashboard-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .ntd-dashboard-kpi-card {
+    min-height: 108px;
+    border-radius: 16px !important;
+  }
+
+  .dashboard-role-nhatuyendung article {
+    min-width: 0;
+  }
+
+  .dashboard-role-nhatuyendung article h2,
+  .dashboard-role-nhatuyendung article strong,
+  .dashboard-role-nhatuyendung article p,
+  .dashboard-role-nhatuyendung article span {
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-filterbar,
+  .dashboard-role-nhatuyendung .ntd-form,
+  .dashboard-role-nhatuyendung .ntd-company-strip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-modal-card,
+  .dashboard-role-nhatuyendung .ntd-drawer-card {
+    border-radius: 18px 18px 0 0 !important;
+    max-height: calc(100dvh - 18px) !important;
+    width: 100% !important;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-drawer {
+    align-items: end !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .ntd-dashboard-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -31,7 +31,7 @@ const taiAnhTin = multer({
 })
 
 async function layCongTyTheoNguoiDung(maNguoiDung: string) {
-  return (NhaTuyenDung as any).findOne({ maNguoiDung }).select('_id')
+  return (NhaTuyenDung as any).findOne({ maNguoiDung }).select('_id trangThaiDuyet')
 }
 
 const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
@@ -43,6 +43,9 @@ const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => 
   if (nguoiDung.vaiTro === 'nha_tuyen_dung') {
     const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
     if (!congTy) throw new LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422)
+    if (congTy.trangThaiDuyet !== 'da_duyet') {
+      throw new LoiUngDung('Công ty chưa được duyệt nên chưa thể tạo tin tuyển dụng', 403, 'EMPLOYER_NOT_APPROVED')
+    }
 
     yeuCau.body = {
       ...yeuCau.body,
