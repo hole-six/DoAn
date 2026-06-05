@@ -1,0 +1,45 @@
+@startuml
+left to right direction
+skinparam shadowing false
+title Use Case - Ứng viên
+
+actor "Ứng viên" as Candidate
+actor "Nhà tuyển dụng" as Employer
+actor "Hệ thống Email SMTP" as Mail
+actor "Gemini API" as Gemini
+
+rectangle "Dashboard ứng viên" {
+  usecase "Quản lý hồ sơ cá nhân" as Profile
+  usecase "Tạo CV trong hệ thống" as CreateCV
+  usecase "Upload CV PDF" as UploadCV
+  usecase "Quản lý hồ sơ năng lực" as Portfolio
+  usecase "Tìm kiếm việc làm" as Search
+  usecase "Lưu việc làm" as SaveJob
+  usecase "Ứng tuyển" as Apply
+  usecase "Theo dõi trạng thái ứng tuyển" as Track
+  usecase "Xác nhận/Yêu cầu đổi lịch phỏng vấn" as InterviewReply
+  usecase "Nhận thông báo" as Notify
+  usecase "Chat với nhà tuyển dụng" as Chat
+  usecase "Nhận gợi ý việc làm AI" as AIRecommend
+}
+
+Candidate --> Profile
+Candidate --> CreateCV
+Candidate --> UploadCV
+Candidate --> Portfolio
+Candidate --> Search
+Candidate --> SaveJob
+Candidate --> Apply
+Candidate --> Track
+Candidate --> InterviewReply
+Candidate --> Notify
+Candidate --> Chat
+Candidate --> AIRecommend
+
+Apply ..> Portfolio : <<include>>
+Apply ..> Notify : <<include>>
+InterviewReply --> Employer : phản hồi lịch
+Notify --> Mail : gửi email khi cần
+AIRecommend --> Gemini : phân tích CV/job
+@enduml
+

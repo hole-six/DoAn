@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+skinparam shadowing false
+title Use Case - AI Gemini và fallback database
+
+actor "Khách vãng lai" as Guest
+actor "Ứng viên" as Candidate
+actor "Gemini API" as Gemini
+database "MongoDB" as DB
+
+rectangle "Trợ lý AI Effort Job" {
+  usecase "Hỏi về việc làm IT" as AskJob
+  usecase "Hỏi về CV/phỏng vấn" as AskCareer
+  usecase "Tìm job phù hợp trong database" as SearchDB
+  usecase "Gọi Gemini sinh câu trả lời" as CallGemini
+  usecase "Fallback khi Gemini lỗi/rate limit" as Fallback
+  usecase "Gợi ý job liên quan" as RecommendJobs
+}
+
+Guest --> AskJob
+Guest --> AskCareer
+Candidate --> AskJob
+Candidate --> AskCareer
+
+AskJob ..> SearchDB : <<include>>
+AskCareer ..> CallGemini : <<include>>
+CallGemini --> Gemini
+SearchDB --> DB
+CallGemini ..> Fallback : <<extend lỗi>>
+Fallback ..> SearchDB : <<include>>
+AskJob ..> RecommendJobs : <<include>>
+@enduml
+

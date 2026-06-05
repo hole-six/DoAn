@@ -1,0 +1,29 @@
+@startuml
+skinparam shadowing false
+title Activity - Đăng nhập JWT
+
+start
+:Người dùng mở trang đăng nhập;
+:Nhập email và mật khẩu;
+if (Form hợp lệ?) then (Có)
+  :Gửi POST /api/xacthuc/dang-nhap;
+  :Backend tìm NgườiDùng theo email;
+  if (Tài khoản tồn tại và hoạt động?) then (Có)
+    :So khớp mật khẩu hash;
+    if (Mật khẩu đúng?) then (Có)
+      :Tạo access token và refresh token;
+      :Trả thông tin người dùng;
+      :Frontend lưu phiên đăng nhập;
+      :Điều hướng theo vai trò;
+    else (Không)
+      :Trả lỗi sai thông tin đăng nhập;
+    endif
+  else (Không)
+    :Trả lỗi tài khoản không hợp lệ;
+  endif
+else (Không)
+  :Hiển thị lỗi nhập liệu;
+endif
+stop
+@enduml
+

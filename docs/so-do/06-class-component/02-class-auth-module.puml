@@ -1,0 +1,40 @@
+@startuml
+skinparam shadowing false
+title Class Diagram - Module xác thực
+
+class "XácThựcController" as AuthController {
+  +đăngKý()
+  +đăngNhập()
+  +đăngNhậpGoogle()
+  +quênMậtKhẩu()
+  +đặtLạiMậtKhẩu()
+}
+
+class "XácThựcService" as AuthService {
+  +tạoNgườiDùng()
+  +soKhớpMậtKhẩu()
+  +tạoJwt()
+  +tạoResetToken()
+  +xácMinhGoogleToken()
+}
+
+class "NgườiDùngModel" as UserModel {
+  +email
+  +mậtKhẩuHash
+  +vaiTrò
+  +resetPasswordTokenHash
+}
+
+class "ỨngViênModel" as CandidateModel
+class "NhàTuyểnDụngModel" as EmployerModel
+class "EmailService" as EmailService {
+  +gửiEmailResetMậtKhẩu()
+}
+
+AuthController --> AuthService
+AuthService --> UserModel
+AuthService --> CandidateModel
+AuthService --> EmployerModel
+AuthService --> EmailService
+@enduml
+

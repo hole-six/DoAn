@@ -1,0 +1,31 @@
+@startuml
+skinparam shadowing false
+title Sequence - Đăng nhập JWT
+
+actor "Người dùng" as User
+boundary "TrangĐăngNhập" as UI
+control "XácThựcController" as Controller
+control "XácThựcService" as Service
+entity "NgườiDùng" as UserModel
+database "MongoDB" as DB
+
+User -> UI : Nhập email, mật khẩu
+UI -> Controller : POST /api/xacthuc/dang-nhap
+Controller -> Service : dangNhap(email, matKhau)
+Service -> UserModel : tìm theo email
+UserModel -> DB : findOne(email)
+DB --> UserModel : user
+UserModel --> Service : user
+Service -> Service : so khớp mật khẩu hash
+alt Hợp lệ
+  Service -> Service : tạo accessToken/refreshToken
+  Service --> Controller : phiên đăng nhập
+  Controller --> UI : 200 + user + token
+  UI -> UI : lưu phiên, điều hướng theo vai trò
+else Không hợp lệ
+  Service --> Controller : lỗi xác thực
+  Controller --> UI : 401
+  UI --> User : Hiển thị lỗi
+end
+@enduml
+

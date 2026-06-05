@@ -1,0 +1,39 @@
+@startuml
+skinparam shadowing false
+title Component Diagram - Frontend React
+
+package "Frontend React/Vite" {
+  component "App Router" as Router
+  component "Public Layout\nHeader/Footer/BottomNav" as PublicLayout
+  component "Auth Pages\nĐăng nhập/Đăng ký/Reset" as Auth
+  component "Public Pages\nTrang chủ/Việc làm/Công ty" as PublicPages
+  component "Dashboard Ứng viên" as CandidateDash
+  component "Dashboard Nhà tuyển dụng" as EmployerDash
+  component "Dashboard Quản trị" as AdminDash
+  component "Chat UI" as ChatUI
+  component "Notification Center" as NotifyUI
+  component "API Client/Auth Storage" as ApiClient
+}
+
+cloud "Backend API" as API
+node "Socket.IO" as Socket
+
+Router --> PublicLayout
+Router --> Auth
+Router --> PublicPages
+Router --> CandidateDash
+Router --> EmployerDash
+Router --> AdminDash
+CandidateDash --> ChatUI
+EmployerDash --> ChatUI
+AdminDash --> NotifyUI
+Auth --> ApiClient
+PublicPages --> ApiClient
+CandidateDash --> ApiClient
+EmployerDash --> ApiClient
+AdminDash --> ApiClient
+ApiClient --> API
+ChatUI --> Socket
+NotifyUI --> Socket
+@enduml
+

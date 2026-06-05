@@ -1,0 +1,23 @@
+@startuml
+skinparam shadowing false
+title Activity - Thông báo hệ thống
+
+start
+:Một nghiệp vụ phát sinh sự kiện;
+if (Sự kiện cần thông báo?) then (Có)
+  :Xác định người nhận và loại thông báo;
+  :Tạo bản ghi ThongBao;
+  if (Người nhận đang online?) then (Có)
+    :Socket.IO gửi realtime;
+  else (Không)
+    :Giữ thông báo chưa đọc;
+  endif
+  if (Cần gửi email?) then (Có)
+    :Gửi email qua SMTP;
+  endif
+else (Không)
+  :Không tạo thông báo;
+endif
+stop
+@enduml
+

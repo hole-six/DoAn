@@ -1,19 +1,24 @@
-# So do UML/ERD cho tai lieu EffortIT
+# Bộ Sơ Đồ Phân Tích Thiết Kế EffortIT
 
-Thu muc nay chua cac so do nguon `.puml` theo cu phap PlantUML. Co the mo bang VS Code PlantUML extension hoac dung PlantUML de export sang PNG/SVG chen vao bao cao Word.
+Thư mục này chứa bộ sơ đồ PlantUML phục vụ báo cáo phân tích thiết kế hệ thống tuyển dụng IT EffortIT. Bộ sơ đồ được chia theo nhóm học thuật: use-case, activity, sequence, robustness, ERD, class/component và deployment.
 
-Danh sach so do:
+Tài liệu chính:
 
-- `01-usecase-tong-quan.puml`: Usecase tong quan.
-- `02-activity-quen-mat-khau.puml`: Activity reset password.
-- `03-activity-ung-tuyen.puml`: Activity ung tuyen.
-- `04-activity-dang-tin-duyet-tin.puml`: Activity nha tuyen dung dang tin va admin duyet.
-- `05-robustness-quen-mat-khau.puml`: Robustness reset password.
-- `06-robustness-ung-tuyen.puml`: Robustness ung tuyen.
-- `07-robustness-duyet-tin.puml`: Robustness duyet tin.
-- `08-sequence-dang-nhap.puml`: Sequence dang nhap.
-- `09-sequence-quen-mat-khau.puml`: Sequence reset password.
-- `10-sequence-ung-tuyen.puml`: Sequence ung tuyen.
-- `11-sequence-chat-realtime.puml`: Sequence chat realtime.
-- `12-erd-effortit.puml`: ERD he thong.
-- `13-activity-lich-phong-van.puml`: Activity lich phong van va ket qua.
+- [Danh mục sơ đồ](00-tai-lieu/danh-muc-so-do.md)
+- [Phân tích thiết kế hệ thống](00-tai-lieu/phan-tich-thiet-ke-he-thong.md)
+
+Cấu trúc:
+
+- `01-usecase/`: sơ đồ use-case theo tác nhân.
+- `02-activity/`: luồng nghiệp vụ chính.
+- `03-sequence/`: tương tác frontend, backend, database, dịch vụ ngoài.
+- `04-robustness/`: boundary, control, entity cho các use-case trọng tâm.
+- `05-erd-du-lieu/`: mô hình dữ liệu.
+- `06-class-component/`: class/module backend và component frontend/backend.
+- `07-deployment/`: triển khai production VPS và webhook deploy.
+
+Render bằng PlantUML extension trong VS Code hoặc lệnh:
+
+```bash
+plantuml docs/so-do/**/*.puml
+```

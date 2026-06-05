@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+title Class Diagram - Tổng quan module backend
+
+package "Backend Express API" {
+  class "maychu.ts" as Server {
+    +khởiĐộngMáyChủ()
+  }
+
+  class "dinhTuyenApi" as Router {
+    +gắnRoute()
+  }
+
+  class "XácThựcModule" as AuthModule
+  class "TinTuyểnDụngModule" as JobModule
+  class "ỨngTuyểnModule" as ApplyModule
+  class "LịchPhỏngVấnModule" as InterviewModule
+  class "TinNhắnModule" as ChatModule
+  class "AiModule" as AIModule
+  class "ThôngBáoModule" as NotifyModule
+}
+
+database "MongoDB" as DB
+cloud "Gemini API" as Gemini
+cloud "SMTP Gmail" as SMTP
+node "Socket.IO" as Socket
+
+Server --> Router
+Router --> AuthModule
+Router --> JobModule
+Router --> ApplyModule
+Router --> InterviewModule
+Router --> ChatModule
+Router --> AIModule
+Router --> NotifyModule
+AuthModule --> DB
+JobModule --> DB
+ApplyModule --> DB
+InterviewModule --> DB
+ChatModule --> DB
+NotifyModule --> DB
+AIModule --> Gemini
+NotifyModule --> SMTP
+ChatModule --> Socket
+@enduml
+

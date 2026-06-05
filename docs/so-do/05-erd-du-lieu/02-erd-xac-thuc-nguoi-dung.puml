@@ -1,0 +1,53 @@
+@startuml
+hide circle
+skinparam shadowing false
+title ERD - Xác thực và người dùng
+
+entity "NgườiDùng" as User {
+  * _id : ObjectId <<PK>>
+  --
+  email : string
+  mậtKhẩuHash : string
+  họTên : string
+  sốĐiệnThoại : string
+  vaiTrò : enum
+  trạngThái : enum
+  googleId : string
+  resetPasswordTokenHash : string
+  resetPasswordExpires : Date
+  ngàyTạo : Date
+}
+
+entity "ỨngViên" as Candidate {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiDùng : ObjectId <<FK>>
+  ảnhĐạiDiện
+  tómTắt
+}
+
+entity "NhàTuyểnDụng" as Employer {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiDùng : ObjectId <<FK>>
+  tênCôngTy
+  trạngTháiDuyệt
+  lýDoTừChối
+}
+
+entity "ThôngBáo" as Notification {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiNhận : ObjectId <<FK>>
+  loại
+  tiêuĐề
+  nộiDung
+  liênKết
+  đãĐọc
+}
+
+User ||--o| Candidate : hồ sơ ứng viên
+User ||--o| Employer : hồ sơ công ty
+User ||--o{ Notification : nhận
+@enduml
+

@@ -1,0 +1,20 @@
+@startuml
+skinparam shadowing false
+title Activity - Mời phỏng vấn
+
+start
+:Nhà tuyển dụng mở pipeline ứng viên;
+:Chọn hồ sơ ứng tuyển phù hợp;
+:Bấm mời phỏng vấn;
+:Nhập thời gian, hình thức, địa chỉ/link họp, ghi chú;
+if (Lịch hợp lệ?) then (Có)
+  :Tạo LichPhongVan;
+  :Cập nhật hồ sơ ứng tuyển sang mời phỏng vấn;
+  :Tạo thông báo cho ứng viên;
+  :Mở kênh chat theo hồ sơ ứng tuyển;
+else (Không)
+  :Hiển thị lỗi lịch;
+endif
+stop
+@enduml
+

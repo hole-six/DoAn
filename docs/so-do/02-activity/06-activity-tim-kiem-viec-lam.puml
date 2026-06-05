@@ -1,0 +1,24 @@
+@startuml
+skinparam shadowing false
+title Activity - Tìm kiếm và lọc việc làm
+
+start
+:Khách/Ứng viên mở trang việc làm;
+:Frontend tải danh sách tin đang mở;
+:Người dùng nhập từ khóa;
+:Người dùng chọn kỹ năng, cấp bậc, hình thức;
+:Hệ thống lọc client-side theo dữ liệu đang mở;
+if (Có kết quả?) then (Có)
+  :Hiển thị danh sách phân trang;
+  :Người dùng chọn xem chi tiết hoặc lưu việc;
+else (Không)
+  :Hiển thị trạng thái không có việc phù hợp;
+  :Gợi ý bỏ bớt bộ lọc;
+endif
+if (Người dùng hỏi AI?) then (Có)
+  :Gửi câu hỏi đến chatbot;
+  :Hiển thị gợi ý việc làm từ AI/database;
+endif
+stop
+@enduml
+

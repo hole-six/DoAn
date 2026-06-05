@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+title Sequence - Quên mật khẩu bằng email token
+
+actor "Người dùng" as User
+boundary "TrangQuênMậtKhẩu" as ForgotUI
+boundary "TrangĐặtLạiMậtKhẩu" as ResetUI
+control "XácThựcController" as Controller
+control "XácThựcService" as Service
+entity "NgườiDùng" as UserModel
+control "EmailService" as Mail
+database "MongoDB" as DB
+
+User -> ForgotUI : Nhập email
+ForgotUI -> Controller : POST /api/xacthuc/quen-mat-khau
+Controller -> Service : taoTokenReset(email)
+Service -> UserModel : tìm user
+UserModel -> DB : findOne(email)
+DB --> UserModel : user/null
+alt Email tồn tại
+  Service -> Service : sinh token + hash
+  Service -> UserModel : lưu hash và hạn dùng
+  UserModel -> DB : update
+  Service -> Mail : gửi link reset
+  Mail --> User : Email reset
+end
+Controller --> ForgotUI : thông báo an toàn
+User -> ResetUI : Mở link reset
+ResetUI -> Controller : GET /dat-lai-mat-khau/:token
+Controller -> Service : kiểm tra token
+Service -> UserModel : tìm token hash còn hạn
+UserModel -> DB : findOne
+DB --> UserModel : user/null
+alt Token hợp lệ
+  Controller --> ResetUI : cho nhập mật khẩu mới
+  User -> ResetUI : Gửi mật khẩu mới
+  ResetUI -> Controller : POST /dat-lai-mat-khau
+  Controller -> Service : cập nhật mật khẩu
+  Service -> UserModel : hash mật khẩu, xóa token
+  UserModel -> DB : update
+  Controller --> ResetUI : thành công
+else Token lỗi
+  Controller --> ResetUI : báo hết hạn/không hợp lệ
+end
+@enduml
+

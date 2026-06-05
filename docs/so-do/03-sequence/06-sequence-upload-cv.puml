@@ -1,0 +1,29 @@
+@startuml
+skinparam shadowing false
+title Sequence - Upload CV PDF và trích xuất nội dung
+
+actor "Ứng viên" as Candidate
+boundary "TrangHồSơỨngViên" as UI
+control "HồSơNăngLựcController" as Controller
+entity "HồSơNăngLực" as CV
+control "Gemini API" as Gemini
+database "MongoDB" as DB
+
+Candidate -> UI : Chọn file PDF
+UI -> Controller : POST /api/hosonangluc/upload-file
+Controller -> Controller : kiểm tra loại file/dung lượng
+alt File hợp lệ
+  Controller -> CV : lưu metadata và file
+  CV -> DB : insert/update
+  opt Có Gemini API
+    Controller -> Gemini : đọc nội dung PDF
+    Gemini --> Controller : text CV
+    Controller -> CV : cập nhật fileCvText
+    CV -> DB : update
+  end
+  Controller --> UI : thành công
+else File không hợp lệ
+  Controller --> UI : lỗi upload
+end
+@enduml
+

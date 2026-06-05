@@ -1,0 +1,28 @@
+@startuml
+skinparam shadowing false
+title Sequence - Nhà tuyển dụng đăng tin chờ duyệt
+
+actor "Nhà tuyển dụng" as Employer
+boundary "TrangQuảnLýTin" as UI
+control "TinTuyểnDụngController" as Controller
+entity "NhàTuyểnDụng" as Company
+entity "TinTuyểnDụng" as Job
+entity "ThôngBáo" as Notify
+database "MongoDB" as DB
+
+Employer -> UI : Nhập form đăng tin
+UI -> Controller : POST /api/tintuyendung
+Controller -> Company : kiểm tra trạng thái duyệt
+Company -> DB : findByUser
+DB --> Company : công ty
+alt Công ty đã duyệt
+  Controller -> Job : tạo tin trạng thái chờ duyệt
+  Job -> DB : insert
+  Controller -> Notify : thông báo admin cần duyệt
+  Notify -> DB : insert
+  Controller --> UI : 201
+else Chưa duyệt
+  Controller --> UI : 403 EMPLOYER_NOT_APPROVED
+end
+@enduml
+

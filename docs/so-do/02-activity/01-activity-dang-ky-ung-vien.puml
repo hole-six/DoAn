@@ -1,0 +1,27 @@
+@startuml
+skinparam shadowing false
+title Activity - Đăng ký tài khoản ứng viên
+
+start
+:Ứng viên mở trang đăng ký;
+:Chọn vai trò "Ứng viên";
+:Nhập họ tên, email, số điện thoại, mật khẩu;
+if (Dữ liệu form hợp lệ?) then (Có)
+  :Frontend gửi POST /api/xacthuc/dang-ky;
+  :Backend kiểm tra email đã tồn tại;
+  if (Email đã tồn tại?) then (Có)
+    :Trả lỗi email đã được sử dụng;
+    :Hiển thị lỗi trên form;
+  else (Không)
+    :Hash mật khẩu;
+    :Tạo NgườiDùng vai trò ứng viên;
+    :Tạo hồ sơ ỨngViên trống;
+    :Trả thông tin tài khoản;
+    :Frontend chuyển sang đăng nhập hoặc dashboard;
+  endif
+else (Không)
+  :Hiển thị lỗi nhập liệu;
+endif
+stop
+@enduml
+

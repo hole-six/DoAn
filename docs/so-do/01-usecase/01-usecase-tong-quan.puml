@@ -1,0 +1,100 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle stick
+title Use Case tổng quan - Hệ thống tuyển dụng IT EffortIT
+
+actor "Khách vãng lai" as Guest
+actor "Ứng viên" as Candidate
+actor "Nhà tuyển dụng" as Employer
+actor "Quản trị viên" as Admin
+actor "Gemini API" as Gemini
+actor "Hệ thống Email SMTP" as Mail
+
+Candidate --|> Guest
+Employer --|> Guest
+
+rectangle "EffortIT - Nền tảng tuyển dụng IT" {
+  usecase "Xem trang chủ" as UC_Home
+  usecase "Tìm kiếm/lọc việc làm" as UC_SearchJob
+  usecase "Xem chi tiết việc làm" as UC_JobDetail
+  usecase "Xem hồ sơ công ty" as UC_Company
+  usecase "Đăng ký tài khoản" as UC_Register
+  usecase "Đăng nhập/JWT" as UC_Login
+  usecase "Google Login" as UC_Google
+  usecase "Quên mật khẩu" as UC_Forgot
+
+  usecase "Quản lý CV/hồ sơ năng lực" as UC_CV
+  usecase "Upload CV PDF" as UC_UploadCV
+  usecase "Lưu việc làm" as UC_SaveJob
+  usecase "Ứng tuyển" as UC_Apply
+  usecase "Theo dõi hồ sơ ứng tuyển" as UC_Track
+  usecase "Xem lịch phỏng vấn" as UC_CandidateInterview
+  usecase "Chat với nhà tuyển dụng" as UC_CandidateChat
+  usecase "Nhận gợi ý việc làm AI" as UC_AIRecommend
+
+  usecase "Cập nhật hồ sơ công ty" as UC_UpdateCompany
+  usecase "Đăng tin tuyển dụng" as UC_PostJob
+  usecase "Quản lý tin tuyển dụng" as UC_ManageJob
+  usecase "Xem pipeline ứng viên" as UC_Pipeline
+  usecase "Mời phỏng vấn" as UC_Schedule
+  usecase "Cập nhật kết quả phỏng vấn" as UC_Result
+  usecase "Chat với ứng viên/Admin" as UC_EmployerChat
+
+  usecase "Dashboard quản trị" as UC_AdminDashboard
+  usecase "Quản lý người dùng" as UC_Users
+  usecase "Duyệt công ty" as UC_ApproveCompany
+  usecase "Duyệt tin tuyển dụng" as UC_ApproveJob
+  usecase "Quản lý kỹ năng" as UC_Skills
+  usecase "Quản lý review công ty" as UC_Reviews
+  usecase "Xử lý thông báo cần duyệt" as UC_AdminNotify
+}
+
+Guest --> UC_Home
+Guest --> UC_SearchJob
+Guest --> UC_JobDetail
+Guest --> UC_Company
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_Google
+Guest --> UC_Forgot
+
+Candidate --> UC_CV
+Candidate --> UC_UploadCV
+Candidate --> UC_SaveJob
+Candidate --> UC_Apply
+Candidate --> UC_Track
+Candidate --> UC_CandidateInterview
+Candidate --> UC_CandidateChat
+Candidate --> UC_AIRecommend
+
+Employer --> UC_UpdateCompany
+Employer --> UC_PostJob
+Employer --> UC_ManageJob
+Employer --> UC_Pipeline
+Employer --> UC_Schedule
+Employer --> UC_Result
+Employer --> UC_EmployerChat
+
+Admin --> UC_AdminDashboard
+Admin --> UC_Users
+Admin --> UC_ApproveCompany
+Admin --> UC_ApproveJob
+Admin --> UC_Skills
+Admin --> UC_Reviews
+Admin --> UC_AdminNotify
+
+UC_Forgot --> Mail : <<include>>
+UC_Google --> UC_Login : <<extend>>
+UC_UploadCV ..> UC_CV : <<extend>>
+UC_Apply ..> UC_CV : <<include>>
+UC_PostJob ..> UC_UpdateCompany : <<include>>
+UC_PostJob ..> UC_ApproveCompany : <<precondition>>
+UC_Schedule ..> UC_Pipeline : <<include>>
+UC_Result ..> UC_Schedule : <<include>>
+UC_AIRecommend --> Gemini : <<include>>
+UC_ApproveCompany ..> UC_AdminNotify : <<include>>
+UC_ApproveJob ..> UC_AdminNotify : <<include>>
+@enduml
+

@@ -1,0 +1,38 @@
+@startuml
+left to right direction
+skinparam shadowing false
+title Use Case - Quản trị viên
+
+actor "Quản trị viên" as Admin
+actor "Nhà tuyển dụng" as Employer
+actor "Ứng viên" as Candidate
+
+rectangle "Khu vực quản trị EffortIT" {
+  usecase "Xem dashboard tổng quan" as Dashboard
+  usecase "Quản lý người dùng" as Users
+  usecase "Duyệt hồ sơ công ty" as ApproveCompany
+  usecase "Duyệt tin tuyển dụng" as ApproveJob
+  usecase "Quản lý kỹ năng" as Skills
+  usecase "Quản lý review công ty" as Reviews
+  usecase "Theo dõi thông báo cần xử lý" as Notifications
+  usecase "Chat hỗ trợ nhà tuyển dụng" as SupportEmployer
+  usecase "Kiểm soát dữ liệu hệ thống" as Audit
+}
+
+Admin --> Dashboard
+Admin --> Users
+Admin --> ApproveCompany
+Admin --> ApproveJob
+Admin --> Skills
+Admin --> Reviews
+Admin --> Notifications
+Admin --> SupportEmployer
+Admin --> Audit
+
+ApproveCompany --> Employer : thông báo kết quả
+ApproveJob --> Employer : thông báo kết quả
+Reviews --> Candidate : kiểm duyệt nội dung
+Notifications ..> ApproveCompany : <<include>>
+Notifications ..> ApproveJob : <<include>>
+@enduml
+

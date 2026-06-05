@@ -1,0 +1,21 @@
+@startuml
+skinparam shadowing false
+title Activity - Lưu việc làm
+
+start
+:Người dùng bấm biểu tượng lưu việc;
+if (Đã đăng nhập ứng viên?) then (Có)
+  :Gửi POST/DELETE /api/viec-lam-da-luu/{id};
+  if (Đang lưu?) then (Có)
+    :Tạo bản ghi ViecLamDaLuu;
+  else (Không)
+    :Xóa bản ghi ViecLamDaLuu;
+  endif
+  :Cập nhật trạng thái nút lưu;
+else (Không)
+  :Lưu tạm trong localStorage;
+  :Gợi ý đăng nhập để đồng bộ;
+endif
+stop
+@enduml
+

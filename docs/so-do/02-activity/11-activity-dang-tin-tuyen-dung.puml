@@ -1,0 +1,24 @@
+@startuml
+skinparam shadowing false
+title Activity - Nhà tuyển dụng đăng tin tuyển dụng
+
+start
+:Nhà tuyển dụng mở form đăng tin;
+:Hệ thống kiểm tra trạng thái duyệt công ty;
+if (Công ty đã duyệt?) then (Có)
+  :Nhập tiêu đề, mô tả, yêu cầu, lương, kỹ năng, hạn nộp;
+  :Upload ảnh đại diện tin nếu có;
+  if (Form hợp lệ?) then (Có)
+    :Tạo TinTuyenDung trạng thái chờ duyệt;
+    :Tạo thông báo cho quản trị viên;
+    :Hiển thị tin đã gửi duyệt;
+  else (Không)
+    :Hiển thị lỗi form;
+  endif
+else (Không)
+  :Chặn tạo tin;
+  :Hiển thị banner chờ duyệt công ty;
+endif
+stop
+@enduml
+

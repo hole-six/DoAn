@@ -1,0 +1,26 @@
+@startuml
+skinparam shadowing false
+title Activity - Gemini chatbot và fallback database
+
+start
+:Người dùng nhập câu hỏi;
+:Frontend chặn gửi trùng khi đang chờ;
+:Gửi POST /api/ai/chatbot;
+:Backend chuẩn hóa câu hỏi;
+if (Có cache/in-flight cùng câu hỏi?) then (Có)
+  :Dùng kết quả đang có;
+else (Không)
+  :Truy vấn việc làm phù hợp trong MongoDB;
+  :Gọi Gemini API với timeout;
+  if (Gemini trả lời thành công?) then (Có)
+    :Parse JSON/câu trả lời;
+    :Trả nguồn "gemini";
+  else (Không)
+    :Dùng fallback database;
+    :Trả cảnh báo Gemini đang bận;
+  endif
+endif
+:Frontend hiển thị câu trả lời và job gợi ý;
+stop
+@enduml
+

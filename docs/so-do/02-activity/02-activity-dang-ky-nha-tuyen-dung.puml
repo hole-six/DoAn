@@ -1,0 +1,26 @@
+@startuml
+skinparam shadowing false
+title Activity - Đăng ký tài khoản nhà tuyển dụng
+
+start
+:Nhà tuyển dụng mở trang đăng ký;
+:Chọn vai trò "Nhà tuyển dụng";
+:Nhập người phụ trách, email, điện thoại, mật khẩu, tên công ty;
+if (Dữ liệu hợp lệ?) then (Có)
+  :Gửi POST /api/xacthuc/dang-ky;
+  :Backend kiểm tra email;
+  if (Email đã tồn tại?) then (Có)
+    :Trả lỗi email;
+  else (Không)
+    :Tạo NgườiDùng vai trò nhà tuyển dụng;
+    :Tạo NhaTuyenDung trạng thái "chờ duyệt";
+    :Tạo thông báo cho quản trị viên;
+    :Trả kết quả đăng ký;
+    :Hiển thị hướng dẫn hoàn thiện hồ sơ công ty;
+  endif
+else (Không)
+  :Hiển thị lỗi form;
+endif
+stop
+@enduml
+

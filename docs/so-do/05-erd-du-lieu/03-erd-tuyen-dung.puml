@@ -1,0 +1,75 @@
+@startuml
+hide circle
+skinparam shadowing false
+title ERD - Nghiệp vụ tuyển dụng
+
+entity "NhàTuyểnDụng" as Employer {
+  * _id : ObjectId <<PK>>
+  --
+  tênCôngTy
+  trạngTháiDuyệt
+}
+
+entity "TinTuyểnDụng" as Job {
+  * _id : ObjectId <<PK>>
+  --
+  mãNhàTuyểnDụng : ObjectId <<FK>>
+  tiêuĐề
+  môTả
+  yêuCầu
+  quyềnLợi
+  lươngMin
+  lươngMax
+  hìnhThức
+  cấpBậc
+  hạnNộp
+  trạngThái
+}
+
+entity "DanhMụcKỹNăng" as Skill {
+  * _id : ObjectId <<PK>>
+  --
+  tênKỹNăng
+  loạiKỹNăng
+  môTả
+}
+
+entity "ỨngViên" as Candidate {
+  * _id : ObjectId <<PK>>
+}
+
+entity "HồSơNăngLực" as CV {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  tiêuĐề
+}
+
+entity "HồSơỨngTuyển" as Application {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  mãTinTuyểnDụng : ObjectId <<FK>>
+  mãHồSơNăngLực : ObjectId <<FK>>
+  trạngThái
+  ngàyNộp
+}
+
+entity "LịchSửHồSơỨngTuyển" as History {
+  * _id : ObjectId <<PK>>
+  --
+  mãHồSơỨngTuyển : ObjectId <<FK>>
+  trạngTháiCũ
+  trạngTháiMới
+  ghiChú
+}
+
+Employer ||--o{ Job
+Job }o--o{ Skill
+Candidate ||--o{ CV
+Candidate ||--o{ Application
+Job ||--o{ Application
+CV ||--o{ Application
+Application ||--o{ History
+@enduml
+

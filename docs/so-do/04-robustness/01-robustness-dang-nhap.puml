@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+skinparam shadowing false
+title Robustness - Đăng nhập
+
+actor "Người dùng" as User
+boundary "TrangĐăngNhập" as LoginPage
+control "XácThựcController" as AuthController
+control "XácThựcService" as AuthService
+entity "NgườiDùng" as UserEntity
+entity "JWT Token" as Token
+database "MongoDB" as DB
+
+User --> LoginPage : nhập email/mật khẩu
+LoginPage --> AuthController : gửi yêu cầu đăng nhập
+AuthController --> AuthService : xác thực
+AuthService --> UserEntity : tìm user
+UserEntity --> DB : truy vấn
+AuthService --> Token : tạo access/refresh token
+AuthController --> LoginPage : trả phiên đăng nhập
+LoginPage --> User : chuyển dashboard
+@enduml
+

@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+title Class Diagram - Module tuyển dụng
+
+class "TinTuyểnDụngController" as JobController {
+  +tạoTin()
+  +cậpNhậtTin()
+  +tạmĐóngTin()
+  +mởLạiTin()
+  +lấyDanhSáchTin()
+}
+
+class "ỨngTuyểnController" as ApplyController {
+  +nộpHồSơ()
+  +cậpNhậtTrạngThái()
+  +lấyPipeline()
+}
+
+class "LịchPhỏngVấnController" as InterviewController {
+  +tạoLịch()
+  +cậpNhậtLịch()
+  +xácNhậnLịch()
+  +hoànThànhPhỏngVấn()
+}
+
+class "TinTuyểnDụng" as Job
+class "HồSơỨngTuyển" as Application
+class "HồSơNăngLực" as CV
+class "LịchPhỏngVấn" as Interview
+class "LịchSửHồSơỨngTuyển" as History
+class "ThôngBáoService" as NotifyService
+
+JobController --> Job
+ApplyController --> Application
+ApplyController --> CV
+ApplyController --> History
+InterviewController --> Interview
+InterviewController --> Application
+JobController --> NotifyService
+ApplyController --> NotifyService
+InterviewController --> NotifyService
+Application --> Job
+Application --> CV
+Interview --> Application
+@enduml
+

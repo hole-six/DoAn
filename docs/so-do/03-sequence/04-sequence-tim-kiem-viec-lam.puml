@@ -1,0 +1,22 @@
+@startuml
+skinparam shadowing false
+title Sequence - Tìm kiếm việc làm
+
+actor "Khách/Ứng viên" as User
+boundary "TrangTìmViệc" as UI
+control "TinTuyểnDụngController" as JobController
+entity "TinTuyểnDụng" as JobModel
+database "MongoDB" as DB
+
+User -> UI : Mở /viec-lam
+UI -> JobController : GET /api/tintuyendung
+JobController -> JobModel : lấy tin đang mở
+JobModel -> DB : find(trangThai='dang_mo')
+DB --> JobModel : danh sách tin
+JobModel --> JobController : jobs
+JobController --> UI : jobs
+User -> UI : Nhập từ khóa/bộ lọc
+UI -> UI : lọc kỹ năng, cấp bậc, hình thức
+UI --> User : Hiển thị danh sách phân trang
+@enduml
+

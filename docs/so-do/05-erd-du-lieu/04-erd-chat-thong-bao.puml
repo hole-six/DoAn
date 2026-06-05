@@ -1,0 +1,52 @@
+@startuml
+hide circle
+skinparam shadowing false
+title ERD - Chat và thông báo
+
+entity "NgườiDùng" as User {
+  * _id : ObjectId <<PK>>
+  --
+  email
+  họTên
+  vaiTrò
+}
+
+entity "CuộcTròChuyện" as Conversation {
+  * _id : ObjectId <<PK>>
+  --
+  thànhViên : ObjectId[]
+  loại
+  mãHồSơỨngTuyển
+  mãTinTuyểnDụng
+  cậpNhậtLúc
+}
+
+entity "TinNhắn" as Message {
+  * _id : ObjectId <<PK>>
+  --
+  mãCuộcTròChuyện : ObjectId <<FK>>
+  mãNgườiGửi : ObjectId <<FK>>
+  nộiDung
+  tệpĐínhKèm
+  đãĐọc
+  ngàyTạo
+}
+
+entity "ThôngBáo" as Notification {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiNhận : ObjectId <<FK>>
+  loại
+  tiêuĐề
+  nộiDung
+  liênKết
+  đãĐọc
+  ngàyTạo
+}
+
+User }o--o{ Conversation : tham gia
+Conversation ||--o{ Message
+User ||--o{ Message : gửi
+User ||--o{ Notification : nhận
+@enduml
+

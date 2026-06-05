@@ -1,0 +1,59 @@
+@startuml
+hide circle
+skinparam shadowing false
+title ERD - AI, CV và gợi ý việc làm
+
+entity "ỨngViên" as Candidate {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiDùng
+}
+
+entity "HồSơNăngLực" as CV {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  fileCvData
+  fileCvText
+  kỹNăngLậpTrình
+  kinhNghiệmLàm
+  dựÁnChiTiết
+}
+
+entity "TinTuyểnDụng" as Job {
+  * _id : ObjectId <<PK>>
+  --
+  tiêuĐề
+  môTả
+  yêuCầu
+  kỹNăng
+  trạngThái
+}
+
+entity "GợiÝViệcLàmAI" as Match {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  mãTinTuyểnDụng : ObjectId <<FK>>
+  điểmPhùHợp
+  lýDo
+  nguồn
+  ngàyTạo
+}
+
+entity "LịchSửChatbot" as ChatbotLog {
+  * _id : ObjectId <<PK>>
+  --
+  câuHỏi
+  câuTrảLời
+  nguồnTrảLời
+  cảnhBáo
+  ngàyTạo
+}
+
+Candidate ||--o{ CV
+Candidate ||--o{ Match
+Job ||--o{ Match
+CV }o--o{ Job : so khớp kỹ năng
+@enduml
+

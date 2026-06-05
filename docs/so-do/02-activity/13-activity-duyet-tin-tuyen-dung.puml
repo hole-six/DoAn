@@ -1,0 +1,19 @@
+@startuml
+skinparam shadowing false
+title Activity - Quản trị viên duyệt tin tuyển dụng
+
+start
+:Quản trị viên mở tin tuyển dụng chờ duyệt;
+:Xem nội dung tin, công ty, kỹ năng, lương;
+if (Tin hợp lệ?) then (Có)
+  :Cập nhật trạng thái "đang mở";
+  :Tạo thông báo duyệt tin cho nhà tuyển dụng;
+  :Tin xuất hiện ngoài trang việc làm;
+else (Không)
+  :Nhập lý do từ chối;
+  :Cập nhật trạng thái "từ chối";
+  :Tạo thông báo cho nhà tuyển dụng;
+endif
+stop
+@enduml
+

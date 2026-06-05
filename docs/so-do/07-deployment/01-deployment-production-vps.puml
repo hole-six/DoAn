@@ -1,0 +1,38 @@
+@startuml
+skinparam shadowing false
+title Deployment - Production VPS EffortIT
+
+node "Người dùng" as User {
+  artifact "Trình duyệt" as Browser
+}
+
+node "VPS Ubuntu\n14.225.255.110" as VPS {
+  node "Nginx" as Nginx {
+    artifact "Static frontend\n/var/www/itjob-frontend" as Static
+    artifact "Reverse proxy /api" as Proxy
+  }
+
+  node "PM2" as PM2 {
+    artifact "itjob-backend\nport 5001" as Backend
+    artifact "itjob-webhook\nport 9001" as Webhook
+  }
+
+  database "MongoDB\nlocalhost:27017" as Mongo
+}
+
+cloud "GitHub" as GitHub
+cloud "Let's Encrypt SSL" as SSL
+cloud "Gemini API" as Gemini
+cloud "Gmail SMTP" as SMTP
+
+Browser --> Nginx : HTTPS effortit.site
+Nginx --> Static : serve React build
+Proxy --> Backend : /api/*
+Backend --> Mongo
+Backend --> Gemini
+Backend --> SMTP
+GitHub --> Webhook : push webhook
+Webhook --> PM2 : pull/build/reload
+Nginx --> SSL : chứng chỉ TLS
+@enduml
+

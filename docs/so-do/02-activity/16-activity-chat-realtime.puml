@@ -1,0 +1,22 @@
+@startuml
+skinparam shadowing false
+title Activity - Chat realtime
+
+start
+:Người dùng đăng nhập;
+:Frontend kết nối Socket.IO bằng token;
+if (Token hợp lệ?) then (Có)
+  :Join room theo userId/vai trò;
+  :Mở danh sách cuộc trò chuyện;
+  :Chọn cuộc trò chuyện;
+  :Gửi tin nhắn;
+  :Backend lưu TinNhan;
+  :Socket.IO phát tin đến người nhận;
+  :Cập nhật trạng thái chưa đọc;
+else (Không)
+  :Từ chối kết nối socket;
+  :Yêu cầu đăng nhập lại;
+endif
+stop
+@enduml
+

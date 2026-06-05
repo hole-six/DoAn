@@ -1,0 +1,38 @@
+@startuml
+skinparam shadowing false
+title Activity - Quên mật khẩu bằng email token
+
+start
+:Người dùng mở trang quên mật khẩu;
+:Nhập email tài khoản;
+if (Email hợp lệ?) then (Có)
+  :Frontend gửi POST /api/xacthuc/quen-mat-khau;
+  :Backend tìm NgườiDùng theo email;
+  if (Email tồn tại?) then (Có)
+    :Tạo token ngẫu nhiên;
+    :Lưu resetPasswordTokenHash và hạn dùng;
+    :Gửi email chứa link đặt lại mật khẩu;
+    if (Gửi email thành công?) then (Có)
+      :Thông báo kiểm tra hộp thư;
+    else (Không)
+      :Thông báo lỗi gửi email;
+    endif
+  else (Không)
+    :Trả thông báo an toàn không lộ email;
+  endif
+else (Không)
+  :Hiển thị lỗi email;
+endif
+:Người dùng mở link đặt lại mật khẩu;
+:Backend kiểm tra token và hạn dùng;
+if (Token hợp lệ?) then (Có)
+  :Hiển thị form nhập mật khẩu mới;
+  :Người dùng gửi mật khẩu mới;
+  :Hash mật khẩu và xóa token reset;
+  :Chuyển về trang đăng nhập;
+else (Không)
+  :Thông báo token hết hạn hoặc không hợp lệ;
+endif
+stop
+@enduml
+

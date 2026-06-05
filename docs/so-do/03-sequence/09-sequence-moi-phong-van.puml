@@ -1,0 +1,26 @@
+@startuml
+skinparam shadowing false
+title Sequence - Mời phỏng vấn
+
+actor "Nhà tuyển dụng" as Employer
+boundary "PipelineỨngViên" as UI
+control "LịchPhỏngVấnController" as Controller
+entity "HồSơỨngTuyển" as Application
+entity "LịchPhỏngVấn" as Interview
+entity "ThôngBáo" as Notify
+database "MongoDB" as DB
+
+Employer -> UI : Bấm mời phỏng vấn
+UI -> Controller : POST /api/lichphongvan
+Controller -> Application : kiểm tra hồ sơ thuộc tin của NTD
+Application -> DB : findById
+DB --> Application : hồ sơ
+Controller -> Interview : tạo lịch
+Interview -> DB : insert
+Controller -> Application : cập nhật trạng thái mời phỏng vấn
+Application -> DB : update
+Controller -> Notify : thông báo ứng viên
+Notify -> DB : insert
+Controller --> UI : lịch đã tạo
+@enduml
+

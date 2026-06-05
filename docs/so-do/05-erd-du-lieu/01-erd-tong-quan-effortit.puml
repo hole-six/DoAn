@@ -1,0 +1,96 @@
+@startuml
+hide circle
+skinparam shadowing false
+skinparam linetype ortho
+title ERD tổng quan - EffortIT
+
+entity "NgườiDùng" as User {
+  * _id : ObjectId <<PK>>
+  --
+  email
+  mậtKhẩuHash
+  họTên
+  sốĐiệnThoại
+  vaiTrò
+  trạngThái
+  ngàyTạo
+}
+
+entity "ỨngViên" as Candidate {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiDùng : ObjectId <<FK>>
+  vịTríMongMuốn
+  nămKinhNghiệm
+  tómTắt
+}
+
+entity "NhàTuyểnDụng" as Employer {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiDùng : ObjectId <<FK>>
+  tênCôngTy
+  ngành
+  quyMô
+  trạngTháiDuyệt
+}
+
+entity "TinTuyểnDụng" as Job {
+  * _id : ObjectId <<PK>>
+  --
+  mãNhàTuyểnDụng : ObjectId <<FK>>
+  tiêuĐề
+  môTả
+  lươngMin
+  lươngMax
+  trạngThái
+}
+
+entity "HồSơNăngLực" as CV {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  tiêuĐề
+  fileCvText
+  cvChính
+}
+
+entity "HồSơỨngTuyển" as Application {
+  * _id : ObjectId <<PK>>
+  --
+  mãỨngViên : ObjectId <<FK>>
+  mãTinTuyểnDụng : ObjectId <<FK>>
+  mãHồSơNăngLực : ObjectId <<FK>>
+  trạngThái
+}
+
+entity "LịchPhỏngVấn" as Interview {
+  * _id : ObjectId <<PK>>
+  --
+  mãHồSơỨngTuyển : ObjectId <<FK>>
+  thờiGianBắtĐầu
+  hìnhThức
+  trạngThái
+  kếtQuả
+}
+
+entity "ThôngBáo" as Notification {
+  * _id : ObjectId <<PK>>
+  --
+  mãNgườiNhận : ObjectId <<FK>>
+  loại
+  tiêuĐề
+  đãĐọc
+}
+
+User ||--o| Candidate
+User ||--o| Employer
+Employer ||--o{ Job
+Candidate ||--o{ CV
+Candidate ||--o{ Application
+Job ||--o{ Application
+CV ||--o{ Application
+Application ||--o{ Interview
+User ||--o{ Notification
+@enduml
+
