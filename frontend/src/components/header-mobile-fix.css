@@ -353,3 +353,45 @@
     padding-inline: 8px;
   }
 }
+
+/* Final mobile auth CTA guard: keep the register pill readable in deployed CSS order. */
+@media (max-width: 768px) {
+  .site-header-rong .nav-bar-rong {
+    grid-template-columns: 48px minmax(0, 1fr) max-content !important;
+  }
+
+  .site-header-rong .nav-actions-rong .nav-pill-rong.strong {
+    width: auto !important;
+    min-width: 108px !important;
+    max-width: 132px !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0d244a !important;
+    box-shadow: 0 10px 24px rgba(255, 255, 255, 0.16) !important;
+  }
+
+  .site-header-rong .nav-actions-rong .nav-pill-rong.strong span,
+  .site-header-rong .nav-pill-rong.strong span {
+    display: inline !important;
+    color: #0d244a !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap !important;
+  }
+
+  .site-header-rong .nav-actions-rong .nav-pill-rong.strong svg {
+    color: #0d244a !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-header-rong .nav-actions-rong .nav-pill-rong.strong {
+    min-width: 96px !important;
+    max-width: 104px !important;
+    padding-inline: 10px !important;
+    font-size: 12px !important;
+  }
+}

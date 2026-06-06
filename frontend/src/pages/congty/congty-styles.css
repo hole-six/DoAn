@@ -303,11 +303,14 @@
 }
 
 .company-real-hero.jobs-real-hero > img {
-  opacity: 0.5 !important;
+  opacity: 0.74 !important;
+  filter: saturate(1.06) contrast(1.04) !important;
 }
 
 .company-real-hero.jobs-real-hero > div {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.52) 0%, rgba(30, 58, 138, 0.34) 100%) !important;
+  background:
+    linear-gradient(90deg, rgba(5, 16, 35, 0.70) 0%, rgba(7, 25, 52, 0.43) 46%, rgba(7, 25, 52, 0.12) 100%),
+    linear-gradient(0deg, rgba(5, 16, 35, 0.36), rgba(5, 16, 35, 0.02)) !important;
 }
 
 /* Company filter correction: no sideways scrolling, readable labels. */
@@ -540,6 +543,41 @@
 }
 
 @media (max-width: 768px) {
+  .company-real-page {
+    overflow-x: hidden !important;
+  }
+
+  .company-real-page .company-real-hero {
+    min-height: 430px !important;
+    padding: 24px 14px 28px !important;
+  }
+
+  .company-real-page .company-real-hero article {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .company-real-page .company-real-hero h1 {
+    max-width: 100% !important;
+    font-size: 26px !important;
+    line-height: 1.18 !important;
+  }
+
+  .company-real-page .company-real-hero p {
+    font-size: 14px !important;
+    line-height: 1.45 !important;
+  }
+
+  .company-real-page .company-real-search {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+    padding: 10px !important;
+  }
+
+  .company-real-page .company-real-search > .primary-button {
+    width: 100% !important;
+  }
+
   .company-real-page .jobs-filter-backdrop {
     position: fixed;
     inset: 0;
@@ -555,7 +593,8 @@
     padding: 18px 12px 96px !important;
   }
 
-  .company-real-page .company-real-filter {
+  .company-real-page .company-real-filter,
+  .company-real-page .company-real-filter:not(.is-mobile-open) {
     display: none !important;
   }
 
@@ -616,13 +655,21 @@
   }
 
   .company-real-page .result-toolbar {
-    grid-template-columns: 1fr auto;
-    gap: 10px;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
   }
 
   .company-real-page .result-toolbar select {
     grid-column: 1 / -1;
     width: 100%;
+  }
+
+  .company-real-page .result-toolbar .jobs-mobile-filter-trigger {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .company-real-page .company-real-grid {

@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Đánh giá công ty"
+
+actor "Actor: Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "UI: chi-tiet-cong-ty" as UI
+boundary "UI: form-danh-gia-cong-ty" as Form
+control "Controller: ReviewCongTyController" as Controller
+entity "Entity: ReviewCongTy" as MainEntity
+entity "Entity: NhaTuyenDung" as E1
+entity "Entity: UngVien" as E2
+entity "Entity: ThongBao" as E3
+
+Actor --> UI : Mở form đánh giá công ty
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Nhập điểm đánh giá và nội dung nhận xét
+Form --> Controller : taoDanhGiaCongTy(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra quyền đánh giá và nội dung\nTạo đánh giá chờ duyệt
+Controller <--> E1 : Gửi thông báo cho quản trị viên
+Controller --> Form : Thông báo đánh giá đang chờ duyệt / Thông báo nội dung đánh giá không hợp lệ
+Controller --> UI : trả dữ liệu mới
+@enduml

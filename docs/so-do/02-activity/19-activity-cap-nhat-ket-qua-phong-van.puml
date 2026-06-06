@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Cập nhật kết quả phỏng vấn
+
+start
+:Nhà tuyển dụng mở trang lịch phỏng vấn;
+:Chọn lịch cần cập nhật kết quả;
+:Hệ thống kiểm tra lịch phỏng vấn;
+if (Lịch tồn tại và thuộc quyền xử lý?) then (Có)
+  fork
+    :Chọn kết quả đạt hoặc không đạt;
+  fork again
+    :Nhập ghi chú kết quả;
+  end fork
+  :Nhà tuyển dụng lưu kết quả;
+  :Hệ thống kiểm tra dữ liệu kết quả;
+  if (Kết quả hợp lệ?) then (Có)
+    :Hệ thống cập nhật lịch phỏng vấn;
+    :Hệ thống cập nhật trạng thái hồ sơ ứng tuyển;
+    :Thông báo cho ứng viên;
+    stop
+  else (Không)
+    :Thông báo thiếu thông tin kết quả;
+    stop
+  endif
+else (Không)
+  :Thông báo không thể cập nhật lịch này;
+  stop
+endif
+@enduml

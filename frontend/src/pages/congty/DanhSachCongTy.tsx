@@ -6,6 +6,8 @@ import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { normalizeSkills } from '../../lib/skillDisplay'
+import '../vieclam/vieclam-styles.css'
 import './congty-styles.css'
 
 const logoDuPhong = 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80'
@@ -25,7 +27,7 @@ type TinTuyenDung = {
   id: string
   maNhaTuyenDung: string
   trangThai?: string
-  kyNang?: Array<{ maKyNang: string; tenKyNang: string; loaiKyNang?: string }>
+  kyNang?: unknown[]
 }
 
 type DanhGia = {
@@ -62,6 +64,13 @@ function formatQuyMo(quyMo?: number) {
   return String(quyMo)
 }
 
+const quyMoLabels: Record<string, string> = {
+  '1-50': '1-50 nhân viên',
+  '51-150': '51-150 nhân viên',
+  '151-300': '151-300 nhân viên',
+  '300+': '300+ nhân viên',
+}
+
 function toggleValue(list: string[], value: string) {
   return list.includes(value) ? list.filter(item => item !== value) : [...list, value]
 }
@@ -72,7 +81,7 @@ function normalize(value: string) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/g, 'd')
-    .replace(/Ä‘/g, 'd')
+    .replace(/đ/g, 'd')
 }
 
 function imageUrl(value?: string) {
@@ -195,13 +204,12 @@ export default function DanhSachCongTy() {
       jobCount.set(job.maNhaTuyenDung, (jobCount.get(job.maNhaTuyenDung) ?? 0) + 1)
       const companySkills = companySkillMap.get(job.maNhaTuyenDung) ?? new Set<string>()
       const companySkillTypes = companySkillTypeMap.get(job.maNhaTuyenDung) ?? new Set<string>()
-      ;(job.kyNang ?? []).forEach(skill => {
-        const id = String(skill.maKyNang ?? skill.tenKyNang)
-        const loai = skill.loaiKyNang ?? 'khac'
+      normalizeSkills(job.kyNang).forEach(skill => {
+        const { id, ten, loai } = skill
         companySkills.add(id)
         companySkillTypes.add(loai)
         const current = skillMap.get(id)
-        skillMap.set(id, { id, ten: skill.tenKyNang, loai, count: (current?.count ?? 0) + 1 })
+        skillMap.set(id, { id, ten, loai, count: (current?.count ?? 0) + 1 })
       })
       companySkillMap.set(job.maNhaTuyenDung, companySkills)
       companySkillTypeMap.set(job.maNhaTuyenDung, companySkillTypes)
@@ -343,7 +351,7 @@ export default function DanhSachCongTy() {
             <h3>Quy mô</h3>
             {boLocDong.quyMo.map(([label, count]) => (
               <button className={quyMoDangChon.includes(label) ? 'active' : ''} key={label} onClick={() => setQuyMoDangChon(prev => toggleValue(prev, label))}>
-                <Users size={15} /> <span>{label}</span><em>{count}</em>
+                <Users size={15} /> <span>{quyMoLabels[label] ?? label}</span><em>{count}</em>
               </button>
             ))}
           </section>

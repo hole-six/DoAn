@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, RotateCcw, Trash2, XCircle } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { formatDate } from '../../../lib/format'
+import { toast } from '../../../lib/toast'
 import { Badge } from '../../nhatuyendung/shared/NtdAtoms'
 import { adminApi } from '../shared/adminApi'
 import { AdminPage, AdminPanel, AdminTable, EmptyRow } from '../shared/AdminTable'
@@ -24,6 +26,7 @@ export default function QuanLyCongTyAdmin() {
   const [items, setItems] = useState<AdminCompany[]>([])
   const [error, setError] = useState('')
   const [dangXuLy, setDangXuLy] = useState('')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const load = async () => {
     try {
@@ -40,6 +43,7 @@ export default function QuanLyCongTyAdmin() {
     setDangXuLy(`${item.id}:${trangThaiDuyet}`)
     try {
       await adminApi.update(`/nhatuyendung/${item.id}`, { trangThaiDuyet })
+      toast.success('Đã cập nhật trạng thái công ty.')
       await load()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không cập nhật được trạng thái công ty')
@@ -49,17 +53,37 @@ export default function QuanLyCongTyAdmin() {
   }
 
   const remove = async (item: AdminCompany) => {
-    const ok = window.confirm(`Xóa công ty "${item.tenCongTy}"? Hành động này chỉ nên dùng khi hồ sơ có vấn đề nghiêm trọng.`)
-    if (!ok) return
-    setDangXuLy(`${item.id}:xoa`)
-    try {
-      await adminApi.remove(`/nhatuyendung/${item.id}`)
-      await load()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không xóa được công ty')
-    } finally {
-      setDangXuLy('')
-    }
+    confirm(
+      'Xóa công ty',
+      `Xóa công ty "${item.tenCongTy}"? Hành động này chỉ nên dùng khi hồ sơ có vấn đề nghiêm trọng.`,
+      async () => {
+        setDangXuLy(`${item.id}:xoa`)
+        try {
+          await adminApi.remove(`/nhatuyendung/${item.id}`)
+          toast.success('Đã xóa công ty.')
+          await load()
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Không xóa được công ty'
+          setError(message)
+          toast.error(message)
+        } finally {
+          setDangXuLy('')
+        }
+      },
+      'danger',
+      'Xóa',
+    )
+  }
+
+  const confirmUpdate = (item: AdminCompany, trangThaiDuyet: string) => {
+    const approved = trangThaiDuyet === 'da_duyet'
+    confirm(
+      approved ? 'Duyệt công ty' : 'Từ chối công ty',
+      `${approved ? 'Duyệt' : 'Từ chối'} công ty "${item.tenCongTy}"?`,
+      () => void update(item, trangThaiDuyet),
+      approved ? 'info' : 'warning',
+      approved ? 'Duyệt' : 'Từ chối',
+    )
   }
 
   const renderActions = (item: AdminCompany) => {
@@ -71,12 +95,12 @@ export default function QuanLyCongTyAdmin() {
     return (
       <ButtonGroup>
         {(trangThai === 'cho_duyet' || trangThai === 'tu_choi') && (
-          <Button size="sm" variant="success" loading={dangDuyet} icon={trangThai === 'tu_choi' ? <RotateCcw size={14} /> : <CheckCircle size={14} />} onClick={() => void update(item, 'da_duyet')}>
+          <Button size="sm" variant="success" loading={dangDuyet} icon={trangThai === 'tu_choi' ? <RotateCcw size={14} /> : <CheckCircle size={14} />} onClick={() => confirmUpdate(item, 'da_duyet')}>
             {trangThai === 'tu_choi' ? 'Duyệt lại' : 'Duyệt'}
           </Button>
         )}
         {trangThai === 'cho_duyet' && (
-          <Button size="sm" variant="danger" loading={dangTuChoi} icon={<XCircle size={14} />} onClick={() => void update(item, 'tu_choi')}>
+          <Button size="sm" variant="danger" loading={dangTuChoi} icon={<XCircle size={14} />} onClick={() => confirmUpdate(item, 'tu_choi')}>
             Từ chối
           </Button>
         )}
@@ -118,6 +142,7 @@ export default function QuanLyCongTyAdmin() {
           }) : <EmptyRow cols={5} />}
         </AdminTable>
       </AdminPanel>
+      <ConfirmDialogComponent />
     </AdminPage>
   )
 }

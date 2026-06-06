@@ -1,9 +1,10 @@
-import { Bell, Briefcase, Calendar, MessageCircle, Plus, Users } from 'lucide-react'
+import { AlertTriangle, Bell, Briefcase, Building2, Calendar, MessageCircle, Plus, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/Button'
 import { DashboardSkeleton } from '../../../components/LoadingStates'
 import { useChat } from '../../../contexts/ChatContext'
 import { formatDateTime } from '../../../lib/format'
+import { getEmployerGate } from '../../../lib/employerGate'
 import { employerApplicationStatusLabel, interviewStatusLabel, toneForApplicationStatus, toneForInterviewStatus } from '../../../lib/statusLabels'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
@@ -22,10 +23,10 @@ export default function DashboardNhaTuyenDungPage() {
   const pending = data.applications.filter(item => ['da_nop', 'da_xem', 'dang_xet_duyet'].includes(item.trangThai))
   const upcoming = data.interviews.filter(item => new Date(item.thoiGianBatDau).getTime() >= Date.now())
   const unread = data.notifications.filter(item => !item.daDoc).length
-
+  const gate = getEmployerGate(data.company)
   return (
     <Page
-      title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'}
+      title={data.company?.tenCongTy ?? 'Tổng quan nhà tuyển dụng'}
       desc="Pipeline tuyển dụng, lịch phỏng vấn và tin đang mở."
       action={(
         <>
@@ -40,11 +41,31 @@ export default function DashboardNhaTuyenDungPage() {
           >
             Nhắn admin
           </Button>
-          <Button variant="primary" icon={<Plus size={16} />} onClick={() => { window.location.href = '/nha-tuyen-dung/quan-ly-tin?new=1' }}>Đăng tin</Button>
+          {gate.allowed ? (
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => { window.location.href = '/nha-tuyen-dung/quan-ly-tin?new=1' }}>Đăng tin</Button>
+          ) : (
+            <Button variant={gate.status === 'pending' ? 'secondary' : 'primary'} icon={<Building2 size={16} />} disabled={gate.status === 'pending'} onClick={() => { window.location.href = '/nha-tuyen-dung/cong-ty' }}>
+              {gate.cta}
+            </Button>
+          )}
         </>
       )}
     >
       <ErrorState message={data.error} />
+      {!gate.allowed && (
+        <Panel>
+          <div className="grid gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+            <AlertTriangle size={24} />
+            <div>
+              <h2 className="text-base font-black">Cần được duyệt công ty trước khi tuyển dụng</h2>
+              <p className="mt-1 text-sm font-bold leading-6">{gate.message}</p>
+            </div>
+            <Button variant="primary" icon={<Building2 size={16} />} disabled={gate.status === 'pending'} onClick={() => { window.location.href = '/nha-tuyen-dung/cong-ty' }}>
+              {gate.cta}
+            </Button>
+          </div>
+        </Panel>
+      )}
       <div className="ntd-dashboard-kpi-grid grid grid-cols-2 gap-2.5 max-[360px]:grid-cols-1 sm:gap-3 xl:grid-cols-4">
         <Kpi icon={Briefcase} label="Tin đang mở" value={openJobs.length} />
         <Kpi icon={Users} label="Ứng viên" value={data.applications.length} />

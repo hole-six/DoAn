@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Quản lý danh mục kỹ năng
+
+actor "Actor: Quản trị viên" as Actor
+boundary "UI: quan-tri-ky-nang" as UI
+boundary "UI: form-ky-nang" as Form
+control "Controller: KyNangController" as Controller
+entity "Entity: KyNang" as MainEntity
+entity "Entity: TinTuyenDung" as E1
+entity "Entity: UngVien" as E2
+
+Actor -> UI : 1. Mở trang danh mục kỹ năng
+activate UI
+UI -> Form : 2. Hiển thị form-ky-nang
+activate Form
+Actor -> Form : 3. Thêm, sửa, xóa hoặc gộp kỹ năng
+Form -> Controller : 4. quanLyKyNang(request)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra tên kỹ năng, loại kỹ năng và ràng buộc sử dụng
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Cập nhật danh mục kỹ năng
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Kiểm tra tin tuyển dụng và hồ sơ đang tham chiếu
+  Controller --> Form : 10. Trả danh mục kỹ năng mới
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo kỹ năng trùng hoặc đang được sử dụng
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+end
+deactivate Controller
+deactivate Form
+deactivate UI
+@enduml

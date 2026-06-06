@@ -1,45 +1,42 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 left to right direction
 skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle stick
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #222222
+}
 title Use Case - Ứng viên
 
 actor "Ứng viên" as Candidate
-actor "Nhà tuyển dụng" as Employer
-actor "Hệ thống Email SMTP" as Mail
-actor "Gemini API" as Gemini
 
-rectangle "Dashboard ứng viên" {
-  usecase "Quản lý hồ sơ cá nhân" as Profile
-  usecase "Tạo CV trong hệ thống" as CreateCV
-  usecase "Upload CV PDF" as UploadCV
-  usecase "Quản lý hồ sơ năng lực" as Portfolio
-  usecase "Tìm kiếm việc làm" as Search
+rectangle "Dashboard ứng viên EffortIT" {
+  usecase "Đăng nhập" as Login
+  usecase "Cập nhật thông tin tài khoản" as UpdateAccount
+  usecase "Quản lý hồ sơ năng lực" as Profile
   usecase "Lưu việc làm" as SaveJob
-  usecase "Ứng tuyển" as Apply
+  usecase "Ứng tuyển tin tuyển dụng" as Apply
   usecase "Theo dõi trạng thái ứng tuyển" as Track
-  usecase "Xác nhận/Yêu cầu đổi lịch phỏng vấn" as InterviewReply
-  usecase "Nhận thông báo" as Notify
-  usecase "Chat với nhà tuyển dụng" as Chat
-  usecase "Nhận gợi ý việc làm AI" as AIRecommend
+  usecase "Quản lý lịch phỏng vấn" as Interview
+  usecase "Đánh giá công ty" as Review
 }
 
+Candidate --> Login
+Candidate --> UpdateAccount
 Candidate --> Profile
-Candidate --> CreateCV
-Candidate --> UploadCV
-Candidate --> Portfolio
-Candidate --> Search
 Candidate --> SaveJob
 Candidate --> Apply
 Candidate --> Track
-Candidate --> InterviewReply
-Candidate --> Notify
-Candidate --> Chat
-Candidate --> AIRecommend
+Candidate --> Interview
+Candidate --> Review
 
-Apply ..> Portfolio : <<include>>
-Apply ..> Notify : <<include>>
-InterviewReply --> Employer : phản hồi lịch
-Notify --> Mail : gửi email khi cần
-AIRecommend --> Gemini : phân tích CV/job
+Apply ..> Profile : <<include>>
+Track ..> Apply : <<extend>>
+Interview ..> Track : <<extend>>
+Review ..> Interview : <<extend>>
 @enduml
-

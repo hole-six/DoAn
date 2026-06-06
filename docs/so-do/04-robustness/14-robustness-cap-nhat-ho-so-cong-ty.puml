@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Cập nhật hồ sơ công ty"
+
+actor "Actor: Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
+boundary "UI: thong-tin-cong-ty" as UI
+boundary "UI: form-ho-so-cong-ty" as Form
+control "Controller: NhaTuyenDungController" as Controller
+entity "Entity: NhaTuyenDung" as MainEntity
+entity "Entity: TaiKhoan" as E1
+entity "Entity: ThongBao" as E2
+
+Actor --> UI : Mở trang thông tin công ty
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Cập nhật mã số thuế, địa chỉ, logo, mô tả
+Form --> Controller : capNhatHoSoCongTy(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra quyền sở hữu và độ đầy đủ hồ sơ\nCập nhật hồ sơ công ty
+Controller <--> E1 : Chuyển trạng thái chờ duyệt và báo admin
+Controller --> Form : Thông báo đã gửi hồ sơ chờ duyệt / Thông báo thiếu thông tin cần duyệt
+Controller --> UI : trả dữ liệu mới
+@enduml

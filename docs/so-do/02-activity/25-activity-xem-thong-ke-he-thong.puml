@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Xem thống kê hệ thống
+
+start
+:Quản trị viên đăng nhập;
+:Mở dashboard quản trị;
+fork
+  :Hệ thống thống kê người dùng;
+fork again
+  :Hệ thống thống kê công ty;
+fork again
+  :Hệ thống thống kê tin tuyển dụng;
+fork again
+  :Hệ thống thống kê hồ sơ ứng tuyển;
+fork again
+  :Hệ thống thống kê dữ liệu cần duyệt;
+end fork
+if (Dữ liệu thống kê tải thành công?) then (Có)
+  :Hệ thống hiển thị biểu đồ và chỉ số tổng quan;
+  :Quản trị viên xem số liệu;
+  stop
+else (Không)
+  :Hệ thống hiển thị thông báo lỗi tải dữ liệu;
+  :Quản trị viên nhấn tải lại nếu cần;
+  stop
+endif
+@enduml

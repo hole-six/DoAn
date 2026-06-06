@@ -8,24 +8,6 @@ import { duongDanTheoVaiTro, luuPhienDangNhap } from '../../lib/auth'
 import { API_URL, GOOGLE_CLIENT_ID } from '../../lib/env'
 import './auth-styles.css'
 
-const vaiTroApi = {
-  ungvien: 'ung_vien',
-  nhatuyendung: 'nha_tuyen_dung',
-  quantrivien: 'admin',
-} as const
-
-const taiKhoanMau = {
-  ungvien: { email: 'ungvien@itjob.vn', matKhau: '123456' },
-  nhatuyendung: { email: 'nhatuyendung@itjob.vn', matKhau: '123456' },
-  quantrivien: { email: 'admin@itjob.vn', matKhau: '123456' },
-} as const
-
-const nhanVaiTro: Record<keyof typeof vaiTroApi, string> = {
-  ungvien: 'Ứng viên',
-  nhatuyendung: 'Nhà tuyển dụng',
-  quantrivien: 'Quản trị viên',
-}
-
 const inputWrap =
   'mt-2 flex h-14 items-center overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm transition focus-within:border-[#0b5c91] focus-within:ring-4 focus-within:ring-[#0b5c91]/10'
 const inputClass = 'h-full min-w-0 flex-1 bg-transparent px-4 text-base font-bold text-slate-950 outline-none placeholder:text-slate-400'
@@ -37,16 +19,21 @@ const navyButtonStyle = {
   boxShadow: '0 18px 34px rgba(6, 42, 77, 0.24)',
 }
 
+const loginNoticeMap: Record<string, string> = {
+  save_candidate_only: 'Bạn cần đăng nhập bằng tài khoản ứng viên để lưu việc làm.',
+}
+
 export default function DangNhap() {
-  const [email, setEmail] = useState<string>(taiKhoanMau.ungvien.email)
-  const [matKhau, setMatKhau] = useState<string>(taiKhoanMau.ungvien.matKhau)
+  const [email, setEmail] = useState('')
+  const [matKhau, setMatKhau] = useState('')
   const [hienMatKhau, setHienMatKhau] = useState(false)
-  const [vaiTro, setVaiTro] = useState<keyof typeof vaiTroApi>('ungvien')
   const [dangXuLy, setDangXuLy] = useState(false)
   const [loi, setLoi] = useState('')
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
   const navigate = useNavigate()
-  const redirect = new URLSearchParams(window.location.search).get('redirect') ?? ''
+  const query = new URLSearchParams(window.location.search)
+  const redirect = query.get('redirect') ?? ''
+  const notice = loginNoticeMap[query.get('notice') ?? '']
 
   const hoanTatDangNhap = (duLieu: any) => {
     luuPhienDangNhap(duLieu)
@@ -73,7 +60,7 @@ export default function DangNhap() {
             const phanHoi = await fetch(`${API_URL}/xacthuc/dang-nhap-google`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ credential: response.credential, vaiTro: vaiTroApi[vaiTro] }),
+              body: JSON.stringify({ credential: response.credential }),
             })
             const ketQua = await phanHoi.json()
             if (!phanHoi.ok) throw new Error(ketQua.thongBao ?? 'Đăng nhập Google thất bại')
@@ -108,7 +95,7 @@ export default function DangNhap() {
     } else {
       renderButton()
     }
-  }, [vaiTro])
+  }, [])
 
   const xuLyDangNhap = async (e: FormEvent) => {
     e.preventDefault()
@@ -119,7 +106,7 @@ export default function DangNhap() {
       const phanHoi = await fetch(`${API_URL}/xacthuc/dang-nhap`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, matKhau, vaiTro: vaiTroApi[vaiTro] }),
+        body: JSON.stringify({ email, matKhau }),
       })
       const ketQua = await phanHoi.json()
       if (!phanHoi.ok) throw new Error(ketQua.thongBao ?? 'Đăng nhập thất bại')
@@ -129,13 +116,6 @@ export default function DangNhap() {
     } finally {
       setDangXuLy(false)
     }
-  }
-
-  const chonVaiTro = (role: typeof vaiTro) => {
-    setVaiTro(role)
-    setEmail(taiKhoanMau[role].email)
-    setMatKhau(taiKhoanMau[role].matKhau)
-    setLoi('')
   }
 
   return (
@@ -158,12 +138,8 @@ export default function DangNhap() {
               </p>
             </div>
 
-            <div className="grid max-w-xl grid-cols-3 gap-3 text-white">
-              {['Ứng viên', 'Nhà tuyển dụng', 'Quản trị viên'].map(item => (
-                <div key={item} className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm font-black backdrop-blur">
-                  {item}
-                </div>
-              ))}
+            <div className="max-w-xl rounded-2xl border border-white/15 bg-white/10 p-4 text-sm font-black leading-6 text-white backdrop-blur">
+              Nhập tài khoản của bạn, hệ thống sẽ tự mở đúng giao diện ứng viên, nhà tuyển dụng hoặc quản trị viên.
             </div>
           </div>
         </section>
@@ -186,27 +162,15 @@ export default function DangNhap() {
               </Link>
             </p>
 
-            <div className="auth-role-switch mt-8 grid grid-cols-3 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
-              {(['ungvien', 'nhatuyendung', 'quantrivien'] as const).map(role => (
-                <button
-                  key={role}
-                  type="button"
-                  onClick={() => chonVaiTro(role)}
-                  style={vaiTro === role ? navyButtonStyle : { backgroundColor: '#ffffff', border: '1px solid transparent', color: '#334155' }}
-                  className={`min-h-14 rounded-xl px-2 text-sm font-black transition sm:text-base ${
-                    vaiTro === role
-                      ? '!bg-[#062a4d] !text-white shadow-lg shadow-[#062a4d]/25'
-                      : '!bg-white !text-slate-700 hover:!bg-slate-50 hover:!text-[#062a4d]'
-                  }`}
-                >
-                  {nhanVaiTro[role]}
-                </button>
-              ))}
+            <div className="mt-8 rounded-xl border border-[#b8d7ef] bg-[#eff8ff] px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
+              <span className="font-black text-[#062a4d]">Đăng nhập một bước:</span> hệ thống tự nhận vai trò từ tài khoản và chuyển đến đúng dashboard.
             </div>
 
-            <div className="mt-4 rounded-xl border border-[#b8d7ef] bg-[#eff8ff] px-4 py-3 text-sm font-semibold text-slate-700">
-              <span className="font-black text-[#062a4d]">Tài khoản seed:</span> {taiKhoanMau[vaiTro].email} / {taiKhoanMau[vaiTro].matKhau}
-            </div>
+            {notice && (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black leading-6 text-amber-800">
+                {notice}
+              </div>
+            )}
 
             <form className="mt-7 grid gap-5" onSubmit={xuLyDangNhap}>
               <label className="block text-sm font-black uppercase tracking-wide text-slate-700">
@@ -258,7 +222,9 @@ export default function DangNhap() {
                 <span className="h-px flex-1 bg-slate-200" />
               </div>
               {GOOGLE_CLIENT_ID ? (
-                <div ref={googleButtonRef} className="min-h-11" />
+                <div className="flex min-h-11 justify-center">
+                  <div ref={googleButtonRef} className="min-h-11 w-full max-w-[360px]" />
+                </div>
               ) : (
                 <div className="flex items-start gap-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm font-semibold text-slate-600">
                   <ShieldCheck className="mt-0.5 shrink-0 text-[#0b5c91]" size={18} />

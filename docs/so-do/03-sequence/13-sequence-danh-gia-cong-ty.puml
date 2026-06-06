@@ -1,0 +1,61 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Đánh giá công ty
+
+actor "Actor: Ứng viên" as Actor
+boundary "UI: chi-tiet-cong-ty" as UI
+boundary "UI: form-danh-gia-cong-ty" as Form
+control "Controller: ReviewCongTyController" as Controller
+entity "Entity: ReviewCongTy" as MainEntity
+entity "Entity: NhaTuyenDung" as E1
+entity "Entity: UngVien" as E2
+entity "Entity: ThongBao" as E3
+
+Actor -> UI : 1. Mở form đánh giá công ty
+activate UI
+UI -> Form : 2. Hiển thị form-danh-gia-cong-ty
+activate Form
+Actor -> Form : 3. Nhập điểm đánh giá và nội dung nhận xét
+Form -> Controller : 4. taoDanhGiaCongTy(request)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra quyền đánh giá và nội dung
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Tạo đánh giá chờ duyệt
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Gửi thông báo cho quản trị viên
+  Controller --> Form : 10. Thông báo đánh giá đang chờ duyệt
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo nội dung đánh giá không hợp lệ
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+end
+deactivate Controller
+deactivate Form
+deactivate UI
+@enduml

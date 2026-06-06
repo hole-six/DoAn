@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Eye } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
 import { applicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
+import { toast } from '../../../lib/toast'
 import type { HoSoUngTuyen } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel, Row } from '../shared/UngVienAtoms'
 import { useUngVienData } from '../shared/useUngVienData'
@@ -12,13 +14,28 @@ import { AppDrawer } from './AppDrawer'
 export default function UngTuyenPage() {
   const data = useUngVienData()
   const [selected, setSelected] = useState<HoSoUngTuyen | null>(null)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const withdraw = async () => {
     if (!selected) return
     const reason = window.prompt('Lý do rút hồ sơ?') ?? ''
-    await apiCoXacThuc(`/hosoungtuyen/${selected.id}/rut`, { method: 'POST', body: JSON.stringify({ ghiChu: reason }) })
-    setSelected(null)
-    await data.reload()
+    const target = selected
+    confirm(
+      'Rút hồ sơ ứng tuyển',
+      `Bạn chắc chắn muốn rút hồ sơ ứng tuyển vị trí "${target.tinTuyenDung?.tieuDe ?? 'này'}"?`,
+      async () => {
+        try {
+          await apiCoXacThuc(`/hosoungtuyen/${target.id}/rut`, { method: 'POST', body: JSON.stringify({ ghiChu: reason }) })
+          setSelected(null)
+          toast.success('Đã rút hồ sơ ứng tuyển.')
+          await data.reload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể rút hồ sơ ứng tuyển.')
+        }
+      },
+      'warning',
+      'Rút hồ sơ',
+    )
   }
 
   return (
@@ -40,7 +57,17 @@ export default function UngTuyenPage() {
           )) : <EmptyState>Bạn chưa ứng tuyển vị trí nào.</EmptyState>}
         </div>
       </Panel>
-      {selected && <AppDrawer item={selected} onClose={() => setSelected(null)} onWithdraw={() => void withdraw()} />}
+      {selected && (
+        <AppDrawer
+          item={selected}
+          danhGia={data.danhGiaCongTy.find(item => item.maHoSoUngTuyen === selected.id)}
+          coLichPhongVan={data.lich.some(item => item.maHoSoUngTuyen === selected.id)}
+          onClose={() => setSelected(null)}
+          onWithdraw={() => void withdraw()}
+          onReviewSubmitted={async () => { await data.reload() }}
+        />
+      )}
+      <ConfirmDialogComponent />
     </Page>
   )
 }

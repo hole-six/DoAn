@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Building2, RefreshCw, Save, Upload, X } from 'lucide-react'
+import { AlertTriangle, Building2, RefreshCw, Save, Upload, X } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../../lib/auth'
+import { getEmployerGate } from '../../../lib/employerGate'
 import { imageUrl } from '../../../lib/format'
 import type { NhaTuyenDung } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
@@ -63,6 +64,8 @@ export default function CongTyNhaTuyenDungPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [savedAt, setSavedAt] = useState('')
+  const gateParam = new URLSearchParams(window.location.search).get('gate')
+  const gate = getEmployerGate(data.company)
 
   useEffect(() => {
     setForm(companyToForm(data.company))
@@ -132,6 +135,17 @@ export default function CongTyNhaTuyenDungPage() {
       action={<Button icon={<RefreshCw size={16} />} onClick={() => void data.reload()}>Làm mới</Button>}
     >
       <ErrorState message={data.error} />
+      {gateParam && !gate.allowed && (
+        <Panel>
+          <div className="grid gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+            <AlertTriangle size={24} />
+            <div>
+              <h2 className="text-base font-black">Cần hoàn thiện và được duyệt công ty trước khi tuyển dụng</h2>
+              <p className="mt-1 text-sm font-bold leading-6">{gate.message}</p>
+            </div>
+          </div>
+        </Panel>
+      )}
       {!data.company ? (
         <EmptyState>Chưa tìm thấy hồ sơ công ty của tài khoản này.</EmptyState>
       ) : (

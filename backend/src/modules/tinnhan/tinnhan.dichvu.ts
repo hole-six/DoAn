@@ -4,13 +4,14 @@ import { CuocTroChuyenModel, TinNhanModel } from './tinnhan.mohinh.js'
 import { taoVaGuiThongBao } from '../thongbao/thongbao.dichvu.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { NhaTuyenDung } from '../nhatuyendung/nhatuyendung.mohinh.js'
+import { HoSoUngTuyen } from '../hosoungtuyen/hosoungtuyen.mohinh.js'
 
 // ============================================
 // CONVERSATION SERVICES
 // ============================================
 
 /**
- * Láº¥y hoáº·c táº¡o cuá»™c trÃ² chuyá»‡n giá»¯a 2 ngÆ°á»i
+ * Lấy hoặc tạo cuộc trò chuyện giữa 2 người
  */
 export async function layHoacTaoCuocTroChuyenModel(params: {
   nguoiThamGia: string[]
@@ -18,34 +19,118 @@ export async function layHoacTaoCuocTroChuyenModel(params: {
   maHoSoUngTuyen?: string
   maTinTuyenDung?: string
 }) {
-  // Sáº¯p xáº¿p Ä‘á»ƒ tÃ¬m kiáº¿m nháº¥t quÃ¡n
   const nguoiThamGiaSorted = [...params.nguoiThamGia].sort()
+  const loai = params.loai || 'ung_vien_nha_tuyen_dung'
 
-  // TÃ¬m cuá»™c trÃ² chuyá»‡n hiá»‡n cÃ³
   const dieuKienTimKiem: Record<string, unknown> = {
     nguoiThamGia: { $all: nguoiThamGiaSorted, $size: nguoiThamGiaSorted.length },
     daLuuTru: false,
-    ...(params.loai ? { loai: params.loai } : {}),
-    ...(params.maHoSoUngTuyen ? { maHoSoUngTuyen: params.maHoSoUngTuyen } : {}),
-    ...(params.maTinTuyenDung ? { maTinTuyenDung: params.maTinTuyenDung } : {}),
+    loai,
   }
 
-  let cuocTroChuyenModel = await CuocTroChuyenModel.findOne(dieuKienTimKiem).populate('nguoiThamGia', 'hoTen email vaiTro')
+  const danhSachTrung = await CuocTroChuyenModel.find(dieuKienTimKiem).sort({ ngayCapNhat: -1, ngayTao: -1 })
+  let cuocTroChuyenModel = danhSachTrung[0] || null
 
-  // Náº¿u chÆ°a cÃ³, táº¡o má»›i
+  if (cuocTroChuyenModel && danhSachTrung.length > 1) {
+    await hopNhatCuocTroChuyenTrungLap(cuocTroChuyenModel, danhSachTrung.slice(1))
+  }
+
   if (!cuocTroChuyenModel) {
     cuocTroChuyenModel = await CuocTroChuyenModel.create({
       nguoiThamGia: nguoiThamGiaSorted,
-      loai: params.loai || 'ung_vien_nha_tuyen_dung',
+      loai,
       maHoSoUngTuyen: params.maHoSoUngTuyen,
       maTinTuyenDung: params.maTinTuyenDung,
+      maHoSoUngTuyenGanNhat: params.maHoSoUngTuyen,
+      maTinTuyenDungGanNhat: params.maTinTuyenDung,
       soChuaDoc: Object.fromEntries(nguoiThamGiaSorted.map((id) => [id, 0])),
     })
-    
-    await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro')
   }
 
+  await capNhatNguCanhCuocTroChuyen(cuocTroChuyenModel, params)
+  await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro')
   return cuocTroChuyenModel
+}
+
+async function taoTomTatNguCanh(params: { maHoSoUngTuyen?: string; maTinTuyenDung?: string }) {
+  if (!params.maHoSoUngTuyen && !params.maTinTuyenDung) return undefined
+
+  const hoSo = params.maHoSoUngTuyen
+    ? await (HoSoUngTuyen as any)
+      .findById(params.maHoSoUngTuyen)
+      .populate({ path: 'maTinTuyenDung', select: 'tieuDe maNhaTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy' } })
+    : await (HoSoUngTuyen as any)
+      .findOne({ maTinTuyenDung: params.maTinTuyenDung })
+      .sort({ ngayCapNhat: -1 })
+      .populate({ path: 'maTinTuyenDung', select: 'tieuDe maNhaTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy' } })
+
+  const tin = hoSo?.maTinTuyenDung
+  return {
+    tieuDeTin: tin?.tieuDe,
+    tenCongTy: tin?.maNhaTuyenDung?.tenCongTy,
+    maHoSoUngTuyen: params.maHoSoUngTuyen || (hoSo?._id ? String(hoSo._id) : undefined),
+    maTinTuyenDung: params.maTinTuyenDung || (tin?._id ? String(tin._id) : undefined),
+    capNhatLuc: new Date(),
+  }
+}
+
+async function capNhatNguCanhCuocTroChuyen(cuocTroChuyenModel: any, params: { maHoSoUngTuyen?: string; maTinTuyenDung?: string }) {
+  if (!params.maHoSoUngTuyen && !params.maTinTuyenDung) return
+  const summary = await taoTomTatNguCanh(params)
+  cuocTroChuyenModel.maHoSoUngTuyen = params.maHoSoUngTuyen || cuocTroChuyenModel.maHoSoUngTuyen
+  cuocTroChuyenModel.maTinTuyenDung = params.maTinTuyenDung || cuocTroChuyenModel.maTinTuyenDung
+  cuocTroChuyenModel.maHoSoUngTuyenGanNhat = params.maHoSoUngTuyen || cuocTroChuyenModel.maHoSoUngTuyenGanNhat
+  cuocTroChuyenModel.maTinTuyenDungGanNhat = params.maTinTuyenDung || cuocTroChuyenModel.maTinTuyenDungGanNhat
+  if (summary) cuocTroChuyenModel.contextSummary = summary
+  await cuocTroChuyenModel.save()
+}
+
+async function hopNhatCuocTroChuyenTrungLap(cuocChinh: any, danhSachTrung: any[]) {
+  for (const cuocTrung of danhSachTrung) {
+    await TinNhanModel.updateMany(
+      { maCuocTroChuyenId: cuocTrung._id },
+      { $set: { maCuocTroChuyenId: cuocChinh._id } },
+    )
+
+    for (const nguoi of cuocChinh.nguoiThamGia) {
+      const maNguoi = String(nguoi)
+      const hienTai = Number(cuocChinh.soChuaDoc?.get(maNguoi) || 0)
+      const boSung = Number(cuocTrung.soChuaDoc?.get(maNguoi) || 0)
+      cuocChinh.soChuaDoc.set(maNguoi, hienTai + boSung)
+    }
+
+    const thoiGianCuoiCungTrung = cuocTrung.tinNhanCuoiCung?.thoiGian ? new Date(cuocTrung.tinNhanCuoiCung.thoiGian).getTime() : 0
+    const thoiGianCuoiCungChinh = cuocChinh.tinNhanCuoiCung?.thoiGian ? new Date(cuocChinh.tinNhanCuoiCung.thoiGian).getTime() : 0
+    if (thoiGianCuoiCungTrung > thoiGianCuoiCungChinh) {
+      cuocChinh.tinNhanCuoiCung = cuocTrung.tinNhanCuoiCung
+    }
+
+    cuocTrung.daLuuTru = true
+    cuocTrung.thoiGianLuuTru = new Date()
+    await cuocTrung.save()
+  }
+  await cuocChinh.save()
+}
+
+async function hopNhatCuocTroChuyenCuaNguoiDung(maNguoiDung: string) {
+  const danhSach = await CuocTroChuyenModel.find({
+    nguoiThamGia: maNguoiDung,
+    daLuuTru: false,
+    loai: { $ne: 'nhom_cong_dong' },
+  }).sort({ ngayCapNhat: -1, ngayTao: -1 })
+
+  const groups = new Map<string, any[]>()
+  for (const item of danhSach) {
+    const participants = [...(item.nguoiThamGia || [])].map((value: any) => String(value)).sort().join('|')
+    const key = `${item.loai || 'ung_vien_nha_tuyen_dung'}:${participants}`
+    groups.set(key, [...(groups.get(key) || []), item])
+  }
+
+  for (const items of groups.values()) {
+    if (items.length > 1) {
+      await hopNhatCuocTroChuyenTrungLap(items[0], items.slice(1))
+    }
+  }
 }
 
 async function timAdminDauTien() {
@@ -104,7 +189,7 @@ export async function layDanhSachNhomCongDong() {
 export async function thamGiaNhomCongDong(maNhom: string, maNguoiDung: string) {
   const nhom = await CuocTroChuyenModel.findById(maNhom)
   if (!nhom) throw new LoiUngDung('Không tìm thấy nhóm', 404)
-  if (nhom.loai !== 'nhom_cong_dong') throw new LoiUngDung('Day khong phai nhom cong dong', 400)
+  if (nhom.loai !== 'nhom_cong_dong') throw new LoiUngDung('Đây không phải nhóm cộng đồng', 400)
 
   const daCoMat = nhom.nguoiThamGia.some((id: any) => String(id) === maNguoiDung)
   if (!daCoMat) {
@@ -115,7 +200,7 @@ export async function thamGiaNhomCongDong(maNhom: string, maNguoiDung: string) {
     await TinNhanModel.create({
       maCuocTroChuyenId: maNhom,
       nguoiGui: maNguoiDung,
-      noiDung: 'da tham gia nhom',
+      noiDung: 'đã tham gia nhóm',
       loai: 'system',
     })
   }
@@ -124,15 +209,19 @@ export async function thamGiaNhomCongDong(maNhom: string, maNguoiDung: string) {
 }
 
 /**
- * Láº¥y danh sÃ¡ch cuá»™c trÃ² chuyá»‡n cá»§a user
+ * Lấy danh sách cuộc trò chuyện của user
  */
 export async function layDanhSachCuocTroChuyenModel(maNguoiDung: string) {
+  await hopNhatCuocTroChuyenCuaNguoiDung(maNguoiDung)
+
   const danhSach = await CuocTroChuyenModel.find({
     nguoiThamGia: maNguoiDung,
     daLuuTru: false,
   })
     .populate('nguoiThamGia', 'hoTen email vaiTro')
     .populate('tinNhanCuoiCung.nguoiGui', 'hoTen')
+    .populate('maHoSoUngTuyenGanNhat', 'trangThai')
+    .populate('maTinTuyenDungGanNhat', 'tieuDe')
     .sort({ ngayCapNhat: -1 })
     .limit(50)
 
@@ -147,7 +236,7 @@ export async function layDanhSachCuocTroChuyenModel(maNguoiDung: string) {
 }
 
 /**
- * Láº¥y chi tiáº¿t cuá»™c trÃ² chuyá»‡n
+ * Lấy chi tiết cuộc trò chuyện
  */
 export async function layCuocTroChuyenModelTheoMa(maCuocTroChuyenModel: string, maNguoiDung: string) {
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(maCuocTroChuyenModel).populate('nguoiThamGia', 'hoTen email vaiTro')
@@ -156,17 +245,17 @@ export async function layCuocTroChuyenModelTheoMa(maCuocTroChuyenModel: string, 
     throw new LoiUngDung('Không tìm thấy cuộc trò chuyện', 404)
   }
 
-  // Kiá»ƒm tra quyá»n truy cáº­p
+  // Kiểm tra quyền truy cập
   const coQuyen = cuocTroChuyenModel.nguoiThamGia.some((ng: any) => String(ng._id) === maNguoiDung)
   if (!coQuyen) {
-    throw new LoiUngDung('Ban khong co quyen truy cap cuoc tro chuyen nay', 403)
+    throw new LoiUngDung('Bạn không có quyền truy cập cuộc trò chuyện này', 403)
   }
 
   return cuocTroChuyenModel
 }
 
 /**
- * ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘á»c táº¥t cáº£ tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
+ * Đánh dấu đã đọc tất cả tin nhắn trong cuộc trò chuyện
  */
 export async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel: string, maNguoiDung: string) {
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(maCuocTroChuyenModel)
@@ -174,11 +263,11 @@ export async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel: strin
     throw new LoiUngDung('Không tìm thấy cuộc trò chuyện', 404)
   }
 
-  // Reset sá»‘ chÆ°a Ä‘á»c
+  // Reset số chưa đọc
   cuocTroChuyenModel.soChuaDoc.set(maNguoiDung, 0)
   await cuocTroChuyenModel.save()
 
-  // ÄÃ¡nh dáº¥u táº¥t cáº£ tin nháº¯n chÆ°a Ä‘á»c
+  // Đánh dấu tất cả tin nhắn chưa đọc
   await TinNhanModel.updateMany(
     {
       maCuocTroChuyenId: maCuocTroChuyenModel,
@@ -203,7 +292,7 @@ export async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel: strin
 // ============================================
 
 /**
- * Gá»­i tin nháº¯n
+ * Gửi tin nhắn
  */
 export async function guiTinNhan(params: {
   maCuocTroChuyenId: string
@@ -213,10 +302,10 @@ export async function guiTinNhan(params: {
   tepDinhKem?: any[]
   traloiTinNhan?: string
 }) {
-  // Kiá»ƒm tra quyá»n
+  // Kiểm tra quyền
   const cuocTroChuyenModel = await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.nguoiGui)
 
-  // Táº¡o tin nháº¯n
+  // Tạo tin nhắn
   const tinNhan = await TinNhanModel.create({
     maCuocTroChuyenId: params.maCuocTroChuyenId,
     nguoiGui: params.nguoiGui,
@@ -226,20 +315,20 @@ export async function guiTinNhan(params: {
     traloiTinNhan: params.traloiTinNhan,
   })
 
-  // Populate Ä‘á»ƒ tráº£ vá» Ä‘áº§y Ä‘á»§ thÃ´ng tin
+  // Populate để trả về đầy đủ thông tin
   await tinNhan.populate('nguoiGui', 'hoTen email vaiTro')
   if (params.traloiTinNhan) {
     await tinNhan.populate('traloiTinNhan')
   }
 
-  // Cáº­p nháº­t cuá»™c trÃ² chuyá»‡n
+  // Cập nhật cuộc trò chuyện
   cuocTroChuyenModel.tinNhanCuoiCung = {
     noiDung: params.noiDung,
     nguoiGui: params.nguoiGui as any,
     thoiGian: new Date(),
   }
 
-  // TÄƒng sá»‘ chÆ°a Ä‘á»c cho ngÆ°á»i khÃ¡c
+  // Tăng số chưa đọc cho người khác
   for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
     const id = String((nguoiThamGia as any)._id)
     if (id !== params.nguoiGui) {
@@ -250,7 +339,7 @@ export async function guiTinNhan(params: {
 
   await cuocTroChuyenModel.save()
 
-  // Gá»­i real-time qua Socket.IO cho ngÆ°á»i nháº­n
+  // Gửi real-time qua Socket.IO cho người nhận
   const tinNhanObj = tinNhan.toObject()
   for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
     const id = String((nguoiThamGia as any)._id)
@@ -277,7 +366,7 @@ export async function guiTinNhan(params: {
         noiDung: params.noiDung.substring(0, 100),
         lienKet: `${duongDanChat}?cuocTroChuyen=${params.maCuocTroChuyenId}`,
         mucDoUuTien: 'trung_binh',
-        icon: 'ðŸ’¬',
+        icon: '💬',
         mauSac: '#8b5cf6',
       })
     }
@@ -290,7 +379,7 @@ export async function guiTinNhan(params: {
 }
 
 /**
- * Láº¥y danh sÃ¡ch tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
+ * Lấy danh sách tin nhắn trong cuộc trò chuyện
  */
 export async function layDanhSachTinNhan(params: {
   maCuocTroChuyenId: string
@@ -298,7 +387,7 @@ export async function layDanhSachTinNhan(params: {
   limit?: number
   truocTinNhan?: string
 }) {
-  // Kiá»ƒm tra quyá»n
+  // Kiểm tra quyền
   await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.maNguoiDung)
 
   const query: any = {
@@ -331,7 +420,7 @@ export async function layDanhSachTinNhan(params: {
 }
 
 /**
- * XÃ³a tin nháº¯n
+ * Xóa tin nhắn
  */
 export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
   const tinNhan = await TinNhanModel.findById(maTinNhan)
@@ -339,16 +428,16 @@ export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
     throw new LoiUngDung('Không tìm thấy tin nhắn', 404)
   }
 
-  // Chá»‰ ngÆ°á»i gá»­i má»›i Ä‘Æ°á»£c xÃ³a
+  // Chỉ người gửi mới được xóa
   if (String(tinNhan.nguoiGui) !== maNguoiDung) {
-    throw new LoiUngDung('Ban khong co quyen xoa tin nhan nay', 403)
+    throw new LoiUngDung('Bạn không có quyền xóa tin nhắn này', 403)
   }
 
   tinNhan.daXoa = true
-  tinNhan.noiDung = 'Tin nhan da bi xoa'
+  tinNhan.noiDung = 'Tin nhắn đã bị xóa'
   await tinNhan.save()
 
-  // Gá»­i real-time
+  // Gửi real-time
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId)
   if (cuocTroChuyenModel) {
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
@@ -363,7 +452,7 @@ export async function xoaTinNhan(maTinNhan: string, maNguoiDung: string) {
 }
 
 /**
- * ThÃªm reaction vÃ o tin nháº¯n
+ * Thêm reaction vào tin nhắn
  */
 export async function themPhanUng(params: {
   maTinNhan: string
@@ -375,10 +464,10 @@ export async function themPhanUng(params: {
     throw new LoiUngDung('Không tìm thấy tin nhắn', 404)
   }
 
-  // XÃ³a reaction cÅ© cá»§a user nÃ y (náº¿u cÃ³)
+  // Xóa reaction cũ của user này (nếu có)
   tinNhan.phanUng = tinNhan.phanUng.filter((r: any) => String(r.nguoiDung) !== params.maNguoiDung)
 
-  // ThÃªm reaction má»›i
+  // Thêm reaction mới
   tinNhan.phanUng.push({
     nguoiDung: params.maNguoiDung as any,
     emoji: params.emoji,
@@ -386,7 +475,7 @@ export async function themPhanUng(params: {
 
   await tinNhan.save()
 
-  // Gá»­i real-time
+  // Gửi real-time
   const cuocTroChuyenModel = await CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId)
   if (cuocTroChuyenModel) {
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {

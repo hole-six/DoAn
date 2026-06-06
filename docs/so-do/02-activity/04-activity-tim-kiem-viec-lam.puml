@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Tìm kiếm việc làm
+
+start
+:Người dùng mở trang việc làm;
+fork
+  :Nhập từ khóa tìm kiếm;
+fork again
+  :Chọn kỹ năng;
+fork again
+  :Chọn cấp bậc;
+fork again
+  :Chọn hình thức làm việc;
+fork again
+  :Chọn khoảng lương nếu cần;
+end fork
+:Hệ thống lọc tin tuyển dụng đã duyệt và còn mở;
+if (Có kết quả phù hợp?) then (Có)
+  :Hệ thống phân trang danh sách việc làm;
+  :Người dùng xem kết quả;
+  stop
+else (Không)
+  :Hệ thống hiển thị trạng thái không có kết quả;
+  :Gợi ý thay đổi điều kiện tìm kiếm;
+  stop
+endif
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Quản lý hồ sơ năng lực"
+
+actor "Actor: Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "UI: ho-so-nang-luc" as UI
+boundary "UI: form-cv-studio" as Form
+control "Controller: HoSoNangLucController" as Controller
+entity "Entity: HoSoNangLuc" as MainEntity
+entity "Entity: UngVien" as E1
+entity "Entity: TepCV" as E2
+
+Actor --> UI : Mở hồ sơ năng lực
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Tạo, chỉnh sửa, upload hoặc chọn CV chính
+Form --> Controller : luuHoSoNangLuc(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra hồ sơ ứng viên và dữ liệu CV\nLưu hồ sơ năng lực
+Controller <--> E1 : Cập nhật CV chính hoặc file CV
+Controller --> Form : Thông báo lưu CV thành công / Thông báo thiếu hồ sơ hoặc dữ liệu CV lỗi
+Controller --> UI : trả dữ liệu mới
+@enduml

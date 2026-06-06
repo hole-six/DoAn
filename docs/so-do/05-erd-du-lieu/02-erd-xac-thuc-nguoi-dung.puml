@@ -1,53 +1,57 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 hide circle
 skinparam shadowing false
 title ERD - Xác thực và người dùng
 
-entity "NgườiDùng" as User {
+entity "NguoiDung" as User {
   * _id : ObjectId <<PK>>
   --
-  email : string
-  mậtKhẩuHash : string
-  họTên : string
-  sốĐiệnThoại : string
-  vaiTrò : enum
-  trạngThái : enum
-  googleId : string
-  resetPasswordTokenHash : string
-  resetPasswordExpires : Date
-  ngàyTạo : Date
+  email : String <<UNIQUE>>
+  matKhau : String
+  hoTen : String
+  soDienThoai : String
+  vaiTro : Enum
+  trangThai : Enum
+  maDatLaiMatKhauHash : String
+  maDatLaiMatKhauHetHan : Date
+  ngayTao : Date
+  ngayCapNhat : Date
 }
 
-entity "ỨngViên" as Candidate {
+entity "UngVien" as Candidate {
   * _id : ObjectId <<PK>>
   --
-  mãNgườiDùng : ObjectId <<FK>>
-  ảnhĐạiDiện
-  tómTắt
+  maNguoiDung : ObjectId <<FK>>
+  anhDaiDien : String
+  tomTat : String
+  kinhNghiem : Number
 }
 
-entity "NhàTuyểnDụng" as Employer {
+entity "NhaTuyenDung" as Employer {
   * _id : ObjectId <<PK>>
   --
-  mãNgườiDùng : ObjectId <<FK>>
-  tênCôngTy
-  trạngTháiDuyệt
-  lýDoTừChối
+  maNguoiDung : ObjectId <<FK>>
+  tenCongTy : String
+  trangThaiDuyet : Enum
+  lyDoTuChoi : String
 }
 
-entity "ThôngBáo" as Notification {
+entity "ThongBao" as Notification {
   * _id : ObjectId <<PK>>
   --
-  mãNgườiNhận : ObjectId <<FK>>
-  loại
-  tiêuĐề
-  nộiDung
-  liênKết
-  đãĐọc
+  maNguoiDung : ObjectId <<FK>>
+  loai : Enum
+  tieuDe : String
+  noiDung : String
+  lienKet : String
+  daDoc : Boolean
 }
 
 User ||--o| Candidate : hồ sơ ứng viên
 User ||--o| Employer : hồ sơ công ty
 User ||--o{ Notification : nhận
 @enduml
-

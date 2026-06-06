@@ -1,0 +1,41 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Xem chi tiết công ty
+
+start
+:Người dùng chọn công ty tuyển dụng;
+:Hệ thống kiểm tra hồ sơ công ty;
+if (Công ty tồn tại và đã được duyệt?) then (Có)
+  fork
+    :Hiển thị thông tin tổng quan công ty;
+  fork again
+    :Hiển thị mô tả, ngành nghề và quy mô;
+  fork again
+    :Hiển thị danh sách tin đang tuyển;
+  fork again
+    :Hiển thị đánh giá đã được duyệt;
+  end fork
+  if (Người dùng chọn tin tuyển dụng?) then (Có)
+    :Chuyển đến chi tiết tin tuyển dụng;
+    stop
+  else (Không)
+    :Tiếp tục xem hồ sơ công ty;
+    stop
+  endif
+else (Không)
+  :Hệ thống thông báo công ty không khả dụng;
+  stop
+endif
+@enduml

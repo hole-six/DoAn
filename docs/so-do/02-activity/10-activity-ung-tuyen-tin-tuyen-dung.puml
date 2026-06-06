@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Ứng tuyển tin tuyển dụng
+
+start
+:Ứng viên đăng nhập;
+:Mở chi tiết tin tuyển dụng;
+:Chọn nút ứng tuyển;
+:Hệ thống kiểm tra tin tuyển dụng;
+if (Tin còn mở?) then (Có)
+  :Hệ thống kiểm tra hồ sơ năng lực của ứng viên;
+  if (Có hồ sơ năng lực hợp lệ?) then (Có)
+    :Ứng viên chọn hồ sơ dùng để ứng tuyển;
+    :Ứng viên gửi hồ sơ ứng tuyển;
+    :Hệ thống kiểm tra trùng hồ sơ ứng tuyển;
+    if (Chưa từng ứng tuyển?) then (Có)
+      :Hệ thống tạo hồ sơ ứng tuyển;
+      :Hệ thống thông báo cho nhà tuyển dụng;
+      :Thông báo ứng tuyển thành công;
+      stop
+    else (Không)
+      :Thông báo đã ứng tuyển tin này;
+      stop
+    endif
+  else (Không)
+    :Yêu cầu ứng viên tạo hồ sơ năng lực trước;
+    stop
+  endif
+else (Không)
+  :Thông báo tin đã đóng hoặc không khả dụng;
+  stop
+endif
+@enduml

@@ -6,6 +6,53 @@
   font-family: "Lexend", sans-serif;
 }
 
+.job-share-menu button {
+  align-items: center;
+  background: #ffffff;
+  border: 0;
+  border-radius: 10px;
+  color: #1f2937;
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 850;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.job-share-menu button:hover {
+  background: #eef6ff;
+  color: #0058be;
+}
+
+.job-share-menu button span {
+  align-items: center;
+  background: #1877f2;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  height: 16px;
+  justify-content: center;
+  line-height: 1;
+  width: 16px;
+}
+
+.jobs-real-page .jobs-real-hero > img {
+  opacity: 0.72 !important;
+  filter: saturate(1.08) contrast(1.04) !important;
+}
+
+.jobs-real-page .jobs-real-hero > div {
+  background:
+    linear-gradient(90deg, rgba(5, 16, 35, 0.72) 0%, rgba(7, 25, 52, 0.46) 45%, rgba(7, 25, 52, 0.14) 100%),
+    linear-gradient(0deg, rgba(5, 16, 35, 0.42), rgba(5, 16, 35, 0.04)) !important;
+}
+
 .jobs-real-page *,
 .jobs-real-page input,
 .jobs-real-page button,

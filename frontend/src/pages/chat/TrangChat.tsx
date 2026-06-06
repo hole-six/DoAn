@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { clsx } from 'clsx'
-import { ArrowLeft, Check, CheckCheck, Hash, MessageCircle, Search, Send, Shield, Users, X } from 'lucide-react'
-import { useChat, type TinNhan } from '../../contexts/ChatContext'
+import { ArrowLeft, Briefcase, Check, CheckCheck, Hash, MessageCircle, Search, Shield, Users, X, Send } from 'lucide-react'
+import { useChat, type CuocTroChuyenPreview, type TinNhan } from '../../contexts/ChatContext'
 import { layNguoiDung } from '../../lib/auth'
 
 type VaiTro = 'ung_vien' | 'nha_tuyen_dung' | 'admin'
@@ -50,6 +50,22 @@ function TypePill({ loai }: { loai: string }) {
   return <span className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-black text-sky-800"><MessageCircle size={12} /> 1-1</span>
 }
 
+function ContextChip({ conversation, compact = false }: { conversation?: CuocTroChuyenPreview | null; compact?: boolean }) {
+  const summary = conversation?.contextSummary
+  if (!summary?.tieuDeTin && !summary?.tenCongTy) return null
+  return (
+    <span className={clsx(
+      'inline-flex min-w-0 items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50 text-sky-800',
+      compact ? 'max-w-full px-2 py-0.5 text-[11px] font-black' : 'max-w-full px-3 py-1 text-xs font-black',
+    )}>
+      <Briefcase size={compact ? 12 : 14} className="shrink-0" />
+      <span className="truncate">
+        {summary.tieuDeTin || 'Hồ sơ ứng tuyển'}{summary.tenCongTy ? ` · ${summary.tenCongTy}` : ''}
+      </span>
+    </span>
+  )
+}
+
 function MessageItem({
   message,
   isMe,
@@ -67,6 +83,14 @@ function MessageItem({
   onReact: (id: string, emoji: string) => void
   onDelete: (id: string) => void
 }) {
+  if (message.loai === 'system') {
+    return (
+      <div className="mb-3 flex justify-center">
+        <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-bold text-slate-600">{message.noiDung}</span>
+      </div>
+    )
+  }
+
   const reactions: Record<string, number> = {}
   for (const item of Array.isArray((message as any).phanUng) ? (message as any).phanUng : []) {
     reactions[String(item.emoji)] = (reactions[String(item.emoji)] || 0) + 1
@@ -147,8 +171,14 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
       if (tab === 'direct' && conversation.loai === 'nhom_cong_dong') return false
       if (!query) return true
       const other = chat.layNguoiKhac(conversation)
-      return [other?.hoTen, conversation.tinNhanCuoiCung?.noiDung, conversation.tenNhom, conversation.moTaNhom]
-        .some(value => String(value ?? '').toLowerCase().includes(query))
+      return [
+        other?.hoTen,
+        conversation.tinNhanCuoiCung?.noiDung,
+        conversation.tenNhom,
+        conversation.moTaNhom,
+        conversation.contextSummary?.tieuDeTin,
+        conversation.contextSummary?.tenCongTy,
+      ].some(value => String(value ?? '').toLowerCase().includes(query))
     })
   }, [chat, search, tab])
 
@@ -224,7 +254,7 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
                 type="button"
                 onClick={() => void chat.moCuocTroChuyen(conversation)}
                 className={clsx(
-                  'flex min-h-[78px] w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left transition',
+                  'flex min-h-[88px] w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left transition',
                   active ? 'bg-sky-50' : 'hover:bg-slate-50',
                 )}
               >
@@ -238,8 +268,9 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
                     <strong className="min-w-0 truncate text-sm font-black text-slate-950">{name}</strong>
                     {conversation.tinNhanCuoiCung?.thoiGian && <span className="shrink-0 text-[11px] font-bold text-slate-400">{relativeTime(conversation.tinNhanCuoiCung.thoiGian)}</span>}
                   </div>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                     <TypePill loai={conversation.loai ?? 'truc_tiep'} />
+                    <ContextChip conversation={conversation} compact />
                     {unread > 0 && <span className="shrink-0 rounded-full bg-sky-700 px-2 py-0.5 text-[11px] font-black text-white">{unread > 9 ? '9+' : unread}</span>}
                   </div>
                   <span className="mt-1 block truncate text-xs font-semibold text-slate-500">{conversation.tinNhanCuoiCung?.noiDung || 'Chưa có tin nhắn'}</span>
@@ -266,6 +297,7 @@ export default function TrangChat({ vaiTro }: { vaiTro: VaiTro }) {
               <div className="min-w-0 flex-1">
                 <div className="truncate text-base font-black text-slate-950">{isGroup ? (selected.tenNhom || 'Nhóm cộng đồng') : (other?.hoTen || 'Người dùng')}</div>
                 <div className="text-sm font-semibold text-slate-500">{isGroup ? `${selected.nguoiThamGia?.length || 0} thành viên` : typing ? 'Đang nhập...' : online ? 'Đang online' : 'Offline'}</div>
+                <div className="mt-1"><ContextChip conversation={selected} /></div>
               </div>
               {selected.loai === 'admin_support' && <span className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-800 sm:inline-flex"><Shield size={13} /> Hỗ trợ</span>}
             </header>

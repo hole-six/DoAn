@@ -1,9 +1,11 @@
 ﻿import { useEffect, useState } from 'react'
 import { Edit3, Eye, Plus, Power, Trash2 } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDate, formatMoney } from '../../../lib/format'
 import { jobStatusLabel, toneForJobStatus } from '../../../lib/statusLabels'
+import { toast } from '../../../lib/toast'
 import type { TinTuyenDung } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
@@ -13,6 +15,7 @@ export default function QuanLyTinNhaTuyenDungPage() {
   const data = useEmployerData()
   const [editing, setEditing] = useState<Partial<TinTuyenDung> | null | undefined>(undefined)
   const congTyDaDuyet = data.company?.trangThaiDuyet === 'da_duyet'
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   useEffect(() => {
     if (congTyDaDuyet && new URLSearchParams(window.location.search).get('new') === '1') setEditing(null)
@@ -21,19 +24,46 @@ export default function QuanLyTinNhaTuyenDungPage() {
   const save = async (job: Partial<TinTuyenDung>) => {
     const path = job.id ? `/tintuyendung/${job.id}` : '/tintuyendung'
     await apiCoXacThuc(path, { method: job.id ? 'PATCH' : 'POST', body: JSON.stringify(job) })
+    toast.success(job.id ? 'Đã cập nhật tin tuyển dụng.' : 'Đã tạo tin tuyển dụng.')
     setEditing(undefined)
     await data.reload()
   }
 
   const setStatus = async (job: TinTuyenDung, action: 'tam-dong' | 'mo-lai') => {
-    await apiCoXacThuc(`/tintuyendung/${job.id}/${action}`, { method: 'POST' })
-    await data.reload()
+    const closing = action === 'tam-dong'
+    confirm(
+      closing ? 'Tạm đóng tin tuyển dụng' : 'Mở lại tin tuyển dụng',
+      `${closing ? 'Tạm đóng' : 'Mở lại'} tin "${job.tieuDe}"?`,
+      async () => {
+        try {
+          await apiCoXacThuc(`/tintuyendung/${job.id}/${action}`, { method: 'POST' })
+          toast.success(closing ? 'Đã tạm đóng tin tuyển dụng.' : 'Đã mở lại tin tuyển dụng.')
+          await data.reload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể đổi trạng thái tin.')
+        }
+      },
+      closing ? 'warning' : 'info',
+      closing ? 'Tạm đóng' : 'Mở lại',
+    )
   }
 
   const remove = async (job: TinTuyenDung) => {
-    if (!window.confirm(`Xóa tin ${job.tieuDe}?`)) return
-    await apiCoXacThuc(`/tintuyendung/${job.id}`, { method: 'DELETE' })
-    await data.reload()
+    confirm(
+      'Xóa tin tuyển dụng',
+      `Xóa tin "${job.tieuDe}"? Hành động này không thể hoàn tác.`,
+      async () => {
+        try {
+          await apiCoXacThuc(`/tintuyendung/${job.id}`, { method: 'DELETE' })
+          toast.success('Đã xóa tin tuyển dụng.')
+          await data.reload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể xóa tin tuyển dụng.')
+        }
+      },
+      'danger',
+      'Xóa',
+    )
   }
 
   return (
@@ -76,6 +106,7 @@ export default function QuanLyTinNhaTuyenDungPage() {
         </div>
       </Panel>
       {editing !== undefined && <JobModal initial={editing ?? undefined} companyId={data.company?.id} skills={data.skills} onClose={() => setEditing(undefined)} onSubmit={save} />}
+      <ConfirmDialogComponent />
     </Page>
   )
 }

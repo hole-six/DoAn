@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, MessageCircle, Search } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { useChat } from '../../../contexts/ChatContext'
 import { employerApplicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
+import { toast } from '../../../lib/toast'
 import type { HoSoUngTuyen } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
@@ -12,7 +14,7 @@ import { ScheduleModal } from '../interviews/ScheduleModal'
 import type { ScheduleValue } from '../interviews/ScheduleModal'
 import { CandidateDrawer } from './CandidateDrawer'
 
-const TRANG_THAI_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat'] as const
+const TRANG_THAI_CHAT = ['da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat'] as const
 
 export default function UngVienNhaTuyenDungPage() {
   const data = useEmployerData()
@@ -20,6 +22,7 @@ export default function UngVienNhaTuyenDungPage() {
   const [selected, setSelected] = useState<HoSoUngTuyen | null>(null)
   const [scheduling, setScheduling] = useState<HoSoUngTuyen | null>(null)
   const { moChatVoiNguoiDung } = useChat()
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -45,12 +48,27 @@ export default function UngVienNhaTuyenDungPage() {
     const ghiChu = trangThai === 'tu_choi'
       ? window.prompt(giaiDoanTuChoi === 'phong_van' ? 'Lý do từ chối sau phỏng vấn?' : 'Lý do từ chối sàng lọc?') ?? ''
       : 'Nhà tuyển dụng đang xét duyệt hồ sơ'
-    const updated = await apiCoXacThuc(`/hosoungtuyen/${selected.id}/danh-gia`, {
-      method: 'POST',
-      body: JSON.stringify({ trangThai, ghiChu, giaiDoanTuChoi }),
-    }) as HoSoUngTuyen
-    setSelected(updated)
-    await data.reload()
+    const target = selected
+    const rejecting = trangThai === 'tu_choi'
+    confirm(
+      rejecting ? 'Từ chối ứng viên' : 'Chuyển sang xét duyệt',
+      `${rejecting ? 'Từ chối' : 'Chuyển trạng thái'} hồ sơ của "${target.hoSoNangLuc?.hoTenHienThi || target.ungVien?.nguoiDung?.hoTen || 'ứng viên này'}"?`,
+      async () => {
+        try {
+          const updated = await apiCoXacThuc(`/hosoungtuyen/${target.id}/danh-gia`, {
+            method: 'POST',
+            body: JSON.stringify({ trangThai, ghiChu, giaiDoanTuChoi }),
+          }) as HoSoUngTuyen
+          setSelected(updated)
+          toast.success(rejecting ? 'Đã từ chối ứng viên.' : 'Đã cập nhật trạng thái hồ sơ.')
+          await data.reload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể cập nhật hồ sơ ứng viên.')
+        }
+      },
+      rejecting ? 'warning' : 'info',
+      rejecting ? 'Từ chối' : 'Cập nhật',
+    )
   }
 
   const completeInterview = async (ketQua: 'dat' | 'khong_dat') => {
@@ -60,21 +78,40 @@ export default function UngVienNhaTuyenDungPage() {
       setScheduling(selected)
       return
     }
-    await apiCoXacThuc(`/lichphongvan/${lich.id}/hoan-thanh`, {
-      method: 'POST',
-      body: JSON.stringify({ ketQua, ghiChu: ketQua === 'dat' ? 'Ứng viên đạt phỏng vấn' : 'Ứng viên không đạt phỏng vấn' }),
-    })
-    const updated = await apiCoXacThuc(`/hosoungtuyen/${selected.id}`) as HoSoUngTuyen
-    setSelected(updated)
-    await data.reload()
+    const target = selected
+    confirm(
+      ketQua === 'dat' ? 'Đánh dấu ứng viên đạt' : 'Đánh dấu ứng viên không đạt',
+      `Cập nhật kết quả phỏng vấn cho "${target.hoSoNangLuc?.hoTenHienThi || target.ungVien?.nguoiDung?.hoTen || 'ứng viên này'}"?`,
+      async () => {
+        try {
+          await apiCoXacThuc(`/lichphongvan/${lich.id}/hoan-thanh`, {
+            method: 'POST',
+            body: JSON.stringify({ ketQua, ghiChu: ketQua === 'dat' ? 'Ứng viên đạt phỏng vấn' : 'Ứng viên không đạt phỏng vấn' }),
+          })
+          const updated = await apiCoXacThuc(`/hosoungtuyen/${target.id}`) as HoSoUngTuyen
+          setSelected(updated)
+          toast.success('Đã cập nhật kết quả phỏng vấn.')
+          await data.reload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể cập nhật kết quả phỏng vấn.')
+        }
+      },
+      ketQua === 'dat' ? 'info' : 'warning',
+      'Cập nhật',
+    )
   }
 
   const schedule = async (value: ScheduleValue) => {
     if (!scheduling) return
-    await apiCoXacThuc(`/hosoungtuyen/${scheduling.id}/moi-phong-van`, { method: 'POST', body: JSON.stringify(value) })
-    setScheduling(null)
-    setSelected(null)
-    await data.reload()
+    try {
+      await apiCoXacThuc(`/hosoungtuyen/${scheduling.id}/moi-phong-van`, { method: 'POST', body: JSON.stringify(value) })
+      setScheduling(null)
+      setSelected(null)
+      toast.success('Đã gửi lời mời phỏng vấn.')
+      await data.reload()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Không thể gửi lời mời phỏng vấn.')
+    }
   }
 
   const openChat = async (item: HoSoUngTuyen) => {
@@ -134,6 +171,7 @@ export default function UngVienNhaTuyenDungPage() {
         />
       )}
       {scheduling && <ScheduleModal onClose={() => setScheduling(null)} onSubmit={schedule} />}
+      <ConfirmDialogComponent />
     </Page>
   )
 }

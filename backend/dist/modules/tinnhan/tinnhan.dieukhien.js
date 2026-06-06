@@ -4,10 +4,9 @@ exports.dieuKhienTinNhan = void 0;
 const batloibatdongbo_js_1 = require("../../dungchung/batloibatdongbo.js");
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const hosoungtuyen_mohinh_js_1 = require("../hosoungtuyen/hosoungtuyen.mohinh.js");
-const nhatuyendung_mohinh_js_1 = require("../nhatuyendung/nhatuyendung.mohinh.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const tinnhan_dichvu_js_1 = require("./tinnhan.dichvu.js");
-const TRANG_THAI_CHAT_NTD_UV = ['dang_xet_duyet', 'moi_phong_van', 'dat'];
+const TRANG_THAI_CHAT_NTD_UV = ['da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat'];
 function id(value) {
     return String(value?._id ?? value?.id ?? value ?? '');
 }
@@ -16,12 +15,6 @@ async function timNguoiDungAdminDauTien() {
     if (!admin)
         throw new loiungdung_js_1.LoiUngDung('Hệ thống chưa có tài khoản quản trị viên', 409, 'ADMIN_NOT_FOUND');
     return String(admin._id);
-}
-async function damBaoNhaTuyenDungDaDuyet(maNguoiDung) {
-    const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung }).select('_id trangThaiDuyet tenCongTy');
-    if (!congTy || congTy.trangThaiDuyet !== 'da_duyet') {
-        throw new loiungdung_js_1.LoiUngDung('Công ty chưa được duyệt nên chưa thể mở chat hỗ trợ', 403, 'EMPLOYER_NOT_APPROVED');
-    }
 }
 async function xacThucChatUngTuyen(nguoiDung, nguoiNhan, maHoSoUngTuyen, maTinTuyenDung) {
     const vaiTro = String(nguoiDung.vaiTro ?? '');
@@ -118,7 +111,6 @@ exports.dieuKhienTinNhan = {
                 throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền mở chat hỗ trợ', 403, 'FORBIDDEN');
             }
             if (String(nguoiDung.vaiTro ?? '') === 'nha_tuyen_dung') {
-                await damBaoNhaTuyenDungDaDuyet(maNguoiDung);
                 nguoiNhanThuc = await timNguoiDungAdminDauTien();
             }
             else {
@@ -126,7 +118,6 @@ exports.dieuKhienTinNhan = {
                 if (!nguoiNhanDoc || String(nguoiNhanDoc.vaiTro ?? '') !== 'nha_tuyen_dung') {
                     throw new loiungdung_js_1.LoiUngDung('Admin chỉ có thể mở chat hỗ trợ với nhà tuyển dụng', 409, 'INVALID_CHAT_TARGET');
                 }
-                await damBaoNhaTuyenDungDaDuyet(id(nguoiNhanDoc));
                 nguoiNhanThuc = id(nguoiNhanDoc);
             }
             loaiCuocTroChuyen = 'admin_support';

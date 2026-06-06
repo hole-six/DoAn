@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Đăng nhập
+
+start
+:Người dùng mở giao diện đăng nhập;
+fork
+  :Nhập email;
+fork again
+  :Nhập mật khẩu;
+end fork
+:Nhấn nút "Đăng nhập";
+:Hệ thống kiểm tra tài khoản;
+if (Thông tin đăng nhập hợp lệ?) then (Có)
+  :Hệ thống xác định vai trò người dùng;
+  if (Tài khoản đang hoạt động?) then (Có)
+    :Hệ thống tạo phiên đăng nhập;
+    :Chuyển đến giao diện theo vai trò;
+    stop
+  else (Không)
+    :Thông báo tài khoản bị khóa hoặc chưa hợp lệ;
+    stop
+  endif
+else (Không)
+  :Thông báo sai email hoặc mật khẩu;
+  stop
+endif
+@enduml

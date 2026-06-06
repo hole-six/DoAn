@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Lưu việc làm"
+
+actor "Actor: Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "UI: chi-tiet-viec-lam" as UI
+boundary "UI: nut-luu-viec-lam" as Form
+control "Controller: ViecLamDaLuuController" as Controller
+entity "Entity: ViecLamDaLuu" as MainEntity
+entity "Entity: TinTuyenDung" as E1
+entity "Entity: UngVien" as E2
+
+Actor --> UI : Mở chi tiết việc làm
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Nhấn nút Lưu hoặc Bỏ lưu
+Form --> Controller : toggleLuuViecLam(maTin)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra vai trò ứng viên và tin đang tồn tại\nTạo hoặc xóa bản ghi việc làm đã lưu
+Controller <--> E1 : Lấy lại trạng thái lưu hiện tại
+Controller --> Form : Thông báo trạng thái lưu mới / Yêu cầu đăng nhập bằng tài khoản ứng viên
+Controller --> UI : trả dữ liệu mới
+@enduml

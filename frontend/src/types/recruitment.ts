@@ -111,6 +111,21 @@ export type HoSoUngTuyen = {
   ngayNop?: string
 }
 
+export type DanhGiaCongTy = {
+  id: Id
+  _id?: Id
+  maUngVien: Id
+  maNhaTuyenDung: Id
+  maHoSoUngTuyen?: Id
+  diem: number
+  noiDung: string
+  anDanh?: boolean
+  daDuyet?: boolean
+  ngayTao?: string
+  ngayCapNhat?: string
+  nhaTuyenDung?: Pick<NhaTuyenDung, 'id' | 'tenCongTy' | 'logo'>
+}
+
 export type LichPhongVan = {
   id: Id
   _id?: Id

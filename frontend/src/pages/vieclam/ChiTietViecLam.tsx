@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { Bookmark, Briefcase, Building2, Clock, DollarSign, FileText, Globe, MapPin, Share2, UploadCloud, Users, X } from 'lucide-react'
+import { Bookmark, Briefcase, Building2, Clock, Copy, DollarSign, FileText, Globe, MapPin, MessageCircle, Share2, UploadCloud, Users, X } from 'lucide-react'
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
+import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
 
 const logoDuPhong = 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT'
@@ -118,6 +119,7 @@ export default function ChiTietViecLam() {
   const [fileCvMoi, setFileCvMoi] = useState<File | null>(null)
   const [thuXinViec, setThuXinViec] = useState('')
   const [daLuu, setDaLuu] = useState(false)
+  const [moMenuChiaSe, setMoMenuChiaSe] = useState(false)
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
 
@@ -151,7 +153,7 @@ export default function ChiTietViecLam() {
           setDaLuu((viecDaLuuList ?? []).some((item: any) => item.maTinTuyenDung === job.id))
         } else {
           setDaUngTuyen(false)
-          setDaLuu(JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]').includes(job.id))
+          setDaLuu(false)
         }
       })
       .catch(error => setLoi(error instanceof Error ? error.message : 'Không tải được chi tiết việc làm'))
@@ -171,6 +173,8 @@ export default function ChiTietViecLam() {
   const quyenLoi = tachDong(viec?.quyenLoi)
   const tenCongTy = congTy?.tenCongTy ?? viec?.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng'
   const logo = congTy?.logo ?? viec?.nhaTuyenDung?.logo ?? logoDuPhong
+  const shareUrl = typeof window !== 'undefined' && viec ? `${window.location.origin}/viec-lam/${viec.id}` : ''
+  const shareText = viec ? `${viec.tieuDe} tại ${tenCongTy}` : 'Việc làm ITJob'
 
   const ungTuyenNgay = async () => {
     const nguoiDung = layNguoiDung()
@@ -223,22 +227,57 @@ export default function ChiTietViecLam() {
   const toggleSave = async () => {
     if (!viec) return
     const nguoiDung = layNguoiDung()
-    const next = !daLuu
-    setDaLuu(next)
-
-    if (nguoiDung?.vaiTro === 'ung_vien') {
-      try {
-        await apiCoXacThuc(`/viec-lam-da-luu/${viec.id}`, { method: next ? 'POST' : 'DELETE' })
-      } catch (err) {
-        setDaLuu(!next)
-        setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không lưu được việc làm')
-      }
+    if (!nguoiDung) {
+      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(`/viec-lam/${viec.id}`)}&notice=save_candidate_only`
       return
     }
 
-    const saved: string[] = JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]')
-    const updated = next ? Array.from(new Set([...saved, viec.id])) : saved.filter(item => item !== viec.id)
-    localStorage.setItem('itjob_saved_jobs', JSON.stringify(updated))
+    if (nguoiDung.vaiTro !== 'ung_vien') {
+      setThongBaoUngTuyen('Bạn cần đăng nhập bằng tài khoản ứng viên để lưu việc làm. Tài khoản hiện tại không thể dùng chức năng này.')
+      window.setTimeout(() => { window.location.href = duongDanTheoVaiTro[nguoiDung.vaiTro] }, 1200)
+      return
+    }
+
+    const next = !daLuu
+    setDaLuu(next)
+
+    try {
+      await apiCoXacThuc(`/viec-lam-da-luu/${viec.id}`, { method: next ? 'POST' : 'DELETE' })
+      toast.success(next ? 'Đã lưu việc làm.' : 'Đã bỏ lưu việc làm.')
+    } catch (err) {
+      setDaLuu(!next)
+      setThongBaoUngTuyen(err instanceof Error ? err.message : 'Không lưu được việc làm')
+    }
+  }
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Đã sao chép link việc làm.')
+    } catch {
+      window.prompt('Sao chép link việc làm', shareUrl)
+    }
+    setMoMenuChiaSe(false)
+  }
+
+  const shareNative = async () => {
+    if (!shareUrl) return
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareText, text: shareText, url: shareUrl })
+      } catch {
+        // user cancelled native share
+      }
+      setMoMenuChiaSe(false)
+      return
+    }
+    await copyShareUrl()
+  }
+
+  const openShare = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer,width=760,height=640')
+    setMoMenuChiaSe(false)
   }
 
   const nopHoSoUngTuyen = async () => {
@@ -323,7 +362,7 @@ export default function ChiTietViecLam() {
               { key: 'mo-ta', label: 'Mô tả công việc' },
               { key: 'cong-ty', label: 'Về công ty' },
             ].map(t => (
-              <button key={t.key} onClick={() => setTab(t.key as typeof tab)} style={{ padding: '12px 20px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: tab === t.key ? '#e11d48' : '#6b7280', borderBottom: tab === t.key ? '2px solid #e11d48' : '2px solid transparent', marginBottom: -1, fontFamily: "'Inter', system-ui, sans-serif" }}>
+              <button key={t.key} onClick={() => setTab(t.key as typeof tab)} style={{ padding: '12px 20px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: tab === t.key ? '#e11d48' : '#6b7280', borderBottom: tab === t.key ? '2px solid #e11d48' : '2px solid transparent', marginBottom: -1, fontFamily: "'Lexend', system-ui, sans-serif" }}>
                 {t.label}
               </button>
             ))}
@@ -341,11 +380,22 @@ export default function ChiTietViecLam() {
                 </div>
               </div>
               <div className="job-detail-card job-detail-actions-card" style={{ background: '#fff', borderRadius: 8, padding: '20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Inter', system-ui, sans-serif" }}>
+                <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Lexend', system-ui, sans-serif" }}>
                   {dangUngTuyen ? 'Đang ứng tuyển...' : daUngTuyen ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </button>
                 <button onClick={() => void toggleSave()} style={{ background: daLuu ? '#eff6ff' : '#f3f4f6', color: daLuu ? '#0058be' : '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Bookmark size={16} fill={daLuu ? '#0058be' : 'none'} /> {daLuu ? 'Đã lưu' : 'Lưu'}</button>
-                <button style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Share2 size={16} /> Chia sẻ</button>
+                <div style={{ position: 'relative' }}>
+                  <button type="button" onClick={() => setMoMenuChiaSe(value => !value)} style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Share2 size={16} /> Chia sẻ</button>
+                  {moMenuChiaSe && (
+                    <div className="job-share-menu" style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 30, minWidth: 230, borderRadius: 14, border: '1px solid #dbe4f0', background: '#fff', padding: 8, boxShadow: '0 20px 45px rgba(15,23,42,.18)' }}>
+                      <button type="button" onClick={() => void shareNative()}><Share2 size={15} /> Chia sẻ bằng thiết bị</button>
+                      <button type="button" onClick={() => void copyShareUrl()}><Copy size={15} /> Sao chép link</button>
+                      <button type="button" onClick={() => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)}><span aria-hidden="true">f</span> Facebook</button>
+                      <button type="button" onClick={() => openShare(`https://zalo.me/share?u=${encodeURIComponent(shareUrl)}`)}><MessageCircle size={15} /> Zalo</button>
+                      <button type="button" onClick={() => openShare(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(shareUrl)}`)}><MessageCircle size={15} /> Messenger</button>
+                    </div>
+                  )}
+                </div>
               </div>
               {thongBaoUngTuyen && <div style={{ background: '#fff', borderRadius: 8, padding: '14px 18px', border: '1px solid #dbe4f0', color: daUngTuyen ? '#166534' : '#334155', fontWeight: 700 }}>{thongBaoUngTuyen}</div>}
               <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>

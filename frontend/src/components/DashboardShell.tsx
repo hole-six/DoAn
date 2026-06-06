@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { Link, Navigate, NavLink, Outlet } from 'react-router-dom'
 import { clsx } from 'clsx'
 import {
@@ -23,7 +23,9 @@ import {
 import logoWeb from '../assets/logoweb.png'
 import { useChat } from '../contexts/ChatContext'
 import { useThongBao } from '../contexts/ThongBaoContext'
-import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
+import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
+import { EMPLOYER_RECRUITMENT_PATHS, getEmployerGate, refId, type EmployerGateResult } from '../lib/employerGate'
+import type { NhaTuyenDung } from '../types/recruitment'
 import AppIcon from './AppIcon'
 import BottomNav from './BottomNav'
 import './dashboard-shell.css'
@@ -53,6 +55,7 @@ const menuNTD = [
   { to: '/nha-tuyen-dung/cong-ty', icon: Building2, label: 'Thông tin công ty' },
   { to: '/nha-tuyen-dung/chat', icon: MessageCircle, label: 'Tin nhắn' },
   { to: '/nha-tuyen-dung/thong-bao', icon: Bell, label: 'Thông báo' },
+  { to: '/nha-tuyen-dung/bang-gia', icon: Star, label: 'Bảng giá' },
 ]
 
 const menuAdmin = [
@@ -63,6 +66,7 @@ const menuAdmin = [
   { to: '/quan-tri/ky-nang', icon: BookOpen, label: 'Danh mục kỹ năng' },
   { to: '/quan-tri/review', icon: UserCheck, label: 'Review công ty' },
   { to: '/quan-tri/chat', icon: MessageCircle, label: 'Tin nhắn & Hỗ trợ' },
+  { to: '/quan-tri/thong-bao', icon: Bell, label: 'Thông báo' },
  
 ]
 
@@ -142,6 +146,7 @@ const shellByRole: Record<VaiTro, {
 export default function DashboardShell({ vaiTro }: Props) {
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('itjob_sidebar_collapsed') === 'true')
+  const [employerGate, setEmployerGate] = useState<EmployerGateResult | null>(null)
   const menu = menuMap[vaiTro]
   const nguoiDung = layNguoiDung()
   const { soLuongChuaDoc: soThongBao } = useThongBao()
@@ -159,6 +164,24 @@ export default function DashboardShell({ vaiTro }: Props) {
   useEffect(() => {
     localStorage.setItem('itjob_sidebar_collapsed', String(collapsed))
   }, [collapsed])
+
+  useEffect(() => {
+    if (vaiTro !== 'nhatuyendung' || !nguoiDung?.id) {
+      setEmployerGate(null)
+      return
+    }
+    let active = true
+    apiCoXacThuc('/nhatuyendung')
+      .then((companies: NhaTuyenDung[]) => {
+        if (!active) return
+        const company = (companies ?? []).find(item => refId(item.maNguoiDung) === nguoiDung.id)
+        setEmployerGate(getEmployerGate(company))
+      })
+      .catch(() => {
+        if (active) setEmployerGate(getEmployerGate(null))
+      })
+    return () => { active = false }
+  }, [vaiTro, nguoiDung?.id])
 
   if (!nguoiDung) return <Navigate to="/dang-nhap" replace />
   if (nguoiDung.vaiTro !== vaiTroCanCo) return <Navigate to={duongDanTheoVaiTro[nguoiDung.vaiTro]} replace />
@@ -202,6 +225,15 @@ export default function DashboardShell({ vaiTro }: Props) {
           <nav className="grid gap-1">
             {menu.map((item) => {
               const Icon = item.icon
+              const locked = vaiTro === 'nhatuyendung'
+                && employerGate
+                && !employerGate.allowed
+                && EMPLOYER_RECRUITMENT_PATHS.some(path => item.to.startsWith(path))
+              const unread = item.to.includes('thong-bao')
+                ? soThongBao
+                : item.to.includes('/chat')
+                  ? soTinNhan
+                  : 0
               return (
                 <NavLink
                   key={item.to}
@@ -213,16 +245,28 @@ export default function DashboardShell({ vaiTro }: Props) {
                       'flex min-h-11 min-w-0 items-center gap-2.5 overflow-hidden rounded-xl border border-transparent px-3 text-sm font-extrabold leading-tight transition',
                       shell.navBase,
                       isActive && shell.navActive,
-                      collapsed && 'lg:justify-center lg:px-0',
+                      locked && 'pointer-events-none opacity-45 grayscale',
+                      collapsed && 'lg:relative lg:justify-center lg:overflow-visible lg:px-0',
                     )
                   }
-                  onClick={() => setOpen(false)}
+                  onClick={(event) => {
+                    if (locked) {
+                      event.preventDefault()
+                      return
+                    }
+                    setOpen(false)
+                  }}
                 >
                   <AppIcon icon={Icon} className="shrink-0 text-current" />
                   <span className={clsx('min-w-0 flex-1 truncate', collapsed && 'lg:hidden')}>{item.label}</span>
-                  {(item.to.includes('thong-bao') && soThongBao > 0) || (item.to.includes('/chat') && soTinNhan > 0) ? (
-                    <span className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white">
-                      {item.to.includes('thong-bao') ? Math.min(99, soThongBao) : Math.min(99, soTinNhan)}
+                  {unread > 0 ? (
+                    <span
+                      className={clsx(
+                        'inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-black text-white',
+                        collapsed ? 'lg:absolute lg:right-1 lg:top-1 lg:h-4 lg:min-w-4 lg:px-1 lg:text-[9px]' : 'ml-auto',
+                      )}
+                    >
+                      {Math.min(99, unread)}
                     </span>
                   ) : null}
                 </NavLink>

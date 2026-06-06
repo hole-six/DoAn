@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Đánh giá công ty
+
+start
+:Ứng viên đăng nhập;
+:Mở trang chi tiết công ty;
+:Chọn chức năng đánh giá công ty;
+:Hệ thống kiểm tra điều kiện đánh giá;
+if (Ứng viên đủ điều kiện?) then (Có)
+  fork
+    :Chọn điểm đánh giá;
+  fork again
+    :Nhập nội dung nhận xét;
+  fork again
+    :Chọn chế độ hiển thị tên nếu có;
+  end fork
+  :Ứng viên gửi đánh giá;
+  :Hệ thống kiểm tra nội dung đánh giá;
+  if (Đánh giá hợp lệ?) then (Có)
+    :Hệ thống lưu đánh giá ở trạng thái chờ duyệt;
+    :Hệ thống thông báo cho quản trị viên;
+    :Thông báo đánh giá đã được ghi nhận;
+    stop
+  else (Không)
+    :Thông báo lỗi nội dung đánh giá;
+    stop
+  endif
+else (Không)
+  :Thông báo chưa đủ điều kiện đánh giá;
+  stop
+endif
+@enduml

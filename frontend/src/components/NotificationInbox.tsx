@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Check, ExternalLink, Eye, Inbox, MessageCircle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useThongBao } from '../contexts/ThongBaoContext'
@@ -39,8 +39,16 @@ export function NotificationInbox({ items, onReload }: Props) {
   const [busy, setBusy] = useState('')
 
   const unreadCount = items.filter(item => !item.daDoc).length
+  const filterCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    items.forEach(item => {
+      const type = item.loai ?? 'he_thong'
+      counts.set(type, (counts.get(type) ?? 0) + 1)
+    })
+    return counts
+  }, [items])
   const filteredItems = useMemo(
-    () => (filter === 'all' ? items : items.filter(item => item.loai === filter)),
+    () => (filter === 'all' ? items : items.filter(item => (item.loai ?? 'he_thong') === filter)),
     [filter, items],
   )
 
@@ -98,6 +106,7 @@ export function NotificationInbox({ items, onReload }: Props) {
         <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map(({ key, label, icon: Icon }) => {
             const active = filter === key
+            const count = key === 'all' ? items.length : filterCounts.get(key) ?? 0
             return (
               <button
                 key={key}
@@ -111,6 +120,9 @@ export function NotificationInbox({ items, onReload }: Props) {
               >
                 <Icon size={15} />
                 {label}
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                  {count}
+                </span>
               </button>
             )
           })}
@@ -143,6 +155,9 @@ export function NotificationInbox({ items, onReload }: Props) {
                       <h3 className="min-w-0 break-words text-base font-black text-slate-950">{item.tieuDe}</h3>
                       <span className={`rounded-full px-2.5 py-1 text-xs font-black ${item.daDoc ? 'bg-slate-100 text-slate-500' : 'bg-sky-600 text-white'}`}>
                         {item.daDoc ? 'Đã đọc' : 'Mới'}
+                      </span>
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700">
+                        {priorityLabel((item as any).mucDoUuTien)}
                       </span>
                     </div>
                     <p className="mt-2 line-clamp-2 break-words text-sm font-semibold leading-6 text-slate-600">{item.noiDung}</p>

@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý hồ sơ năng lực
+
+start
+:Ứng viên đăng nhập;
+:Mở trang hồ sơ năng lực;
+if (Chọn thao tác?) then (Tạo hoặc chỉnh sửa)
+  fork
+    :Nhập thông tin cá nhân;
+  fork again
+    :Cập nhật kỹ năng;
+  fork again
+    :Cập nhật kinh nghiệm;
+  fork again
+    :Cập nhật dự án;
+  end fork
+else (Upload CV)
+  :Chọn file CV;
+  :Hệ thống kiểm tra định dạng và dung lượng;
+endif
+:Ứng viên lưu hồ sơ;
+:Hệ thống kiểm tra dữ liệu hồ sơ;
+if (Hồ sơ hợp lệ?) then (Có)
+  :Hệ thống lưu hồ sơ năng lực;
+  :Hiển thị bản xem trước hồ sơ;
+  stop
+else (Không)
+  :Thông báo lỗi và yêu cầu bổ sung;
+  stop
+endif
+@enduml

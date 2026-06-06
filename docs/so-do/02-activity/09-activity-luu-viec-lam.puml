@@ -1,21 +1,36 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 skinparam shadowing false
-title Activity - Lưu việc làm
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Lưu việc làm
 
 start
-:Người dùng bấm biểu tượng lưu việc;
-if (Đã đăng nhập ứng viên?) then (Có)
-  :Gửi POST/DELETE /api/viec-lam-da-luu/{id};
-  if (Đang lưu?) then (Có)
-    :Tạo bản ghi ViecLamDaLuu;
-  else (Không)
-    :Xóa bản ghi ViecLamDaLuu;
-  endif
-  :Cập nhật trạng thái nút lưu;
+:Ứng viên đăng nhập;
+:Mở danh sách hoặc chi tiết việc làm;
+:Chọn nút lưu việc làm;
+:Hệ thống kiểm tra tin tuyển dụng;
+if (Tin hợp lệ và chưa được lưu?) then (Có)
+  :Hệ thống lưu việc làm vào danh sách quan tâm;
+  :Thông báo lưu việc làm thành công;
+  stop
 else (Không)
-  :Lưu tạm trong localStorage;
-  :Gợi ý đăng nhập để đồng bộ;
+  if (Tin đã được lưu?) then (Có)
+    :Hệ thống hủy lưu việc làm;
+    :Thông báo đã bỏ lưu;
+    stop
+  else (Không)
+    :Thông báo tin tuyển dụng không khả dụng;
+    stop
+  endif
 endif
-stop
 @enduml
-

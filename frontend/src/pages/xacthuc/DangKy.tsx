@@ -17,6 +17,11 @@ const navyButtonStyle = {
   color: '#ffffff',
   boxShadow: '0 18px 34px rgba(6, 42, 77, 0.24)',
 }
+const homeLinkStyle = {
+  backgroundColor: '#062a4d',
+  border: '1px solid rgba(255, 255, 255, 0.22)',
+  color: '#ffffff',
+}
 
 export default function DangKy() {
   const [vaiTro, setVaiTro] = useState<'ungvien' | 'nhatuyendung'>('ungvien')
@@ -95,14 +100,14 @@ export default function DangKy() {
           <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={dangKyImg} alt="Đăng ký Effort Job" />
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(2,7,24,0.96),rgba(3,22,52,0.82),rgba(2,7,24,0.58))]" />
           <div className="relative z-10 flex min-h-dvh flex-col justify-between p-12 xl:p-16">
-            <Link to="/" className="inline-flex w-fit items-center gap-2 rounded-full bg-white/12 px-4 py-2 text-sm font-black uppercase tracking-wide text-white ring-1 ring-white/20 transition hover:bg-white/20">
+            <Link to="/" style={homeLinkStyle} className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-black uppercase tracking-wide text-white ring-1 ring-white/20 transition hover:bg-white/20">
               <ArrowLeft size={18} /> Về trang chủ
             </Link>
 
             <div className="max-w-xl">
               <img src={logoWeb} alt="Effort Job" className="mb-8 object-contain" style={{ height: 96, width: 'auto', maxWidth: 240 }} />
               <p className="text-sm font-black uppercase tracking-[0.22em] text-cyan-200">Effort Job</p>
-              <h1 className="mt-4 text-4xl font-black leading-[1.08] text-white xl:text-5xl">Đăng ký nhanh, hoàn thiện hồ sơ sau</h1>
+              <h1 className="mt-4 text-4xl font-black leading-[1.08] text-white xl:text-5xl" style={{ color: '#ffffff', textShadow: '0 2px 18px rgba(0,0,0,0.35)' }}>Đăng ký nhanh, hoàn thiện hồ sơ sau</h1>
               <p className="mt-5 max-w-lg text-base font-semibold leading-7 text-slate-200">
                 Ứng viên dùng CV làm trung tâm. Nhà tuyển dụng đăng ký tối thiểu, sau đó cập nhật công ty và chờ admin duyệt.
               </p>
@@ -124,7 +129,7 @@ export default function DangKy() {
         <section className="flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
           <div className="w-full max-w-[600px] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10">
             <div className="mb-8 flex items-center justify-between gap-4 lg:hidden">
-              <Link to="/" className="inline-flex items-center gap-2 rounded-full bg-[#062a4d] px-4 py-2 text-sm font-black text-white">
+              <Link to="/" style={homeLinkStyle} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black text-white">
                 <ArrowLeft size={18} /> Trang chủ
               </Link>
               <img src={logoWeb} alt="Effort Job" className="object-contain" style={{ height: 40, width: 'auto', maxWidth: 120 }} />

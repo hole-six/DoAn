@@ -2,7 +2,7 @@
 /* DASHBOARD SHELL - RESPONSIVE IMPROVEMENTS */
 /* ========================================================================== */
 
-/* â”€â”€â”€ Base Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Base Improvements ──────────────────────────────────────────────────── */
 
 /* Smooth transitions for sidebar */
 aside[data-open] {
@@ -15,7 +15,7 @@ aside[data-open] {
   overscroll-behavior: contain;
 }
 
-/* â”€â”€â”€ Mobile Responsive (â‰¤1023px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Mobile Responsive (≤1023px) ────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
   /* Mobile sidebar overlay */
@@ -90,13 +90,13 @@ aside[data-open] {
   }
 
   /* Logout button on mobile */
-  a[title="ÄÄƒng xuáº¥t"] {
+  a[title="Đăng xuất"] {
     min-height: 48px !important;
     font-size: 15px !important;
   }
 }
 
-/* â”€â”€â”€ Small Mobile (â‰¤480px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Small Mobile (≤480px) ──────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
   /* Tighter spacing */
@@ -139,7 +139,7 @@ aside[data-open] {
   }
 }
 
-/* â”€â”€â”€ Tablet Landscape (768px - 1023px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Tablet Landscape (768px - 1023px) ──────────────────────────────────── */
 
 @media (min-width: 768px) and (max-width: 1023px) {
   /* Slightly larger sidebar on tablet */
@@ -153,7 +153,7 @@ aside[data-open] {
   }
 }
 
-/* â”€â”€â”€ Desktop Improvements (â‰¥1024px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Desktop Improvements (≥1024px) ─────────────────────────────────────── */
 
 @media (min-width: 1024px) {
   /* Sidebar transitions */
@@ -213,7 +213,7 @@ aside[data-open] {
   }
 }
 
-/* â”€â”€â”€ Large Desktop (â‰¥1440px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Large Desktop (≥1440px) ────────────────────────────────────────────── */
 
 @media (min-width: 1440px) {
   /* Wider sidebar */
@@ -227,7 +227,7 @@ aside[data-open] {
   }
 }
 
-/* â”€â”€â”€ Backdrop Blur Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Backdrop Blur Improvements ─────────────────────────────────────────── */
 
 /* Mobile overlay */
 .fixed.inset-0.z-\[65\].bg-slate-900\/45 {
@@ -245,7 +245,7 @@ aside[data-open] {
   }
 }
 
-/* â”€â”€â”€ Active Navigation Item Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Active Navigation Item Improvements ────────────────────────────────── */
 
 /* Better active state visibility */
 nav.grid.gap-1 a[class*="navActive"] {
@@ -269,7 +269,7 @@ aside[data-collapsed="true"] nav.grid.gap-1 a[class*="navActive"]::before {
   display: none;
 }
 
-/* â”€â”€â”€ Role Card Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Role Card Improvements ─────────────────────────────────────────────── */
 
 .rounded-xl.border.p-3 {
   transition: all 0.2s ease;
@@ -280,21 +280,21 @@ aside[data-collapsed="true"] nav.grid.gap-1 a[class*="navActive"]::before {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* â”€â”€â”€ Logout Button Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Logout Button Improvements ─────────────────────────────────────────── */
 
-a[title="ÄÄƒng xuáº¥t"] {
+a[title="Đăng xuất"] {
   transition: all 0.2s ease;
 }
 
-a[title="ÄÄƒng xuáº¥t"]:hover {
+a[title="Đăng xuất"]:hover {
   transform: translateX(2px);
 }
 
-aside[data-collapsed="true"] a[title="ÄÄƒng xuáº¥t"]:hover {
+aside[data-collapsed="true"] a[title="Đăng xuất"]:hover {
   transform: translateX(0);
 }
 
-/* â”€â”€â”€ Collapse/Expand Button Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Collapse/Expand Button Improvements ────────────────────────────────── */
 
 button[aria-label*="menu"] {
   transition: all 0.2s ease;
@@ -308,7 +308,7 @@ button[aria-label*="menu"]:active {
   transform: scale(0.95);
 }
 
-/* â”€â”€â”€ Mobile Header Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Mobile Header Improvements ─────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
   /* Sticky header shadow on scroll */
@@ -336,7 +336,7 @@ button[aria-label*="menu"]:active {
   }
 }
 
-/* â”€â”€â”€ Accessibility Improvements â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Accessibility Improvements ─────────────────────────────────────────── */
 
 /* Focus visible states */
 aside a:focus-visible,
@@ -358,7 +358,7 @@ aside button:focus-visible {
   }
 }
 
-/* â”€â”€â”€ Print Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Print Styles ────────────────────────────────────────────────────────── */
 
 @media print {
   aside,
@@ -374,13 +374,13 @@ aside button:focus-visible {
   }
 }
 
-/* â”€â”€â”€ Dark Mode Support (if needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Dark Mode Support (if needed) ───────────────────────────────────────── */
 
 @media (prefers-color-scheme: dark) {
   /* Add dark mode overrides if needed */
 }
 
-/* â”€â”€â”€ Safe Area Insets (for notched devices) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Safe Area Insets (for notched devices) ─────────────────────────────── */
 
 @supports (padding: max(0px)) {
   @media (max-width: 1023px) {
@@ -401,7 +401,7 @@ aside button:focus-visible {
   }
 }
 
-/* â”€â”€â”€ Smooth Scroll Behavior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Smooth Scroll Behavior ──────────────────────────────────────────────── */
 
 main.min-w-0.flex-1 {
   scroll-behavior: smooth;
@@ -413,26 +413,26 @@ main.min-w-0.flex-1 {
   }
 }
 
-/* â”€â”€â”€ Loading States â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Loading States ──────────────────────────────────────────────────────── */
 
 aside[data-loading="true"] {
   pointer-events: none;
   opacity: 0.6;
 }
 
-/* â”€â”€â”€ Better Touch Targets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Better Touch Targets ────────────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
   /* Ensure all interactive elements are at least 44x44px */
   nav.grid.gap-1 a,
   button,
-  a[title="ÄÄƒng xuáº¥t"] {
+  a[title="Đăng xuất"] {
     min-height: 44px;
     min-width: 44px;
   }
 }
 
-/* â”€â”€â”€ Overflow Handling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Overflow Handling ───────────────────────────────────────────────────── */
 
 /* Prevent content from overflowing sidebar */
 aside nav.grid.gap-1 a span {
@@ -441,7 +441,7 @@ aside nav.grid.gap-1 a span {
   white-space: nowrap;
 }
 
-/* â”€â”€â”€ Animation for Menu Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ─── Animation for Menu Toggle ───────────────────────────────────────────── */
 
 @media (max-width: 1023px) {
   aside[data-open="true"] {

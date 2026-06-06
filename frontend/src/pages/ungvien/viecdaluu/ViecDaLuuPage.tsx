@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Briefcase, Trash2 } from 'lucide-react'
+﻿import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Briefcase, Search, Trash2 } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatMoney } from '../../../lib/format'
+import { toast } from '../../../lib/toast'
 import { EmptyState, ErrorState, Page, Panel } from '../shared/UngVienAtoms'
 
 type SavedJob = {
@@ -28,6 +31,7 @@ export default function ViecDaLuuPage() {
   const [items, setItems] = useState<SavedJob[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [error, setError] = useState('')
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const load = useCallback(async () => {
     setDangTai(true)
@@ -49,17 +53,40 @@ export default function ViecDaLuuPage() {
 
   useEffect(() => { void load() }, [load])
 
-  const boLuu = async (maTinTuyenDung: string) => {
-    try {
-      await apiCoXacThuc(`/viec-lam-da-luu/${maTinTuyenDung}`, { method: 'DELETE' })
-      setItems(prev => prev.filter(item => item.maTinTuyenDung !== maTinTuyenDung))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không bỏ lưu được việc làm')
-    }
+  const boLuu = async (item: SavedJob) => {
+    confirm(
+      'Bỏ lưu việc làm',
+      `Bỏ lưu tin "${item.tinTuyenDung?.tieuDe ?? 'này'}"?`,
+      async () => {
+        try {
+          await apiCoXacThuc(`/viec-lam-da-luu/${item.maTinTuyenDung}`, { method: 'DELETE' })
+          setItems(prev => prev.filter(saved => saved.maTinTuyenDung !== item.maTinTuyenDung))
+          toast.success('Đã bỏ lưu việc làm.')
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Không bỏ lưu được việc làm'
+          setError(message)
+          toast.error(message)
+        }
+      },
+      'warning',
+      'Bỏ lưu',
+    )
   }
 
   return (
-    <Page title="Việc làm đã lưu" desc="Những tin tuyển dụng bạn đã đánh dấu để xem lại và ứng tuyển sau.">
+    <Page
+      title="Việc làm đã lưu"
+      desc="Những tin tuyển dụng bạn đã đánh dấu để xem lại và ứng tuyển sau."
+      action={
+        <Link
+          to="/viec-lam"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0e4d7d] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#08395f]"
+        >
+          <Search size={16} />
+          Tìm thêm việc làm
+        </Link>
+      }
+    >
       <ErrorState message={error} />
       <Panel>
         {dangTai ? (
@@ -87,7 +114,7 @@ export default function ViecDaLuuPage() {
                     <Button variant="primary" icon={<Briefcase size={16} />} disabled={!job} onClick={() => { if (job) window.location.href = `/viec-lam/${job.id}` }}>
                       Xem việc
                     </Button>
-                    <Button variant="danger" icon={<Trash2 size={16} />} onClick={() => void boLuu(item.maTinTuyenDung)}>
+                    <Button variant="danger" icon={<Trash2 size={16} />} onClick={() => void boLuu(item)}>
                       Bỏ lưu
                     </Button>
                   </div>
@@ -96,9 +123,21 @@ export default function ViecDaLuuPage() {
             })}
           </div>
         ) : (
-          <EmptyState>Bạn chưa lưu việc làm nào. Khi thấy tin phù hợp, nhấn biểu tượng lưu để quay lại sau.</EmptyState>
+          <EmptyState>
+            <div className="mx-auto grid max-w-md justify-items-center gap-3">
+              <p>Bạn chưa lưu việc làm nào. Khi thấy tin phù hợp, nhấn biểu tượng lưu để quay lại sau.</p>
+              <Link
+                to="/viec-lam"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#0e4d7d] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#08395f]"
+              >
+                <Search size={16} />
+                Tìm thêm việc làm
+              </Link>
+            </div>
+          </EmptyState>
         )}
       </Panel>
+      <ConfirmDialogComponent />
     </Page>
   )
 }

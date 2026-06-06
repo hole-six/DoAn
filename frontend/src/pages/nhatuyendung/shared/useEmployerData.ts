@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { apiCoXacThuc, layNguoiDung } from '../../../lib/auth'
+import { refId } from '../../../lib/employerGate'
 import type { HoSoUngTuyen, KyNang, LichPhongVan, NhaTuyenDung, ThongBao, TinTuyenDung } from '../../../types/recruitment'
 
 type EmployerState = {
@@ -23,13 +24,6 @@ const initialState: EmployerState = {
   interviews: [],
   notifications: [],
   skills: [],
-}
-
-function refId(value: unknown) {
-  if (!value) return ''
-  if (typeof value === 'string') return value
-  const item = value as { id?: string; _id?: string }
-  return String(item.id ?? item._id ?? '')
 }
 
 export function useEmployerData() {

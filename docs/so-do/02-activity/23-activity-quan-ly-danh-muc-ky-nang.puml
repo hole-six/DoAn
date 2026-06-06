@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý danh mục kỹ năng
+
+start
+:Quản trị viên mở trang danh mục kỹ năng;
+:Hệ thống tải danh sách kỹ năng;
+fork
+  :Tìm kiếm kỹ năng;
+fork again
+  :Lọc theo nhóm kỹ năng;
+fork again
+  :Lọc theo trạng thái;
+end fork
+if (Chọn thêm kỹ năng?) then (Có)
+  :Nhập thông tin kỹ năng mới;
+else (Khóa hoặc mở khóa)
+  if (Chọn sửa kỹ năng?) then (Có)
+    :Cập nhật tên, nhóm hoặc mô tả kỹ năng;
+  else (Không)
+    :Chọn trạng thái kỹ năng;
+  endif
+endif
+:Hệ thống kiểm tra dữ liệu kỹ năng;
+if (Dữ liệu hợp lệ?) then (Có)
+  :Hệ thống lưu danh mục kỹ năng;
+  :Thông báo xử lý thành công;
+  stop
+else (Không)
+  :Thông báo lỗi dữ liệu kỹ năng;
+  stop
+endif
+@enduml

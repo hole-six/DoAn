@@ -1,0 +1,61 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Đăng ký tài khoản
+
+start
+:Khách vãng lai truy cập hệ thống;
+:Nhấn nút "Đăng ký";
+if (Chọn vai trò đăng ký?) then (Ứng viên)
+  fork
+    :Nhập họ tên;
+  fork again
+    :Nhập email;
+  fork again
+    :Nhập số điện thoại;
+  fork again
+    :Nhập mật khẩu;
+  fork again
+    :Nhập xác nhận mật khẩu;
+  end fork
+else (Nhà tuyển dụng)
+  fork
+    :Nhập họ tên người phụ trách;
+  fork again
+    :Nhập email;
+  fork again
+    :Nhập số điện thoại;
+  fork again
+    :Nhập mật khẩu;
+  fork again
+    :Nhập tên công ty;
+  end fork
+endif
+:Nhấn nút "Đăng ký";
+:Hệ thống kiểm tra dữ liệu đăng ký;
+if (Dữ liệu hợp lệ?) then (Có)
+  :Hệ thống tạo tài khoản người dùng;
+  if (Vai trò là nhà tuyển dụng?) then (Có)
+    :Hệ thống tạo hồ sơ công ty chờ duyệt;
+  else (Không)
+    :Hệ thống tạo hồ sơ ứng viên ban đầu;
+  endif
+  :Hệ thống thông báo đăng ký thành công;
+  stop
+else (Không)
+  :Hệ thống hiển thị thông báo lỗi;
+  :Người dùng nhập lại thông tin;
+  stop
+endif
+@enduml

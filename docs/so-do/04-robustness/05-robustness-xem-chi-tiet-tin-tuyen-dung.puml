@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Xem chi tiết tin tuyển dụng"
+
+actor "Actor: Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "UI: chi-tiet-viec-lam" as UI
+boundary "UI: khung-thao-tac-viec-lam" as Form
+control "Controller: TinTuyenDungController" as Controller
+entity "Entity: TinTuyenDung" as MainEntity
+entity "Entity: NhaTuyenDung" as E1
+entity "Entity: KyNang" as E2
+entity "Entity: ReviewCongTy" as E3
+
+Actor --> UI : Mở một tin tuyển dụng
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Xem mô tả, yêu cầu và quyền lợi
+Form --> Controller : layChiTietTin(maTin)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra tin có tồn tại và được phép hiển thị\nLấy chi tiết tin tuyển dụng
+Controller <--> E1 : Lấy thông tin công ty và kỹ năng
+Controller --> Form : Hiển thị chi tiết tin / Thông báo tin không tồn tại hoặc đã đóng
+Controller --> UI : trả dữ liệu mới
+@enduml

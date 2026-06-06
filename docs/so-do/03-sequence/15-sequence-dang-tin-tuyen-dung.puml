@@ -1,0 +1,61 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Đăng tin tuyển dụng
+
+actor "Actor: Nhà tuyển dụng" as Actor
+boundary "UI: quan-ly-tin" as UI
+boundary "UI: form-dang-tin" as Form
+control "Controller: TinTuyenDungController" as Controller
+entity "Entity: TinTuyenDung" as MainEntity
+entity "Entity: NhaTuyenDung" as E1
+entity "Entity: KyNang" as E2
+entity "Entity: ThongBao" as E3
+
+Actor -> UI : 1. Nhấn Đăng tin tuyển dụng
+activate UI
+UI -> Form : 2. Hiển thị form-dang-tin
+activate Form
+Actor -> Form : 3. Nhập tiêu đề, mô tả, kỹ năng, lương và hạn nộp
+Form -> Controller : 4. taoTinTuyenDung(request)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra công ty đã duyệt và dữ liệu tin
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Tạo tin tuyển dụng chờ duyệt
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Lưu kỹ năng và gửi thông báo cho admin
+  Controller --> Form : 10. Thông báo tin đã gửi duyệt
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo công ty chưa được duyệt hoặc dữ liệu lỗi
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+end
+deactivate Controller
+deactivate Form
+deactivate UI
+@enduml

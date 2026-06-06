@@ -2,306 +2,402 @@
 
 ## 1. Giới Thiệu
 
-EffortIT là hệ thống tuyển dụng IT tập trung cho thị trường Đà Nẵng. Hệ thống hỗ trợ khách vãng lai tìm kiếm việc làm và công ty, ứng viên quản lý CV và ứng tuyển, nhà tuyển dụng quản lý hồ sơ công ty và tin tuyển dụng, quản trị viên duyệt dữ liệu, đồng thời tích hợp chat realtime, thông báo và trợ lý AI Gemini.
+EffortIT là website tuyển dụng ngành công nghệ thông tin tại Thành phố Đà Nẵng. Hệ thống hỗ trợ khách vãng lai tìm kiếm việc làm, ứng viên quản lý hồ sơ năng lực và ứng tuyển, nhà tuyển dụng quản lý công ty/tin tuyển dụng/hồ sơ ứng viên, đồng thời cho phép quản trị viên kiểm duyệt dữ liệu quan trọng trước khi công khai.
 
-## 2. Tác Nhân
+## 2.2. Phân Tích Thiết Kế Hệ Thống
 
-| Actor | Vai trò |
-|---|---|
-| Khách vãng lai | Xem trang chủ, tìm việc làm, xem công ty, đăng ký hoặc đăng nhập. |
-| Ứng viên | Tạo CV/hồ sơ năng lực, lưu việc, ứng tuyển, nhận lịch phỏng vấn, chat và nhận thông báo. |
-| Nhà tuyển dụng | Cập nhật hồ sơ công ty, đăng tin, quản lý ứng viên, mời phỏng vấn, chat và nhận thông báo duyệt. |
-| Quản trị viên | Quản lý người dùng, duyệt công ty, duyệt tin tuyển dụng, duyệt đánh giá và theo dõi thông báo cần xử lý. |
-| Gemini API | Phân tích câu hỏi, hỗ trợ gợi ý việc làm, CV và phỏng vấn; fallback bằng dữ liệu nội bộ khi cần. |
-| Hệ thống Email SMTP | Gửi email đặt lại mật khẩu và email/thông báo nghiệp vụ. |
-| MongoDB | Lưu trữ người dùng, CV, công ty, tin tuyển dụng, ứng tuyển, lịch phỏng vấn, chat và thông báo. |
-| Socket.IO | Truyền tin nhắn và sự kiện realtime giữa các vai trò. |
+Phần này trình bày actor, usecase chính, kịch bản nghiệp vụ và mối liên hệ giữa các loại sơ đồ. Danh sách usecase dưới đây là nguồn chuẩn để xây dựng usecase diagram, activity diagram, robustness diagram, sequence diagram và ERD.
 
-## 3. Nhóm Use-Case
+### 2.2.1. Liệt Kê Actor Và Usecase
 
-### 3.1 Khách Vãng Lai
+#### 2.2.1.1. Khách vãng lai
 
-- Xem trang chủ.
-- Tìm kiếm và lọc việc làm.
-- Xem chi tiết việc làm.
-- Xem danh sách và hồ sơ công ty.
-- Đăng ký tài khoản ứng viên.
-- Đăng ký tài khoản nhà tuyển dụng.
-- Đăng nhập bằng email/mật khẩu hoặc Google.
+- Tìm kiếm việc làm.
+- Xem chi tiết tin tuyển dụng.
+- Xem chi tiết công ty.
+- Đăng ký tài khoản.
+- Đăng nhập.
 - Quên mật khẩu.
-- Hỏi trợ lý AI trong phạm vi tuyển dụng IT.
 
-### 3.2 Ứng Viên
+#### 2.2.1.2. Ứng viên
 
-- Quản lý hồ sơ cá nhân và CV.
-- Upload CV PDF và trích xuất nội dung.
+- Đăng nhập.
+- Cập nhật thông tin tài khoản.
+- Quản lý hồ sơ năng lực.
 - Lưu việc làm.
-- Ứng tuyển bằng hồ sơ năng lực.
-- Theo dõi trạng thái hồ sơ ứng tuyển.
-- Phản hồi lịch phỏng vấn.
-- Chat với nhà tuyển dụng khi hồ sơ ở trạng thái phù hợp.
-- Nhận và lọc thông báo.
+- Ứng tuyển tin tuyển dụng.
+- Theo dõi trạng thái ứng tuyển.
+- Quản lý lịch phỏng vấn.
+- Đánh giá công ty.
 
-### 3.3 Nhà Tuyển Dụng
+#### 2.2.1.3. Nhà tuyển dụng
 
+- Đăng nhập.
+- Cập nhật thông tin tài khoản.
 - Cập nhật hồ sơ công ty.
-- Chờ quản trị viên duyệt công ty.
-- Đăng tin tuyển dụng khi công ty đã được duyệt.
-- Theo dõi trạng thái duyệt tin.
+- Đăng tin tuyển dụng.
+- Quản lý tin tuyển dụng.
 - Quản lý hồ sơ ứng viên.
-- Mời phỏng vấn và cập nhật kết quả phỏng vấn.
-- Chat với ứng viên theo ngữ cảnh hồ sơ ứng tuyển.
-- Nhận thông báo duyệt/từ chối.
+- Mời ứng viên phỏng vấn.
+- Cập nhật kết quả phỏng vấn.
 
-### 3.4 Quản Trị Viên
+#### 2.2.1.4. Quản trị viên
 
-- Quản lý tài khoản người dùng.
-- Duyệt công ty.
+- Quản lý người dùng.
+- Duyệt hồ sơ công ty.
 - Duyệt tin tuyển dụng.
+- Quản lý danh mục kỹ năng.
 - Duyệt đánh giá công ty.
-- Quản lý kỹ năng/danh mục.
-- Nhận thông báo các mục cần duyệt.
-- Theo dõi chat và dữ liệu hệ thống.
+- Xem thống kê hệ thống.
 
-## 4. Mô Tả Sơ Đồ Use-Case Tổng Quan
+### 2.2.2. Mô Tả Sơ Đồ Usecase Tổng Quan
 
-Hình 1.1 mô tả ranh giới hệ thống EffortIT và các nhóm chức năng chính. Khách vãng lai có thể xem dữ liệu công khai và tạo tài khoản. Sau đăng nhập, ứng viên thao tác với CV và hồ sơ ứng tuyển; nhà tuyển dụng thao tác với công ty, tin tuyển dụng và ứng viên; quản trị viên duyệt các dữ liệu nhạy cảm trước khi công khai. Các dịch vụ ngoài như Gemini API, SMTP và Socket.IO được biểu diễn như tác nhân hỗ trợ.
+Sơ đồ usecase tổng quan mô tả ranh giới hệ thống EffortIT và các chức năng nghiệp vụ chính theo từng actor. Khách vãng lai thao tác với dữ liệu công khai và xác thực tài khoản. Ứng viên quản lý hồ sơ năng lực, lưu việc, ứng tuyển, theo dõi tiến trình và đánh giá công ty. Nhà tuyển dụng quản lý hồ sơ công ty, tin tuyển dụng, hồ sơ ứng viên và lịch phỏng vấn. Quản trị viên chịu trách nhiệm kiểm duyệt, quản trị dữ liệu nền và theo dõi thống kê.
 
-## 5. Scenario Use-Case Chính
+Các chức năng phụ như chat realtime, AI, deployment và component kỹ thuật không được đưa vào usecase lõi của báo cáo này để tránh làm loãng phạm vi phân tích nghiệp vụ.
 
-### 5.1 Đăng Ký Ứng Viên
+### 2.2.3. Scenario Usecase Chính
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Đăng ký ứng viên |
-| Description | Người dùng tạo tài khoản ứng viên bằng thông tin tối thiểu. |
-| Actors | Khách vãng lai, MongoDB |
-| Input | Họ tên, email, số điện thoại, mật khẩu, xác nhận mật khẩu. |
-| Output | Tài khoản ứng viên và hồ sơ ứng viên trống được tạo. |
-| Basic flow | 1. Người dùng mở form đăng ký. <br> 2. Chọn vai trò ứng viên. <br> 3. Nhập thông tin bắt buộc. <br> 4. Hệ thống kiểm tra email, mật khẩu và số điện thoại. <br> 5. Hệ thống hash mật khẩu, tạo `NguoiDung` và `UngVien`. <br> 6. Người dùng được chuyển đến đăng nhập hoặc dashboard. |
-| Alternative flow | Nếu email đã tồn tại, hệ thống gợi ý đăng nhập hoặc quên mật khẩu. |
-| Exception flow | Nếu database lỗi, hệ thống trả thông báo tạo tài khoản thất bại và ghi log. |
+#### Bảng 2.1: Scenario Usecase "Đăng ký tài khoản"
 
-### 5.2 Đăng Ký Nhà Tuyển Dụng
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Đăng ký tài khoản |
+| 2 | Description | Khách vãng lai tạo tài khoản ứng viên hoặc nhà tuyển dụng để sử dụng hệ thống. |
+| 3 | Actors | Khách vãng lai. |
+| 4 | Input | Họ tên, email, số điện thoại, mật khẩu, vai trò; nhà tuyển dụng nhập thêm tên công ty. |
+| 5 | Output | Tài khoản được tạo; ứng viên có hồ sơ ban đầu, nhà tuyển dụng có hồ sơ công ty chờ duyệt. |
+| 6 | Basic flow | 1. Actor mở giao diện đăng ký. <br> 2. Actor chọn vai trò. <br> 3. Actor nhập thông tin bắt buộc. <br> 4. Hệ thống kiểm tra dữ liệu. <br> 5. Hệ thống tạo tài khoản và hồ sơ tương ứng. <br> 6. Hệ thống thông báo đăng ký thành công. |
+| 7 | Alternative flow | Nếu actor chọn nhà tuyển dụng, hệ thống tạo hồ sơ công ty ở trạng thái chờ duyệt. |
+| 8 | Exception flow | Email đã tồn tại, thiếu thông tin hoặc mật khẩu không hợp lệ thì hệ thống thông báo lỗi. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Đăng ký nhà tuyển dụng |
-| Description | Người phụ trách tạo tài khoản nhà tuyển dụng và công ty ở trạng thái chờ duyệt. |
-| Actors | Khách vãng lai, MongoDB, Quản trị viên |
-| Input | Họ tên người phụ trách, email, số điện thoại, mật khẩu, tên công ty. |
-| Output | Tài khoản nhà tuyển dụng và hồ sơ công ty `cho_duyet`. |
-| Basic flow | 1. Người dùng chọn vai trò nhà tuyển dụng. <br> 2. Nhập thông tin tối thiểu. <br> 3. Hệ thống kiểm tra dữ liệu và email trùng. <br> 4. Tạo `NguoiDung` và `NhaTuyenDung`. <br> 5. Gửi thông báo cho quản trị viên về công ty cần duyệt. |
-| Alternative flow | Nếu thiếu tên công ty, hệ thống yêu cầu bổ sung trước khi gửi. |
-| Exception flow | Nếu lỗi lưu công ty, hệ thống rollback hoặc thông báo đăng ký chưa hoàn tất. |
+#### Bảng 2.2: Scenario Usecase "Đăng nhập"
 
-### 5.3 Đăng Nhập JWT
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Đăng nhập |
+| 2 | Description | Người dùng đã có tài khoản đăng nhập để truy cập chức năng theo vai trò. |
+| 3 | Actors | Khách vãng lai, ứng viên, nhà tuyển dụng, quản trị viên. |
+| 4 | Input | Email và mật khẩu. |
+| 5 | Output | Phiên đăng nhập và giao diện phù hợp với vai trò. |
+| 6 | Basic flow | 1. Actor mở trang đăng nhập. <br> 2. Actor nhập email, mật khẩu. <br> 3. Hệ thống kiểm tra tài khoản. <br> 4. Hệ thống xác định vai trò. <br> 5. Hệ thống chuyển actor đến giao diện tương ứng. |
+| 7 | Alternative flow | Actor có thể quay lại trang chủ hoặc chuyển sang quên mật khẩu. |
+| 8 | Exception flow | Sai thông tin, tài khoản bị khóa hoặc không hoạt động thì hệ thống từ chối đăng nhập. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Đăng nhập JWT |
-| Description | Người dùng đăng nhập bằng email và mật khẩu để nhận access token và refresh token. |
-| Actors | Ứng viên, Nhà tuyển dụng, Quản trị viên, MongoDB |
-| Input | Email, mật khẩu. |
-| Output | JWT, refresh token, thông tin người dùng và vai trò. |
-| Basic flow | 1. Người dùng nhập email/mật khẩu. <br> 2. Backend tìm người dùng theo email. <br> 3. So sánh mật khẩu với hash. <br> 4. Kiểm tra trạng thái tài khoản. <br> 5. Phát token và trả dữ liệu hồ sơ tương ứng vai trò. |
-| Alternative flow | Nếu người dùng là nhà tuyển dụng chưa duyệt, vẫn đăng nhập nhưng bị hạn chế đăng tin. |
-| Exception flow | Sai mật khẩu, tài khoản bị khóa hoặc token không tạo được. |
+#### Bảng 2.3: Scenario Usecase "Quên mật khẩu"
 
-### 5.4 Google Login
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quên mật khẩu |
+| 2 | Description | Người dùng yêu cầu liên kết đặt lại mật khẩu qua email. |
+| 3 | Actors | Khách vãng lai, ứng viên, nhà tuyển dụng, quản trị viên. |
+| 4 | Input | Email tài khoản, mã đặt lại mật khẩu, mật khẩu mới. |
+| 5 | Output | Email đặt lại mật khẩu được gửi và mật khẩu mới được cập nhật nếu mã hợp lệ. |
+| 6 | Basic flow | 1. Actor nhập email. <br> 2. Hệ thống tạo mã đặt lại mật khẩu. <br> 3. Hệ thống gửi email reset. <br> 4. Actor mở liên kết và nhập mật khẩu mới. <br> 5. Hệ thống kiểm tra mã. <br> 6. Hệ thống cập nhật mật khẩu. |
+| 7 | Alternative flow | Nếu email không tồn tại, hệ thống trả thông báo trung tính để tránh lộ tài khoản. |
+| 8 | Exception flow | Mã hết hạn, sai mã hoặc mật khẩu mới không hợp lệ thì hệ thống từ chối cập nhật. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Google Login |
-| Description | Người dùng đăng nhập bằng Google OAuth/Google Identity. |
-| Actors | Khách vãng lai, Google, MongoDB |
-| Input | Google credential token hoặc callback code. |
-| Output | Tài khoản liên kết Google và JWT của hệ thống. |
-| Basic flow | 1. Người dùng bấm đăng nhập Google. <br> 2. Frontend nhận credential từ Google. <br> 3. Backend xác thực `GOOGLE_CLIENT_ID`. <br> 4. Tìm hoặc tạo `NguoiDung`. <br> 5. Trả JWT và thông tin vai trò. |
-| Alternative flow | Nếu tài khoản chưa có vai trò đầy đủ, hệ thống yêu cầu hoàn thiện thông tin. |
-| Exception flow | Client ID sai, token hết hạn hoặc Google không phản hồi. |
+#### Bảng 2.4: Scenario Usecase "Tìm kiếm việc làm"
 
-### 5.5 Quên Mật Khẩu Bằng Email Token
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Tìm kiếm việc làm |
+| 2 | Description | Người dùng tìm các tin tuyển dụng IT đang công khai. |
+| 3 | Actors | Khách vãng lai, ứng viên. |
+| 4 | Input | Từ khóa, kỹ năng, cấp bậc, hình thức làm việc, mức lương. |
+| 5 | Output | Danh sách tin tuyển dụng đã duyệt, còn mở và phù hợp điều kiện tìm kiếm. |
+| 6 | Basic flow | 1. Actor mở trang việc làm. <br> 2. Actor nhập từ khóa hoặc bộ lọc. <br> 3. Hệ thống lọc tin hợp lệ. <br> 4. Hệ thống phân trang kết quả. <br> 5. Actor xem danh sách việc làm. |
+| 7 | Alternative flow | Actor thay đổi bộ lọc để hệ thống cập nhật kết quả. |
+| 8 | Exception flow | Không có kết quả hoặc lỗi tải dữ liệu thì hệ thống hiển thị thông báo phù hợp. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Quên mật khẩu |
-| Description | Người dùng yêu cầu link đặt lại mật khẩu qua email. |
-| Actors | Khách vãng lai, Hệ thống Email SMTP, MongoDB |
-| Input | Email tài khoản, mật khẩu mới, token reset. |
-| Output | Email reset và mật khẩu mới được cập nhật. |
-| Basic flow | 1. Người dùng nhập email. <br> 2. Hệ thống kiểm tra email. <br> 3. Tạo token ngẫu nhiên, lưu hash và hạn dùng 30 phút. <br> 4. Gửi email chứa link đặt lại mật khẩu. <br> 5. Người dùng mở link, nhập mật khẩu mới. <br> 6. Hệ thống kiểm tra token, cập nhật mật khẩu và xóa token. |
-| Alternative flow | Nếu email không tồn tại, hệ thống trả thông báo trung tính để tránh lộ tài khoản. |
-| Exception flow | Token hết hạn, token đã dùng, SMTP lỗi hoặc mật khẩu mới không hợp lệ. |
+#### Bảng 2.5: Scenario Usecase "Xem chi tiết tin tuyển dụng"
 
-### 5.6 Tìm Kiếm Và Lọc Việc Làm
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Xem chi tiết tin tuyển dụng |
+| 2 | Description | Người dùng xem đầy đủ thông tin của một tin tuyển dụng. |
+| 3 | Actors | Khách vãng lai, ứng viên. |
+| 4 | Input | Tin tuyển dụng được chọn. |
+| 5 | Output | Mô tả công việc, yêu cầu, quyền lợi, mức lương, công ty và hạn nộp. |
+| 6 | Basic flow | 1. Actor chọn tin tuyển dụng. <br> 2. Hệ thống kiểm tra tin có được công khai hay không. <br> 3. Hệ thống tải thông tin tin và công ty. <br> 4. Hệ thống hiển thị chi tiết. |
+| 7 | Alternative flow | Nếu actor là ứng viên đã đăng nhập, hệ thống hiển thị thao tác lưu việc hoặc ứng tuyển. |
+| 8 | Exception flow | Tin không tồn tại, chưa duyệt hoặc đã đóng thì hệ thống thông báo không khả dụng. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Tìm kiếm/lọc việc làm |
-| Description | Người dùng tìm việc theo từ khóa, kỹ năng, cấp bậc, hình thức, mức lương và sắp xếp. |
-| Actors | Khách vãng lai, Ứng viên, MongoDB |
-| Input | Từ khóa, bộ lọc, trang, số lượng mỗi trang. |
-| Output | Danh sách tin tuyển dụng đang mở và đã duyệt. |
-| Basic flow | 1. Người dùng nhập từ khóa hoặc chọn bộ lọc. <br> 2. Frontend gửi query. <br> 3. Backend lọc tin theo trạng thái hợp lệ. <br> 4. Trả danh sách, tổng số bản ghi và phân trang. <br> 5. Frontend hiển thị card việc làm. |
-| Alternative flow | Nếu không có kết quả, hệ thống gợi ý bỏ lọc hoặc hỏi AI. |
-| Exception flow | Query không hợp lệ hoặc backend lỗi trả danh sách rỗng kèm thông báo. |
+#### Bảng 2.6: Scenario Usecase "Xem chi tiết công ty"
 
-### 5.7 Quản Lý CV/Hồ Sơ Năng Lực
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Xem chi tiết công ty |
+| 2 | Description | Người dùng xem hồ sơ chi tiết của công ty tuyển dụng. |
+| 3 | Actors | Khách vãng lai, ứng viên. |
+| 4 | Input | Công ty được chọn. |
+| 5 | Output | Thông tin công ty, mô tả, quy mô, địa chỉ, tin đang tuyển và đánh giá đã duyệt. |
+| 6 | Basic flow | 1. Actor chọn công ty. <br> 2. Hệ thống kiểm tra công ty đã được duyệt. <br> 3. Hệ thống tải hồ sơ công ty, tin đang tuyển và đánh giá. <br> 4. Actor xem chi tiết công ty. |
+| 7 | Alternative flow | Actor chọn một tin tuyển dụng của công ty để chuyển sang trang chi tiết tin. |
+| 8 | Exception flow | Công ty không tồn tại hoặc chưa được duyệt thì hệ thống không hiển thị công khai. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Quản lý CV/hồ sơ năng lực |
-| Description | Ứng viên tạo, chỉnh sửa, upload và đặt CV chính. |
-| Actors | Ứng viên, MongoDB, AI/CV Parser |
-| Input | File CV, thông tin cá nhân, kỹ năng, kinh nghiệm, dự án. |
-| Output | Hồ sơ năng lực có thể dùng để ứng tuyển. |
-| Basic flow | 1. Ứng viên mở trang hồ sơ. <br> 2. Upload CV hoặc nhập thủ công. <br> 3. Hệ thống lưu file/text CV. <br> 4. Ứng viên bổ sung kỹ năng, kinh nghiệm, dự án. <br> 5. Đặt CV chính và trạng thái công khai nếu cần. |
-| Alternative flow | Nếu upload CV thành công, hệ thống có thể trích xuất nội dung để điền gợi ý. |
-| Exception flow | File quá lớn, sai định dạng hoặc lỗi lưu file. |
+#### Bảng 2.7: Scenario Usecase "Cập nhật thông tin tài khoản"
 
-### 5.8 Ứng Tuyển
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Cập nhật thông tin tài khoản |
+| 2 | Description | Người dùng đã đăng nhập cập nhật thông tin cá nhân cơ bản. |
+| 3 | Actors | Ứng viên, nhà tuyển dụng. |
+| 4 | Input | Họ tên, số điện thoại và thông tin liên hệ được phép chỉnh sửa. |
+| 5 | Output | Thông tin tài khoản được cập nhật. |
+| 6 | Basic flow | 1. Actor mở trang tài khoản. <br> 2. Actor chỉnh sửa thông tin. <br> 3. Hệ thống kiểm tra dữ liệu. <br> 4. Hệ thống lưu thay đổi. <br> 5. Hệ thống thông báo thành công. |
+| 7 | Alternative flow | Actor hủy thao tác, hệ thống giữ nguyên dữ liệu cũ. |
+| 8 | Exception flow | Dữ liệu không hợp lệ thì hệ thống thông báo lỗi. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Ứng tuyển |
-| Description | Ứng viên nộp hồ sơ vào một tin tuyển dụng đang mở. |
-| Actors | Ứng viên, Nhà tuyển dụng, MongoDB, Hệ thống thông báo |
-| Input | Mã tin tuyển dụng, mã hồ sơ năng lực, ghi chú ứng tuyển. |
-| Output | Hồ sơ ứng tuyển ở trạng thái mới nộp/chờ xét duyệt. |
-| Basic flow | 1. Ứng viên mở chi tiết việc làm. <br> 2. Bấm ứng tuyển. <br> 3. Chọn CV/hồ sơ năng lực. <br> 4. Hệ thống kiểm tra tin còn mở và chưa ứng tuyển trùng. <br> 5. Tạo `HoSoUngTuyen` và lịch sử trạng thái. <br> 6. Gửi thông báo cho nhà tuyển dụng. |
-| Alternative flow | Nếu chưa có CV, hệ thống chuyển sang trang tạo hồ sơ. |
-| Exception flow | Tin đã đóng, đã ứng tuyển trước đó hoặc hồ sơ không hợp lệ. |
+#### Bảng 2.8: Scenario Usecase "Quản lý hồ sơ năng lực"
 
-### 5.9 Cập Nhật Hồ Sơ Công Ty
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý hồ sơ năng lực |
+| 2 | Description | Ứng viên tạo, cập nhật, upload và quản lý hồ sơ năng lực/CV. |
+| 3 | Actors | Ứng viên. |
+| 4 | Input | Thông tin cá nhân, kỹ năng, kinh nghiệm, dự án, học vấn và file CV nếu có. |
+| 5 | Output | Hồ sơ năng lực được lưu và có thể dùng để ứng tuyển. |
+| 6 | Basic flow | 1. Ứng viên mở trang hồ sơ. <br> 2. Ứng viên nhập hoặc upload thông tin. <br> 3. Hệ thống kiểm tra dữ liệu/file. <br> 4. Hệ thống lưu hồ sơ. <br> 5. Hệ thống hiển thị bản xem trước. |
+| 7 | Alternative flow | Ứng viên đặt một hồ sơ làm CV chính. |
+| 8 | Exception flow | File sai định dạng, quá lớn hoặc dữ liệu thiếu thì hệ thống báo lỗi. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Nhà tuyển dụng cập nhật hồ sơ công ty |
-| Description | Nhà tuyển dụng bổ sung logo, website, ngành, quy mô, địa chỉ và mô tả công ty. |
-| Actors | Nhà tuyển dụng, Quản trị viên, MongoDB |
-| Input | Thông tin công ty và tài liệu/ảnh liên quan. |
-| Output | Hồ sơ công ty được cập nhật và có thể chuyển về trạng thái chờ duyệt. |
-| Basic flow | 1. Nhà tuyển dụng mở trang công ty. <br> 2. Cập nhật dữ liệu. <br> 3. Hệ thống validate. <br> 4. Lưu thay đổi. <br> 5. Nếu cần duyệt lại, tạo thông báo cho quản trị viên. |
-| Alternative flow | Nếu công ty đã duyệt và chỉ đổi thông tin phụ, hệ thống có thể giữ trạng thái cũ theo chính sách. |
-| Exception flow | Logo sai định dạng, dữ liệu thiếu hoặc lỗi lưu MongoDB. |
+#### Bảng 2.9: Scenario Usecase "Lưu việc làm"
 
-### 5.10 Đăng Tin Tuyển Dụng
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Lưu việc làm |
+| 2 | Description | Ứng viên lưu hoặc bỏ lưu một tin tuyển dụng quan tâm. |
+| 3 | Actors | Ứng viên. |
+| 4 | Input | Tin tuyển dụng được chọn. |
+| 5 | Output | Tin được thêm vào hoặc xóa khỏi danh sách việc làm đã lưu. |
+| 6 | Basic flow | 1. Ứng viên chọn tin tuyển dụng. <br> 2. Ứng viên bấm lưu việc. <br> 3. Hệ thống kiểm tra tin. <br> 4. Hệ thống lưu tin vào danh sách quan tâm. |
+| 7 | Alternative flow | Nếu tin đã được lưu, thao tác tiếp theo sẽ bỏ lưu tin. |
+| 8 | Exception flow | Tin không tồn tại hoặc không công khai thì hệ thống từ chối thao tác. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Nhà tuyển dụng đăng tin tuyển dụng |
-| Description | Nhà tuyển dụng đã được duyệt tạo tin mới và gửi quản trị viên kiểm duyệt. |
-| Actors | Nhà tuyển dụng, Quản trị viên, MongoDB, Hệ thống thông báo |
-| Input | Tiêu đề, mô tả, yêu cầu, quyền lợi, lương, hình thức, cấp bậc, kỹ năng, hạn nộp, ảnh đại diện. |
-| Output | Tin tuyển dụng trạng thái chờ duyệt. |
-| Basic flow | 1. Nhà tuyển dụng mở form đăng tin. <br> 2. Hệ thống kiểm tra công ty đã duyệt. <br> 3. Nhà tuyển dụng nhập dữ liệu. <br> 4. Backend validate và lưu tin. <br> 5. Tạo thông báo cho quản trị viên. |
-| Alternative flow | Nếu tin lưu nháp, hệ thống chưa gửi duyệt. |
-| Exception flow | Công ty chưa duyệt, thiếu trường bắt buộc hoặc ảnh upload lỗi. |
+#### Bảng 2.10: Scenario Usecase "Ứng tuyển tin tuyển dụng"
 
-### 5.11 Quản Trị Viên Duyệt Công Ty
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Ứng tuyển tin tuyển dụng |
+| 2 | Description | Ứng viên nộp hồ sơ năng lực vào một tin tuyển dụng đang mở. |
+| 3 | Actors | Ứng viên, nhà tuyển dụng. |
+| 4 | Input | Tin tuyển dụng, hồ sơ năng lực và thư xin việc nếu có. |
+| 5 | Output | Hồ sơ ứng tuyển được tạo và gửi đến nhà tuyển dụng. |
+| 6 | Basic flow | 1. Ứng viên mở chi tiết tin. <br> 2. Ứng viên chọn ứng tuyển. <br> 3. Hệ thống kiểm tra tin và hồ sơ năng lực. <br> 4. Ứng viên gửi hồ sơ. <br> 5. Hệ thống tạo hồ sơ ứng tuyển và lịch sử trạng thái. |
+| 7 | Alternative flow | Nếu ứng viên chưa có hồ sơ năng lực, hệ thống yêu cầu tạo hồ sơ trước. |
+| 8 | Exception flow | Tin đã đóng, chưa duyệt hoặc ứng viên đã ứng tuyển thì hệ thống từ chối. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Duyệt công ty |
-| Description | Quản trị viên xem hồ sơ công ty và quyết định duyệt hoặc từ chối. |
-| Actors | Quản trị viên, Nhà tuyển dụng, MongoDB, Hệ thống thông báo |
-| Input | Mã công ty, quyết định duyệt/từ chối, ghi chú. |
-| Output | Trạng thái duyệt công ty và thông báo cho nhà tuyển dụng. |
-| Basic flow | 1. Admin mở danh sách công ty chờ duyệt. <br> 2. Xem chi tiết hồ sơ. <br> 3. Chọn duyệt hoặc từ chối. <br> 4. Hệ thống cập nhật `trangThaiDuyet`. <br> 5. Gửi thông báo kết quả cho nhà tuyển dụng. |
-| Alternative flow | Admin yêu cầu bổ sung thông tin thay vì từ chối hẳn. |
-| Exception flow | Công ty không tồn tại hoặc trạng thái đã thay đổi bởi phiên khác. |
+#### Bảng 2.11: Scenario Usecase "Theo dõi trạng thái ứng tuyển"
 
-### 5.12 Quản Trị Viên Duyệt Tin Tuyển Dụng
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Theo dõi trạng thái ứng tuyển |
+| 2 | Description | Ứng viên theo dõi tiến trình xử lý các hồ sơ đã nộp. |
+| 3 | Actors | Ứng viên. |
+| 4 | Input | Danh sách hồ sơ ứng tuyển của ứng viên. |
+| 5 | Output | Trạng thái hiện tại và lịch sử xử lý hồ sơ. |
+| 6 | Basic flow | 1. Ứng viên mở trang ứng tuyển. <br> 2. Hệ thống tải danh sách hồ sơ. <br> 3. Ứng viên chọn hồ sơ. <br> 4. Hệ thống hiển thị trạng thái và lịch sử xử lý. |
+| 7 | Alternative flow | Ứng viên lọc hồ sơ theo trạng thái. |
+| 8 | Exception flow | Chưa có hồ sơ ứng tuyển thì hệ thống hiển thị trạng thái trống. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Duyệt tin tuyển dụng |
-| Description | Quản trị viên kiểm duyệt tin tuyển dụng trước khi công khai. |
-| Actors | Quản trị viên, Nhà tuyển dụng, MongoDB, Hệ thống thông báo |
-| Input | Mã tin, quyết định, ghi chú. |
-| Output | Tin được công khai hoặc bị từ chối. |
-| Basic flow | 1. Admin mở tin chờ duyệt. <br> 2. Kiểm tra nội dung, mức lương, kỹ năng, ảnh. <br> 3. Duyệt hoặc từ chối. <br> 4. Backend cập nhật trạng thái. <br> 5. Gửi thông báo cho nhà tuyển dụng. |
-| Alternative flow | Admin chỉnh trạng thái cần bổ sung nếu chính sách yêu cầu. |
-| Exception flow | Tin không thuộc công ty hợp lệ hoặc công ty chưa được duyệt. |
+#### Bảng 2.12: Scenario Usecase "Quản lý lịch phỏng vấn"
 
-### 5.13 Mời Phỏng Vấn
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý lịch phỏng vấn |
+| 2 | Description | Ứng viên xem lịch phỏng vấn và phản hồi khi cần. |
+| 3 | Actors | Ứng viên, nhà tuyển dụng. |
+| 4 | Input | Lịch phỏng vấn liên quan đến hồ sơ ứng tuyển. |
+| 5 | Output | Thông tin lịch, trạng thái xác nhận hoặc yêu cầu đổi lịch. |
+| 6 | Basic flow | 1. Ứng viên mở trang lịch phỏng vấn. <br> 2. Hệ thống tải lịch liên quan. <br> 3. Ứng viên xem thời gian, hình thức và trạng thái. <br> 4. Ứng viên phản hồi nếu cần. |
+| 7 | Alternative flow | Ứng viên chỉ xem lịch và không gửi phản hồi. |
+| 8 | Exception flow | Không có lịch phỏng vấn thì hệ thống hiển thị trạng thái trống. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Mời phỏng vấn |
-| Description | Nhà tuyển dụng tạo lịch phỏng vấn cho hồ sơ ứng tuyển phù hợp. |
-| Actors | Nhà tuyển dụng, Ứng viên, MongoDB, Hệ thống thông báo |
-| Input | Hồ sơ ứng tuyển, thời gian, hình thức, địa chỉ/link họp, ghi chú. |
-| Output | Lịch phỏng vấn và thông báo cho ứng viên. |
-| Basic flow | 1. Nhà tuyển dụng chọn hồ sơ. <br> 2. Bấm mời phỏng vấn. <br> 3. Nhập thời gian và hình thức. <br> 4. Hệ thống tạo `LichPhongVan`. <br> 5. Cập nhật trạng thái hồ sơ và gửi thông báo. |
-| Alternative flow | Ứng viên đề xuất đổi lịch nếu chưa phù hợp. |
-| Exception flow | Thời gian kết thúc trước bắt đầu hoặc hồ sơ không còn hợp lệ. |
+#### Bảng 2.13: Scenario Usecase "Đánh giá công ty"
 
-### 5.14 Cập Nhật Kết Quả Phỏng Vấn
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Đánh giá công ty |
+| 2 | Description | Ứng viên gửi đánh giá về công ty để quản trị viên duyệt trước khi công khai. |
+| 3 | Actors | Ứng viên, quản trị viên. |
+| 4 | Input | Công ty, điểm đánh giá, nội dung nhận xét và tùy chọn ẩn danh. |
+| 5 | Output | Đánh giá được lưu ở trạng thái chờ duyệt. |
+| 6 | Basic flow | 1. Ứng viên mở chi tiết công ty. <br> 2. Ứng viên nhập điểm và nội dung đánh giá. <br> 3. Hệ thống kiểm tra điều kiện đánh giá. <br> 4. Hệ thống lưu đánh giá chờ duyệt. <br> 5. Hệ thống thông báo đánh giá đã được ghi nhận. |
+| 7 | Alternative flow | Ứng viên chỉnh sửa nội dung trước khi gửi. |
+| 8 | Exception flow | Công ty không công khai, nội dung không hợp lệ hoặc ứng viên không đủ điều kiện thì hệ thống từ chối. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Cập nhật kết quả phỏng vấn |
-| Description | Nhà tuyển dụng nhập kết quả đạt/không đạt và ghi chú sau phỏng vấn. |
-| Actors | Nhà tuyển dụng, Ứng viên, MongoDB, Hệ thống thông báo |
-| Input | Mã lịch phỏng vấn, kết quả, ghi chú. |
-| Output | Lịch phỏng vấn và hồ sơ ứng tuyển được cập nhật. |
-| Basic flow | 1. Nhà tuyển dụng mở lịch phỏng vấn. <br> 2. Chọn cập nhật kết quả. <br> 3. Nhập kết quả và ghi chú. <br> 4. Backend cập nhật lịch, hồ sơ và lịch sử. <br> 5. Gửi thông báo cho ứng viên. |
-| Alternative flow | Nếu chưa có kết quả cuối, lưu trạng thái cần bổ sung/đang xét. |
-| Exception flow | Thiếu ghi chú bắt buộc hoặc lịch đã bị hủy. |
+#### Bảng 2.14: Scenario Usecase "Cập nhật hồ sơ công ty"
 
-### 5.15 Chat Realtime
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Cập nhật hồ sơ công ty |
+| 2 | Description | Nhà tuyển dụng cập nhật thông tin công ty để gửi quản trị viên duyệt. |
+| 3 | Actors | Nhà tuyển dụng, quản trị viên. |
+| 4 | Input | Tên công ty, logo, website, ngành nghề, quy mô, địa chỉ và mô tả. |
+| 5 | Output | Hồ sơ công ty được lưu và chuyển trạng thái chờ duyệt nếu cần. |
+| 6 | Basic flow | 1. Nhà tuyển dụng mở trang công ty. <br> 2. Nhà tuyển dụng nhập hoặc chỉnh sửa thông tin. <br> 3. Hệ thống kiểm tra dữ liệu. <br> 4. Hệ thống lưu hồ sơ. <br> 5. Hệ thống cập nhật trạng thái duyệt. |
+| 7 | Alternative flow | Nhà tuyển dụng lưu tạm thông tin để hoàn thiện sau. |
+| 8 | Exception flow | Thiếu dữ liệu bắt buộc hoặc dữ liệu không hợp lệ thì hệ thống yêu cầu bổ sung. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Chat realtime |
-| Description | Ứng viên và nhà tuyển dụng trao đổi theo hồ sơ ứng tuyển; admin có thể nhận hỗ trợ theo nghiệp vụ. |
-| Actors | Ứng viên, Nhà tuyển dụng, Quản trị viên, Socket.IO, MongoDB |
-| Input | Nội dung tin nhắn, mã cuộc trò chuyện, file đính kèm nếu có. |
-| Output | Tin nhắn lưu DB và được phát realtime cho thành viên. |
-| Basic flow | 1. Người dùng mở chat. <br> 2. Backend kiểm tra quyền tham gia cuộc trò chuyện. <br> 3. Người dùng gửi tin nhắn. <br> 4. Tin nhắn được lưu MongoDB. <br> 5. Socket.IO phát sự kiện đến thành viên. <br> 6. Tạo thông báo nếu người nhận đang offline. |
-| Alternative flow | Nếu chưa có cuộc trò chuyện hợp lệ, hệ thống tạo theo hồ sơ ứng tuyển được phép chat. |
-| Exception flow | Người dùng không thuộc cuộc trò chuyện hoặc socket mất kết nối. |
+#### Bảng 2.15: Scenario Usecase "Đăng tin tuyển dụng"
 
-### 5.16 Thông Báo Hệ Thống
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Đăng tin tuyển dụng |
+| 2 | Description | Nhà tuyển dụng đã được duyệt tạo tin mới và gửi quản trị viên kiểm duyệt. |
+| 3 | Actors | Nhà tuyển dụng, quản trị viên. |
+| 4 | Input | Tiêu đề, mô tả, yêu cầu, quyền lợi, lương, kỹ năng, hình thức, cấp bậc và hạn nộp. |
+| 5 | Output | Tin tuyển dụng ở trạng thái chờ duyệt. |
+| 6 | Basic flow | 1. Nhà tuyển dụng mở form đăng tin. <br> 2. Hệ thống kiểm tra công ty đã được duyệt. <br> 3. Nhà tuyển dụng nhập nội dung tin. <br> 4. Hệ thống kiểm tra dữ liệu. <br> 5. Hệ thống lưu tin chờ duyệt. |
+| 7 | Alternative flow | Nhà tuyển dụng lưu nháp để hoàn thiện sau. |
+| 8 | Exception flow | Công ty chưa được duyệt hoặc tin thiếu thông tin thì hệ thống không cho gửi duyệt. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Thông báo hệ thống |
-| Description | Hệ thống tạo, lưu, lọc và đánh dấu đã đọc các thông báo nghiệp vụ. |
-| Actors | Ứng viên, Nhà tuyển dụng, Quản trị viên, MongoDB |
-| Input | Loại thông báo, người nhận, tiêu đề, nội dung, liên kết xử lý. |
-| Output | Thông báo hiển thị trong dashboard đúng vai trò. |
-| Basic flow | 1. Nghiệp vụ phát sinh sự kiện. <br> 2. Backend gọi helper tạo thông báo. <br> 3. Lưu `ThongBao`. <br> 4. Frontend lấy danh sách theo vai trò và bộ lọc. <br> 5. Người dùng mở hoặc đánh dấu đã đọc. |
-| Alternative flow | Nếu có socket, thông báo mới được đẩy realtime. |
-| Exception flow | Người nhận không tồn tại hoặc liên kết xử lý không hợp lệ. |
+#### Bảng 2.16: Scenario Usecase "Quản lý tin tuyển dụng"
 
-### 5.17 Hỏi AI Gemini Và Fallback Database
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý tin tuyển dụng |
+| 2 | Description | Nhà tuyển dụng theo dõi, chỉnh sửa, đóng hoặc mở lại tin đã tạo. |
+| 3 | Actors | Nhà tuyển dụng. |
+| 4 | Input | Danh sách tin tuyển dụng thuộc công ty. |
+| 5 | Output | Tin được cập nhật trạng thái hoặc nội dung. |
+| 6 | Basic flow | 1. Nhà tuyển dụng mở trang quản lý tin. <br> 2. Hệ thống tải danh sách tin. <br> 3. Nhà tuyển dụng chọn tin cần xử lý. <br> 4. Hệ thống lưu thay đổi và cập nhật danh sách. |
+| 7 | Alternative flow | Nhà tuyển dụng lọc tin theo trạng thái để quản lý dễ hơn. |
+| 8 | Exception flow | Tin không thuộc công ty của nhà tuyển dụng thì hệ thống từ chối thao tác. |
 
-| Mục | Nội dung |
-|---|---|
-| Use case name | Hỏi AI Gemini và fallback database |
-| Description | Người dùng hỏi trợ lý AI về tuyển dụng IT, CV, phỏng vấn hoặc gợi ý việc làm. |
-| Actors | Khách vãng lai, Ứng viên, Gemini API, MongoDB |
-| Input | Câu hỏi, ngữ cảnh người dùng nếu đã đăng nhập. |
-| Output | Câu trả lời có kiểm soát phạm vi và danh sách gợi ý nếu có. |
-| Basic flow | 1. Người dùng nhập câu hỏi. <br> 2. Backend kiểm tra phạm vi IT/tuyển dụng. <br> 3. Nếu phù hợp, gọi Gemini API kèm prompt an toàn. <br> 4. Nếu cần dữ liệu việc làm, truy vấn MongoDB. <br> 5. Trả câu trả lời và gợi ý liên quan. |
-| Alternative flow | Nếu Gemini chậm/lỗi, hệ thống fallback bằng dữ liệu việc làm trong database. |
-| Exception flow | Câu hỏi ngoài phạm vi được trả lời lịch sự rằng trợ lý chỉ hỗ trợ tuyển dụng IT. |
+#### Bảng 2.17: Scenario Usecase "Quản lý hồ sơ ứng viên"
 
-## 6. Liên Kết Sơ Đồ Với Scenario
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý hồ sơ ứng viên |
+| 2 | Description | Nhà tuyển dụng xem và xử lý hồ sơ ứng viên ứng tuyển vào tin của công ty. |
+| 3 | Actors | Nhà tuyển dụng, ứng viên. |
+| 4 | Input | Danh sách hồ sơ ứng tuyển, trạng thái xử lý và ghi chú. |
+| 5 | Output | Hồ sơ ứng viên được cập nhật trạng thái trong quy trình tuyển dụng. |
+| 6 | Basic flow | 1. Nhà tuyển dụng mở trang ứng viên. <br> 2. Hệ thống hiển thị danh sách hồ sơ. <br> 3. Nhà tuyển dụng xem chi tiết CV. <br> 4. Nhà tuyển dụng cập nhật trạng thái xử lý. <br> 5. Hệ thống ghi lịch sử thay đổi. |
+| 7 | Alternative flow | Nhà tuyển dụng lọc hồ sơ theo tin tuyển dụng hoặc trạng thái. |
+| 8 | Exception flow | Hồ sơ không thuộc tin của công ty thì hệ thống từ chối truy cập. |
 
-| Nhóm | Sơ đồ đại diện | Nội dung kiểm chứng |
+#### Bảng 2.18: Scenario Usecase "Mời ứng viên phỏng vấn"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Mời ứng viên phỏng vấn |
+| 2 | Description | Nhà tuyển dụng tạo lịch phỏng vấn cho ứng viên phù hợp. |
+| 3 | Actors | Nhà tuyển dụng, ứng viên. |
+| 4 | Input | Hồ sơ ứng tuyển, thời gian, hình thức, địa điểm hoặc link họp. |
+| 5 | Output | Lịch phỏng vấn được tạo và gửi đến ứng viên. |
+| 6 | Basic flow | 1. Nhà tuyển dụng chọn hồ sơ ứng viên. <br> 2. Nhà tuyển dụng nhập thông tin lịch. <br> 3. Hệ thống kiểm tra thời gian và trạng thái hồ sơ. <br> 4. Hệ thống tạo lịch phỏng vấn. <br> 5. Hệ thống cập nhật trạng thái hồ sơ. |
+| 7 | Alternative flow | Nhà tuyển dụng chỉnh sửa lịch trước khi gửi. |
+| 8 | Exception flow | Thời gian không hợp lệ hoặc hồ sơ không đủ điều kiện thì hệ thống không tạo lịch. |
+
+#### Bảng 2.19: Scenario Usecase "Cập nhật kết quả phỏng vấn"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Cập nhật kết quả phỏng vấn |
+| 2 | Description | Nhà tuyển dụng ghi nhận kết quả sau buổi phỏng vấn. |
+| 3 | Actors | Nhà tuyển dụng, ứng viên. |
+| 4 | Input | Lịch phỏng vấn, kết quả đạt/không đạt và ghi chú. |
+| 5 | Output | Kết quả phỏng vấn và trạng thái hồ sơ ứng tuyển được cập nhật. |
+| 6 | Basic flow | 1. Nhà tuyển dụng mở lịch phỏng vấn. <br> 2. Nhà tuyển dụng chọn lịch cần cập nhật. <br> 3. Nhà tuyển dụng nhập kết quả. <br> 4. Hệ thống kiểm tra dữ liệu. <br> 5. Hệ thống cập nhật lịch và hồ sơ ứng tuyển. |
+| 7 | Alternative flow | Nếu chưa có kết quả cuối, nhà tuyển dụng giữ trạng thái đang xử lý. |
+| 8 | Exception flow | Lịch đã hủy hoặc thiếu thông tin kết quả thì hệ thống từ chối cập nhật. |
+
+#### Bảng 2.20: Scenario Usecase "Quản lý người dùng"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý người dùng |
+| 2 | Description | Quản trị viên quản lý tài khoản người dùng trong hệ thống. |
+| 3 | Actors | Quản trị viên. |
+| 4 | Input | Từ khóa, vai trò, trạng thái và thông tin tài khoản cần xử lý. |
+| 5 | Output | Tài khoản được tạo, cập nhật, khóa/mở khóa hoặc xóa nếu hợp lệ. |
+| 6 | Basic flow | 1. Quản trị viên mở trang người dùng. <br> 2. Hệ thống hiển thị danh sách tài khoản. <br> 3. Quản trị viên lọc hoặc chọn tài khoản. <br> 4. Quản trị viên thêm/sửa/xóa/khóa tài khoản. <br> 5. Hệ thống kiểm tra và lưu thay đổi. |
+| 7 | Alternative flow | Quản trị viên tải lại danh sách người dùng mới nhất. |
+| 8 | Exception flow | Email trùng, dữ liệu không hợp lệ hoặc xóa admin cuối cùng thì hệ thống từ chối. |
+
+#### Bảng 2.21: Scenario Usecase "Duyệt hồ sơ công ty"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Duyệt hồ sơ công ty |
+| 2 | Description | Quản trị viên kiểm tra hồ sơ công ty và duyệt hoặc từ chối. |
+| 3 | Actors | Quản trị viên, nhà tuyển dụng. |
+| 4 | Input | Hồ sơ công ty chờ duyệt, quyết định và lý do nếu từ chối. |
+| 5 | Output | Trạng thái duyệt công ty được cập nhật. |
+| 6 | Basic flow | 1. Quản trị viên mở danh sách công ty chờ duyệt. <br> 2. Quản trị viên xem chi tiết hồ sơ. <br> 3. Quản trị viên duyệt hoặc từ chối. <br> 4. Hệ thống cập nhật trạng thái. |
+| 7 | Alternative flow | Quản trị viên yêu cầu nhà tuyển dụng bổ sung thông tin. |
+| 8 | Exception flow | Hồ sơ không tồn tại hoặc đã được xử lý thì hệ thống thông báo trạng thái hiện tại. |
+
+#### Bảng 2.22: Scenario Usecase "Duyệt tin tuyển dụng"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Duyệt tin tuyển dụng |
+| 2 | Description | Quản trị viên kiểm duyệt tin tuyển dụng trước khi công khai. |
+| 3 | Actors | Quản trị viên, nhà tuyển dụng. |
+| 4 | Input | Tin chờ duyệt, quyết định duyệt/từ chối và lý do nếu có. |
+| 5 | Output | Tin được công khai hoặc bị từ chối. |
+| 6 | Basic flow | 1. Quản trị viên mở danh sách tin chờ duyệt. <br> 2. Quản trị viên xem chi tiết tin. <br> 3. Quản trị viên duyệt hoặc từ chối. <br> 4. Hệ thống cập nhật trạng thái tin. |
+| 7 | Alternative flow | Quản trị viên từ chối và nhập lý do để nhà tuyển dụng chỉnh sửa. |
+| 8 | Exception flow | Tin không tồn tại, đã bị xóa hoặc công ty không hợp lệ thì hệ thống từ chối duyệt. |
+
+#### Bảng 2.23: Scenario Usecase "Quản lý danh mục kỹ năng"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Quản lý danh mục kỹ năng |
+| 2 | Description | Quản trị viên quản lý danh mục kỹ năng dùng cho tin tuyển dụng và hồ sơ năng lực. |
+| 3 | Actors | Quản trị viên. |
+| 4 | Input | Tên kỹ năng, nhóm kỹ năng và trạng thái. |
+| 5 | Output | Kỹ năng được thêm mới, cập nhật hoặc khóa. |
+| 6 | Basic flow | 1. Quản trị viên mở trang kỹ năng. <br> 2. Hệ thống hiển thị danh sách kỹ năng. <br> 3. Quản trị viên thêm/sửa/khóa kỹ năng. <br> 4. Hệ thống kiểm tra dữ liệu. <br> 5. Hệ thống lưu kỹ năng. |
+| 7 | Alternative flow | Quản trị viên khóa kỹ năng không còn sử dụng thay vì xóa. |
+| 8 | Exception flow | Tên kỹ năng bị trùng hoặc thiếu dữ liệu thì hệ thống báo lỗi. |
+
+#### Bảng 2.24: Scenario Usecase "Duyệt đánh giá công ty"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Duyệt đánh giá công ty |
+| 2 | Description | Quản trị viên kiểm duyệt đánh giá công ty trước khi hiển thị công khai. |
+| 3 | Actors | Quản trị viên, ứng viên. |
+| 4 | Input | Đánh giá công ty chờ duyệt và quyết định xử lý. |
+| 5 | Output | Đánh giá được công khai hoặc bị từ chối/ẩn. |
+| 6 | Basic flow | 1. Quản trị viên mở trang duyệt đánh giá. <br> 2. Hệ thống hiển thị đánh giá chờ duyệt. <br> 3. Quản trị viên xem nội dung. <br> 4. Quản trị viên duyệt hoặc từ chối. <br> 5. Hệ thống cập nhật trạng thái đánh giá. |
+| 7 | Alternative flow | Quản trị viên lọc đánh giá theo trạng thái hoặc công ty. |
+| 8 | Exception flow | Đánh giá không tồn tại hoặc đã xử lý thì hệ thống thông báo trạng thái hiện tại. |
+
+#### Bảng 2.25: Scenario Usecase "Xem thống kê hệ thống"
+
+| STT | Thành phần | Nội dung |
+|---:|---|---|
+| 1 | Usecase name | Xem thống kê hệ thống |
+| 2 | Description | Quản trị viên xem số liệu tổng quan để theo dõi hoạt động hệ thống. |
+| 3 | Actors | Quản trị viên. |
+| 4 | Input | Khoảng thời gian hoặc bộ lọc thống kê nếu có. |
+| 5 | Output | Số liệu về người dùng, công ty, tin tuyển dụng, hồ sơ ứng tuyển và dữ liệu cần duyệt. |
+| 6 | Basic flow | 1. Quản trị viên mở dashboard quản trị. <br> 2. Hệ thống tổng hợp dữ liệu nghiệp vụ. <br> 3. Hệ thống hiển thị chỉ số và biểu đồ. <br> 4. Quản trị viên xem số liệu. |
+| 7 | Alternative flow | Quản trị viên thay đổi bộ lọc hoặc khoảng thời gian. |
+| 8 | Exception flow | Dữ liệu thống kê tải thất bại thì hệ thống thông báo lỗi và cho phép tải lại. |
+
+### 2.2.4. Liên Kết Sơ Đồ Với Scenario
+
+| Nhóm sơ đồ | Vai trò trong báo cáo | Danh mục |
 |---|---|---|
-| Use-case | Hình 1.1 đến 1.6 | Actor và phạm vi hệ thống. |
-| Activity | Hình 2.1 đến 2.18 | Basic flow và nhánh thay thế của từng nghiệp vụ. |
-| Sequence | Hình 3.1 đến 3.12 | Tương tác frontend, backend, MongoDB, SMTP, Socket.IO, Gemini API. |
-| Robustness | Hình 4.1 đến 4.7 | Boundary, Control, Entity của use-case trọng tâm. |
-| ERD | Hình 5.1 đến 5.5 | Entity, khóa chính, khóa ngoại và quan hệ dữ liệu. |
-| Class/Component | Hình 6.1 đến 6.6 | Module xử lý, service, repository và component triển khai. |
-| Deployment | Hình 7.1 đến 7.2 | Cấu hình VPS, Nginx, PM2, MongoDB, webhook deploy. |
+| Usecase | Xác định actor, chức năng chính và phạm vi hệ thống. | Hình 1.1 đến Hình 1.5 |
+| Activity | Trực quan hóa basic flow, alternative flow và exception flow của từng usecase. | Hình 2.1 đến Hình 2.25 |
+| Sequence | Mô tả thứ tự tương tác giữa actor, giao diện, controller/service và các collection dữ liệu cụ thể. | Hình 3.1 đến Hình 3.25 |
+| Robustness | Chuyển usecase sang mô hình Boundary, Control, Entity. | Hình 4.1 đến Hình 4.25 |
+| ERD | Mô tả collection, khóa chính, khóa ngoại và quan hệ dữ liệu lõi. | Hình 5.1 đến Hình 5.3 |
+| Bảng dữ liệu | Mô tả trường dữ liệu theo collection MongoDB. | Bảng 5.1 đến Bảng 5.12 |
 
-## 7. Ghi Chú Học Thuật
+### 2.2.5. Quy Ước Học Thuật
 
-Các sơ đồ được tách theo mức trừu tượng. Use-case mô tả yêu cầu chức năng từ góc nhìn tác nhân. Activity mô tả luồng xử lý nghiệp vụ. Sequence mô tả thứ tự gọi giữa các thành phần. Robustness nối use-case với thiết kế lớp theo ba nhóm boundary, control và entity. ERD mô tả cấu trúc dữ liệu. Class/component và deployment mô tả kiến trúc triển khai của hệ thống.
+- Usecase chỉ liệt kê chức năng nghiệp vụ chính, không đưa chi tiết triển khai như API, webhook, AI hoặc socket.
+- Activity dùng câu mô tả nghiệp vụ ngắn, có điểm bắt đầu, điểm kết thúc, nhánh điều kiện và fork khi có nhiều dữ liệu được nhập/tải song song.
+- Robustness dùng đúng ba nhóm Boundary, Control và Entity để nối yêu cầu với thiết kế; Entity đặt theo đúng tên collection trong hệ thống như `nguoi_dung`, `tin_tuyen_dung`, `ho_so_ung_tuyen`.
+- Sequence dùng actor, giao diện, controller/service thật và collection cụ thể để mô tả thứ tự tương tác, không dùng một database MongoDB chung cho mọi nghiệp vụ.
+- ERD và bảng dữ liệu dùng kiểu dữ liệu MongoDB/Mongoose để bám sát hệ thống hiện tại.

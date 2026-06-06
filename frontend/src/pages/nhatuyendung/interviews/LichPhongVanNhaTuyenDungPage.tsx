@@ -6,10 +6,13 @@ import { useChat } from '../../../contexts/ChatContext'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
 import { interviewStatusLabel, toneForInterviewStatus } from '../../../lib/statusLabels'
+import { toast } from '../../../lib/toast'
 import type { LichPhongVan } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
 import { ScheduleModal } from './ScheduleModal'
+
+const TRANG_THAI_LICH_DUOC_CHAT = ['da_len_lich', 'da_xac_nhan', 'doi_lich']
 
 function candidateUserId(item: LichPhongVan) {
   const nguoiDung = item.hoSoUngTuyen?.ungVien?.nguoiDung as any
@@ -31,6 +34,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
 
   const openChat = async (item: LichPhongVan) => {
     const userId = candidateUserId(item)
+    if (!TRANG_THAI_LICH_DUOC_CHAT.includes(item.trangThai)) return
     if (!userId) {
       setChatError('Lịch phỏng vấn này chưa có thông tin tài khoản ứng viên để mở chat.')
       return
@@ -49,6 +53,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
     if (!editing) return
     await apiCoXacThuc(`/lichphongvan/${editing.id}/cap-nhat`, { method: 'PATCH', body: JSON.stringify(value) })
     setEditing(null)
+    toast.success('Đã cập nhật lịch phỏng vấn.')
     await data.reload()
   }
 
@@ -62,6 +67,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
     await apiCoXacThuc(`/lichphongvan/${resultTarget.item.id}/hoan-thanh`, { method: 'POST', body: JSON.stringify({ ketQua: resultTarget.ketQua, ghiChu: ghiChuKetQua }) })
     setResultTarget(null)
     setGhiChuKetQua('')
+    toast.success('Đã cập nhật kết quả phỏng vấn.')
     await data.reload()
   }
   return (
@@ -85,7 +91,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
                 </div>
                 <div className="ntd-list-actions">
                 <ButtonGroup>
-                  <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!userId || ['hoan_thanh', 'da_huy'].includes(item.trangThai)} onClick={() => void openChat(item)}>
+                  <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!userId || !TRANG_THAI_LICH_DUOC_CHAT.includes(item.trangThai)} onClick={() => void openChat(item)}>
                     Nhắn ứng viên
                   </Button>
                   <Button size="sm" icon={<Edit3 size={15} />} disabled={['hoan_thanh', 'da_huy'].includes(item.trangThai)} onClick={() => setEditing(item)}>Cập nhật</Button>

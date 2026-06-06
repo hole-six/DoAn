@@ -11,7 +11,7 @@ import { Badge, Drawer } from '../shared/NtdAtoms'
 type Tab = 'overview' | 'cv' | 'history'
 type ActionKey = 'view' | 'advance_review' | 'reject_screening' | 'schedule' | 'pass' | 'reject_interview'
 
-const TRANG_THAI_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat'] as const
+const TRANG_THAI_CHAT = ['da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat'] as const
 
 const actionLabels: Record<ActionKey, string> = {
   view: 'Đã xem',

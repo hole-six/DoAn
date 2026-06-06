@@ -1,37 +1,37 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 left to right direction
 skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle stick
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #222222
+}
 title Use Case - Khách vãng lai
 
 actor "Khách vãng lai" as Guest
 
-rectangle "Khu vực công khai EffortIT" {
-  usecase "Xem trang chủ" as Home
-  usecase "Tìm việc làm IT" as SearchJob
-  usecase "Lọc theo kỹ năng/cấp bậc/hình thức" as FilterJob
-  usecase "Xem chi tiết việc làm" as JobDetail
-  usecase "Xem danh sách công ty" as CompanyList
-  usecase "Xem hồ sơ công ty" as CompanyDetail
-  usecase "Hỏi trợ lý AI công khai" as PublicAI
-  usecase "Đăng ký" as Register
+rectangle "EffortIT" {
+  usecase "Tìm kiếm việc làm" as SearchJob
+  usecase "Xem chi tiết tin tuyển dụng" as JobDetail
+  usecase "Xem chi tiết công ty" as CompanyDetail
+  usecase "Đăng ký tài khoản" as Register
   usecase "Đăng nhập" as Login
   usecase "Quên mật khẩu" as Forgot
 }
 
-Guest --> Home
 Guest --> SearchJob
-Guest --> FilterJob
 Guest --> JobDetail
-Guest --> CompanyList
 Guest --> CompanyDetail
-Guest --> PublicAI
 Guest --> Register
 Guest --> Login
 Guest --> Forgot
 
-FilterJob ..> SearchJob : <<extend>>
 JobDetail ..> SearchJob : <<extend>>
-CompanyDetail ..> CompanyList : <<extend>>
-PublicAI ..> SearchJob : <<include dữ liệu việc làm>>
+CompanyDetail ..> JobDetail : <<extend>>
+Forgot ..> Login : <<extend>>
 @enduml
-

@@ -1,0 +1,38 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Cập nhật thông tin tài khoản
+
+start
+:Người dùng đăng nhập;
+:Mở trang thông tin tài khoản;
+fork
+  :Cập nhật họ tên;
+fork again
+  :Cập nhật số điện thoại;
+fork again
+  :Cập nhật thông tin liên hệ được phép sửa;
+end fork
+:Nhấn nút lưu thay đổi;
+:Hệ thống kiểm tra dữ liệu;
+if (Dữ liệu hợp lệ?) then (Có)
+  :Hệ thống lưu thông tin tài khoản;
+  :Thông báo cập nhật thành công;
+  stop
+else (Không)
+  :Thông báo lỗi dữ liệu;
+  :Người dùng chỉnh sửa lại;
+  stop
+endif
+@enduml

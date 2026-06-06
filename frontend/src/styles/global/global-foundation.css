@@ -1,4 +1,4 @@
-/* Global foundation and shared responsive rules */
+﻿/* Global foundation and shared responsive rules */
 
 /* Global foundation, public primitives, auth base */
 
@@ -69,13 +69,13 @@ h2,
 h3,
 .brand strong {
   color: var(--on-surface);
-  font-family: Poppins, Inter, system-ui, sans-serif;
+  font-family: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: -0.02em;
   margin: 0;
 }
 
 .title {
-  font-family: "Poppins", sans-serif;
+  font-family: "Lexend", sans-serif;
   font-size: 42px;
   font-weight: 700;
   line-height: 1.2;
@@ -83,7 +83,7 @@ h3,
 }
 
 .subtitle {
-  font-family: "Poppins", sans-serif;
+  font-family: "Lexend", sans-serif;
   font-size: 18px;
   font-weight: 500;
 }
@@ -624,7 +624,7 @@ p {
 
 .stat-card strong {
   display: block;
-  font-family: Poppins, Inter, sans-serif;
+  font-family: "Lexend", sans-serif;
   font-size: 34px;
   font-weight: 800;
   line-height: 1;
@@ -998,7 +998,7 @@ p {
 
 .hero-mini-panel strong {
   display: block;
-  font-family: Poppins, Inter, sans-serif;
+  font-family: "Lexend", sans-serif;
   font-size: 46px;
   margin-top: 42px;
 }
@@ -1754,26 +1754,6 @@ p {
     gap: 16px !important;
   }
 
-  /* Feature Bar */
-  .thanh-tinh-nang-co-dinh {
-    position: relative !important;
-    top: 0 !important;
-  }
-
-  .thanh-tinh-nang-khung {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .thanh-tinh-nang-khung::-webkit-scrollbar {
-    display: none;
-  }
-
-  .tinh-nang-item {
-    min-width: 140px;
-  }
-
   /* CTA Section */
   .dashboard-hero {
     flex-direction: column !important;
@@ -1944,9 +1924,8 @@ p {
     text-align: center;
   }
 
-  /* Tech stack in footer - hide on mobile */
   .footer > div:first-child {
-    display: none;
+    display: grid;
   }
 }
 

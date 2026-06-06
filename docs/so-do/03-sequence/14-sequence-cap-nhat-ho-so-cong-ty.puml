@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Cập nhật hồ sơ công ty
+
+actor "Actor: Nhà tuyển dụng" as Actor
+boundary "UI: thong-tin-cong-ty" as UI
+boundary "UI: form-ho-so-cong-ty" as Form
+control "Controller: NhaTuyenDungController" as Controller
+entity "Entity: NhaTuyenDung" as MainEntity
+entity "Entity: TaiKhoan" as E1
+entity "Entity: ThongBao" as E2
+
+Actor -> UI : 1. Mở trang thông tin công ty
+activate UI
+UI -> Form : 2. Hiển thị form-ho-so-cong-ty
+activate Form
+Actor -> Form : 3. Cập nhật mã số thuế, địa chỉ, logo, mô tả
+Form -> Controller : 4. capNhatHoSoCongTy(request)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra quyền sở hữu và độ đầy đủ hồ sơ
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Cập nhật hồ sơ công ty
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Chuyển trạng thái chờ duyệt và báo admin
+  Controller --> Form : 10. Thông báo đã gửi hồ sơ chờ duyệt
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo thiếu thông tin cần duyệt
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+end
+deactivate Controller
+deactivate Form
+deactivate UI
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý người dùng
+
+start
+:Quản trị viên mở trang quản lý người dùng;
+:Hệ thống tải danh sách tài khoản;
+fork
+  :Nhập từ khóa tìm kiếm;
+fork again
+  :Chọn vai trò;
+fork again
+  :Chọn trạng thái;
+end fork
+:Hệ thống lọc và phân trang danh sách;
+if (Quản trị viên chọn thêm người dùng?) then (Có)
+  :Nhập thông tin tài khoản mới;
+  :Hệ thống tạo người dùng;
+else (Xóa hoặc khóa)
+  if (Quản trị viên chọn sửa người dùng?) then (Có)
+    :Cập nhật thông tin tài khoản;
+    :Hệ thống lưu thay đổi;
+  else (Không)
+    :Xác nhận thao tác xóa hoặc khóa;
+    :Hệ thống kiểm tra ràng buộc quản trị;
+    :Hệ thống cập nhật trạng thái tài khoản;
+  endif
+endif
+:Thông báo kết quả xử lý;
+stop
+@enduml

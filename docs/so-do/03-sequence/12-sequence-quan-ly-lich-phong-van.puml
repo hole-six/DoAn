@@ -1,0 +1,60 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Quản lý lịch phỏng vấn
+
+actor "Actor: Ứng viên" as Actor
+boundary "UI: lich-phong-van" as UI
+boundary "UI: form-phan-hoi-lich" as Form
+control "Controller: LichPhongVanController" as Controller
+entity "Entity: LichPhongVan" as MainEntity
+entity "Entity: HoSoUngTuyen" as E1
+entity "Entity: ThongBao" as E2
+
+Actor -> UI : 1. Mở trang lịch phỏng vấn
+activate UI
+UI -> Form : 2. Hiển thị form-phan-hoi-lich
+activate Form
+Actor -> Form : 3. Xác nhận, yêu cầu đổi lịch hoặc xem chi tiết
+Form -> Controller : 4. capNhatTrangThaiLich(request)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra lịch thuộc hồ sơ của ứng viên
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Cập nhật trạng thái lịch
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Gửi thông báo cho nhà tuyển dụng
+  Controller --> Form : 10. Thông báo cập nhật lịch thành công
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo lịch không hợp lệ hoặc đã hủy
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+end
+deactivate Controller
+deactivate Form
+deactivate UI
+@enduml

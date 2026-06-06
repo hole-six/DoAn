@@ -1,9 +1,9 @@
 ﻿import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom'
 import {
-  Search, Briefcase,
-  TrendingUp, Star, FileText, Sparkles, ChevronRight,
-  Award, Zap, Globe, Shield,
+  Search,
+  TrendingUp, Sparkles, ChevronRight,
+  Award, Flame, Zap, Globe, Shield,
   ArrowRight, Bot, CheckCircle, Send, X,
 } from 'lucide-react'
 import effortBg from './assets/EffortBackground.png'
@@ -15,7 +15,7 @@ import './pages/trangchu/trangchu-styles.css'
 import './realtime.css'
 import './components/chat-notification.css'
 
-// âœ¨ Import Real-time Components
+// ✨ Import Real-time Components
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { OfflineIndicator } from './components/OfflineIndicator'
 import { khoiTaoSocket, ngatketnoisocket } from './lib/socket'
@@ -25,178 +25,27 @@ import { ThongBaoProvider } from './contexts/ThongBaoContext'
 import { ThongBaoToastContainer } from './components/ThongBaoCenter'
 import { layAccessToken } from './lib/auth'
 import { API_URL } from './lib/env'
+import { EmployerRecruitmentGate } from './pages/nhatuyendung/shared/EmployerRecruitmentGate'
+import {
+  homeAiQuickPrompts,
+  thongDiepChayNgang,
+  trangChuFallbackCompanies,
+  trangChuFallbackJobs,
+  trangChuLyDo,
+  trangChuTechCategories,
+  type HomeCompany,
+  type HomeJob,
+  type TrangChuLyDoIcon,
+} from './data/trangChuData'
 
-// â”€â”€â”€ Dá»¯ liá»‡u tÄ©nh â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Dữ liệu tĩnh ────────────────────────────────────────────────────────────
 
-const thongDiepChayNgang =
-  'Hơn 12.000 việc làm IT đang tuyển · Lương Backend Senior lên đến 80 triệu · ' +
-  'Mở CV ẩn danh để nhà tuyển dụng tìm bạn · Phỏng vấn thực tế mỗi tuần · ' +
-  'Top công ty công nghệ đang tuyển gấp · Nộp hồ sơ chỉ 1 click · '
+// ─── Brand ───────────────────────────────────────────────────────────────────
 
-const tinhNangNoiBat: Array<{
-  icon: React.ElementType
-  label: string
-  to: string
-  badge?: string
-  badgeLoai?: 'hot' | 'moi'
-}> = [
-  { icon: Briefcase, label: 'Tìm việc IT', to: '/viec-lam', badge: 'HOT', badgeLoai: 'hot' },
-  { icon: FileText, label: 'Tạo CV', to: '/ung-vien/ho-so' },
-  { icon: Star, label: 'Khám phá công ty', to: '/cong-ty', badge: 'MỚI', badgeLoai: 'moi' },
-]
-const nhaTuyenDung = [
-  {
-    id: 1,
-    ten: 'Samsung Electronics HCMC',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg',
-    logoBg: '#000000',
-    diaDiem: 'TP Hồ Chí Minh',
-    soViec: 2,
-    kyNang: ['Embedded', 'Android', 'ReactJS', 'OOP', 'C++', 'Python'],
-  },
-  {
-    id: 2,
-    ten: 'FPT Software',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/200px-FPT_logo_2010.svg.png',
-    logoBg: '#ffffff',
-    diaDiem: 'Hà Nội · TP.HCM · Đà Nẵng',
-    soViec: 142,
-    kyNang: ['Java', 'React', '.NET', 'Python', 'AWS', 'DevOps'],
-  },
-  {
-    id: 3,
-    ten: 'Viettel Group',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Viettel_logo_2021.svg',
-    logoBg: '#ffffff',
-    diaDiem: 'Hà Nội · TP Hồ Chí Minh',
-    soViec: 7,
-    kyNang: ['JavaScript', 'Python', 'PHP', 'UI/UX', 'MySQL', 'MVC'],
-  },
-  {
-    id: 4,
-    ten: 'VNG Corporation',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/VNG_Corporation_logo.svg/200px-VNG_Corporation_logo.svg.png',
-    logoBg: '#ffffff',
-    diaDiem: 'TP.HCM',
-    soViec: 87,
-    kyNang: ['Go', 'Kubernetes', 'React', 'AI/ML', 'gRPC', 'Redis'],
-  },
-  {
-    id: 5,
-    ten: 'Tiki',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Tiki_logo.svg/200px-Tiki_logo.svg.png',
-    logoBg: '#ffffff',
-    diaDiem: 'TP.HCM',
-    soViec: 63,
-    kyNang: ['Node.js', 'Vue', 'AWS', 'Data', 'Kafka', 'Spark'],
-  },
-  {
-    id: 6,
-    ten: 'MoMo',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_MoMo_Square.svg/200px-Logo_MoMo_Square.svg.png',
-    logoBg: '#ffffff',
-    diaDiem: 'TP.HCM',
-    soViec: 55,
-    kyNang: ['Kotlin', 'Swift', 'Spring', 'Kafka', 'iOS', 'Android'],
-  },
-]
-
-const tinTuyenDung = [
-  {
-    id: 1,
-    tieuDe: '[Đà Nẵng] Senior Backend Engineer (Node.js)',
-    congTy: 'VNEXT SOFTWARE',
-    logo: 'https://placehold.co/80x80/fff3e8/f97316?text=VN',
-    diaDiem: 'Tại văn phòng · Đà Nẵng',
-    luong: '30.000.000 - 45.000.000 VND',
-    loaiViec: 'backend',
-    kyNang: ['Node.js', 'PostgreSQL', 'Redis'],
-    badge: 'SUPER HOT',
-    ngayDang: '1 ngày trước',
-    featured: true,
-  },
-  {
-    id: 2,
-    tieuDe: 'Frontend Engineer React/TypeScript',
-    congTy: 'VisionTech Global',
-    logo: 'https://placehold.co/80x80/e0f2fe/2563eb?text=VT',
-    diaDiem: 'Làm từ xa · TP Hồ Chí Minh',
-    luong: '25.000.000 - 38.000.000 VND',
-    loaiViec: 'frontend',
-    kyNang: ['React', 'TypeScript', 'Tailwind CSS'],
-    badge: 'SUPER HOT',
-    ngayDang: '3 ngày trước',
-    featured: true,
-  },
-  {
-    id: 3,
-    tieuDe: '[Remote] DevOps Engineer (AWS/Kubernetes)',
-    congTy: 'Edge8',
-    logo: 'https://placehold.co/80x80/111827/ffffff?text=E8',
-    diaDiem: 'Làm từ xa · Hà Nội',
-    luong: '35.000.000 - 55.000.000 VND',
-    loaiViec: 'devops',
-    kyNang: ['AWS', 'Kubernetes', 'CI/CD'],
-    badge: null,
-    ngayDang: '4 ngày trước',
-    featured: false,
-  },
-  {
-    id: 4,
-    tieuDe: 'Senior Full-stack Developer (React/Node.js)',
-    congTy: 'CodeLink',
-    logo: 'https://placehold.co/80x80/ecfeff/0891b2?text=CL',
-    diaDiem: 'Linh hoạt · TP Hồ Chí Minh',
-    luong: '32.000.000 - 48.000.000 VND',
-    loaiViec: 'fullstack',
-    kyNang: ['React', 'Node.js', 'MongoDB'],
-    badge: 'HOT',
-    ngayDang: '13 ngày trước',
-    featured: false,
-  },
-]
-
-
-
-const lyDo = [
-  { icon: Zap,          tieu: 'Ứng tuyển siêu nhanh',    mo: 'Chỉ 1 click để nộp hồ sơ. Hệ thống tự điền thông tin từ CV của bạn.' },
-  { icon: Shield,       tieu: 'CV ẩn danh bảo mật',      mo: 'Bật chế độ tìm việc thụ động. Nhà tuyển dụng tìm bạn mà không lộ danh tính.' },
-  { icon: Globe,        tieu: 'Mạng lưới rộng khắp',     mo: 'Kết nối với các công ty từ startup đến tập đoàn công nghệ.' },
-  { icon: CheckCircle,  tieu: 'Xác thực công ty',        mo: 'Nhà tuyển dụng được kiểm duyệt để ứng viên yên tâm ứng tuyển.' },
-  { icon: TrendingUp,   tieu: 'Dữ liệu tuyển dụng rõ ràng', mo: 'Tin tuyển dụng trình bày rõ mức lương, kỹ năng, hình thức và quyền lợi.' },
-  { icon: Award,        tieu: 'Hỗ trợ phỏng vấn',        mo: 'Gợi ý câu hỏi phỏng vấn, cách viết CV và lộ trình chuẩn bị cho từng vai trò IT.' },
-]
-
-// â”€â”€â”€ Brand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-// â”€â”€â”€ Header + Brand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Header + Brand ───────────────────────────────────────────────────────────
 // (moved to components/Header.tsx)
 
-// â”€â”€â”€ Hero trang chá»§ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-type HomeJob = {
-  id: string
-  tieuDe: string
-  congTy: string
-  logo: string
-  diaDiem: string
-  luong: string
-  loaiViec: string
-  kyNang: string[]
-  badge: string | null
-  ngayDang: string
-  featured: boolean
-}
-
-type HomeCompany = {
-  id: string
-  ten: string
-  logo: string
-  logoBg: string
-  diaDiem: string
-  soViec: number
-  kyNang: string[]
-}
+// ─── Hero trang chủ ───────────────────────────────────────────────────────────
 
 function useTrangChuData() {
   const [state, setState] = useState<{ jobs: HomeJob[]; companies: HomeCompany[]; loading: boolean }>({ jobs: [], companies: [], loading: true })
@@ -327,7 +176,7 @@ function HeroTrangChu() {
         </h1>
 
         
-        {/* Khung tÃ¬m kiáº¿m */}
+        {/* Khung tìm kiếm */}
         <div ref={searchWrapRef} className={`trangchu-khop-timkiem${searchActive ? ' search-shell-active' : ''}`}>
           <label className="trangchu-search-input">
             <Search size={20} />
@@ -349,7 +198,7 @@ function HeroTrangChu() {
           )}
         </div>
 
-        {/* Gá»£i Ã½ tá»« khoÃ¡ */}
+        {/* Gợi ý từ khoá */}
         <div className="trangchu-goiy">
           <span>Kỹ năng nổi bật:</span>
           {['React', 'Node.js', 'TypeScript', 'Java', 'DevOps', 'Data Engineer'].map(kn => (
@@ -357,7 +206,7 @@ function HeroTrangChu() {
           ))}
         </div>
 
-        {/* Thanh chá»¯ cháº¡y ngang */}
+        {/* Thanh chữ chạy ngang */}
         <div className="bang-chay-thong-bao">
           <span className="bang-chay-icon">HOT</span>
           <div className="bang-chay-cua-so">
@@ -373,39 +222,16 @@ function HeroTrangChu() {
   )
 }
 
-// â”€â”€â”€ Thanh tÃ­nh nÄƒng ná»•i báº­t (náº±m ngoÃ i hero Ä‘á»ƒ khÃ´ng bá»‹ overflow:hidden cáº¯t) â”€
+// ─── Thanh tính năng nổi bật (nằm ngoài hero để không bị overflow:hidden cắt) ─
 
-function ThanhTinhNang() {
-  return (
-    <div className="thanh-tinh-nang-co-dinh">
-      <div className="thanh-tinh-nang-khung">
-        {tinhNangNoiBat.map(item => {
-          const Icon = item.icon
-          return (
-            <Link key={item.label} to={item.to} className="tinh-nang-item">
-              <span className="tinh-nang-icon"><Icon size={18} /></span>
-              <strong>{item.label}</strong>
-              {item.badge && (
-                <span className={`tinh-nang-badge ${item.badgeLoai === 'moi' ? 'moi' : 'hot'}`}>
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-// â”€â”€â”€ Thá»‘ng kÃª â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Thống kê ─────────────────────────────────────────────────────────────────
 
 
 
-// â”€â”€â”€ NhÃ  tuyá»ƒn dá»¥ng ná»•i báº­t â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Nhà tuyển dụng nổi bật ───────────────────────────────────────────────────
 
 function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
-  const items = companies?.length ? companies : nhaTuyenDung.map(item => ({ ...item, id: String(item.id) }))
+  const items = companies?.length ? companies : trangChuFallbackCompanies
   return (
     <section className="section section-why-full">
       <div className="section-title">
@@ -422,7 +248,7 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
       <div className="ntd-grid">
         {items.map(cty => (
           <Link to={`/cong-ty/${cty.id}`} key={cty.id} className="ntd-card">
-            {/* Pháº§n trÃªn: logo + tÃªn + tags */}
+            {/* Phần trên: logo + tên + tags */}
             <div className="ntd-card-top">
               <div className="ntd-logo-wrap" style={{ background: cty.logoBg }}>
                 <img
@@ -439,7 +265,7 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
               </div>
             </div>
 
-            {/* Pháº§n dÆ°á»›i: Ä‘á»‹a Ä‘iá»ƒm + sá»‘ viá»‡c */}
+            {/* Phần dưới: địa điểm + số việc */}
             <div className="ntd-card-bottom">
               <span className="ntd-dia-diem">{cty.diaDiem}</span>
               <div className="ntd-viec">
@@ -455,10 +281,10 @@ function SectionNhaTuyenDung({ companies }: { companies?: HomeCompany[] }) {
   )
 }
 
-// â”€â”€â”€ Tin tuyá»ƒn dá»¥ng ná»•i báº­t â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tin tuyển dụng nổi bật ───────────────────────────────────────────────────
 
 function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
-  const items = jobs?.length ? jobs : tinTuyenDung.map(item => ({ ...item, id: String(item.id) }))
+  const items = jobs?.length ? jobs : trangChuFallbackJobs
   const nhanBadge = (badge: string | null) => {
     if (!badge) return null
     return badge === 'SUPER HOT' ? 'Ưu tiên' : 'Nổi bật'
@@ -493,8 +319,8 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
             className={`vl-card${tin.featured ? ' vl-card--featured' : ''}`}
           >
             {nhanBadge(tin.badge) && (
-              <span className={`vl-badge${tin.badge === 'SUPER HOT' ? ' vl-badge--super' : ''}`}>
-                {nhanBadge(tin.badge)}
+              <span className={`vl-badge${tin.badge === 'SUPER HOT' ? ' vl-badge--super' : ''}`} title={nhanBadge(tin.badge) ?? undefined}>
+                <Flame size={15} fill="currentColor" />
               </span>
             )}
 
@@ -530,40 +356,7 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
   )
 }
 
-// â”€â”€â”€ Tech Stack Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const techCategories = [
-  {
-    category: 'Frontend',
-    techs: [
-      { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-      { name: 'Vue.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vuejs/vuejs-original.svg' },
-      { name: 'Angular', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg' },
-      { name: 'Next.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
-      { name: 'TypeScript', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-    ]
-  },
-  {
-    category: 'Backend',
-    techs: [
-      { name: 'Node.js', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-      { name: 'Python', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-      { name: 'Java', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-      { name: 'Go', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg' },
-      { name: '.NET', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dotnetcore/dotnetcore-original.svg' },
-    ]
-  },
-  {
-    category: 'DevOps & Cloud',
-    techs: [
-      { name: 'Docker', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-      { name: 'Kubernetes', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg' },
-      { name: 'AWS', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-original-wordmark.svg' },
-      { name: 'Jenkins', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jenkins/jenkins-original.svg' },
-      { name: 'Terraform', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/terraform/terraform-original.svg' },
-    ]
-  },
-]
+// ─── Tech Stack Section ───────────────────────────────────────────────────────
 
 function SectionTechStack() {
   return (
@@ -576,7 +369,7 @@ function SectionTechStack() {
         </div>
       </div>
 
-      {techCategories.map(cat => (
+      {trangChuTechCategories.map(cat => (
         <div key={cat.category} className="tech-category">
           <h3>{cat.category}</h3>
           <div className="tech-marquee">
@@ -598,7 +391,16 @@ function SectionTechStack() {
   )
 }
 
-// â”€â”€â”€ Táº¡i sao chá»n Effort Job â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tại sao chọn Effort Job ─────────────────────────────────────────────────
+
+const trangChuLyDoIcons: Record<TrangChuLyDoIcon, typeof Zap> = {
+  zap: Zap,
+  shield: Shield,
+  globe: Globe,
+  check: CheckCircle,
+  trending: TrendingUp,
+  award: Award,
+}
 
 function SectionLyDo() {
   return (
@@ -610,8 +412,8 @@ function SectionLyDo() {
         </div>
       </div>
       <div className="bento-grid">
-        {lyDo.map((item, idx) => {
-          const Icon = item.icon
+        {trangChuLyDo.map((item, idx) => {
+          const Icon = trangChuLyDoIcons[item.icon]
           return (
             <div key={item.tieu} className={`bento-card${idx === 0 ? ' dark' : ''}`}>
               <div className="icon-shell"><Icon size={22} /></div>
@@ -625,7 +427,7 @@ function SectionLyDo() {
   )
 }
 
-// â”€â”€â”€ CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── CTA ─────────────────────────────────────────────────────────────────────
 
 function SectionCTA() {
   return (
@@ -656,7 +458,7 @@ function SectionCTA() {
   )
 }
 
-// â”€â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Footer ───────────────────────────────────────────────────────────────────
 // (moved to components/Footer.tsx)
 
 function HomeAiChat() {
@@ -783,7 +585,7 @@ function HomeAiChat() {
   )
 }
 
-// â”€â”€â”€ Trang chá»§ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Trang chủ ────────────────────────────────────────────────────────────────
 
 void HomeAiChat
 
@@ -799,12 +601,6 @@ type HomeAiJobSuggestion = {
 }
 
 const mascotFrames = [mascotFrame1, mascotFrame2, mascotFrame3]
-const homeAiQuickPrompts = [
-  'Tìm job React Đà Nẵng',
-  'CV tôi hợp job nào?',
-  'Công ty nào đang tuyển Backend?',
-  'Lộ trình học để ứng tuyển Frontend?',
-]
 
 function HomeAiMascotChat() {
   const [question, setQuestion] = useState('')
@@ -925,7 +721,6 @@ function TrangChu() {
   return (
     <main className="app-page">
       <HeroTrangChu />
-      <ThanhTinhNang />
       <SectionNhaTuyenDung companies={data.companies} />
       <SectionTinTuyenDung jobs={data.jobs} />
       <HomeAiMascotChat />
@@ -937,7 +732,7 @@ function TrangChu() {
   )
 }
 
-// â”€â”€â”€ App root â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── App root ─────────────────────────────────────────────────────────────────
 
 import BoDinhTuyen from './components/BoDinhTuyen'
 import DashboardShell from './components/DashboardShell'
@@ -973,6 +768,7 @@ const QuanLyCongTyAdmin = lazy(() => import('./pages/quantrivien/congty/QuanLyCo
 const DuyetTinTuyenDungAdmin = lazy(() => import('./pages/quantrivien/tintuyendung/DuyetTinTuyenDungAdmin'))
 const QuanLyKyNangAdmin = lazy(() => import('./pages/quantrivien/kynang/QuanLyKyNangAdmin'))
 const QuanLyReviewCongTyAdmin = lazy(() => import('./pages/quantrivien/review/QuanLyReviewCongTyAdmin'))
+const ThongBaoAdminPage = lazy(() => import('./pages/quantrivien/thongbao/ThongBaoAdminPage'))
 const ChatUngVienPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatUngVienPage })))
 const ChatNhaTuyenDungPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatNhaTuyenDungPage })))
 const ChatAdminPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatAdminPage })))
@@ -983,7 +779,7 @@ function RouteFallback() {
 }
 
 export default function UngDung() {
-  // âœ¨ Initialize real-time features
+  // ✨ Initialize real-time features
   useEffect(() => {
     langNghePushClick()
 
@@ -1006,14 +802,14 @@ export default function UngDung() {
     <BrowserRouter>
       <ThongBaoProvider>
         <ChatProvider>
-          {/* âœ¨ Real-time UI Components */}
+          {/* ✨ Real-time UI Components */}
           <PWAInstallPrompt />
           <OfflineIndicator />
           <ThongBaoToastContainer />
       
       <Suspense fallback={<RouteFallback />}>
       <Routes>
-        {/* Public routes vá»›i Header + Footer */}
+        {/* Public routes với Header + Footer */}
         <Route element={<BoDinhTuyen />}>
           <Route path="/" element={<TrangChu />} />
           <Route path="/viec-lam" element={<TimKiemViecLam />} />
@@ -1029,13 +825,13 @@ export default function UngDung() {
           <Route path="/bao-mat" element={<TrangDangXayDungPage ten="Bảo mật" />} />
         </Route>
 
-        {/* Auth routes (khÃ´ng cÃ³ Header/Footer) */}
+        {/* Auth routes (không có Header/Footer) */}
         <Route path="/dang-nhap" element={<DangNhap />} />
         <Route path="/dang-ky" element={<DangKy />} />
         <Route path="/quen-mat-khau" element={<ForgotPasswordPage />} />
         <Route path="/dat-lai-mat-khau" element={<ResetPasswordPage />} />
 
-        {/* Dashboard á»©ng viÃªn */}
+        {/* Dashboard ứng viên */}
         <Route path="/ung-vien" element={<DashboardShell vaiTro="ungvien" />}>
           <Route index element={<DashboardUngVien />} />
           <Route path="ho-so" element={<HoSoUngVienPage />} />
@@ -1047,14 +843,14 @@ export default function UngDung() {
           <Route path="cai-dat" element={<CaiDatUngVienPage />} />
         </Route>
 
-        {/* Dashboard nhÃ  tuyá»ƒn dá»¥ng */}
+        {/* Dashboard nhà tuyển dụng */}
         <Route path="/nha-tuyen-dung" element={<DashboardShell vaiTro="nhatuyendung" />}>
           <Route index element={<DashboardNhaTuyenDung />} />
           <Route path="dashboard" element={<DashboardNhaTuyenDung />} />
-          <Route path="quan-ly-tin" element={<QuanLyTinNhaTuyenDungPage />} />
-          <Route path="tao-tin" element={<Navigate to="/nha-tuyen-dung/quan-ly-tin?new=1" replace />} />
-          <Route path="ung-vien" element={<UngVienNhaTuyenDungPage />} />
-          <Route path="lich-phong-van" element={<LichPhongVanNhaTuyenDungPage />} />
+          <Route path="quan-ly-tin" element={<EmployerRecruitmentGate><QuanLyTinNhaTuyenDungPage /></EmployerRecruitmentGate>} />
+          <Route path="tao-tin" element={<EmployerRecruitmentGate><Navigate to="/nha-tuyen-dung/quan-ly-tin?new=1" replace /></EmployerRecruitmentGate>} />
+          <Route path="ung-vien" element={<EmployerRecruitmentGate><UngVienNhaTuyenDungPage /></EmployerRecruitmentGate>} />
+          <Route path="lich-phong-van" element={<EmployerRecruitmentGate><LichPhongVanNhaTuyenDungPage /></EmployerRecruitmentGate>} />
           <Route path="lich-phong-vaan" element={<Navigate to="/nha-tuyen-dung/lich-phong-van" replace />} />
           <Route path="hat" element={<Navigate to="/nha-tuyen-dung/chat" replace />} />
           <Route path="cong-ty" element={<CongTyNhaTuyenDungPage />} />
@@ -1063,7 +859,7 @@ export default function UngDung() {
           <Route path="bang-gia" element={<BangGiaNhaTuyenDungPage />} />
         </Route>
 
-        {/* Dashboard quáº£n trá»‹ viÃªn */}
+        {/* Dashboard quản trị viên */}
         <Route path="/quan-tri" element={<DashboardShell vaiTro="quantrivien" />}>
           <Route path="dashboard" element={<DashboardQuanTriVien />} />
           <Route path="nguoi-dung" element={<QuanLyNguoiDung />} />
@@ -1072,6 +868,7 @@ export default function UngDung() {
           <Route path="ky-nang" element={<QuanLyKyNangAdmin />} />
           <Route path="review" element={<QuanLyReviewCongTyAdmin />} />
           <Route path="chat" element={<ChatAdminPage />} />
+          <Route path="thong-bao" element={<ThongBaoAdminPage />} />
         </Route>
 
         <Route path="*" element={<TrangDangXayDungPage ten="404 - Không tìm thấy" />} />

@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Quản lý hồ sơ ứng viên"
+
+actor "Actor: Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
+boundary "UI: pipeline-ung-vien" as UI
+boundary "UI: drawer-ho-so-ung-vien" as Form
+control "Controller: HoSoUngTuyenController" as Controller
+entity "Entity: HoSoUngTuyen" as MainEntity
+entity "Entity: UngVien" as E1
+entity "Entity: TinTuyenDung" as E2
+entity "Entity: ThongBao" as E3
+
+Actor --> UI : Mở pipeline ứng viên
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Xem hồ sơ, chuyển trạng thái, từ chối hoặc chọn phỏng vấn
+Form --> Controller : capNhatTrangThaiHoSo(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra hồ sơ thuộc tin của công ty\nCập nhật trạng thái hồ sơ ứng tuyển
+Controller <--> E1 : Gửi thông báo cho ứng viên
+Controller --> Form : Hiển thị pipeline đã cập nhật / Thông báo thao tác không hợp lệ
+Controller --> UI : trả dữ liệu mới
+@enduml

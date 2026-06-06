@@ -1,96 +1,355 @@
 @startuml
-hide circle
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 20
 skinparam shadowing false
 skinparam linetype ortho
-title ERD tổng quan - EffortIT
+hide circle
+left to right direction
+title ERD tổng quan toàn hệ thống EffortIT - Theo MongoDB/Mongoose hiện tại
 
-entity "NgườiDùng" as User {
-  * _id : ObjectId <<PK>>
-  --
-  email
-  mậtKhẩuHash
-  họTên
-  sốĐiệnThoại
-  vaiTrò
-  trạngThái
-  ngàyTạo
+package "Tài khoản và vai trò" {
+  entity "nguoi_dung\nNguoiDung" as NguoiDung {
+    * _id : ObjectId <<PK>>
+    --
+    email : String <<UNIQUE>>
+    matKhau : String
+    hoTen : String
+    soDienThoai : String
+    vaiTro : Enum
+    trangThai : Enum
+    maDatLaiMatKhauHash : String
+    maDatLaiMatKhauHetHan : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "ung_vien\nUngVien" as UngVien {
+    * _id : ObjectId <<PK>>
+    --
+    maNguoiDung : ObjectId <<FK, UNIQUE>>
+    ngaySinh : Date
+    gioiTinh : Enum
+    diaChi : String
+    anhDaiDien : String
+    tomTat : String
+    kinhNghiem : Number
+    viTriMongMuon : String
+    mucLuongMongMuon : Number
+    kyNang : Embedded[]
+    portfolio : Embedded[]
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "nha_tuyen_dung\nNhaTuyenDung" as NhaTuyenDung {
+    * _id : ObjectId <<PK>>
+    --
+    maNguoiDung : ObjectId <<FK, UNIQUE>>
+    tenCongTy : String
+    maSoThue : String
+    moTa : String
+    diaChi : String
+    website : String
+    logo : String
+    quyMo : Number
+    nganh : String
+    trangThaiDuyet : Enum
+    lyDoTuChoi : String
+    ngayDuyet : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
 }
 
-entity "ỨngViên" as Candidate {
-  * _id : ObjectId <<PK>>
-  --
-  mãNgườiDùng : ObjectId <<FK>>
-  vịTríMongMuốn
-  nămKinhNghiệm
-  tómTắt
+package "Tuyển dụng" {
+  entity "danh_muc_ky_nang\nDanhMucKyNang" as KyNang {
+    * _id : ObjectId <<PK>>
+    --
+    tenKyNang : String <<UNIQUE>>
+    loaiKyNang : String
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "tin_tuyen_dung\nTinTuyenDung" as TinTuyenDung {
+    * _id : ObjectId <<PK>>
+    --
+    maNhaTuyenDung : ObjectId <<FK>>
+    tieuDe : String
+    yeuCauKinhNghiem : String
+    diaChi : String
+    luongMin : Number
+    luongMax : Number
+    loaiHinh : Enum
+    capBac : Enum
+    anhDaiDien : String
+    hanNop : Date
+    soLuong : Number
+    moTa : String
+    yeuCau : String
+    quyenLoi : String
+    luotXem : Number
+    trangThai : Enum
+    ngayDang : Date
+    kyNang : Embedded[]
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "viec_lam_da_luu\nViecLamDaLuu" as ViecLamDaLuu {
+    * _id : ObjectId <<PK>>
+    --
+    maNguoiDung : ObjectId <<FK>>
+    maTinTuyenDung : ObjectId <<FK>>
+    ngayLuu : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+    UNIQUE(maNguoiDung, maTinTuyenDung)
+  }
+
+  entity "danh_gia_cong_ty\nDanhGiaCongTy" as DanhGiaCongTy {
+    * _id : ObjectId <<PK>>
+    --
+    maUngVien : ObjectId <<FK>>
+    maNhaTuyenDung : ObjectId <<FK>>
+    diem : Number
+    noiDung : String
+    anDanh : Boolean
+    daDuyet : Boolean
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
 }
 
-entity "NhàTuyểnDụng" as Employer {
-  * _id : ObjectId <<PK>>
-  --
-  mãNgườiDùng : ObjectId <<FK>>
-  tênCôngTy
-  ngành
-  quyMô
-  trạngTháiDuyệt
+package "CV, ứng tuyển và phỏng vấn" {
+  entity "ho_so_nang_luc\nHoSoNangLuc" as HoSoNangLuc {
+    * _id : ObjectId <<PK>>
+    --
+    maUngVien : ObjectId <<FK>>
+    tieuDe : String
+    hoTenHienThi : String
+    chucDanh : String
+    emailLienHe : String
+    soDienThoai : String
+    facebook : String
+    github : String
+    portfolioUrl : String
+    diaDiem : String
+    hocVan / kinhNghiemLam / chungChi / duAn : Embedded[]
+    tomTatKinhNghiem : String[]
+    kyNangMem : String[]
+    kyNangLapTrinh : Embedded[]
+    baiVietKyThuat : Embedded[]
+    duAnChiTiet : Embedded[]
+    fileCvTen : String
+    fileCvLoai : String
+    fileCvData : String
+    fileCvText : String
+    fileCvPath : String
+    fileCvTextStatus : Enum
+    loaiHoSo : Enum
+    anhDaiDien : String
+    templateCv : String
+    mauChinh : String
+    mauPhu : String
+    font : String
+    markdownGoc : String
+    ghiChuAi : String
+    cvChinh : Boolean
+    congKhai : Boolean
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "ho_so_ung_tuyen\nHoSoUngTuyen" as HoSoUngTuyen {
+    * _id : ObjectId <<PK>>
+    --
+    maUngVien : ObjectId <<FK>>
+    maTinTuyenDung : ObjectId <<FK>>
+    maHoSoNangLuc : ObjectId <<FK>>
+    thuXinViec : String
+    diemKhopKyNang : Number
+    trangThai : Enum
+    ngayNop : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+    UNIQUE(maUngVien, maTinTuyenDung)
+  }
+
+  entity "lich_phong_van\nLichPhongVan" as LichPhongVan {
+    * _id : ObjectId <<PK>>
+    --
+    maHoSoUngTuyen : ObjectId <<FK, UNIQUE>>
+    thoiGianBatDau : Date
+    thoiGianKetThuc : Date
+    diaChi : String
+    hinhThuc : Enum
+    linkHop : String
+    ghiChu : String
+    trangThai : Enum
+    ketQua : Enum
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "lich_su_ho_so_ung_tuyen\nLichSuHoSoUngTuyen" as LichSu {
+    * _id : ObjectId <<PK>>
+    --
+    maHoSoUngTuyen : ObjectId <<FK>>
+    trangThaiCu : Enum
+    trangThaiMoi : Enum
+    ghiChu : String
+    maNguoiDung : ObjectId <<FK>>
+    thoiGian : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
 }
 
-entity "TinTuyểnDụng" as Job {
-  * _id : ObjectId <<PK>>
-  --
-  mãNhàTuyểnDụng : ObjectId <<FK>>
-  tiêuĐề
-  môTả
-  lươngMin
-  lươngMax
-  trạngThái
+package "Thông báo và trò chuyện" {
+  entity "thong_bao\nThongBao" as ThongBao {
+    * _id : ObjectId <<PK>>
+    --
+    maNguoiDung : ObjectId <<FK>>
+    loai : Enum
+    tieuDe : String
+    noiDung : String
+    lienKet : String
+    maHoSoUngTuyen : ObjectId <<FK>>
+    maLichPhongVan : ObjectId <<FK>>
+    maTinTuyenDung : ObjectId <<FK>>
+    daDoc : Boolean
+    daGui : Boolean
+    mucDoUuTien : Enum
+    hanhDong : Embedded[]
+    icon : String
+    mauSac : String
+    hetHan : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "cuoc_tro_chuyen\nCuocTroChuyen" as CuocTroChuyen {
+    * _id : ObjectId <<PK>>
+    --
+    nguoiThamGia : ObjectId[] <<FK>>
+    loai : Enum
+    tenNhom : String
+    moTaNhom : String
+    anhNhom : String
+    quanTriNhom : ObjectId[] <<FK>>
+    maHoSoUngTuyen : ObjectId <<FK>>
+    maTinTuyenDung : ObjectId <<FK>>
+    tinNhanCuoiCung : Embedded
+    soChuaDoc : Map<Number>
+    daLuuTru : Boolean
+    thoiGianLuuTru : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
+
+  entity "tin_nhan\nTinNhan" as TinNhan {
+    * _id : ObjectId <<PK>>
+    --
+    maCuocTroChuyenId : ObjectId <<FK>>
+    nguoiGui : ObjectId <<FK>>
+    loai : Enum
+    noiDung : String
+    tepDinhKem : Embedded[]
+    traloiTinNhan : ObjectId <<FK>>
+    daDuocDocBoi : Embedded[]
+    phanUng : Embedded[]
+    daXoa : Boolean
+    daChinhSua : Boolean
+    thoiGianChinhSua : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
 }
 
-entity "HồSơNăngLực" as CV {
-  * _id : ObjectId <<PK>>
-  --
-  mãỨngViên : ObjectId <<FK>>
-  tiêuĐề
-  fileCvText
-  cvChính
+package "AI gợi ý việc làm" {
+  entity "goi_y_viec_lam\nGoiYViecLam" as GoiYViecLam {
+    * _id : ObjectId <<PK>>
+    --
+    maUngVien : ObjectId <<FK>>
+    maHoSoNangLuc : ObjectId <<FK>>
+    ketQua : Embedded[]
+    trangThai : Enum
+    loi : String
+    nguon : String
+    lanQuet : Date
+    ngayTao : Date
+    ngayCapNhat : Date
+  }
 }
 
-entity "HồSơỨngTuyển" as Application {
-  * _id : ObjectId <<PK>>
-  --
-  mãỨngViên : ObjectId <<FK>>
-  mãTinTuyểnDụng : ObjectId <<FK>>
-  mãHồSơNăngLực : ObjectId <<FK>>
-  trạngThái
+package "Tài liệu nhúng có tham chiếu" {
+  entity "UngVien.kyNang" as EVSkill {
+    maKyNang : ObjectId <<FK>>
+    mucDo : Number
+  }
+
+  entity "TinTuyenDung.kyNang" as EJSkill {
+    maKyNang : ObjectId <<FK>>
+    batBuoc : Boolean
+  }
+
+  entity "GoiYViecLam.ketQua" as EAIResult {
+    maTinTuyenDung : ObjectId <<FK>>
+    diem : Number
+    lyDo : String
+    kyNangKhop : String[]
+    kyNangThieu : String[]
+  }
 }
 
-entity "LịchPhỏngVấn" as Interview {
-  * _id : ObjectId <<PK>>
-  --
-  mãHồSơỨngTuyển : ObjectId <<FK>>
-  thờiGianBắtĐầu
-  hìnhThức
-  trạngThái
-  kếtQuả
-}
+NguoiDung ||--o| UngVien : sở hữu hồ sơ ứng viên
+NguoiDung ||--o| NhaTuyenDung : sở hữu hồ sơ công ty
+NhaTuyenDung ||--o{ TinTuyenDung : đăng
 
-entity "ThôngBáo" as Notification {
-  * _id : ObjectId <<PK>>
-  --
-  mãNgườiNhận : ObjectId <<FK>>
-  loại
-  tiêuĐề
-  đãĐọc
-}
+UngVien ||--o{ EVSkill : nhúng kỹ năng
+EVSkill }o--|| KyNang : tham chiếu
+TinTuyenDung ||--o{ EJSkill : nhúng kỹ năng yêu cầu
+EJSkill }o--|| KyNang : tham chiếu
 
-User ||--o| Candidate
-User ||--o| Employer
-Employer ||--o{ Job
-Candidate ||--o{ CV
-Candidate ||--o{ Application
-Job ||--o{ Application
-CV ||--o{ Application
-Application ||--o{ Interview
-User ||--o{ Notification
+UngVien ||--o{ HoSoNangLuc : tạo CV/hồ sơ
+UngVien ||--o{ HoSoUngTuyen : nộp
+TinTuyenDung ||--o{ HoSoUngTuyen : nhận
+HoSoNangLuc ||--o{ HoSoUngTuyen : sử dụng
+HoSoUngTuyen ||--o| LichPhongVan : có lịch
+HoSoUngTuyen ||--o{ LichSu : ghi lịch sử
+NguoiDung ||--o{ LichSu : thực hiện đổi trạng thái
+
+NguoiDung ||--o{ ViecLamDaLuu : lưu
+TinTuyenDung ||--o{ ViecLamDaLuu : được lưu
+UngVien ||--o{ DanhGiaCongTy : viết
+NhaTuyenDung ||--o{ DanhGiaCongTy : được đánh giá
+
+NguoiDung ||--o{ ThongBao : nhận
+HoSoUngTuyen ||--o{ ThongBao : liên quan hồ sơ
+LichPhongVan ||--o{ ThongBao : liên quan lịch
+TinTuyenDung ||--o{ ThongBao : liên quan tin
+
+NguoiDung }o--o{ CuocTroChuyen : tham gia
+NguoiDung }o--o{ CuocTroChuyen : quản trị nhóm
+HoSoUngTuyen ||--o{ CuocTroChuyen : ngữ cảnh hồ sơ
+TinTuyenDung ||--o{ CuocTroChuyen : ngữ cảnh tin
+CuocTroChuyen ||--o{ TinNhan : chứa
+NguoiDung ||--o{ TinNhan : gửi
+TinNhan }o--o| TinNhan : trả lời
+
+UngVien ||--o{ GoiYViecLam : quét gợi ý
+HoSoNangLuc ||--o{ GoiYViecLam : nguồn CV
+GoiYViecLam ||--o{ EAIResult : chứa kết quả
+EAIResult }o--|| TinTuyenDung : đề xuất
+
+legend right
+  |= Ký hiệu |= Ý nghĩa |
+  | <<PK>> | Khóa chính MongoDB `_id` |
+  | <<FK>> | ObjectId `ref` trong Mongoose |
+  | Embedded | Tài liệu con nhúng trong collection cha |
+  | UNIQUE | Index duy nhất trong schema |
+endlegend
 @enduml
-

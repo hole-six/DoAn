@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Cập nhật thông tin tài khoản"
+
+actor "Actor: Ứng viên / Nhà tuyển dụng / Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "UI: cai-dat-tai-khoan" as UI
+boundary "UI: form-cap-nhat-tai-khoan" as Form
+control "Controller: NguoiDungController" as Controller
+entity "Entity: TaiKhoan" as MainEntity
+entity "Entity: ThongBao" as E1
+
+Actor --> UI : Mở trang cài đặt tài khoản
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Chỉnh sửa họ tên, số điện thoại, mật khẩu
+Form --> Controller : capNhatTaiKhoan(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra quyền sở hữu và dữ liệu nhập\nCập nhật thông tin tài khoản
+Controller <--> E1 : Ghi nhận thông báo bảo mật nếu cần
+Controller --> Form : Thông báo cập nhật thành công / Thông báo dữ liệu không hợp lệ
+Controller --> UI : trả dữ liệu mới
+@enduml

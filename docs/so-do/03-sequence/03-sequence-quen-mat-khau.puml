@@ -1,46 +1,59 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
 skinparam shadowing false
-title Sequence - Quên mật khẩu bằng email token
+skinparam linetype ortho
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 24
+skinparam BoxPadding 8
+skinparam sequence {
+  ArrowColor #222222
+  LifeLineBorderColor #666666
+  LifeLineBackgroundColor #F7F7F7
+  ParticipantBorderColor #222222
+  ParticipantBackgroundColor White
+  ActorBorderColor #222222
+  ActorBackgroundColor White
+  BoxBorderColor #888888
+}
+title sd Quên mật khẩu
 
-actor "Người dùng" as User
-boundary "TrangQuênMậtKhẩu" as ForgotUI
-boundary "TrangĐặtLạiMậtKhẩu" as ResetUI
-control "XácThựcController" as Controller
-control "XácThựcService" as Service
-entity "NgườiDùng" as UserModel
-control "EmailService" as Mail
-database "MongoDB" as DB
+actor "Actor: Khách vãng lai" as Actor
+boundary "UI: quen-mat-khau" as UI
+boundary "UI: form-quen-mat-khau" as Form
+control "Controller: XacThucController" as Controller
+entity "Entity: TaiKhoan" as MainEntity
+entity "Entity: EmailDatLaiMatKhau" as E1
 
-User -> ForgotUI : Nhập email
-ForgotUI -> Controller : POST /api/xacthuc/quen-mat-khau
-Controller -> Service : taoTokenReset(email)
-Service -> UserModel : tìm user
-UserModel -> DB : findOne(email)
-DB --> UserModel : user/null
-alt Email tồn tại
-  Service -> Service : sinh token + hash
-  Service -> UserModel : lưu hash và hạn dùng
-  UserModel -> DB : update
-  Service -> Mail : gửi link reset
-  Mail --> User : Email reset
+Actor -> UI : 1. Truy cập chức năng quên mật khẩu
+activate UI
+UI -> Form : 2. Hiển thị form-quen-mat-khau
+activate Form
+Actor -> Form : 3. Nhập email cần đặt lại mật khẩu
+Form -> Controller : 4. yeuCauDatLaiMatKhau(email)
+activate Controller
+Controller -> MainEntity : 5. Kiểm tra tài khoản theo email
+activate MainEntity
+MainEntity --> Controller : 6. return kết quả kiểm tra
+deactivate MainEntity
+
+alt [Dữ liệu hợp lệ]
+  Controller -> MainEntity : 7. Tạo mã đặt lại mật khẩu
+  activate MainEntity
+  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  deactivate MainEntity
+  Controller -> E1 : 9. Gửi email chứa liên kết đặt lại
+  Controller --> Form : 10. Thông báo đã gửi email hướng dẫn
+  Form --> UI : 11. Cập nhật giao diện
+  UI --> Actor : 12. Hiển thị kết quả thành công
+else [Dữ liệu không hợp lệ]
+  Controller --> Form : 10. Thông báo email không tồn tại hoặc không hợp lệ
+  Form --> UI : 11. Hiển thị lỗi tại màn hình
+  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
-Controller --> ForgotUI : thông báo an toàn
-User -> ResetUI : Mở link reset
-ResetUI -> Controller : GET /dat-lai-mat-khau/:token
-Controller -> Service : kiểm tra token
-Service -> UserModel : tìm token hash còn hạn
-UserModel -> DB : findOne
-DB --> UserModel : user/null
-alt Token hợp lệ
-  Controller --> ResetUI : cho nhập mật khẩu mới
-  User -> ResetUI : Gửi mật khẩu mới
-  ResetUI -> Controller : POST /dat-lai-mat-khau
-  Controller -> Service : cập nhật mật khẩu
-  Service -> UserModel : hash mật khẩu, xóa token
-  UserModel -> DB : update
-  Controller --> ResetUI : thành công
-else Token lỗi
-  Controller --> ResetUI : báo hết hạn/không hợp lệ
-end
+deactivate Controller
+deactivate Form
+deactivate UI
 @enduml
-

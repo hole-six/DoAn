@@ -153,7 +153,6 @@ export default function DashboardQuanTriVien() {
     tieu: item.tieu,
     moTa: item.moTa,
   }))
-
   async function patchTin(id: string | number, patch: Record<string, unknown>) {
     await api(`/tintuyendung/${id}`, { method: 'PATCH', body: JSON.stringify(patch) })
     await load()

@@ -1,0 +1,40 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Cập nhật hồ sơ công ty
+
+start
+:Nhà tuyển dụng đăng nhập;
+:Mở trang hồ sơ công ty;
+fork
+  :Cập nhật tên và mô tả công ty;
+fork again
+  :Cập nhật logo và website;
+fork again
+  :Cập nhật ngành nghề và quy mô;
+fork again
+  :Cập nhật địa chỉ liên hệ;
+end fork
+:Nhà tuyển dụng gửi lưu hồ sơ;
+:Hệ thống kiểm tra dữ liệu công ty;
+if (Dữ liệu hợp lệ?) then (Có)
+  :Hệ thống lưu hồ sơ công ty;
+  :Chuyển trạng thái hồ sơ sang chờ duyệt nếu cần;
+  :Thông báo cập nhật thành công;
+  stop
+else (Không)
+  :Thông báo lỗi và yêu cầu bổ sung;
+  stop
+endif
+@enduml

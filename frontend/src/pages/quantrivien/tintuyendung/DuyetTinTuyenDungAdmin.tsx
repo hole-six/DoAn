@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Eye, Mail, Send, Trash2, XCircle } from 'lucide-react'
+import { useConfirm } from '../../../components/ConfirmDialog'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDate, imageUrl } from '../../../lib/format'
 import { jobStatusLabel, toneForJobStatus } from '../../../lib/statusLabels'
+import { toast } from '../../../lib/toast'
 import { Badge } from '../../nhatuyendung/shared/NtdAtoms'
 import { adminApi } from '../shared/adminApi'
 import { AdminPage, AdminPanel, AdminTable, EmptyRow } from '../shared/AdminTable'
@@ -25,6 +27,7 @@ export default function DuyetTinTuyenDungAdmin() {
   const [selected, setSelected] = useState<AdminJob | null>(null)
   const [preview, setPreview] = useState<BulkEmailPreview | null>(null)
   const [dangXuLyEmail, setDangXuLyEmail] = useState(false)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const load = async () => {
     try {
@@ -40,16 +43,34 @@ export default function DuyetTinTuyenDungAdmin() {
   }, [])
 
   const approve = async (item: AdminJob, path: 'duyet' | 'tu-choi') => {
-    await adminApi.action(`/tintuyendung/${item.id}/${path}`)
-    await load()
-    if (selected?.id === item.id) setSelected(null)
+    const approving = path === 'duyet'
+    confirm(
+      approving ? 'Duyệt tin tuyển dụng' : 'Từ chối tin tuyển dụng',
+      `${approving ? 'Duyệt' : 'Từ chối'} tin "${item.tieuDe}"?`,
+      async () => {
+        await adminApi.action(`/tintuyendung/${item.id}/${path}`)
+        toast.success(approving ? 'Đã duyệt tin tuyển dụng.' : 'Đã từ chối tin tuyển dụng.')
+        await load()
+        if (selected?.id === item.id) setSelected(null)
+      },
+      approving ? 'info' : 'warning',
+      approving ? 'Duyệt' : 'Từ chối',
+    )
   }
 
   const remove = async (item: AdminJob) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa tin "${item.tieuDe}" không? Hành động này không thể khôi phục.`)) return
-    await adminApi.remove(`/tintuyendung/${item.id}`)
-    await load()
-    if (selected?.id === item.id) setSelected(null)
+    confirm(
+      'Xóa tin tuyển dụng',
+      `Xóa tin "${item.tieuDe}"? Hành động này không thể khôi phục.`,
+      async () => {
+        await adminApi.remove(`/tintuyendung/${item.id}`)
+        toast.success('Đã xóa tin tuyển dụng.')
+        await load()
+        if (selected?.id === item.id) setSelected(null)
+      },
+      'danger',
+      'Xóa',
+    )
   }
 
   const previewEmail = async () => {
@@ -66,18 +87,27 @@ export default function DuyetTinTuyenDungAdmin() {
 
   const sendBulkEmail = async () => {
     if (!preview) return
-    if (!window.confirm(`Gửi email gợi ý việc làm cho ${preview.seGuiEmail} ứng viên phù hợp?`)) return
-    try {
-      setDangXuLyEmail(true)
-      setError('')
-      const ketQua = await apiCoXacThuc('/ai/goi-y-viec-lam/admin/gui-email-hang-loat', { method: 'POST', body: JSON.stringify({ diemToiThieu: 55, soJobMoiEmail: 5 }) }) as any
-      window.alert(`Đã gửi ${ketQua.daGui ?? 0} email. Thất bại: ${ketQua.thatBai ?? 0}.`)
-      setPreview(null)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không gửi được email hàng loạt')
-    } finally {
-      setDangXuLyEmail(false)
-    }
+    confirm(
+      'Gửi email hàng loạt',
+      `Gửi email gợi ý việc làm cho ${preview.seGuiEmail} ứng viên phù hợp?`,
+      async () => {
+        try {
+          setDangXuLyEmail(true)
+          setError('')
+          const ketQua = await apiCoXacThuc('/ai/goi-y-viec-lam/admin/gui-email-hang-loat', { method: 'POST', body: JSON.stringify({ diemToiThieu: 55, soJobMoiEmail: 5 }) }) as any
+          toast.success(`Đã gửi ${ketQua.daGui ?? 0} email. Thất bại: ${ketQua.thatBai ?? 0}.`)
+          setPreview(null)
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Không gửi được email hàng loạt'
+          setError(message)
+          toast.error(message)
+        } finally {
+          setDangXuLyEmail(false)
+        }
+      },
+      'warning',
+      'Gửi email',
+    )
   }
 
   return (
@@ -216,6 +246,7 @@ export default function DuyetTinTuyenDungAdmin() {
           </aside>
         </div>
       )}
+      <ConfirmDialogComponent />
     </AdminPage>
   )
 }

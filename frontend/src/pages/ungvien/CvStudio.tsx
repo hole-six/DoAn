@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import { Brain, Download, Eye, FileUp, ImagePlus, Plus, Save, Sparkles, Trash2, X } from 'lucide-react'
+import { useConfirm } from '../../components/ConfirmDialog'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../lib/auth'
 import { toast } from '../../lib/toast'
 
@@ -77,7 +78,7 @@ const emptyCv: CvData = {
   templateCv: 'it-a4-pro',
   mauChinh: '#0f172a',
   mauPhu: '#000000',
-  font: 'Inter',
+  font: 'Lexend',
   markdownGoc: '',
   loaiHoSo: 'builder',
 }
@@ -543,7 +544,7 @@ function Preview({ cv }: { cv: CvData; data: any }) {
   const hasSkills = cleanCv.kyNangMem.length > 0 || cleanCv.kyNangLapTrinh.length > 0
 
   return (
-    <div className="cv-a4-preview mx-auto w-full max-w-[210mm] bg-white text-[#111827] shadow-[0_28px_80px_rgba(15,23,42,.16)]" style={{ minHeight: '297mm', fontFamily: 'Inter, Segoe UI, Arial, sans-serif' }}>
+    <div className="cv-a4-preview mx-auto w-full max-w-[210mm] bg-white text-[#111827] shadow-[0_28px_80px_rgba(15,23,42,.16)]" style={{ minHeight: '297mm', fontFamily: 'Lexend, Segoe UI, Arial, sans-serif' }}>
       <header className="cv-header">
         <div className="min-w-0">
           {hoTen && <h1>{hoTen}</h1>}
@@ -655,6 +656,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   const [dangTaiAnhCv, setDangTaiAnhCv] = useState(false)
   const [dangTaiFileCv, setDangTaiFileCv] = useState(false)
   const [hienModalThieuHoSo, setHienModalThieuHoSo] = useState(false)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
   const current = data.current ?? {}
   const ungVien = data.ungVien ?? {}
   const danhSachCvDaLuu = useMemo(
@@ -681,9 +683,18 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
     setCv(currentCv => typeof next === 'function' ? next(currentCv) : next)
   }
 
-  function xacNhanBoQuaNhap() {
-    if (!coThayDoiChuaLuu) return true
-    return window.confirm('CV hiện tại có thay đổi chưa lưu. Bạn muốn bỏ qua thay đổi này?')
+  function xacNhanBoQuaNhap(onAccepted: () => void) {
+    if (!coThayDoiChuaLuu) {
+      onAccepted()
+      return
+    }
+    confirm(
+      'Bỏ thay đổi CV?',
+      'CV hiện tại có thay đổi chưa lưu. Bạn muốn bỏ qua thay đổi này?',
+      onAccepted,
+      'warning',
+      'Bỏ thay đổi',
+    )
   }
 
   useEffect(() => {
@@ -865,9 +876,10 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   }
 
   function xemCvDaLuu(item: CvData) {
-    if (!xacNhanBoQuaNhap()) return
-    setCv(taoCvTuDaLuu(item))
-    setCoThayDoiChuaLuu(false)
+    xacNhanBoQuaNhap(() => {
+      setCv(taoCvTuDaLuu(item))
+      setCoThayDoiChuaLuu(false)
+    })
   }
 
   function taiPdfCvDaLuu(item: CvData) {
@@ -891,32 +903,41 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   }
 
   function taoCvMoi() {
-    if (!xacNhanBoQuaNhap()) return
-    setCv(taoBanNhapMoi())
-    setCoThayDoiChuaLuu(false)
+    xacNhanBoQuaNhap(() => {
+      setCv(taoBanNhapMoi())
+      setCoThayDoiChuaLuu(false)
+    })
   }
 
   async function xoaCv(item: CvData) {
-    if (!item.id || !window.confirm(`Xóa ${item.tieuDe || 'CV này'}?`)) return
-    try {
-      setCvDangXoa(item.id)
-      await apiCoXacThuc(`/hosonangluc/${item.id}`, { method: 'DELETE' })
-      setCvDaXoa(value => [...value, item.id as string])
-      const conLai = danhSachCvDaLuu.filter((cvItem: CvData) => cvItem.id !== item.id)
-      if (cv.id === item.id) {
-        const conLaiBuilder = conLai.filter((cvItem: CvData) => !laHoSoFileUpload(cvItem))
-        const next = conLaiBuilder.find((cvItem: CvData) => cvItem.cvChinh) ?? conLaiBuilder[0]
-        if (next) setCv(taoCvTuDaLuu(next))
-        else setCv(taoBanNhapMoi())
-        setCoThayDoiChuaLuu(false)
-      }
-      toast.success('Đã xóa CV.')
-      await onReload()
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Không thể xóa CV.')
-    } finally {
-      setCvDangXoa('')
-    }
+    if (!item.id) return
+    confirm(
+      'Xóa CV',
+      `Xóa ${item.tieuDe || 'CV này'}? Hành động này không thể khôi phục.`,
+      async () => {
+        try {
+          setCvDangXoa(item.id as string)
+          await apiCoXacThuc(`/hosonangluc/${item.id}`, { method: 'DELETE' })
+          setCvDaXoa(value => [...value, item.id as string])
+          const conLai = danhSachCvDaLuu.filter((cvItem: CvData) => cvItem.id !== item.id)
+          if (cv.id === item.id) {
+            const conLaiBuilder = conLai.filter((cvItem: CvData) => !laHoSoFileUpload(cvItem))
+            const next = conLaiBuilder.find((cvItem: CvData) => cvItem.cvChinh) ?? conLaiBuilder[0]
+            if (next) setCv(taoCvTuDaLuu(next))
+            else setCv(taoBanNhapMoi())
+            setCoThayDoiChuaLuu(false)
+          }
+          toast.success('Đã xóa CV.')
+          await onReload()
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : 'Không thể xóa CV.')
+        } finally {
+          setCvDangXoa('')
+        }
+      },
+      'danger',
+      'Xóa CV',
+    )
   }
 
   function taiPdf(source = cv) {
@@ -1098,6 +1119,14 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
             grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
             gap: 8mm;
           }
+          #cv-print-root .cv-header h1 {
+            font-size: 36pt !important;
+            line-height: 1.08 !important;
+          }
+          #cv-print-root .cv-role {
+            font-size: 15pt !important;
+            line-height: 1.35 !important;
+          }
         }
       `}</style>
       <div className="cv-studio-top mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -1112,12 +1141,12 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           </div>
           <p className="mt-1 max-w-3xl text-sm font-semibold text-slate-500">Nhập đủ thông tin như mẫu CV trong `index.html`: thông tin cá nhân, summary, kỹ năng, học vấn, bài viết kỹ thuật và kinh nghiệm theo dự án.</p>
         </div>
-        <div className="cv-studio-actions flex flex-wrap items-center justify-end gap-2">
-          <button type="button" className={secondaryBtn} onClick={taoCvMoi}><Plus size={16} /> Tạo CV mới</button>
-          <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()}><FileUp size={16} /> Upload CV PDF</button>
-          <button type="button" className={secondaryBtn} onClick={goiYAi}><Brain size={16} /> Gợi ý nội dung</button>
-          <button type="button" className={secondaryBtn} onClick={() => taiPdf()} disabled={!coNoiDungDeIn}><Download size={16} /> Tải PDF</button>
+        <div className="cv-studio-actions flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
           <button type="button" className={primaryBtn} disabled={dangLuu || dangTaiAnhCv || dangTaiFileCv} onClick={luuStudio}><Save size={16} /> {dangLuu ? 'Đang lưu...' : 'Lưu CV'}</button>
+          <button type="button" className={secondaryBtn} onClick={() => taiPdf()} disabled={!coNoiDungDeIn}><Download size={16} /> Tải PDF</button>
+          <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()} disabled={dangTaiFileCv}><FileUp size={16} /> {dangTaiFileCv ? 'Đang upload...' : 'Upload PDF'}</button>
+          <button type="button" className={secondaryBtn} onClick={goiYAi}><Brain size={16} /> Gợi ý AI</button>
+          <button type="button" className={secondaryBtn} onClick={taoCvMoi}><Plus size={16} /> Tạo mới</button>
           <input id="cv-photo-upload" hidden type="file" accept="image/*" onChange={e => { void docAnh(e.target.files?.[0]); e.currentTarget.value = '' }} />
           <input id="cv-file-upload" hidden type="file" accept="application/pdf,.pdf" onChange={e => { void docFileCv(e.target.files?.[0]); e.currentTarget.value = '' }} />
         </div>
@@ -1290,6 +1319,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           </div>
         </div>
       )}
+      <ConfirmDialogComponent />
     </section>
   )
 }

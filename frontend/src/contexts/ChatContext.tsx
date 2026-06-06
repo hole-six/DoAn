@@ -54,6 +54,17 @@ export interface CuocTroChuyenPreview {
   soChuaDocCuaToi?: number
   ngayCapNhat: string
   soThanhVien?: number
+  maHoSoUngTuyen?: string
+  maTinTuyenDung?: string
+  maHoSoUngTuyenGanNhat?: string | { _id?: string; id?: string; trangThai?: string }
+  maTinTuyenDungGanNhat?: string | { _id?: string; id?: string; tieuDe?: string }
+  contextSummary?: {
+    tieuDeTin?: string
+    tenCongTy?: string
+    maHoSoUngTuyen?: string
+    maTinTuyenDung?: string
+    capNhatLuc?: string
+  }
 }
 
 export type ChatContextMeta = {

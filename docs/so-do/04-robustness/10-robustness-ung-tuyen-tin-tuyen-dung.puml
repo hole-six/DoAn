@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Ứng tuyển tin tuyển dụng"
+
+actor "Actor: Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "UI: chi-tiet-viec-lam" as UI
+boundary "UI: form-ung-tuyen" as Form
+control "Controller: HoSoUngTuyenController" as Controller
+entity "Entity: HoSoUngTuyen" as MainEntity
+entity "Entity: TinTuyenDung" as E1
+entity "Entity: HoSoNangLuc" as E2
+entity "Entity: ThongBao" as E3
+
+Actor --> UI : Nhấn Ứng tuyển ngay
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Chọn CV và nhập thư ứng tuyển
+Form --> Controller : ungTuyen(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra tin đang mở, CV và hồ sơ ứng viên\nTạo hồ sơ ứng tuyển
+Controller <--> E1 : Gửi thông báo cho nhà tuyển dụng
+Controller --> Form : Thông báo ứng tuyển thành công / Thông báo đã ứng tuyển hoặc thiếu CV
+Controller --> UI : trả dữ liệu mới
+@enduml

@@ -1,44 +1,42 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 left to right direction
 skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam actorStyle stick
+skinparam usecase {
+  BackgroundColor White
+  BorderColor #222222
+}
 title Use Case - Nhà tuyển dụng
 
 actor "Nhà tuyển dụng" as Employer
-actor "Ứng viên" as Candidate
-actor "Quản trị viên" as Admin
 
-rectangle "Dashboard nhà tuyển dụng" {
-  usecase "Cập nhật hồ sơ công ty" as Company
-  usecase "Gửi công ty chờ duyệt" as SubmitCompany
+rectangle "Dashboard nhà tuyển dụng EffortIT" {
+  usecase "Đăng nhập" as Login
+  usecase "Cập nhật thông tin tài khoản" as UpdateAccount
+  usecase "Cập nhật hồ sơ công ty" as UpdateCompany
   usecase "Đăng tin tuyển dụng" as PostJob
   usecase "Quản lý tin tuyển dụng" as ManageJob
-  usecase "Tạm đóng/Mở lại tin" as ToggleJob
-  usecase "Xem hồ sơ ứng viên" as ViewCandidate
-  usecase "Cập nhật pipeline ứng tuyển" as Pipeline
-  usecase "Mời phỏng vấn" as Schedule
-  usecase "Cập nhật kết quả phỏng vấn" as Result
-  usecase "Chat với ứng viên" as ChatCandidate
-  usecase "Chat hỗ trợ với quản trị viên" as ChatAdmin
-  usecase "Nhận thông báo duyệt" as Notify
+  usecase "Quản lý hồ sơ ứng viên" as Applications
+  usecase "Mời ứng viên phỏng vấn" as InviteInterview
+  usecase "Cập nhật kết quả phỏng vấn" as InterviewResult
 }
 
-Employer --> Company
-Employer --> SubmitCompany
+Employer --> Login
+Employer --> UpdateAccount
+Employer --> UpdateCompany
 Employer --> PostJob
 Employer --> ManageJob
-Employer --> ToggleJob
-Employer --> ViewCandidate
-Employer --> Pipeline
-Employer --> Schedule
-Employer --> Result
-Employer --> ChatCandidate
-Employer --> ChatAdmin
-Employer --> Notify
+Employer --> Applications
+Employer --> InviteInterview
+Employer --> InterviewResult
 
-SubmitCompany --> Admin : yêu cầu duyệt
-PostJob ..> Company : <<precondition: công ty đã duyệt>>
-PostJob --> Admin : tin chờ duyệt
-Schedule --> Candidate : gửi lời mời
-Result --> Candidate : gửi kết quả
+PostJob ..> UpdateCompany : <<precondition>>
+ManageJob ..> PostJob : <<extend>>
+InviteInterview ..> Applications : <<include>>
+InterviewResult ..> InviteInterview : <<extend>>
 @enduml
-

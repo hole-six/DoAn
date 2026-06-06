@@ -1,16 +1,130 @@
-import { Download, ExternalLink, FileText, MessageCircle, RotateCcw } from 'lucide-react'
+import { useState } from 'react'
+import { Download, ExternalLink, FileText, MessageCircle, RotateCcw, Star } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { useChat } from '../../../contexts/ChatContext'
+import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
 import { applicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
-import type { HoSoUngTuyen } from '../../../types/recruitment'
+import { toast } from '../../../lib/toast'
+import type { DanhGiaCongTy, HoSoUngTuyen } from '../../../types/recruitment'
 import { Badge, Drawer } from '../shared/UngVienAtoms'
 
-const TRANG_THAI_DUOC_CHAT = ['dang_xet_duyet', 'moi_phong_van', 'dat']
+const TRANG_THAI_DUOC_CHAT = ['da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat']
 const TIMELINE = ['da_nop', 'da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat']
 
-export function AppDrawer({ item, onClose, onWithdraw }: { item: HoSoUngTuyen; onClose: () => void; onWithdraw: () => void }) {
+function ReviewSection({
+  item,
+  danhGia,
+  duDieuKien,
+  onSubmitted,
+}: {
+  item: HoSoUngTuyen
+  danhGia?: DanhGiaCongTy
+  duDieuKien: boolean
+  onSubmitted: () => Promise<void> | void
+}) {
+  const [diem, setDiem] = useState(5)
+  const [noiDung, setNoiDung] = useState('')
+  const [anDanh, setAnDanh] = useState(false)
+  const [dangGui, setDangGui] = useState(false)
+
+  const submit = async () => {
+    const noiDungSach = noiDung.trim()
+    if (noiDungSach.length < 10) {
+      toast.error('Nội dung đánh giá cần ít nhất 10 ký tự.')
+      return
+    }
+    try {
+      setDangGui(true)
+      await apiCoXacThuc(`/danhgiacongty/tu-ho-so/${item.id}`, {
+        method: 'POST',
+        body: JSON.stringify({ diem, noiDung: noiDungSach, anDanh }),
+      })
+      toast.success('Đã gửi đánh giá, chờ quản trị viên duyệt.')
+      setNoiDung('')
+      setAnDanh(false)
+      setDiem(5)
+      await onSubmitted()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Không thể gửi đánh giá công ty.')
+    } finally {
+      setDangGui(false)
+    }
+  }
+
+  return (
+    <section className="rounded-xl border border-slate-200 p-4">
+      <p className="text-xs font-black uppercase tracking-wide text-slate-500">Đánh giá công ty</p>
+      {danhGia ? (
+        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1 text-amber-500">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star key={index} size={16} fill={index < danhGia.diem ? 'currentColor' : 'none'} />
+              ))}
+            </div>
+            <Badge tone={danhGia.daDuyet ? 'green' : 'yellow'}>{danhGia.daDuyet ? 'Đã duyệt' : 'Chờ duyệt'}</Badge>
+          </div>
+          <p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{danhGia.noiDung}</p>
+          {danhGia.anDanh && <p className="mt-2 text-xs font-bold text-slate-500">Bạn đã chọn hiển thị ẩn danh.</p>}
+        </div>
+      ) : duDieuKien ? (
+        <div className="mt-3 grid gap-3">
+          <div className="flex flex-wrap items-center gap-1">
+            {Array.from({ length: 5 }).map((_, index) => {
+              const value = index + 1
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  className="grid h-9 w-9 place-items-center rounded-lg border border-amber-200 bg-amber-50 text-amber-500 transition hover:bg-amber-100"
+                  aria-label={`${value} sao`}
+                  onClick={() => setDiem(value)}
+                >
+                  <Star size={18} fill={value <= diem ? 'currentColor' : 'none'} />
+                </button>
+              )
+            })}
+          </div>
+          <textarea
+            className="min-h-28 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none transition focus:border-sky-400"
+            value={noiDung}
+            onChange={event => setNoiDung(event.target.value)}
+            placeholder="Chia sẻ trải nghiệm phỏng vấn, cách công ty trao đổi và mức độ chuyên nghiệp..."
+          />
+          <label className="flex items-center gap-2 text-sm font-bold text-slate-600">
+            <input type="checkbox" checked={anDanh} onChange={event => setAnDanh(event.target.checked)} />
+            Hiển thị đánh giá ẩn danh
+          </label>
+          <Button size="sm" variant="primary" icon={<Star size={16} />} loading={dangGui} onClick={() => void submit()}>
+            Gửi đánh giá
+          </Button>
+        </div>
+      ) : (
+        <p className="mt-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold leading-6 text-slate-500">
+          Bạn có thể đánh giá công ty sau khi được mời phỏng vấn.
+        </p>
+      )}
+    </section>
+  )
+}
+
+export function AppDrawer({
+  item,
+  danhGia,
+  coLichPhongVan,
+  onClose,
+  onWithdraw,
+  onReviewSubmitted,
+}: {
+  item: HoSoUngTuyen
+  danhGia?: DanhGiaCongTy
+  coLichPhongVan: boolean
+  onClose: () => void
+  onWithdraw: () => void
+  onReviewSubmitted: () => Promise<void> | void
+}) {
   const navigate = useNavigate()
   const { moChatVoiNguoiDung } = useChat()
   const employerUserId = (item.tinTuyenDung?.nhaTuyenDung as any)?.maNguoiDung?.id
@@ -19,6 +133,7 @@ export function AppDrawer({ item, onClose, onWithdraw }: { item: HoSoUngTuyen; o
     ?? (item.tinTuyenDung?.nhaTuyenDung as any)?.nguoiDung?.id
     ?? (item.tinTuyenDung?.nhaTuyenDung as any)?.nguoiDung?._id
   const canChat = TRANG_THAI_DUOC_CHAT.includes(item.trangThai) && Boolean(employerUserId)
+  const duDieuKienDanhGia = item.trangThai === 'moi_phong_van' || coLichPhongVan || Boolean(danhGia)
   const hoSo = item.hoSoNangLuc
   const laPdfUpload = hoSo?.loaiHoSo === 'file_upload' || Boolean(hoSo?.fileCvData)
 
@@ -64,6 +179,8 @@ export function AppDrawer({ item, onClose, onWithdraw }: { item: HoSoUngTuyen; o
             <p className="mt-2 text-sm font-bold text-emerald-700">Bạn đã được mời phỏng vấn và có thể nhắn trực tiếp với nhà tuyển dụng.</p>
           )}
         </section>
+
+        <ReviewSection item={item} danhGia={danhGia} duDieuKien={duDieuKienDanhGia} onSubmitted={onReviewSubmitted} />
 
         <section className="rounded-xl border border-slate-200 p-4">
           <p className="text-xs font-black uppercase tracking-wide text-slate-500">CV đã nộp</p>

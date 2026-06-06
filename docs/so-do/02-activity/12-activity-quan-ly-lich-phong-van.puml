@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý lịch phỏng vấn
+
+start
+:Ứng viên đăng nhập;
+:Mở trang lịch phỏng vấn;
+:Hệ thống tải các lịch phỏng vấn liên quan;
+if (Có lịch phỏng vấn?) then (Có)
+  :Ứng viên chọn lịch cần xem;
+  fork
+    :Xem thời gian phỏng vấn;
+  fork again
+    :Xem hình thức và địa điểm hoặc link họp;
+  fork again
+    :Xem trạng thái lịch;
+  end fork
+  if (Cần phản hồi lịch?) then (Có)
+    :Ứng viên gửi phản hồi hoặc yêu cầu đổi lịch;
+    :Hệ thống ghi nhận phản hồi;
+    :Thông báo cho nhà tuyển dụng;
+    stop
+  else (Không)
+    :Ứng viên xác nhận đã xem lịch;
+    stop
+  endif
+else (Không)
+  :Hiển thị trạng thái chưa có lịch phỏng vấn;
+  stop
+endif
+@enduml

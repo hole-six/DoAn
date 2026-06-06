@@ -1,0 +1,46 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Mời ứng viên phỏng vấn
+
+start
+:Nhà tuyển dụng mở hồ sơ ứng viên;
+:Chọn chức năng mời phỏng vấn;
+:Hệ thống kiểm tra trạng thái hồ sơ ứng tuyển;
+if (Hồ sơ đủ điều kiện mời phỏng vấn?) then (Có)
+  fork
+    :Nhập thời gian bắt đầu và kết thúc;
+  fork again
+    :Chọn hình thức phỏng vấn;
+  fork again
+    :Nhập địa điểm hoặc link họp;
+  fork again
+    :Nhập ghi chú nếu có;
+  end fork
+  :Nhà tuyển dụng gửi lời mời;
+  :Hệ thống kiểm tra thông tin lịch;
+  if (Lịch hợp lệ?) then (Có)
+    :Hệ thống tạo lịch phỏng vấn;
+    :Cập nhật trạng thái hồ sơ ứng tuyển;
+    :Thông báo cho ứng viên;
+    stop
+  else (Không)
+    :Thông báo lỗi lịch phỏng vấn;
+    stop
+  endif
+else (Không)
+  :Thông báo hồ sơ chưa đủ điều kiện;
+  stop
+endif
+@enduml

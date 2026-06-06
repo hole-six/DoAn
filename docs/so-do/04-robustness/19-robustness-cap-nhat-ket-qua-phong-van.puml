@@ -1,0 +1,43 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Cập nhật kết quả phỏng vấn"
+
+actor "Actor: Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
+boundary "UI: lich-phong-van-ntd" as UI
+boundary "UI: form-ket-qua-phong-van" as Form
+control "Controller: LichPhongVanController" as Controller
+entity "Entity: LichPhongVan" as MainEntity
+entity "Entity: HoSoUngTuyen" as E1
+entity "Entity: ThongBao" as E2
+
+Actor --> UI : Mở lịch phỏng vấn cần cập nhật
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Nhập kết quả đạt hoặc không đạt
+Form --> Controller : capNhatKetQuaPhongVan(request)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra lịch thuộc công ty và đã đến bước đánh giá\nCập nhật kết quả phỏng vấn
+Controller <--> E1 : Cập nhật trạng thái hồ sơ và báo ứng viên
+Controller --> Form : Thông báo cập nhật kết quả thành công / Thông báo lịch chưa thể cập nhật kết quả
+Controller --> UI : trả dữ liệu mới
+@enduml

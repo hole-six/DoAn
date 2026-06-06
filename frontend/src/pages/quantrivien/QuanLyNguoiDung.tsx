@@ -3,8 +3,10 @@ import type { FormEvent } from 'react'
 import { clsx } from 'clsx'
 import { Edit3, Plus, RefreshCw, Search, Trash2, UserCheck, Users, X } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
+import { useConfirm } from '../../components/ConfirmDialog'
 import { layAccessToken } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
+import { toast } from '../../lib/toast'
 import './admin-styles.css'
 
 const PAGE_SIZE = 6
@@ -93,6 +95,7 @@ export default function QuanLyNguoiDung() {
   const [loi, setLoi] = useState('')
   const [form, setForm] = useState<FormNguoiDung | null>(null)
   const [page, setPage] = useState(1)
+  const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const taiDuLieu = async () => {
     setDangTai(true)
@@ -179,6 +182,7 @@ export default function QuanLyNguoiDung() {
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(data.thongBao ?? 'Không lưu được người dùng')
+      toast.success(form.id ? 'Đã cập nhật người dùng.' : 'Đã tạo người dùng.')
       setForm(null)
       await taiDuLieu()
     } catch (error) {
@@ -189,19 +193,29 @@ export default function QuanLyNguoiDung() {
   }
 
   const xoaNguoiDung = async (nguoiDung: NguoiDung) => {
-    if (!window.confirm(`Xóa tài khoản ${nguoiDung.email}?`)) return
-    setLoi('')
-    try {
-      const response = await fetch(`${API_URL}/nguoidung/${nguoiDung.id}`, {
-        method: 'DELETE',
-        headers: layHeader(),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data.thongBao ?? 'Không xóa được người dùng')
-      await taiDuLieu()
-    } catch (error) {
-      setLoi(error instanceof Error ? error.message : 'Không xóa được người dùng')
-    }
+    confirm(
+      'Xóa người dùng',
+      `Xóa tài khoản ${nguoiDung.email}? Hành động này không thể hoàn tác.`,
+      async () => {
+        setLoi('')
+        try {
+          const response = await fetch(`${API_URL}/nguoidung/${nguoiDung.id}`, {
+            method: 'DELETE',
+            headers: layHeader(),
+          })
+          const data = await response.json().catch(() => ({}))
+          if (!response.ok) throw new Error(data.thongBao ?? 'Không xóa được người dùng')
+          toast.success('Đã xóa người dùng.')
+          await taiDuLieu()
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Không xóa được người dùng'
+          setLoi(message)
+          toast.error(message)
+        }
+      },
+      'danger',
+      'Xóa',
+    )
   }
 
   return (
@@ -396,6 +410,7 @@ export default function QuanLyNguoiDung() {
           </form>
         </div>
       )}
+      <ConfirmDialogComponent />
     </div>
   )
 }

@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+skinparam actorStyle stick
+skinparam roundcorner 12
+skinparam rectangleBorderColor #222222
+skinparam boundary {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam control {
+  BackgroundColor White
+  BorderColor #222222
+}
+skinparam entity {
+  BackgroundColor White
+  BorderColor #222222
+}
+title Robustness Usecase - "Xem thống kê hệ thống"
+
+actor "Actor: Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "UI: quan-tri-dashboard" as UI
+boundary "UI: bo-loc-thong-ke" as Form
+control "Controller: ThongKeController" as Controller
+entity "Entity: ThongKeHeThong" as MainEntity
+entity "Entity: TaiKhoan" as E1
+entity "Entity: TinTuyenDung" as E2
+entity "Entity: HoSoUngTuyen" as E3
+entity "Entity: NhaTuyenDung" as E4
+
+Actor --> UI : Mở dashboard quản trị
+UI <--> Form : mở form / hiển thị dữ liệu
+Actor --> Form : Chọn khoảng thời gian hoặc loại thống kê
+Form --> Controller : layThongKeHeThong(filter)
+UI --> Controller : tải dữ liệu hiện có
+Controller <--> MainEntity : Kiểm tra quyền quản trị và tham số thống kê\nTổng hợp số liệu hệ thống
+Controller <--> E1 : Đếm người dùng, công ty, tin và hồ sơ ứng tuyển
+Controller --> Form : Hiển thị biểu đồ và chỉ số thống kê / Thông báo không tải được dữ liệu thống kê
+Controller --> UI : trả dữ liệu mới
+@enduml

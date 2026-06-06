@@ -1,75 +1,104 @@
 @startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
 hide circle
 skinparam shadowing false
+skinparam linetype ortho
 title ERD - Nghiệp vụ tuyển dụng
 
-entity "NhàTuyểnDụng" as Employer {
+entity "NhaTuyenDung" as Employer {
   * _id : ObjectId <<PK>>
   --
-  tênCôngTy
-  trạngTháiDuyệt
+  maNguoiDung : ObjectId <<FK>>
+  tenCongTy : String
+  trangThaiDuyet : Enum
 }
 
-entity "TinTuyểnDụng" as Job {
+entity "TinTuyenDung" as Job {
   * _id : ObjectId <<PK>>
   --
-  mãNhàTuyểnDụng : ObjectId <<FK>>
-  tiêuĐề
-  môTả
-  yêuCầu
-  quyềnLợi
-  lươngMin
-  lươngMax
-  hìnhThức
-  cấpBậc
-  hạnNộp
-  trạngThái
+  maNhaTuyenDung : ObjectId <<FK>>
+  tieuDe : String
+  moTa : String
+  yeuCau : String
+  quyenLoi : String
+  luongMin : Number
+  luongMax : Number
+  loaiHinh : Enum
+  capBac : Enum
+  hanNop : Date
+  trangThai : Enum
 }
 
-entity "DanhMụcKỹNăng" as Skill {
+entity "DanhMucKyNang" as Skill {
   * _id : ObjectId <<PK>>
   --
-  tênKỹNăng
-  loạiKỹNăng
-  môTả
+  tenKyNang : String <<UNIQUE>>
+  loaiKyNang : String
 }
 
-entity "ỨngViên" as Candidate {
-  * _id : ObjectId <<PK>>
-}
-
-entity "HồSơNăngLực" as CV {
+entity "UngVien" as Candidate {
   * _id : ObjectId <<PK>>
   --
-  mãỨngViên : ObjectId <<FK>>
-  tiêuĐề
+  maNguoiDung : ObjectId <<FK>>
 }
 
-entity "HồSơỨngTuyển" as Application {
+entity "HoSoNangLuc" as CV {
   * _id : ObjectId <<PK>>
   --
-  mãỨngViên : ObjectId <<FK>>
-  mãTinTuyểnDụng : ObjectId <<FK>>
-  mãHồSơNăngLực : ObjectId <<FK>>
-  trạngThái
-  ngàyNộp
+  maUngVien : ObjectId <<FK>>
+  tieuDe : String
+  loaiHoSo : Enum
+  cvChinh : Boolean
 }
 
-entity "LịchSửHồSơỨngTuyển" as History {
+entity "HoSoUngTuyen" as Application {
   * _id : ObjectId <<PK>>
   --
-  mãHồSơỨngTuyển : ObjectId <<FK>>
-  trạngTháiCũ
-  trạngTháiMới
-  ghiChú
+  maUngVien : ObjectId <<FK>>
+  maTinTuyenDung : ObjectId <<FK>>
+  maHoSoNangLuc : ObjectId <<FK>>
+  trangThai : Enum
+  ngayNop : Date
 }
 
-Employer ||--o{ Job
-Job }o--o{ Skill
-Candidate ||--o{ CV
-Candidate ||--o{ Application
-Job ||--o{ Application
-CV ||--o{ Application
-Application ||--o{ History
+entity "LichPhongVan" as Interview {
+  * _id : ObjectId <<PK>>
+  --
+  maHoSoUngTuyen : ObjectId <<FK>>
+  thoiGianBatDau : Date
+  hinhThuc : Enum
+  trangThai : Enum
+  ketQua : Enum
+}
+
+entity "ViecLamDaLuu" as SavedJob {
+  * _id : ObjectId <<PK>>
+  --
+  maNguoiDung : ObjectId <<FK>>
+  maTinTuyenDung : ObjectId <<FK>>
+  ngayLuu : Date
+}
+
+entity "DanhGiaCongTy" as Review {
+  * _id : ObjectId <<PK>>
+  --
+  maUngVien : ObjectId <<FK>>
+  maNhaTuyenDung : ObjectId <<FK>>
+  diem : Number
+  daDuyet : Boolean
+}
+
+Employer ||--o{ Job : đăng
+Job }o--o{ Skill : yêu cầu
+Candidate ||--o{ CV : tạo
+Candidate ||--o{ Application : nộp
+Job ||--o{ Application : nhận
+CV ||--o{ Application : sử dụng
+Application ||--o| Interview : có lịch
+Job ||--o{ SavedJob : được lưu
+Candidate ||--o{ Review : viết
+Employer ||--o{ Review : nhận
 @enduml
-

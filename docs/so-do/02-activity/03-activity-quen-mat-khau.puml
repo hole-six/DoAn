@@ -1,0 +1,44 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quên mật khẩu
+
+start
+:Người dùng mở trang quên mật khẩu;
+:Nhập email tài khoản;
+:Hệ thống kiểm tra định dạng email;
+if (Email hợp lệ?) then (Có)
+  :Hệ thống tạo mã đặt lại mật khẩu;
+  :Hệ thống gửi email chứa liên kết đặt lại;
+  if (Gửi email thành công?) then (Có)
+    :Người dùng mở liên kết trong email;
+    :Nhập mật khẩu mới và xác nhận mật khẩu;
+    :Hệ thống kiểm tra mã đặt lại;
+    if (Mã còn hiệu lực?) then (Có)
+      :Hệ thống cập nhật mật khẩu mới;
+      :Thông báo đặt lại mật khẩu thành công;
+      stop
+    else (Không)
+      :Thông báo liên kết không hợp lệ hoặc hết hạn;
+      stop
+    endif
+  else (Không)
+    :Thông báo không thể gửi email;
+    stop
+  endif
+else (Không)
+  :Thông báo dữ liệu email không hợp lệ;
+  stop
+endif
+@enduml

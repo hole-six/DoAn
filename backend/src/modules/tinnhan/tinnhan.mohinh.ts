@@ -1,7 +1,7 @@
 ﻿import { Schema, model } from 'mongoose'
 
 // ============================================
-// CONVERSATION MODEL (Cuá»™c há»™i thoáº¡i)
+// CONVERSATION MODEL (Cuộc hội thoại)
 // ============================================
 
 export const loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'] as const
@@ -14,19 +14,29 @@ const cuocTroChuyenSchema = new Schema(
     // Type
     loai: { type: String, enum: loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
 
-    // TÃªn nhÃ³m (dÃ¹ng cho nhom_cong_dong)
+    // Tên nhóm (dùng cho nhom_cong_dong)
     tenNhom: { type: String },
     moTaNhom: { type: String },
     anhNhom: { type: String },
 
-    // Chá»‰ dÃ¹ng cho nhom_cong_dong â€” ai lÃ  admin nhÃ³m
+    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
     quanTriNhom: [{ type: Schema.Types.ObjectId, ref: 'NguoiDung' }],
     
-    // Context (náº¿u chat vá» há»“ sÆ¡ á»©ng tuyá»ƒn cá»¥ thá»ƒ)
+    // Ngữ cảnh gần nhất của cuộc trò chuyện tuyển dụng.
+    // Một cặp ứng viên - nhà tuyển dụng chỉ có một phòng chat; hồ sơ/tin chỉ là ngữ cảnh hiển thị.
     maHoSoUngTuyen: { type: Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
     maTinTuyenDung: { type: Schema.Types.ObjectId, ref: 'TinTuyenDung' },
+    maHoSoUngTuyenGanNhat: { type: Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
+    maTinTuyenDungGanNhat: { type: Schema.Types.ObjectId, ref: 'TinTuyenDung' },
+    contextSummary: {
+      tieuDeTin: String,
+      tenCongTy: String,
+      maHoSoUngTuyen: String,
+      maTinTuyenDung: String,
+      capNhatLuc: Date,
+    },
     
-    // Last message info (Ä‘á»ƒ hiá»ƒn thá»‹ preview)
+    // Last message info (để hiển thị preview)
     tinNhanCuoiCung: {
       noiDung: String,
       nguoiGui: { type: Schema.Types.ObjectId, ref: 'NguoiDung' },
@@ -52,13 +62,14 @@ const cuocTroChuyenSchema = new Schema(
 
 // Indexes
 cuocTroChuyenSchema.index({ nguoiThamGia: 1, ngayCapNhat: -1 })
+cuocTroChuyenSchema.index({ nguoiThamGia: 1, loai: 1, daLuuTru: 1 })
 cuocTroChuyenSchema.index({ maHoSoUngTuyen: 1 })
 cuocTroChuyenSchema.index({ daLuuTru: 1 })
 
 export const CuocTroChuyenModel = model<any>('CuocTroChuyenModel', cuocTroChuyenSchema)
 
 // ============================================
-// MESSAGE MODEL (Tin nháº¯n)
+// MESSAGE MODEL (Tin nhắn)
 // ============================================
 
 export const loaiTinNhanEnum = ['text', 'file', 'image', 'system'] as const

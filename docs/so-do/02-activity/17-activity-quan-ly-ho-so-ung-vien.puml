@@ -1,0 +1,39 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý hồ sơ ứng viên
+
+start
+:Nhà tuyển dụng đăng nhập;
+:Mở trang hồ sơ ứng viên;
+:Hệ thống tải hồ sơ ứng tuyển thuộc tin của công ty;
+fork
+  :Lọc theo tin tuyển dụng;
+fork again
+  :Lọc theo trạng thái xử lý;
+fork again
+  :Tìm kiếm ứng viên;
+end fork
+:Nhà tuyển dụng chọn hồ sơ ứng viên;
+:Hệ thống hiển thị chi tiết hồ sơ và CV;
+if (Chọn cập nhật trạng thái?) then (Có)
+  :Nhà tuyển dụng chọn trạng thái mới;
+  :Hệ thống lưu lịch sử xử lý hồ sơ;
+  :Thông báo cho ứng viên;
+  stop
+else (Không)
+  :Nhà tuyển dụng tiếp tục xem danh sách;
+  stop
+endif
+@enduml

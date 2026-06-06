@@ -47,25 +47,32 @@ function dinhDangThoiGian(ngay: string) {
 }
 
 export function ThongBaoToastContainer() {
-  const { toasts, xoaToast } = useThongBao()
+  const { toasts, xoaToast, danhDauDaDoc } = useThongBao()
   const navigate = useNavigate()
   if (toasts.length === 0) return null
 
+  const openToast = async (toast: ToastThongBao) => {
+    if (toast._id && !toast.daDoc) await danhDauDaDoc(toast._id)
+    if (toast.lienKet) navigate(toast.lienKet)
+    xoaToast(toast.toastId)
+  }
+
   return (
-    <div className="thongbao-toast-stack">
+    <div className="thongbao-toast-stack" aria-live="polite" aria-label="Thông báo mới">
       {toasts.map((toast: ToastThongBao) => {
         const Icon = layIcon(toast.loai)
+        const mau = layMau(toast.loai, toast.mauSac)
         return (
-          <div key={toast.toastId} className="thongbao-toast" style={{ borderLeft: `4px solid ${layMau(toast.loai, toast.mauSac)}` }}>
+          <div key={toast.toastId} className="thongbao-toast" style={{ borderLeft: `5px solid ${mau}` }}>
             <div className="thongbao-toast-inner">
-              <span className="thongbao-toast-icon" style={{ color: layMau(toast.loai, toast.mauSac), background: `${layMau(toast.loai, toast.mauSac)}18` }}>
-                <Icon size={18} />
+              <span className="thongbao-toast-icon" style={{ color: mau, background: `${mau}18` }}>
+                <Icon size={19} />
               </span>
               <div className="thongbao-toast-content">
                 <strong>{toast.tieuDe}</strong>
                 <p>{toast.noiDung}</p>
                 {toast.lienKet && (
-                  <button onClick={() => { navigate(toast.lienKet!); xoaToast(toast.toastId) }}>
+                  <button onClick={() => void openToast(toast)}>
                     Xem ngay <AppIcon icon={ExternalLink} size={12} />
                   </button>
                 )}
@@ -87,7 +94,7 @@ function ThongBaoItem({ tb, onDoc }: { tb: ThongBao; onDoc: (id: string) => void
   const Icon = layIcon(tb.loai)
 
   const xuLyClick = () => {
-    if (!tb.daDoc) onDoc(tb._id)
+    if (!tb.daDoc && tb._id) onDoc(tb._id)
     if (tb.lienKet) navigate(tb.lienKet)
   }
 
@@ -118,7 +125,7 @@ function ThongBaoItem({ tb, onDoc }: { tb: ThongBao; onDoc: (id: string) => void
       {!tb.daDoc && (
         <span className="thongbao-item-unread">
           <i style={{ background: mau }} />
-          <button type="button" onClick={e => { e.stopPropagation(); onDoc(tb._id) }} title="Đánh dấu đã đọc">
+          <button type="button" onClick={e => { e.stopPropagation(); if (tb._id) onDoc(tb._id) }} title="Đánh dấu đã đọc">
             <AppIcon icon={Check} size={14} />
           </button>
         </span>

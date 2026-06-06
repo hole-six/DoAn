@@ -1,0 +1,41 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 14
+skinparam titleFontSize 20
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+title Activity Scenario - Quản lý tin tuyển dụng
+
+start
+:Nhà tuyển dụng đăng nhập;
+:Mở trang quản lý tin tuyển dụng;
+:Hệ thống tải danh sách tin của công ty;
+fork
+  :Tìm kiếm tin tuyển dụng;
+fork again
+  :Lọc theo trạng thái;
+fork again
+  :Sắp xếp theo thời gian;
+end fork
+:Nhà tuyển dụng chọn tin cần xử lý;
+if (Chọn thao tác chỉnh sửa?) then (Có)
+  :Cập nhật nội dung tin;
+  :Hệ thống lưu thay đổi;
+else (Xem trạng thái duyệt)
+  if (Chọn thao tác đóng hoặc mở tin?) then (Có)
+    :Hệ thống cập nhật trạng thái tin;
+  else (Không)
+    :Hệ thống hiển thị kết quả kiểm duyệt;
+  endif
+endif
+:Thông báo xử lý thành công;
+stop
+@enduml

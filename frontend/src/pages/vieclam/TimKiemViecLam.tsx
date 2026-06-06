@@ -7,6 +7,7 @@ import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { apiCoXacThuc, layNguoiDung } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
+import { normalizeSkills } from '../../lib/skillDisplay'
 import './vieclam-styles.css'
 
 type ViecLamItem = {
@@ -144,14 +145,7 @@ export default function TimKiemViecLam() {
             luong: formatLuong(job.luongMin, job.luongMax),
             loai: job.loaiHinh ?? 'toan_thoi_gian',
             capBac: job.capBac ?? 'junior',
-            kyNang: (job.kyNang ?? [])
-              .map((skill: any) => ({
-                id: String(skill.maKyNang ?? skill.id ?? skill.tenKyNang),
-                ten: skill.tenKyNang ?? skill.maKyNang?.tenKyNang,
-                loai: skill.loaiKyNang ?? skill.maKyNang?.loaiKyNang ?? 'khac',
-              }))
-              .filter((skill: any) => skill.ten)
-              .slice(0, 8),
+            kyNang: normalizeSkills(job.kyNang).slice(0, 8),
             moTa: job.moTa ?? '',
             yeuCau: job.yeuCau ?? '',
             ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
@@ -234,17 +228,22 @@ export default function TimKiemViecLam() {
     localStorage.setItem('itjob_saved_jobs', JSON.stringify(next))
   }
 
-  const ketQua = viecLam.filter(job => {
+  const jobMatches = (
+    job: ViecLamItem,
+    except?: 'loai' | 'kyNang' | 'capBac' | 'loaiHinh',
+  ) => {
     const skillText = job.kyNang.map(skill => skill.ten).join(' ')
     const skillIds = job.kyNang.map(skill => skill.id)
     const skillTypes = job.kyNang.map(skill => skill.loai)
     const text = `${job.tieuDe} ${job.congTy} ${job.capBac} ${job.loai} ${skillText} ${job.moTa} ${job.yeuCau}`
     return includesNormalized(text, tuKhoa)
-      && (!loaiDangChon.length || loaiDangChon.some(loai => skillTypes.includes(loai)))
-      && (!kyNangDangChon.length || kyNangDangChon.every(skillId => skillIds.includes(skillId)))
-      && (!capBacDangChon.length || capBacDangChon.includes(job.capBac))
-      && (!loaiHinhDangChon.length || loaiHinhDangChon.includes(job.loai))
-  })
+      && (except === 'loai' || !loaiDangChon.length || loaiDangChon.some(loai => skillTypes.includes(loai)))
+      && (except === 'kyNang' || !kyNangDangChon.length || kyNangDangChon.every(skillId => skillIds.includes(skillId)))
+      && (except === 'capBac' || !capBacDangChon.length || capBacDangChon.includes(job.capBac))
+      && (except === 'loaiHinh' || !loaiHinhDangChon.length || loaiHinhDangChon.includes(job.loai))
+  }
+
+  const ketQua = viecLam.filter(job => jobMatches(job))
 
   useEffect(() => {
     setPage(1)
@@ -261,13 +260,29 @@ export default function TimKiemViecLam() {
     const loaiHinhMap = new Map<string, number>()
 
     viecLam.forEach(job => {
-      capBacMap.set(job.capBac, (capBacMap.get(job.capBac) ?? 0) + 1)
-      loaiHinhMap.set(job.loai, (loaiHinhMap.get(job.loai) ?? 0) + 1)
-      job.kyNang.forEach(skill => {
-        loaiMap.set(skill.loai, (loaiMap.get(skill.loai) ?? 0) + 1)
-        const current = skillMap.get(skill.id)
-        skillMap.set(skill.id, { ...skill, count: (current?.count ?? 0) + 1 })
-      })
+      if (jobMatches(job, 'capBac')) {
+        capBacMap.set(job.capBac, (capBacMap.get(job.capBac) ?? 0) + 1)
+      }
+      if (jobMatches(job, 'loaiHinh')) {
+        loaiHinhMap.set(job.loai, (loaiHinhMap.get(job.loai) ?? 0) + 1)
+      }
+      if (jobMatches(job, 'loai')) {
+        const countedTypes = new Set<string>()
+        job.kyNang.forEach(skill => {
+          if (countedTypes.has(skill.loai)) return
+          countedTypes.add(skill.loai)
+          loaiMap.set(skill.loai, (loaiMap.get(skill.loai) ?? 0) + 1)
+        })
+      }
+      if (jobMatches(job, 'kyNang')) {
+        const countedSkills = new Set<string>()
+        job.kyNang.forEach(skill => {
+          if (countedSkills.has(skill.id)) return
+          countedSkills.add(skill.id)
+          const current = skillMap.get(skill.id)
+          skillMap.set(skill.id, { ...skill, count: (current?.count ?? 0) + 1 })
+        })
+      }
     })
 
     return {
@@ -276,7 +291,7 @@ export default function TimKiemViecLam() {
       capBac: [...capBacMap.entries()].sort((a, b) => b[1] - a[1]),
       loaiHinh: [...loaiHinhMap.entries()].sort((a, b) => b[1] - a[1]),
     }
-  }, [viecLam])
+  }, [viecLam, tuKhoa, loaiDangChon, kyNangDangChon, capBacDangChon, loaiHinhDangChon])
 
   const resetBoLoc = () => {
     setLoaiDangChon([])
@@ -310,7 +325,15 @@ export default function TimKiemViecLam() {
             <button type="button" className="search-overlay" onClick={() => setSearchActive(false)} aria-label="Đóng gợi ý tìm kiếm" />
           )}
           <div className="jobs-real-tags">
-            {goiYKyNang.map(skill => <button key={skill.id} onClick={() => setKyNangDangChon(prev => toggleValue(prev, skill.id))}>{skill.ten}</button>)}
+            {goiYKyNang.map(skill => (
+              <button
+                key={skill.id}
+                className={kyNangDangChon.includes(skill.id) ? 'active' : ''}
+                onClick={() => setKyNangDangChon(prev => toggleValue(prev, skill.id))}
+              >
+                {skill.ten}
+              </button>
+            ))}
           </div>
         </article>
       </section>

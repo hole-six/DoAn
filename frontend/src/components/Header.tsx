@@ -69,7 +69,6 @@ export default function Header() {
     { to: '/', label: 'Trang chủ' },
     { to: '/viec-lam', label: 'Việc làm IT' },
     { to: '/cong-ty', label: 'Công ty' },
-    actionTheoVaiTro,
     ...(nguoiDung
       ? [{ to: dashboardPath, label: `Dashboard ${vaiTroLabel[nguoiDung.vaiTro]}` }]
       : [

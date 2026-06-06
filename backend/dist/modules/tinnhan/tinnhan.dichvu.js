@@ -17,36 +17,110 @@ const tinnhan_mohinh_js_1 = require("./tinnhan.mohinh.js");
 const thongbao_dichvu_js_1 = require("../thongbao/thongbao.dichvu.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const nhatuyendung_mohinh_js_1 = require("../nhatuyendung/nhatuyendung.mohinh.js");
+const hosoungtuyen_mohinh_js_1 = require("../hosoungtuyen/hosoungtuyen.mohinh.js");
 // ============================================
 // CONVERSATION SERVICES
 // ============================================
 /**
- * Láº¥y hoáº·c táº¡o cuá»™c trÃ² chuyá»‡n giá»¯a 2 ngÆ°á»i
+ * Lấy hoặc tạo cuộc trò chuyện giữa 2 người
  */
 async function layHoacTaoCuocTroChuyenModel(params) {
-    // Sáº¯p xáº¿p Ä‘á»ƒ tÃ¬m kiáº¿m nháº¥t quÃ¡n
     const nguoiThamGiaSorted = [...params.nguoiThamGia].sort();
-    // TÃ¬m cuá»™c trÃ² chuyá»‡n hiá»‡n cÃ³
+    const loai = params.loai || 'ung_vien_nha_tuyen_dung';
     const dieuKienTimKiem = {
         nguoiThamGia: { $all: nguoiThamGiaSorted, $size: nguoiThamGiaSorted.length },
         daLuuTru: false,
-        ...(params.loai ? { loai: params.loai } : {}),
-        ...(params.maHoSoUngTuyen ? { maHoSoUngTuyen: params.maHoSoUngTuyen } : {}),
-        ...(params.maTinTuyenDung ? { maTinTuyenDung: params.maTinTuyenDung } : {}),
+        loai,
     };
-    let cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findOne(dieuKienTimKiem).populate('nguoiThamGia', 'hoTen email vaiTro');
-    // Náº¿u chÆ°a cÃ³, táº¡o má»›i
+    const danhSachTrung = await tinnhan_mohinh_js_1.CuocTroChuyenModel.find(dieuKienTimKiem).sort({ ngayCapNhat: -1, ngayTao: -1 });
+    let cuocTroChuyenModel = danhSachTrung[0] || null;
+    if (cuocTroChuyenModel && danhSachTrung.length > 1) {
+        await hopNhatCuocTroChuyenTrungLap(cuocTroChuyenModel, danhSachTrung.slice(1));
+    }
     if (!cuocTroChuyenModel) {
         cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.create({
             nguoiThamGia: nguoiThamGiaSorted,
-            loai: params.loai || 'ung_vien_nha_tuyen_dung',
+            loai,
             maHoSoUngTuyen: params.maHoSoUngTuyen,
             maTinTuyenDung: params.maTinTuyenDung,
+            maHoSoUngTuyenGanNhat: params.maHoSoUngTuyen,
+            maTinTuyenDungGanNhat: params.maTinTuyenDung,
             soChuaDoc: Object.fromEntries(nguoiThamGiaSorted.map((id) => [id, 0])),
         });
-        await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro');
     }
+    await capNhatNguCanhCuocTroChuyen(cuocTroChuyenModel, params);
+    await cuocTroChuyenModel.populate('nguoiThamGia', 'hoTen email vaiTro');
     return cuocTroChuyenModel;
+}
+async function taoTomTatNguCanh(params) {
+    if (!params.maHoSoUngTuyen && !params.maTinTuyenDung)
+        return undefined;
+    const hoSo = params.maHoSoUngTuyen
+        ? await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
+            .findById(params.maHoSoUngTuyen)
+            .populate({ path: 'maTinTuyenDung', select: 'tieuDe maNhaTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy' } })
+        : await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
+            .findOne({ maTinTuyenDung: params.maTinTuyenDung })
+            .sort({ ngayCapNhat: -1 })
+            .populate({ path: 'maTinTuyenDung', select: 'tieuDe maNhaTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy' } });
+    const tin = hoSo?.maTinTuyenDung;
+    return {
+        tieuDeTin: tin?.tieuDe,
+        tenCongTy: tin?.maNhaTuyenDung?.tenCongTy,
+        maHoSoUngTuyen: params.maHoSoUngTuyen || (hoSo?._id ? String(hoSo._id) : undefined),
+        maTinTuyenDung: params.maTinTuyenDung || (tin?._id ? String(tin._id) : undefined),
+        capNhatLuc: new Date(),
+    };
+}
+async function capNhatNguCanhCuocTroChuyen(cuocTroChuyenModel, params) {
+    if (!params.maHoSoUngTuyen && !params.maTinTuyenDung)
+        return;
+    const summary = await taoTomTatNguCanh(params);
+    cuocTroChuyenModel.maHoSoUngTuyen = params.maHoSoUngTuyen || cuocTroChuyenModel.maHoSoUngTuyen;
+    cuocTroChuyenModel.maTinTuyenDung = params.maTinTuyenDung || cuocTroChuyenModel.maTinTuyenDung;
+    cuocTroChuyenModel.maHoSoUngTuyenGanNhat = params.maHoSoUngTuyen || cuocTroChuyenModel.maHoSoUngTuyenGanNhat;
+    cuocTroChuyenModel.maTinTuyenDungGanNhat = params.maTinTuyenDung || cuocTroChuyenModel.maTinTuyenDungGanNhat;
+    if (summary)
+        cuocTroChuyenModel.contextSummary = summary;
+    await cuocTroChuyenModel.save();
+}
+async function hopNhatCuocTroChuyenTrungLap(cuocChinh, danhSachTrung) {
+    for (const cuocTrung of danhSachTrung) {
+        await tinnhan_mohinh_js_1.TinNhanModel.updateMany({ maCuocTroChuyenId: cuocTrung._id }, { $set: { maCuocTroChuyenId: cuocChinh._id } });
+        for (const nguoi of cuocChinh.nguoiThamGia) {
+            const maNguoi = String(nguoi);
+            const hienTai = Number(cuocChinh.soChuaDoc?.get(maNguoi) || 0);
+            const boSung = Number(cuocTrung.soChuaDoc?.get(maNguoi) || 0);
+            cuocChinh.soChuaDoc.set(maNguoi, hienTai + boSung);
+        }
+        const thoiGianCuoiCungTrung = cuocTrung.tinNhanCuoiCung?.thoiGian ? new Date(cuocTrung.tinNhanCuoiCung.thoiGian).getTime() : 0;
+        const thoiGianCuoiCungChinh = cuocChinh.tinNhanCuoiCung?.thoiGian ? new Date(cuocChinh.tinNhanCuoiCung.thoiGian).getTime() : 0;
+        if (thoiGianCuoiCungTrung > thoiGianCuoiCungChinh) {
+            cuocChinh.tinNhanCuoiCung = cuocTrung.tinNhanCuoiCung;
+        }
+        cuocTrung.daLuuTru = true;
+        cuocTrung.thoiGianLuuTru = new Date();
+        await cuocTrung.save();
+    }
+    await cuocChinh.save();
+}
+async function hopNhatCuocTroChuyenCuaNguoiDung(maNguoiDung) {
+    const danhSach = await tinnhan_mohinh_js_1.CuocTroChuyenModel.find({
+        nguoiThamGia: maNguoiDung,
+        daLuuTru: false,
+        loai: { $ne: 'nhom_cong_dong' },
+    }).sort({ ngayCapNhat: -1, ngayTao: -1 });
+    const groups = new Map();
+    for (const item of danhSach) {
+        const participants = [...(item.nguoiThamGia || [])].map((value) => String(value)).sort().join('|');
+        const key = `${item.loai || 'ung_vien_nha_tuyen_dung'}:${participants}`;
+        groups.set(key, [...(groups.get(key) || []), item]);
+    }
+    for (const items of groups.values()) {
+        if (items.length > 1) {
+            await hopNhatCuocTroChuyenTrungLap(items[0], items.slice(1));
+        }
+    }
 }
 async function timAdminDauTien() {
     return nguoidung_mohinh_js_1.NguoiDung.findOne({ vaiTro: 'admin', trangThai: { $ne: 'bi_khoa' } }).select('_id');
@@ -100,7 +174,7 @@ async function thamGiaNhomCongDong(maNhom, maNguoiDung) {
     if (!nhom)
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhóm', 404);
     if (nhom.loai !== 'nhom_cong_dong')
-        throw new loiungdung_js_1.LoiUngDung('Day khong phai nhom cong dong', 400);
+        throw new loiungdung_js_1.LoiUngDung('Đây không phải nhóm cộng đồng', 400);
     const daCoMat = nhom.nguoiThamGia.some((id) => String(id) === maNguoiDung);
     if (!daCoMat) {
         nhom.nguoiThamGia.push(maNguoiDung);
@@ -109,22 +183,25 @@ async function thamGiaNhomCongDong(maNhom, maNguoiDung) {
         await tinnhan_mohinh_js_1.TinNhanModel.create({
             maCuocTroChuyenId: maNhom,
             nguoiGui: maNguoiDung,
-            noiDung: 'da tham gia nhom',
+            noiDung: 'đã tham gia nhóm',
             loai: 'system',
         });
     }
     return nhom;
 }
 /**
- * Láº¥y danh sÃ¡ch cuá»™c trÃ² chuyá»‡n cá»§a user
+ * Lấy danh sách cuộc trò chuyện của user
  */
 async function layDanhSachCuocTroChuyenModel(maNguoiDung) {
+    await hopNhatCuocTroChuyenCuaNguoiDung(maNguoiDung);
     const danhSach = await tinnhan_mohinh_js_1.CuocTroChuyenModel.find({
         nguoiThamGia: maNguoiDung,
         daLuuTru: false,
     })
         .populate('nguoiThamGia', 'hoTen email vaiTro')
         .populate('tinNhanCuoiCung.nguoiGui', 'hoTen')
+        .populate('maHoSoUngTuyenGanNhat', 'trangThai')
+        .populate('maTinTuyenDungGanNhat', 'tieuDe')
         .sort({ ngayCapNhat: -1 })
         .limit(50);
     return danhSach.map((doc) => {
@@ -137,32 +214,32 @@ async function layDanhSachCuocTroChuyenModel(maNguoiDung) {
     });
 }
 /**
- * Láº¥y chi tiáº¿t cuá»™c trÃ² chuyá»‡n
+ * Lấy chi tiết cuộc trò chuyện
  */
 async function layCuocTroChuyenModelTheoMa(maCuocTroChuyenModel, maNguoiDung) {
     const cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findById(maCuocTroChuyenModel).populate('nguoiThamGia', 'hoTen email vaiTro');
     if (!cuocTroChuyenModel) {
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy cuộc trò chuyện', 404);
     }
-    // Kiá»ƒm tra quyá»n truy cáº­p
+    // Kiểm tra quyền truy cập
     const coQuyen = cuocTroChuyenModel.nguoiThamGia.some((ng) => String(ng._id) === maNguoiDung);
     if (!coQuyen) {
-        throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen truy cap cuoc tro chuyen nay', 403);
+        throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền truy cập cuộc trò chuyện này', 403);
     }
     return cuocTroChuyenModel;
 }
 /**
- * ÄÃ¡nh dáº¥u Ä‘Ã£ Ä‘á»c táº¥t cáº£ tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
+ * Đánh dấu đã đọc tất cả tin nhắn trong cuộc trò chuyện
  */
 async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel, maNguoiDung) {
     const cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findById(maCuocTroChuyenModel);
     if (!cuocTroChuyenModel) {
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy cuộc trò chuyện', 404);
     }
-    // Reset sá»‘ chÆ°a Ä‘á»c
+    // Reset số chưa đọc
     cuocTroChuyenModel.soChuaDoc.set(maNguoiDung, 0);
     await cuocTroChuyenModel.save();
-    // ÄÃ¡nh dáº¥u táº¥t cáº£ tin nháº¯n chÆ°a Ä‘á»c
+    // Đánh dấu tất cả tin nhắn chưa đọc
     await tinnhan_mohinh_js_1.TinNhanModel.updateMany({
         maCuocTroChuyenId: maCuocTroChuyenModel,
         nguoiGui: { $ne: maNguoiDung },
@@ -181,12 +258,12 @@ async function danhDauDaDocCuocTroChuyenModel(maCuocTroChuyenModel, maNguoiDung)
 // MESSAGE SERVICES
 // ============================================
 /**
- * Gá»­i tin nháº¯n
+ * Gửi tin nhắn
  */
 async function guiTinNhan(params) {
-    // Kiá»ƒm tra quyá»n
+    // Kiểm tra quyền
     const cuocTroChuyenModel = await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.nguoiGui);
-    // Táº¡o tin nháº¯n
+    // Tạo tin nhắn
     const tinNhan = await tinnhan_mohinh_js_1.TinNhanModel.create({
         maCuocTroChuyenId: params.maCuocTroChuyenId,
         nguoiGui: params.nguoiGui,
@@ -195,18 +272,18 @@ async function guiTinNhan(params) {
         tepDinhKem: params.tepDinhKem || [],
         traloiTinNhan: params.traloiTinNhan,
     });
-    // Populate Ä‘á»ƒ tráº£ vá» Ä‘áº§y Ä‘á»§ thÃ´ng tin
+    // Populate để trả về đầy đủ thông tin
     await tinNhan.populate('nguoiGui', 'hoTen email vaiTro');
     if (params.traloiTinNhan) {
         await tinNhan.populate('traloiTinNhan');
     }
-    // Cáº­p nháº­t cuá»™c trÃ² chuyá»‡n
+    // Cập nhật cuộc trò chuyện
     cuocTroChuyenModel.tinNhanCuoiCung = {
         noiDung: params.noiDung,
         nguoiGui: params.nguoiGui,
         thoiGian: new Date(),
     };
-    // TÄƒng sá»‘ chÆ°a Ä‘á»c cho ngÆ°á»i khÃ¡c
+    // Tăng số chưa đọc cho người khác
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
         const id = String(nguoiThamGia._id);
         if (id !== params.nguoiGui) {
@@ -215,7 +292,7 @@ async function guiTinNhan(params) {
         }
     }
     await cuocTroChuyenModel.save();
-    // Gá»­i real-time qua Socket.IO cho ngÆ°á»i nháº­n
+    // Gửi real-time qua Socket.IO cho người nhận
     const tinNhanObj = tinNhan.toObject();
     for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
         const id = String(nguoiThamGia._id);
@@ -241,7 +318,7 @@ async function guiTinNhan(params) {
                 noiDung: params.noiDung.substring(0, 100),
                 lienKet: `${duongDanChat}?cuocTroChuyen=${params.maCuocTroChuyenId}`,
                 mucDoUuTien: 'trung_binh',
-                icon: 'ðŸ’¬',
+                icon: '💬',
                 mauSac: '#8b5cf6',
             });
         }
@@ -252,10 +329,10 @@ async function guiTinNhan(params) {
     };
 }
 /**
- * Láº¥y danh sÃ¡ch tin nháº¯n trong cuá»™c trÃ² chuyá»‡n
+ * Lấy danh sách tin nhắn trong cuộc trò chuyện
  */
 async function layDanhSachTinNhan(params) {
-    // Kiá»ƒm tra quyá»n
+    // Kiểm tra quyền
     await layCuocTroChuyenModelTheoMa(params.maCuocTroChuyenId, params.maNguoiDung);
     const query = {
         maCuocTroChuyenId: params.maCuocTroChuyenId,
@@ -283,21 +360,21 @@ async function layDanhSachTinNhan(params) {
     });
 }
 /**
- * XÃ³a tin nháº¯n
+ * Xóa tin nhắn
  */
 async function xoaTinNhan(maTinNhan, maNguoiDung) {
     const tinNhan = await tinnhan_mohinh_js_1.TinNhanModel.findById(maTinNhan);
     if (!tinNhan) {
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin nhắn', 404);
     }
-    // Chá»‰ ngÆ°á»i gá»­i má»›i Ä‘Æ°á»£c xÃ³a
+    // Chỉ người gửi mới được xóa
     if (String(tinNhan.nguoiGui) !== maNguoiDung) {
-        throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen xoa tin nhan nay', 403);
+        throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền xóa tin nhắn này', 403);
     }
     tinNhan.daXoa = true;
-    tinNhan.noiDung = 'Tin nhan da bi xoa';
+    tinNhan.noiDung = 'Tin nhắn đã bị xóa';
     await tinNhan.save();
-    // Gá»­i real-time
+    // Gửi real-time
     const cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId);
     if (cuocTroChuyenModel) {
         for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {
@@ -310,22 +387,22 @@ async function xoaTinNhan(maTinNhan, maNguoiDung) {
     return tinNhan;
 }
 /**
- * ThÃªm reaction vÃ o tin nháº¯n
+ * Thêm reaction vào tin nhắn
  */
 async function themPhanUng(params) {
     const tinNhan = await tinnhan_mohinh_js_1.TinNhanModel.findById(params.maTinNhan);
     if (!tinNhan) {
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin nhắn', 404);
     }
-    // XÃ³a reaction cÅ© cá»§a user nÃ y (náº¿u cÃ³)
+    // Xóa reaction cũ của user này (nếu có)
     tinNhan.phanUng = tinNhan.phanUng.filter((r) => String(r.nguoiDung) !== params.maNguoiDung);
-    // ThÃªm reaction má»›i
+    // Thêm reaction mới
     tinNhan.phanUng.push({
         nguoiDung: params.maNguoiDung,
         emoji: params.emoji,
     });
     await tinNhan.save();
-    // Gá»­i real-time
+    // Gửi real-time
     const cuocTroChuyenModel = await tinnhan_mohinh_js_1.CuocTroChuyenModel.findById(tinNhan.maCuocTroChuyenId);
     if (cuocTroChuyenModel) {
         for (const nguoiThamGia of cuocTroChuyenModel.nguoiThamGia) {

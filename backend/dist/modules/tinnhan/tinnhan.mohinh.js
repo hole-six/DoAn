@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TinNhanModel = exports.loaiTinNhanEnum = exports.CuocTroChuyenModel = exports.loaiCuocTroChuyenEnum = void 0;
 const mongoose_1 = require("mongoose");
 // ============================================
-// CONVERSATION MODEL (Cuá»™c há»™i thoáº¡i)
+// CONVERSATION MODEL (Cuộc hội thoại)
 // ============================================
 exports.loaiCuocTroChuyenEnum = ['ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong'];
 const cuocTroChuyenSchema = new mongoose_1.Schema({
@@ -11,16 +11,26 @@ const cuocTroChuyenSchema = new mongoose_1.Schema({
     nguoiThamGia: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung', required: true }],
     // Type
     loai: { type: String, enum: exports.loaiCuocTroChuyenEnum, default: 'ung_vien_nha_tuyen_dung' },
-    // TÃªn nhÃ³m (dÃ¹ng cho nhom_cong_dong)
+    // Tên nhóm (dùng cho nhom_cong_dong)
     tenNhom: { type: String },
     moTaNhom: { type: String },
     anhNhom: { type: String },
-    // Chá»‰ dÃ¹ng cho nhom_cong_dong â€” ai lÃ  admin nhÃ³m
+    // Chỉ dùng cho nhom_cong_dong — ai là admin nhóm
     quanTriNhom: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung' }],
-    // Context (náº¿u chat vá» há»“ sÆ¡ á»©ng tuyá»ƒn cá»¥ thá»ƒ)
+    // Ngữ cảnh gần nhất của cuộc trò chuyện tuyển dụng.
+    // Một cặp ứng viên - nhà tuyển dụng chỉ có một phòng chat; hồ sơ/tin chỉ là ngữ cảnh hiển thị.
     maHoSoUngTuyen: { type: mongoose_1.Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
     maTinTuyenDung: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TinTuyenDung' },
-    // Last message info (Ä‘á»ƒ hiá»ƒn thá»‹ preview)
+    maHoSoUngTuyenGanNhat: { type: mongoose_1.Schema.Types.ObjectId, ref: 'HoSoUngTuyen' },
+    maTinTuyenDungGanNhat: { type: mongoose_1.Schema.Types.ObjectId, ref: 'TinTuyenDung' },
+    contextSummary: {
+        tieuDeTin: String,
+        tenCongTy: String,
+        maHoSoUngTuyen: String,
+        maTinTuyenDung: String,
+        capNhatLuc: Date,
+    },
+    // Last message info (để hiển thị preview)
     tinNhanCuoiCung: {
         noiDung: String,
         nguoiGui: { type: mongoose_1.Schema.Types.ObjectId, ref: 'NguoiDung' },
@@ -41,11 +51,12 @@ const cuocTroChuyenSchema = new mongoose_1.Schema({
 });
 // Indexes
 cuocTroChuyenSchema.index({ nguoiThamGia: 1, ngayCapNhat: -1 });
+cuocTroChuyenSchema.index({ nguoiThamGia: 1, loai: 1, daLuuTru: 1 });
 cuocTroChuyenSchema.index({ maHoSoUngTuyen: 1 });
 cuocTroChuyenSchema.index({ daLuuTru: 1 });
 exports.CuocTroChuyenModel = (0, mongoose_1.model)('CuocTroChuyenModel', cuocTroChuyenSchema);
 // ============================================
-// MESSAGE MODEL (Tin nháº¯n)
+// MESSAGE MODEL (Tin nhắn)
 // ============================================
 exports.loaiTinNhanEnum = ['text', 'file', 'image', 'system'];
 const tinNhanSchema = new mongoose_1.Schema({
