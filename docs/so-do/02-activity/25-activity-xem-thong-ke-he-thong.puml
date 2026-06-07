@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,29 +10,45 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Xem thống kê hệ thống
-
 start
 :Quản trị viên đăng nhập;
 :Mở dashboard quản trị;
-fork
-  :Hệ thống thống kê người dùng;
-fork again
-  :Hệ thống thống kê công ty;
-fork again
-  :Hệ thống thống kê tin tuyển dụng;
-fork again
-  :Hệ thống thống kê hồ sơ ứng tuyển;
-fork again
-  :Hệ thống thống kê dữ liệu cần duyệt;
-end fork
-if (Dữ liệu thống kê tải thành công?) then (Có)
-  :Hệ thống hiển thị biểu đồ và chỉ số tổng quan;
-  :Quản trị viên xem số liệu;
-  stop
-else (Không)
-  :Hệ thống hiển thị thông báo lỗi tải dữ liệu;
-  :Quản trị viên nhấn tải lại nếu cần;
+if (Phiên đăng nhập hợp lệ và vai trò admin?) then (Đúng)
+  fork
+    :Hệ thống tải NguoiDung;
+  fork again
+    :Hệ thống tải NhaTuyenDung;
+  fork again
+    :Hệ thống tải TinTuyenDung;
+  fork again
+    :Hệ thống tải HoSoUngTuyen;
+  fork again
+    :Hệ thống tải CanhBaoQuanTri;
+  end fork
+  if (Tải dữ liệu thành công?) then (Đúng)
+    :Tổng hợp tổng người dùng và tài khoản hoạt động;
+    :Tổng hợp việc làm đang mở và tin chờ duyệt;
+    :Tổng hợp công ty chờ duyệt;
+    :Tổng hợp hồ sơ ứng tuyển mới trong 24 giờ;
+    :Hiển thị cảnh báo vận hành từ CanhBaoQuanTri;
+    :Hiển thị danh sách tin tuyển dụng chờ duyệt;
+    if (Quản trị viên chọn thao tác nhanh?) then (Người dùng)
+      :Điều hướng tới trang quản lý người dùng;
+    elseif (Chọn công ty?) then (Công ty)
+      :Điều hướng tới trang quản lý công ty;
+    elseif (Chọn tin tuyển dụng?) then (Tin tuyển dụng)
+      :Điều hướng tới trang duyệt tin tuyển dụng;
+    else (Cài đặt)
+      :Điều hướng tới trang cài đặt quản trị;
+    endif
+    :Kết thúc nhánh;
+  else (Sai)
+    :Hiển thị thông báo không tải được dữ liệu dashboard;
+    :Cho phép nhấn tải lại;
+    :Kết thúc nhánh;
+  endif
+else (Sai)
+  :Điều hướng tới trang đăng nhập hoặc báo không có quyền;
   stop
 endif
 @enduml

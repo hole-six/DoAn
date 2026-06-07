@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,30 +10,49 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Quản lý tin tuyển dụng
-
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang quản lý tin tuyển dụng;
-:Hệ thống tải danh sách tin của công ty;
 fork
-  :Tìm kiếm tin tuyển dụng;
+  :Hệ thống tải NhaTuyenDung của tài khoản;
 fork again
-  :Lọc theo trạng thái;
+  :Hệ thống tải danh sách TinTuyenDung;
 fork again
-  :Sắp xếp theo thời gian;
+  :Hệ thống tải DanhMucKyNang;
 end fork
-:Nhà tuyển dụng chọn tin cần xử lý;
-if (Chọn thao tác chỉnh sửa?) then (Có)
-  :Cập nhật nội dung tin;
-  :Hệ thống lưu thay đổi;
-else (Xem trạng thái duyệt)
-  if (Chọn thao tác đóng hoặc mở tin?) then (Có)
-    :Hệ thống cập nhật trạng thái tin;
-  else (Không)
-    :Hệ thống hiển thị kết quả kiểm duyệt;
+if (Có quyền quản lý tin?) then (Có)
+  :Hiển thị danh sách tin của công ty;
+  if (Chọn thao tác?) then (Sửa tin)
+    :Chọn TinTuyenDung cần sửa;
+    :Mở form sửa tin;
+    fork
+      :Cập nhật tiêu đề, mô tả, yêu cầu;
+    fork again
+      :Cập nhật lương, hạn nộp, địa điểm;
+    fork again
+      :Cập nhật kỹ năng;
+    end fork
+    :Nhấn nút "Lưu";
+    :Hệ thống cập nhật TinTuyenDung;
+    :Hiển thị thông báo lưu thành công;
+  elseif (Chọn tạm đóng hoặc mở lại?) then (Tạm đóng hoặc mở lại)
+    :Chọn trạng thái mới;
+    :Hệ thống cập nhật trạng thái TinTuyenDung;
+    :Hiển thị thông báo thành công;
+  elseif (Chọn xóa tin?) then (Xóa tin)
+    :Nhấn icon "Xóa";
+    if (Xác nhận xóa?) then (Có)
+      :Hệ thống xóa TinTuyenDung;
+      :Hiển thị thông báo đã xóa;
+    else (Không)
+      :Đóng hộp xác nhận;
+    endif
+  else (Xem ứng viên)
+    :Điều hướng tới pipeline ứng viên theo tin;
   endif
+  :Kết thúc nhánh;
+else (Không)
+  :Hiển thị thông báo công ty chưa được duyệt hoặc không có quyền;
+  stop
 endif
-:Thông báo xử lý thành công;
-stop
 @enduml

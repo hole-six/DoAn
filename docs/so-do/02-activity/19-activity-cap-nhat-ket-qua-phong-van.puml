@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,31 +10,38 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Cập nhật kết quả phỏng vấn
-
 start
-:Nhà tuyển dụng mở trang lịch phỏng vấn;
+:Nhà tuyển dụng đăng nhập;
+:Mở trang lịch phỏng vấn nhà tuyển dụng;
+:Hệ thống tải LichPhongVan và HoSoUngTuyen liên quan;
 :Chọn lịch cần cập nhật kết quả;
-:Hệ thống kiểm tra lịch phỏng vấn;
-if (Lịch tồn tại và thuộc quyền xử lý?) then (Có)
-  fork
-    :Chọn kết quả đạt hoặc không đạt;
-  fork again
-    :Nhập ghi chú kết quả;
-  end fork
-  :Nhà tuyển dụng lưu kết quả;
-  :Hệ thống kiểm tra dữ liệu kết quả;
-  if (Kết quả hợp lệ?) then (Có)
-    :Hệ thống cập nhật lịch phỏng vấn;
-    :Hệ thống cập nhật trạng thái hồ sơ ứng tuyển;
-    :Thông báo cho ứng viên;
-    stop
+if (Lịch thuộc công ty?) then (Đúng)
+  if (Trạng thái có thể cập nhật kết quả?) then (da_len_lich hoặc da_xac_nhan)
+    if (Chọn kết quả?) then (Đạt)
+      :Nhấn nút "Đạt";
+      :Nhập ghi chú kết quả nếu có;
+      :Nhấn nút "Cập nhật";
+      :Hệ thống cập nhật LichPhongVan thành hoan_thanh, ketQua dat;
+      :Hệ thống cập nhật HoSoUngTuyen thành dat;
+      :Gửi ThongBao kết quả phỏng vấn cho ứng viên;
+      :Hiển thị cập nhật thành công;
+      :Kết thúc nhánh;
+    else (Không đạt)
+      :Nhấn nút "Không đạt";
+      :Nhập ghi chú kết quả nếu có;
+      :Nhấn nút "Cập nhật";
+      :Hệ thống cập nhật LichPhongVan thành hoan_thanh, ketQua khong_dat;
+      :Hệ thống cập nhật HoSoUngTuyen thành tu_choi;
+      :Gửi ThongBao kết quả phỏng vấn cho ứng viên;
+      :Hiển thị cập nhật thành công;
+      :Kết thúc nhánh;
+    endif
   else (Không)
-    :Thông báo thiếu thông tin kết quả;
-    stop
+    :Hiển thị thông báo lịch chưa thể cập nhật kết quả;
+    :Kết thúc nhánh;
   endif
-else (Không)
-  :Thông báo không thể cập nhật lịch này;
+else (Sai)
+  :Hiển thị thông báo không có quyền cập nhật lịch;
   stop
 endif
 @enduml

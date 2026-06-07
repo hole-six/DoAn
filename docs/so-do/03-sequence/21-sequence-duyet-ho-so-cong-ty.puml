@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,15 +15,17 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Duyệt hồ sơ công ty
+title Sơ đồ Duyệt hồ sơ công ty
 
 actor "Actor: Quản trị viên" as Actor
 boundary "UI: quan-tri-cong-ty" as UI
 boundary "UI: form-duyet-cong-ty" as Form
 control "Controller: NhaTuyenDungController" as Controller
 entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: TaiKhoan" as E1
+entity "Entity: NguoiDung" as E1
 entity "Entity: ThongBao" as E2
 
 Actor -> UI : 1. Mở danh sách công ty chờ duyệt
@@ -40,7 +40,7 @@ activate MainEntity
 MainEntity --> Controller : 6. return kết quả kiểm tra
 deactivate MainEntity
 
-alt [Dữ liệu hợp lệ]
+alt Dữ liệu hợp lệ
   Controller -> MainEntity : 7. Cập nhật trạng thái duyệt công ty
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
@@ -49,7 +49,7 @@ alt [Dữ liệu hợp lệ]
   Controller --> Form : 10. Thông báo xử lý hồ sơ công ty thành công
   Form --> UI : 11. Cập nhật giao diện
   UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
+else Dữ liệu không hợp lệ
   Controller --> Form : 10. Thông báo hồ sơ công ty không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin

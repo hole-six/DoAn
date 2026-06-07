@@ -1,45 +1,46 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Đăng ký tài khoản"
 
-actor "Actor: Khách vãng lai\n(from Usecase Diagram)" as Actor
-boundary "UI: dang-ky" as UI
-boundary "UI: form-dang-ky" as Form
-control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: UngVien" as E1
-entity "Entity: NhaTuyenDung" as E2
-entity "Entity: ThongBao" as E3
+actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
+boundary "dang-ky" as UI
+boundary "form-dang-ky" as Form
+control "dang-ky-tai-khoan" as Controller
 
-Actor --> UI : Truy cập trang đăng ký
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Nhập thông tin đăng ký và chọn vai trò
-Form --> Controller : dangKy(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra email, mật khẩu và vai trò\nTạo tài khoản mới
-Controller <--> E1 : Tạo hồ sơ ứng viên hoặc hồ sơ công ty
-Controller <--> E2 : Gửi thông báo duyệt công ty nếu là nhà tuyển dụng
-Controller --> Form : Thông báo đăng ký thành công / Thông báo dữ liệu không hợp lệ
-Controller --> UI : trả dữ liệu mới
+entity "NguoiDung" as NguoiDung
+entity "UngVien" as UngVien
+entity "NhaTuyenDung" as NhaTuyenDung
+entity "ThongBao" as ThongBao
+
+Actor -right-> UI
+UI -right-> Form
+Form -right-> Controller
+
+Controller -right-> NguoiDung
+Controller -right-> UngVien
+Controller -right-> NhaTuyenDung
+Controller -right-> ThongBao
+
+NguoiDung -down[hidden]-> UngVien
+UngVien -down[hidden]-> NhaTuyenDung
+NhaTuyenDung -down[hidden]-> ThongBao
 @enduml

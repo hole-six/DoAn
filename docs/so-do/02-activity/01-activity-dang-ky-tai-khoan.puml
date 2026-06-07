@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,12 +10,12 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Đăng ký tài khoản
-
 start
-:Khách vãng lai truy cập hệ thống;
+:Khách vãng lai mở trang hệ thống;
 :Nhấn nút "Đăng ký";
-if (Chọn vai trò đăng ký?) then (Ứng viên)
+:Chọn vai trò đăng ký;
+if (Vai trò?) then (Ứng viên)
+  :Hệ thống hiển thị form ứng viên;
   fork
     :Nhập họ tên;
   fork again
@@ -30,6 +28,7 @@ if (Chọn vai trò đăng ký?) then (Ứng viên)
     :Nhập xác nhận mật khẩu;
   end fork
 else (Nhà tuyển dụng)
+  :Hệ thống hiển thị form nhà tuyển dụng;
   fork
     :Nhập họ tên người phụ trách;
   fork again
@@ -41,21 +40,28 @@ else (Nhà tuyển dụng)
   fork again
     :Nhập tên công ty;
   end fork
+  :Hệ thống nhắc sẽ hoàn thiện mã số thuế, website, địa chỉ, logo và mô tả sau đăng ký;
 endif
-:Nhấn nút "Đăng ký";
-:Hệ thống kiểm tra dữ liệu đăng ký;
-if (Dữ liệu hợp lệ?) then (Có)
-  :Hệ thống tạo tài khoản người dùng;
-  if (Vai trò là nhà tuyển dụng?) then (Có)
-    :Hệ thống tạo hồ sơ công ty chờ duyệt;
-  else (Không)
-    :Hệ thống tạo hồ sơ ứng viên ban đầu;
-  endif
-  :Hệ thống thông báo đăng ký thành công;
-  stop
+if (Muốn thoát?) then (Có)
+  :Quay lại trang chủ hoặc mở trang đăng nhập;
+  :Kết thúc nhánh;
 else (Không)
+  :Nhấn nút "Đăng ký";
+endif
+:Hệ thống kiểm tra email, mật khẩu, xác nhận mật khẩu, vai trò và tên công ty nếu là nhà tuyển dụng;
+if (Dữ liệu hợp lệ?) then (Đúng)
+  :Tạo NguoiDung với trạng thái hoạt động;
+  if (Đăng ký nhà tuyển dụng?) then (Có)
+    :Tạo NhaTuyenDung tối thiểu với tên công ty và trạng thái chờ duyệt;
+    :Gửi ThongBao cho quản trị viên về hồ sơ công ty chờ duyệt;
+  else (Không)
+    :Tạo hồ sơ UngVien mặc định;
+  endif
+  :Điều hướng sang trang đăng nhập;
+  :Kết thúc nhánh;
+else (Sai)
   :Hệ thống hiển thị thông báo lỗi;
-  :Người dùng nhập lại thông tin;
+  :Người dùng chỉnh lại thông tin;
   stop
 endif
 @enduml

@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,28 +10,51 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Quản lý hồ sơ ứng viên
-
 start
 :Nhà tuyển dụng đăng nhập;
-:Mở trang hồ sơ ứng viên;
-:Hệ thống tải hồ sơ ứng tuyển thuộc tin của công ty;
+:Mở trang pipeline ứng viên;
 fork
-  :Lọc theo tin tuyển dụng;
+  :Hệ thống tải HoSoUngTuyen của công ty;
 fork again
-  :Lọc theo trạng thái xử lý;
+  :Hệ thống tải TinTuyenDung;
 fork again
-  :Tìm kiếm ứng viên;
+  :Hệ thống tải UngVien và HoSoNangLuc liên quan;
+fork again
+  :Hệ thống tải LichPhongVan nếu có;
 end fork
-:Nhà tuyển dụng chọn hồ sơ ứng viên;
-:Hệ thống hiển thị chi tiết hồ sơ và CV;
-if (Chọn cập nhật trạng thái?) then (Có)
-  :Nhà tuyển dụng chọn trạng thái mới;
-  :Hệ thống lưu lịch sử xử lý hồ sơ;
-  :Thông báo cho ứng viên;
-  stop
+if (Có quyền xem hồ sơ?) then (Có)
+  :Hiển thị danh sách hồ sơ ứng tuyển;
+  :Chọn một HoSoUngTuyen;
+  :Mở drawer chi tiết ứng viên;
+  fork
+    :Xem tổng quan hồ sơ ứng tuyển;
+  fork again
+    :Xem CV builder hoặc CV PDF đã nộp;
+  fork again
+    :Xem lịch sử trạng thái;
+  end fork
+  if (Chọn hành động?) then (Đánh dấu đã xem)
+    :Gọi HoSoUngTuyen/xem;
+    :Cập nhật trạng thái từ da_nop sang da_xem;
+    :Gửi ThongBao hồ sơ đã được xem cho ứng viên;
+  elseif (Chuyển xét duyệt?) then (Xét duyệt)
+    :Gọi HoSoUngTuyen/danh-gia với trangThai = dang_xet_duyet;
+    :Ghi LichSuHoSoUngTuyen;
+  elseif (Từ chối sàng lọc?) then (Từ chối)
+    :Nhập lý do từ chối sàng lọc;
+    :Gọi HoSoUngTuyen/danh-gia với trangThai = tu_choi;
+    :Gửi ThongBao kết quả cho ứng viên;
+  elseif (Mời phỏng vấn?) then (Mời phỏng vấn)
+    :Mở form mời phỏng vấn;
+  elseif (Cập nhật kết quả phỏng vấn?) then (Đạt/Không đạt)
+    :Gọi LichPhongVan/hoan-thanh để cập nhật kết quả;
+  else (Nhắn tin)
+    :Mở cuộc trò chuyện với ứng viên nếu trạng thái cho phép;
+  endif
+  :Tải lại dữ liệu pipeline;
+  :Kết thúc nhánh;
 else (Không)
-  :Nhà tuyển dụng tiếp tục xem danh sách;
+  :Hiển thị thông báo không có quyền xem hồ sơ;
   stop
 endif
 @enduml

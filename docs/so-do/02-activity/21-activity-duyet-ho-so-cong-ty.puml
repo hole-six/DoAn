@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,27 +10,36 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Duyệt hồ sơ công ty
-
 start
-:Quản trị viên mở danh sách công ty chờ duyệt;
-:Hệ thống hiển thị hồ sơ công ty cần xử lý;
-:Quản trị viên chọn một hồ sơ công ty;
-fork
-  :Xem thông tin pháp lý và liên hệ;
-fork again
-  :Xem mô tả, logo và ngành nghề;
-fork again
-  :Xem lịch sử cập nhật nếu có;
-end fork
-if (Quyết định xử lý?) then (Duyệt)
-  :Hệ thống chuyển công ty sang trạng thái đã duyệt;
-  :Thông báo kết quả cho nhà tuyển dụng;
-  stop
-else (Từ chối)
-  :Quản trị viên nhập lý do từ chối;
-  :Hệ thống lưu lý do và chuyển trạng thái từ chối;
-  :Thông báo kết quả cho nhà tuyển dụng;
+:Quản trị viên đăng nhập;
+:Mở trang quản lý công ty;
+:Hệ thống tải danh sách NhaTuyenDung;
+if (Tải dữ liệu thành công?) then (Đúng)
+  :Hiển thị công ty, ngành, trạng thái và ngày tạo;
+  :Chọn một hồ sơ công ty;
+  if (Chọn thao tác?) then (Duyệt)
+    :Nhấn nút "Duyệt" hoặc "Duyệt lại";
+    :Xác nhận duyệt công ty;
+    :Hệ thống cập nhật NhaTuyenDung.trangThaiDuyet = da_duyet;
+    :Gửi ThongBao kết quả duyệt cho nhà tuyển dụng;
+    :Tải lại danh sách công ty;
+    :Kết thúc nhánh;
+  elseif (Chọn từ chối?) then (Từ chối)
+    :Nhấn nút "Từ chối";
+    :Xác nhận từ chối công ty;
+    :Hệ thống cập nhật NhaTuyenDung.trangThaiDuyet = tu_choi;
+    :Gửi ThongBao kết quả từ chối cho nhà tuyển dụng;
+    :Tải lại danh sách công ty;
+    :Kết thúc nhánh;
+  else (Xóa)
+    :Nhấn nút "Xóa";
+    :Xác nhận xóa hồ sơ công ty;
+    :Hệ thống xóa NhaTuyenDung nếu được phép;
+    :Tải lại danh sách công ty;
+    :Kết thúc nhánh;
+  endif
+else (Sai)
+  :Hiển thị thông báo không tải được dữ liệu công ty;
   stop
 endif
 @enduml

@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,44 +15,54 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Ứng tuyển tin tuyển dụng
+title Sơ đồ Ứng tuyển tin tuyển dụng
 
 actor "Actor: Ứng viên" as Actor
 boundary "UI: chi-tiet-viec-lam" as UI
 boundary "UI: form-ung-tuyen" as Form
+control "Controller: HoSoNangLucController" as CvController
 control "Controller: HoSoUngTuyenController" as Controller
-entity "Entity: HoSoUngTuyen" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: HoSoNangLuc" as E2
-entity "Entity: ThongBao" as E3
+entity "Entity: UngVien" as UngVien
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: HoSoNangLuc" as HoSoNangLuc
+entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
+entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Nhấn Ứng tuyển ngay
 activate UI
-UI -> Form : 2. Hiển thị form-ung-tuyen
+UI -> Form : 2. Hiển thị form chọn CV
 activate Form
-Actor -> Form : 3. Chọn CV và nhập thư ứng tuyển
-Form -> Controller : 4. ungTuyen(request)
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra tin đang mở, CV và hồ sơ ứng viên
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Actor -> Form : 3. Chọn CV có sẵn hoặc upload PDF và nhập thư ứng tuyển
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Tạo hồ sơ ứng tuyển
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Gửi thông báo cho nhà tuyển dụng
-  Controller --> Form : 10. Thông báo ứng tuyển thành công
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo đã ứng tuyển hoặc thiếu CV
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+opt Upload CV mới
+  Form -> CvController : 4. POST /hosonangluc/upload-file
+  CvController -> HoSoNangLuc : 5. Tạo HoSoNangLuc loại file_upload
+  HoSoNangLuc --> CvController : 6. Trả mã CV
+  CvController --> Form : 7. Trả mã HoSoNangLuc
 end
+
+Form -> Controller : 8. POST /hosoungtuyen/ung-tuyen
+activate Controller
+Controller -> UngVien : 9. Lấy hồ sơ ứng viên theo người dùng hiện tại
+Controller -> TinTuyenDung : 10. Kiểm tra tin đang mở
+Controller -> HoSoNangLuc : 11. Kiểm tra CV thuộc ứng viên
+
+alt Hợp lệ
+  Controller -> HoSoUngTuyen : 12. Tạo hồ sơ ứng tuyển
+  HoSoUngTuyen --> Controller : 13. Trả hồ sơ ứng tuyển
+  Controller -> ThongBao : 14. Báo nhà tuyển dụng có hồ sơ mới
+  Controller --> Form : 15. Trả ứng tuyển thành công
+  Form --> UI : 16. Cập nhật trạng thái đã ứng tuyển
+  UI --> Actor : 17. Hiển thị ứng tuyển thành công
+else Không hợp lệ
+  Controller --> Form : 15. Trả lỗi đã ứng tuyển, thiếu CV hoặc tin không mở
+  Form --> UI : 16. Hiển thị lỗi
+  UI --> Actor : 17. Yêu cầu kiểm tra lại
+end
+
 deactivate Controller
 deactivate Form
 deactivate UI

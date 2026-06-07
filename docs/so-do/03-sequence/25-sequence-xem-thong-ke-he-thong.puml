@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,46 +15,55 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Xem thống kê hệ thống
+title Sơ đồ Xem thống kê hệ thống
 
 actor "Actor: Quản trị viên" as Actor
 boundary "UI: quan-tri-dashboard" as UI
-boundary "UI: bo-loc-thong-ke" as Form
-control "Controller: ThongKeController" as Controller
-entity "Entity: ThongKeHeThong" as MainEntity
-entity "Entity: TaiKhoan" as E1
-entity "Entity: TinTuyenDung" as E2
-entity "Entity: HoSoUngTuyen" as E3
-entity "Entity: NhaTuyenDung" as E4
+boundary "UI: bang-thong-ke" as Form
+control "Controller: DashboardAdminController" as Controller
+control "Controller: CanhBaoQuanTriController" as AlertController
+entity "Entity: NguoiDung" as NguoiDung
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
+entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
 
 Actor -> UI : 1. Mở dashboard quản trị
 activate UI
-UI -> Form : 2. Hiển thị bo-loc-thong-ke
+UI -> Form : 2. Hiển thị khung thống kê
 activate Form
-Actor -> Form : 3. Chọn khoảng thời gian hoặc loại thống kê
-Form -> Controller : 4. layThongKeHeThong(filter)
+Form -> Controller : 3. GET /nguoidung, /tintuyendung, /nhatuyendung, /hosoungtuyen
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra quyền quản trị và tham số thống kê
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
-
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Tổng hợp số liệu hệ thống
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Đếm người dùng, công ty, tin và hồ sơ ứng tuyển
-  Controller --> Form : 10. Hiển thị biểu đồ và chỉ số thống kê
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo không tải được dữ liệu thống kê
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
-end
+Controller -> NguoiDung : 4. Lấy danh sách người dùng
+NguoiDung --> Controller : 5. Trả dữ liệu người dùng
+Controller -> TinTuyenDung : 6. Lấy danh sách tin tuyển dụng
+TinTuyenDung --> Controller : 7. Trả dữ liệu tin
+Controller -> NhaTuyenDung : 8. Lấy danh sách công ty
+NhaTuyenDung --> Controller : 9. Trả dữ liệu công ty
+Controller -> HoSoUngTuyen : 10. Lấy danh sách hồ sơ ứng tuyển
+HoSoUngTuyen --> Controller : 11. Trả dữ liệu hồ sơ
+Controller --> Form : 12. Trả dữ liệu dashboard
 deactivate Controller
+
+Form -> AlertController : 13. GET /canhbaoquantri
+activate AlertController
+AlertController -> TinTuyenDung : 14. Đếm tin chờ duyệt, quá hạn, sắp hết hạn
+AlertController -> NhaTuyenDung : 15. Đếm công ty chờ duyệt, quá hạn
+AlertController -> HoSoUngTuyen : 16. Đếm hồ sơ ứng tuyển mới
+AlertController -> NguoiDung : 17. Đếm tài khoản bị khóa
+AlertController --> Form : 18. Trả cảnh báo và thống kê vận hành
+deactivate AlertController
+
+alt Tải dữ liệu thành công
+  Form --> UI : 19. Cập nhật KPI, tin chờ duyệt và cảnh báo
+  UI --> Actor : 20. Hiển thị dashboard quản trị
+else Tải dữ liệu thất bại
+  Form --> UI : 19. Hiển thị lỗi không tải được dữ liệu
+  UI --> Actor : 20. Yêu cầu thử lại
+end
+
 deactivate Form
 deactivate UI
 @enduml

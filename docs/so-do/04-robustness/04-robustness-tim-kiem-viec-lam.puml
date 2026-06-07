@@ -1,43 +1,39 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Tìm kiếm việc làm"
 
-actor "Actor: Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "UI: viec-lam" as UI
-boundary "UI: bo-loc-viec-lam" as Form
-control "Controller: TinTuyenDungController" as Controller
-entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: KyNang" as E1
-entity "Entity: NhaTuyenDung" as E2
+actor "Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "viec-lam" as UI
+boundary "bo-loc-viec-lam" as Form
+control "tim-kiem-viec-lam" as Controller
 
-Actor --> UI : Truy cập trang việc làm
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Nhập từ khóa và chọn bộ lọc
-Form --> Controller : timKiemTinTuyenDung(filter)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Chuẩn hóa từ khóa, kỹ năng, địa điểm\nTìm tin đang mở phù hợp
-Controller <--> E1 : Lấy kỹ năng và công ty liên quan
-Controller --> Form : Trả danh sách việc làm / Thông báo không tìm thấy dữ liệu phù hợp
-Controller --> UI : trả dữ liệu mới
+entity "TinTuyenDung" as MainEntity
+entity "NhaTuyenDung" as E1
+entity "DanhMucKyNang" as E2
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
+Controller <--> E1
+Controller <--> E2
 @enduml

@@ -130,7 +130,7 @@ export default function Header() {
                 <AppIcon icon={LogIn} size={17} />
                 <span>Đăng nhập</span>
               </Link>
-              <Link to="/dang-ky" className="nav-pill-rong strong">
+              <Link to="/dang-ky" className="nav-pill-rong strong nav-register-rong">
                 <AppIcon icon={UserPlus} size={17} />
                 <span>Đăng ký</span>
               </Link>

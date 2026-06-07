@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,30 +10,32 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Xem chi tiết công ty
-
 start
-:Người dùng chọn công ty tuyển dụng;
-:Hệ thống kiểm tra hồ sơ công ty;
-if (Công ty tồn tại và đã được duyệt?) then (Có)
+:Khách vãng lai hoặc ứng viên chọn một công ty;
+:Hệ thống tải NhaTuyenDung theo mã;
+if (Công ty tồn tại?) then (Có)
   fork
-    :Hiển thị thông tin tổng quan công ty;
+    :Tải danh sách TinTuyenDung của công ty;
   fork again
-    :Hiển thị mô tả, ngành nghề và quy mô;
-  fork again
-    :Hiển thị danh sách tin đang tuyển;
-  fork again
-    :Hiển thị đánh giá đã được duyệt;
+    :Tải DanhGiaCongTy đã duyệt;
   end fork
-  if (Người dùng chọn tin tuyển dụng?) then (Có)
-    :Chuyển đến chi tiết tin tuyển dụng;
-    stop
-  else (Không)
-    :Tiếp tục xem hồ sơ công ty;
-    stop
+  :Lọc tin đang mở của công ty;
+  :Hiển thị hồ sơ công ty, thông tin chung, tin đang tuyển và điểm đánh giá;
+  if (Người dùng chọn tab?) then (Giới thiệu)
+    :Xem mô tả, website, quy mô, ngành và địa chỉ công ty;
+  elseif (Chọn đánh giá?) then (Đánh giá)
+    :Xem danh sách đánh giá đã được quản trị viên duyệt;
+  else (Bài viết)
+    :Hiển thị trạng thái chưa có bài viết;
   endif
+  if (Chọn một tin tuyển dụng?) then (Có)
+    :Mở chi tiết TinTuyenDung;
+  else (Không)
+    :Quay lại danh sách công ty hoặc danh sách việc làm;
+  endif
+  :Kết thúc nhánh;
 else (Không)
-  :Hệ thống thông báo công ty không khả dụng;
+  :Hiển thị thông báo không tìm thấy công ty;
   stop
 endif
 @enduml

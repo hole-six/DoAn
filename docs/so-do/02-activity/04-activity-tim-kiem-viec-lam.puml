@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,29 +10,56 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Tìm kiếm việc làm
-
 start
-:Người dùng mở trang việc làm;
+:Khách vãng lai hoặc ứng viên mở trang việc làm;
+:Hệ thống tải danh sách TinTuyenDung;
+if (Người dùng là ứng viên đã đăng nhập?) then (Có)
+  :Hệ thống tải ViecLamDaLuu của ứng viên;
+else (Không)
+  :Dùng danh sách việc đã lưu trong trình duyệt nếu có;
+endif
+:Hệ thống chỉ hiển thị tin có trangThai = dang_mo;
 fork
   :Nhập từ khóa tìm kiếm;
 fork again
-  :Chọn kỹ năng;
+  :Chọn nhóm kỹ năng;
+fork again
+  :Chọn kỹ năng liên quan;
 fork again
   :Chọn cấp bậc;
 fork again
   :Chọn hình thức làm việc;
-fork again
-  :Chọn khoảng lương nếu cần;
 end fork
-:Hệ thống lọc tin tuyển dụng đã duyệt và còn mở;
-if (Có kết quả phù hợp?) then (Có)
-  :Hệ thống phân trang danh sách việc làm;
-  :Người dùng xem kết quả;
-  stop
+if (Người dùng chọn gợi ý tìm kiếm?) then (Có)
+  :Hệ thống mở việc làm hoặc công ty theo gợi ý;
 else (Không)
-  :Hệ thống hiển thị trạng thái không có kết quả;
-  :Gợi ý thay đổi điều kiện tìm kiếm;
+  :Nhấn nút "Tìm việc" hoặc hệ thống tự lọc;
+endif
+if (Muốn xóa bộ lọc?) then (Có)
+  :Đặt lại nhóm kỹ năng, kỹ năng, cấp bậc và hình thức;
+else (Không)
+  :Giữ bộ lọc hiện tại;
+endif
+:Hệ thống lọc TinTuyenDung theo từ khóa và bộ lọc động;
+if (Người dùng hỏi trợ lý AI?) then (Có)
+  :Gửi câu hỏi tới AI chatbot;
+  :Hiển thị câu trả lời gợi ý tìm việc;
+else (Không)
+  :Tiếp tục xem kết quả;
+endif
+if (Có kết quả?) then (Có)
+  :Hiển thị danh sách việc làm theo phân trang;
+  if (Người dùng chọn một tin?) then (Có)
+    :Mở trang chi tiết TinTuyenDung;
+  elseif (Chọn lưu việc?) then (Lưu việc)
+    :Lưu hoặc bỏ lưu TinTuyenDung;
+  else (Không)
+    :Tiếp tục xem danh sách;
+  endif
+  :Kết thúc nhánh;
+else (Không)
+  :Hiển thị trạng thái không có việc phù hợp;
+  :Gợi ý đổi từ khóa hoặc bộ lọc;
   stop
 endif
 @enduml

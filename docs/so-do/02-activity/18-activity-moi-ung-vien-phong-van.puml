@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,35 +10,48 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Mời ứng viên phỏng vấn
-
 start
-:Nhà tuyển dụng mở hồ sơ ứng viên;
-:Chọn chức năng mời phỏng vấn;
-:Hệ thống kiểm tra trạng thái hồ sơ ứng tuyển;
-if (Hồ sơ đủ điều kiện mời phỏng vấn?) then (Có)
-  fork
-    :Nhập thời gian bắt đầu và kết thúc;
-  fork again
-    :Chọn hình thức phỏng vấn;
-  fork again
-    :Nhập địa điểm hoặc link họp;
-  fork again
-    :Nhập ghi chú nếu có;
-  end fork
-  :Nhà tuyển dụng gửi lời mời;
-  :Hệ thống kiểm tra thông tin lịch;
-  if (Lịch hợp lệ?) then (Có)
-    :Hệ thống tạo lịch phỏng vấn;
-    :Cập nhật trạng thái hồ sơ ứng tuyển;
-    :Thông báo cho ứng viên;
-    stop
-  else (Không)
-    :Thông báo lỗi lịch phỏng vấn;
-    stop
+:Nhà tuyển dụng đăng nhập;
+:Mở pipeline ứng viên;
+:Hệ thống tải HoSoUngTuyen, UngVien và TinTuyenDung;
+:Chọn hồ sơ ứng viên cần mời phỏng vấn;
+if (Hồ sơ thuộc công ty?) then (Đúng)
+  if (Đã có LichPhongVan?) then (Có)
+    :Hiển thị thông báo hồ sơ đã có lịch phỏng vấn;
+    :Kết thúc nhánh;
+  else (Chưa)
+    :Nhấn nút "Mời phỏng vấn";
+    fork
+      :Chọn ngày giờ bắt đầu;
+    fork again
+      :Chọn ngày giờ kết thúc;
+    fork again
+      :Chọn hình thức online hoặc offline;
+    fork again
+      :Nhập địa chỉ hoặc link họp;
+    fork again
+      :Nhập ghi chú cho ứng viên;
+    end fork
+    if (Muốn thoát?) then (Có)
+      :Nhấn nút "Đóng";
+      :Kết thúc nhánh;
+    else (Không)
+      :Nhấn nút "Lưu lịch";
+    endif
+    :Hệ thống kiểm tra thời gian và dữ liệu lịch;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo LichPhongVan trạng thái da_len_lich;
+      :Cập nhật HoSoUngTuyen thành moi_phong_van;
+      :Gửi ThongBao mời phỏng vấn cho ứng viên;
+      :Hiển thị gửi lời mời thành công;
+      :Kết thúc nhánh;
+    else (Sai)
+      :Hiển thị thông báo lỗi dữ liệu lịch;
+      :Kết thúc nhánh;
+    endif
   endif
-else (Không)
-  :Thông báo hồ sơ chưa đủ điều kiện;
+else (Sai)
+  :Hiển thị thông báo không có quyền mời phỏng vấn;
   stop
 endif
 @enduml

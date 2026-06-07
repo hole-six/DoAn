@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,26 +10,44 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Theo dõi trạng thái ứng tuyển
-
 start
 :Ứng viên đăng nhập;
-:Mở trang hồ sơ đã ứng tuyển;
-:Hệ thống tải danh sách hồ sơ ứng tuyển;
-if (Có hồ sơ ứng tuyển?) then (Có)
-  :Ứng viên chọn một hồ sơ;
+:Mở trang hồ sơ ứng tuyển;
+fork
+  :Hệ thống tải HoSoUngTuyen của ứng viên;
+fork again
+  :Hệ thống tải TinTuyenDung liên quan;
+fork again
+  :Hệ thống tải LichPhongVan liên quan;
+end fork
+if (Tải dữ liệu thành công?) then (Đúng)
+  :Hiển thị danh sách hồ sơ ứng tuyển;
   fork
-    :Hệ thống hiển thị trạng thái hiện tại;
+    :Chọn bộ lọc trạng thái;
   fork again
-    :Hệ thống hiển thị lịch sử xử lý;
+    :Nhập từ khóa vị trí hoặc công ty;
   fork again
-    :Hệ thống hiển thị thông tin tin tuyển dụng;
+    :Sắp xếp theo ngày nộp;
   end fork
-  :Ứng viên theo dõi tiến trình;
-  stop
-else (Không)
-  :Hiển thị trạng thái chưa có hồ sơ ứng tuyển;
-  :Gợi ý tìm kiếm việc làm;
+  if (Chọn một hồ sơ?) then (Có)
+    :Mở chi tiết HoSoUngTuyen;
+    if (Trạng thái cho phép rút?) then (Có)
+      if (Nhấn "Rút hồ sơ"?) then (Có)
+        :Nhập lý do nếu có;
+        :Hệ thống cập nhật trạng thái da_rut;
+        :Hiển thị thông báo rút hồ sơ thành công;
+      else (Không)
+        :Tiếp tục xem chi tiết;
+      endif
+    else (Không)
+      :Chỉ hiển thị tiến trình và lịch liên quan;
+    endif
+  else (Không)
+    :Tiếp tục xem danh sách;
+  endif
+  :Kết thúc nhánh;
+else (Sai)
+  :Hiển thị thông báo không tải được hồ sơ ứng tuyển;
   stop
 endif
 @enduml

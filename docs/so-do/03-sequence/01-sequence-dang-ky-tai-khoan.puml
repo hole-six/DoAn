@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,46 +15,67 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Đăng ký tài khoản
+title Sơ đồ Đăng ký tài khoản
 
 actor "Actor: Khách vãng lai" as Actor
 boundary "UI: dang-ky" as UI
 boundary "UI: form-dang-ky" as Form
-control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: UngVien" as E1
-entity "Entity: NhaTuyenDung" as E2
-entity "Entity: ThongBao" as E3
+control "Controller: NguoiDungController" as NguoiDungController
+control "Controller: UngVienController" as UngVienController
+control "Controller: NhaTuyenDungController" as NhaTuyenDungController
+entity "Entity: NguoiDung" as NguoiDung
+entity "Entity: UngVien" as UngVien
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
+entity "Entity: ThongBao" as ThongBao
 
-Actor -> UI : 1. Truy cập trang đăng ký
+Actor -> UI : 1. Mở trang đăng ký
 activate UI
-UI -> Form : 2. Hiển thị form-dang-ky
+UI -> Form : 2. Hiển thị form theo vai trò
 activate Form
-Actor -> Form : 3. Nhập thông tin đăng ký và chọn vai trò
-Form -> Controller : 4. dangKy(request)
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra email, mật khẩu và vai trò
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Actor -> Form : 3. Nhập họ tên, email, SĐT, mật khẩu
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Tạo tài khoản mới
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Tạo hồ sơ ứng viên hoặc hồ sơ công ty
-  Controller -> E2 : 10. Gửi thông báo duyệt công ty nếu là nhà tuyển dụng
-  Controller --> Form : 11. Thông báo đăng ký thành công
-  Form --> UI : 12. Cập nhật giao diện
-  UI --> Actor : 13. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 11. Thông báo dữ liệu không hợp lệ
-  Form --> UI : 12. Hiển thị lỗi tại màn hình
-  UI --> Actor : 13. Yêu cầu kiểm tra lại thông tin
+alt Vai trò ứng viên
+  Form -> NguoiDungController : 4. POST /nguoidung
+  activate NguoiDungController
+  NguoiDungController -> NguoiDung : 5. Kiểm tra email và tạo NguoiDung
+  NguoiDung --> NguoiDungController : 6. Trả NguoiDung mới
+  NguoiDungController --> Form : 7. Trả mã người dùng
+  deactivate NguoiDungController
+  Form -> UngVienController : 8. POST /ungvien
+  activate UngVienController
+  UngVienController -> UngVien : 9. Tạo hồ sơ ứng viên mặc định
+  UngVien --> UngVienController : 10. Trả hồ sơ ứng viên
+  UngVienController --> Form : 11. Tạo hồ sơ thành công
+  deactivate UngVienController
+else Vai trò nhà tuyển dụng
+  Actor -> Form : 4. Nhập thêm tên công ty
+  Form -> NguoiDungController : 5. POST /nguoidung
+  activate NguoiDungController
+  NguoiDungController -> NguoiDung : 6. Kiểm tra email và tạo NguoiDung
+  NguoiDung --> NguoiDungController : 7. Trả NguoiDung mới
+  NguoiDungController --> Form : 8. Trả mã người dùng
+  deactivate NguoiDungController
+  Form -> NhaTuyenDungController : 9. POST /nhatuyendung
+  activate NhaTuyenDungController
+  NhaTuyenDungController -> NhaTuyenDung : 10. Tạo công ty trạng thái cho_duyet
+  NhaTuyenDung --> NhaTuyenDungController : 11. Trả hồ sơ công ty
+  NhaTuyenDungController -> ThongBao : 12. Gửi thông báo admin duyệt công ty
+  ThongBao --> NhaTuyenDungController : 13. Đã tạo thông báo
+  NhaTuyenDungController --> Form : 14. Tạo công ty thành công
+  deactivate NhaTuyenDungController
 end
-deactivate Controller
+
+alt Thành công
+  Form --> UI : 15. Điều hướng sang đăng nhập
+  UI --> Actor : 16. Hiển thị đăng ký thành công
+else Không hợp lệ
+  Form --> UI : 15. Hiển thị lỗi từ API
+  UI --> Actor : 16. Yêu cầu sửa thông tin
+end
+
 deactivate Form
 deactivate UI
 @enduml

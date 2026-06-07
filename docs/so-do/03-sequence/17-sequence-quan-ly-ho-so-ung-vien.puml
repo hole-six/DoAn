@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,44 +15,56 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Quản lý hồ sơ ứng viên
+title Sơ đồ Quản lý hồ sơ ứng viên
 
 actor "Actor: Nhà tuyển dụng" as Actor
 boundary "UI: pipeline-ung-vien" as UI
 boundary "UI: drawer-ho-so-ung-vien" as Form
 control "Controller: HoSoUngTuyenController" as Controller
-entity "Entity: HoSoUngTuyen" as MainEntity
-entity "Entity: UngVien" as E1
-entity "Entity: TinTuyenDung" as E2
-entity "Entity: ThongBao" as E3
+entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
+entity "Entity: UngVien" as UngVien
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
+entity "Entity: LichPhongVan" as LichPhongVan
+entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Mở pipeline ứng viên
 activate UI
-UI -> Form : 2. Hiển thị drawer-ho-so-ung-vien
+UI -> Form : 2. Hiển thị hồ sơ ứng tuyển
 activate Form
-Actor -> Form : 3. Xem hồ sơ, chuyển trạng thái, từ chối hoặc chọn phỏng vấn
-Form -> Controller : 4. capNhatTrangThaiHoSo(request)
+Form -> Controller : 3. GET /hosoungtuyen
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra hồ sơ thuộc tin của công ty
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Controller -> HoSoUngTuyen : 4. Lấy hồ sơ thuộc tin của công ty
+HoSoUngTuyen --> Controller : 5. Trả danh sách hồ sơ
+Controller -> UngVien : 6. Populate thông tin ứng viên
+Controller -> TinTuyenDung : 7. Populate tin tuyển dụng
+Controller --> Form : 8. Trả dữ liệu pipeline
+deactivate Controller
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Cập nhật trạng thái hồ sơ ứng tuyển
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Gửi thông báo cho ứng viên
-  Controller --> Form : 10. Hiển thị pipeline đã cập nhật
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo thao tác không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+alt Đánh dấu đã xem hoặc đánh giá
+  Actor -> Form : 9. Chọn xem, đưa vào xét duyệt hoặc từ chối
+  Form -> Controller : 10. POST /hosoungtuyen/:ma/xem hoặc /:ma/danh-gia
+  activate Controller
+  Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
+  Controller -> NhaTuyenDung : 12. Kiểm tra nhà tuyển dụng hiện tại
+  Controller -> HoSoUngTuyen : 13. Cập nhật trạng thái nghiệp vụ
+  Controller -> ThongBao : 14. Báo ứng viên khi cần
+  Controller --> Form : 15. Trả hồ sơ đã cập nhật
+else Mời phỏng vấn
+  Actor -> Form : 9. Chọn lên lịch phỏng vấn
+  Form -> Controller : 10. POST /hosoungtuyen/:ma/moi-phong-van
+  activate Controller
+  Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
+  Controller -> LichPhongVan : 12. Tạo lịch phỏng vấn
+  Controller -> ThongBao : 13. Báo ứng viên
+  Controller --> Form : 14. Trả lịch mới
 end
+
+Form --> UI : 16. Cập nhật pipeline
+UI --> Actor : 17. Hiển thị kết quả thao tác
 deactivate Controller
 deactivate Form
 deactivate UI

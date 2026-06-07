@@ -1,44 +1,39 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Quản lý người dùng"
 
-actor "Actor: Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "UI: quan-tri-nguoi-dung" as UI
-boundary "UI: form-tai-khoan" as Form
-control "Controller: NguoiDungController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: UngVien" as E1
-entity "Entity: NhaTuyenDung" as E2
-entity "Entity: ThongBao" as E3
+actor "Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "quan-tri-nguoi-dung" as UI
+boundary "form-tai-khoan" as Form
+control "quan-ly-nguoi-dung" as Controller
 
-Actor --> UI : Mở trang quản lý người dùng
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Tìm kiếm, thêm, sửa, khóa hoặc xóa tài khoản
-Form --> Controller : quanLyTaiKhoan(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra quyền quản trị và ràng buộc tài khoản\nCập nhật tài khoản
-Controller <--> E1 : Đồng bộ hồ sơ ứng viên hoặc công ty liên quan
-Controller --> Form : Trả danh sách tài khoản mới / Thông báo thao tác tài khoản không hợp lệ
-Controller --> UI : trả dữ liệu mới
+entity "NguoiDung" as MainEntity
+entity "UngVien" as E1
+entity "NhaTuyenDung" as E2
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
+Controller <--> E1
+Controller <--> E2
 @enduml

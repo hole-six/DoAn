@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,29 +10,43 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Xem chi tiết tin tuyển dụng
-
 start
-:Người dùng chọn một tin tuyển dụng;
-:Hệ thống kiểm tra tin tuyển dụng;
-if (Tin tồn tại và được công khai?) then (Có)
+:Khách vãng lai hoặc ứng viên chọn một tin tuyển dụng;
+:Hệ thống tải TinTuyenDung theo mã;
+if (Tin tồn tại?) then (Có)
   fork
-    :Hệ thống hiển thị mô tả công việc;
+    :Tải NhaTuyenDung liên quan;
   fork again
-    :Hệ thống hiển thị yêu cầu và quyền lợi;
-  fork again
-    :Hệ thống hiển thị thông tin công ty;
-  fork again
-    :Hệ thống hiển thị mức lương và hạn nộp;
+    :Tải danh sách TinTuyenDung để gợi ý việc tương tự;
   end fork
-  if (Người dùng là ứng viên?) then (Có)
-    :Hiển thị thao tác lưu việc hoặc ứng tuyển;
+  :Hiển thị mô tả, yêu cầu, quyền lợi, mức lương, địa điểm và kỹ năng của tin;
+  if (Người dùng đăng nhập ứng viên?) then (Có)
+    fork
+      :Kiểm tra HoSoUngTuyen đã nộp;
+    fork again
+      :Kiểm tra ViecLamDaLuu;
+    fork again
+      :Tải HoSoNangLuc để ứng tuyển;
+    end fork
+    if (Chọn thao tác?) then (Ứng tuyển)
+      :Mở form ứng tuyển;
+      :Chọn CV có sẵn hoặc upload CV PDF mới;
+      :Nhập thư xin việc nếu có;
+    elseif (Chọn lưu việc?) then (Lưu việc)
+      :Gọi chức năng lưu hoặc bỏ lưu việc làm;
+    else (Xem công ty)
+      :Mở trang chi tiết công ty;
+    endif
   else (Không)
-    :Hiển thị lời mời đăng nhập để ứng tuyển;
+    if (Chọn ứng tuyển hoặc lưu việc?) then (Có)
+      :Điều hướng tới trang đăng nhập;
+    else (Không)
+      :Tiếp tục xem thông tin tin tuyển dụng;
+    endif
   endif
-  stop
+  :Kết thúc nhánh;
 else (Không)
-  :Hệ thống thông báo tin không khả dụng;
+  :Hiển thị thông báo không tìm thấy tin tuyển dụng;
   stop
 endif
 @enduml

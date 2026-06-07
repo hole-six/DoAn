@@ -1,43 +1,46 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Duyệt đánh giá công ty"
 
-actor "Actor: Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "UI: quan-tri-review" as UI
-boundary "UI: form-duyet-review" as Form
-control "Controller: ReviewCongTyController" as Controller
-entity "Entity: ReviewCongTy" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: ThongBao" as E2
+actor "Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "quan-tri-review" as UI
+boundary "form-duyet-review" as Form
+control "duyet-danh-gia-cong-ty" as Controller
 
-Actor --> UI : Mở danh sách đánh giá chờ duyệt
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Xem nội dung và chọn duyệt hoặc từ chối
-Form --> Controller : duyetDanhGiaCongTy(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra nội dung đánh giá và công ty liên quan\nCập nhật trạng thái đánh giá
-Controller <--> E1 : Cập nhật điểm hiển thị của công ty nếu duyệt
-Controller --> Form : Thông báo xử lý đánh giá thành công / Thông báo đánh giá không hợp lệ
-Controller --> UI : trả dữ liệu mới
+entity "DanhGiaCongTy" as MainEntity
+entity "UngVien" as E1
+entity "NhaTuyenDung" as E2
+entity "HoSoUngTuyen" as E3
+
+Actor -right-> UI
+UI -right-> Form
+Form -right-> Controller
+
+Controller -right-> MainEntity
+Controller -right-> E1
+Controller -right-> E2
+Controller -right-> E3
+
+MainEntity -down[hidden]-> E1
+E1 -down[hidden]-> E2
+E2 -down[hidden]-> E3
 @enduml

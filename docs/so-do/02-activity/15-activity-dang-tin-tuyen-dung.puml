@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,35 +10,48 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Đăng tin tuyển dụng
-
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang quản lý tin tuyển dụng;
-:Chọn tạo tin tuyển dụng mới;
-:Hệ thống kiểm tra trạng thái duyệt công ty;
-if (Công ty đã được duyệt?) then (Có)
+:Hệ thống kiểm tra hồ sơ NhaTuyenDung;
+if (Công ty đã được duyệt?) then (Đúng)
+  :Nhấn nút "Đăng tin";
+  :Hệ thống tải DanhMucKyNang;
   fork
-    :Nhập tiêu đề và mô tả công việc;
+    :Nhập tiêu đề tin tuyển dụng;
   fork again
-    :Nhập yêu cầu và quyền lợi;
+    :Nhập mô tả công việc;
   fork again
-    :Chọn kỹ năng, cấp bậc và hình thức;
+    :Nhập yêu cầu ứng viên;
   fork again
-    :Nhập mức lương và hạn nộp;
+    :Nhập quyền lợi;
+  fork again
+    :Chọn cấp bậc, loại hình và địa điểm;
+  fork again
+    :Nhập lương, hạn nộp và số lượng;
+  fork again
+    :Chọn kỹ năng bắt buộc;
+  fork again
+    :Tải ảnh đại diện tin nếu có;
   end fork
-  :Gửi tin chờ duyệt;
-  :Hệ thống kiểm tra nội dung tin;
-  if (Tin hợp lệ?) then (Có)
-    :Hệ thống lưu tin ở trạng thái chờ duyệt;
-    :Thông báo cho quản trị viên;
-    stop
+  if (Muốn thoát?) then (Có)
+    :Nhấn nút "Đóng";
+    :Kết thúc nhánh;
   else (Không)
-    :Thông báo lỗi nội dung tin;
-    stop
+    :Nhấn nút "Lưu tin";
   endif
-else (Không)
-  :Thông báo công ty chưa được duyệt;
+  :Hệ thống kiểm tra dữ liệu TinTuyenDung;
+  if (Dữ liệu hợp lệ?) then (Đúng)
+    :Tạo TinTuyenDung trạng thái cho_duyet;
+    :Gửi ThongBao cho quản trị viên duyệt tin;
+    :Hiển thị đăng tin thành công và chờ duyệt;
+    :Kết thúc nhánh;
+  else (Sai)
+    :Hiển thị thông báo lỗi;
+    :Kết thúc nhánh;
+  endif
+else (Sai)
+  :Hiển thị yêu cầu cập nhật hoặc chờ duyệt hồ sơ công ty;
   stop
 endif
 @enduml

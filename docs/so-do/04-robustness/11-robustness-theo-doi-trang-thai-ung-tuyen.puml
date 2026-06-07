@@ -1,43 +1,39 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Theo dõi trạng thái ứng tuyển"
 
-actor "Actor: Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "UI: ho-so-ung-tuyen" as UI
-boundary "UI: bo-loc-trang-thai" as Form
-control "Controller: HoSoUngTuyenController" as Controller
-entity "Entity: HoSoUngTuyen" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: LichPhongVan" as E2
+actor "Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "ho-so-ung-tuyen" as UI
+boundary "bo-loc-trang-thai" as Form
+control "theo-doi-trang-thai-ung-tuyen" as Controller
 
-Actor --> UI : Mở trang hồ sơ ứng tuyển
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Lọc hoặc xem chi tiết trạng thái
-Form --> Controller : layDanhSachHoSoUngTuyen()
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra hồ sơ thuộc ứng viên\nLấy danh sách hồ sơ ứng tuyển
-Controller <--> E1 : Lấy tin tuyển dụng và lịch phỏng vấn liên quan
-Controller --> Form : Hiển thị trạng thái ứng tuyển / Thông báo không tải được dữ liệu
-Controller --> UI : trả dữ liệu mới
+entity "HoSoUngTuyen" as MainEntity
+entity "TinTuyenDung" as E1
+entity "LichPhongVan" as E2
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
+Controller <--> E1
+Controller <--> E2
 @enduml

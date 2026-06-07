@@ -1,44 +1,46 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Đăng tin tuyển dụng"
 
-actor "Actor: Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
-boundary "UI: quan-ly-tin" as UI
-boundary "UI: form-dang-tin" as Form
-control "Controller: TinTuyenDungController" as Controller
-entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: KyNang" as E2
-entity "Entity: ThongBao" as E3
+actor "Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
+boundary "quan-ly-tin" as UI
+boundary "form-dang-tin" as Form
+control "dang-tin-tuyen-dung" as Controller
 
-Actor --> UI : Nhấn Đăng tin tuyển dụng
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Nhập tiêu đề, mô tả, kỹ năng, lương và hạn nộp
-Form --> Controller : taoTinTuyenDung(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra công ty đã duyệt và dữ liệu tin\nTạo tin tuyển dụng chờ duyệt
-Controller <--> E1 : Lưu kỹ năng và gửi thông báo cho admin
-Controller --> Form : Thông báo tin đã gửi duyệt / Thông báo công ty chưa được duyệt hoặc dữ liệu lỗi
-Controller --> UI : trả dữ liệu mới
+entity "TinTuyenDung" as MainEntity
+entity "NhaTuyenDung" as E1
+entity "DanhMucKyNang" as E2
+entity "ThongBao" as E3
+
+Actor -right-> UI
+UI -right-> Form
+Form -right-> Controller
+
+Controller -right-> MainEntity
+Controller -right-> E1
+Controller -right-> E2
+Controller -right-> E3
+
+MainEntity -down[hidden]-> E1
+E1 -down[hidden]-> E2
+E2 -down[hidden]-> E3
 @enduml

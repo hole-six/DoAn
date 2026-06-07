@@ -145,16 +145,18 @@ export default function DangKy() {
             <div className="auth-role-switch auth-role-switch--register mt-8 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-100 p-2">
               <button
                 type="button"
+                aria-pressed={vaiTro === 'ungvien'}
                 style={vaiTro === 'ungvien' ? navyButtonStyle : { backgroundColor: '#ffffff', border: '1px solid transparent', color: '#334155' }}
-                className={`min-h-14 rounded-xl px-3 text-base font-black transition ${vaiTro === 'ungvien' ? '!bg-[#062a4d] !text-white shadow-lg shadow-[#062a4d]/25' : '!bg-white !text-slate-700 hover:!bg-slate-50 hover:!text-[#062a4d]'}`}
+                className={`auth-role-button min-h-14 rounded-xl px-3 text-base font-black transition ${vaiTro === 'ungvien' ? 'auth-role-button--active !bg-[#062a4d] !text-white shadow-lg shadow-[#062a4d]/25' : 'auth-role-button--inactive !bg-white !text-slate-700 hover:!bg-slate-50 hover:!text-[#062a4d]'}`}
                 onClick={() => setVaiTro('ungvien')}
               >
                 Ứng viên
               </button>
               <button
                 type="button"
+                aria-pressed={vaiTro === 'nhatuyendung'}
                 style={vaiTro === 'nhatuyendung' ? navyButtonStyle : { backgroundColor: '#ffffff', border: '1px solid transparent', color: '#334155' }}
-                className={`min-h-14 rounded-xl px-3 text-base font-black transition ${vaiTro === 'nhatuyendung' ? '!bg-[#062a4d] !text-white shadow-lg shadow-[#062a4d]/25' : '!bg-white !text-slate-700 hover:!bg-slate-50 hover:!text-[#062a4d]'}`}
+                className={`auth-role-button min-h-14 rounded-xl px-3 text-base font-black transition ${vaiTro === 'nhatuyendung' ? 'auth-role-button--active !bg-[#062a4d] !text-white shadow-lg shadow-[#062a4d]/25' : 'auth-role-button--inactive !bg-white !text-slate-700 hover:!bg-slate-50 hover:!text-[#062a4d]'}`}
                 onClick={() => setVaiTro('nhatuyendung')}
               >
                 Nhà tuyển dụng
@@ -224,7 +226,7 @@ export default function DangKy() {
                 type="submit"
                 disabled={dangXuLy}
                 style={navyButtonStyle}
-                className="min-h-14 rounded-xl !border !border-[#062a4d] !bg-[#062a4d] px-6 text-lg font-black !text-white shadow-xl shadow-[#062a4d]/25 transition hover:!bg-[#0b5c91] disabled:cursor-not-allowed disabled:opacity-70"
+                className="auth-submit-button min-h-14 rounded-xl !border !border-[#062a4d] !bg-[#062a4d] px-6 text-lg font-black !text-white shadow-xl shadow-[#062a4d]/25 transition hover:!bg-[#0b5c91] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {dangXuLy ? 'Đang tạo tài khoản...' : vaiTro === 'nhatuyendung' ? 'Đăng ký nhà tuyển dụng' : 'Tạo tài khoản ứng viên'}
               </button>

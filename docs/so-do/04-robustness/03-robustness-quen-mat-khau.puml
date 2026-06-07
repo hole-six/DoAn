@@ -1,42 +1,35 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Quên mật khẩu"
 
-actor "Actor: Khách vãng lai\n(from Usecase Diagram)" as Actor
-boundary "UI: quen-mat-khau" as UI
-boundary "UI: form-quen-mat-khau" as Form
-control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: EmailDatLaiMatKhau" as E1
+actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
+boundary "quen-mat-khau" as UI
+boundary "form-quen-mat-khau" as Form
+control "quen-mat-khau" as Controller
 
-Actor --> UI : Truy cập chức năng quên mật khẩu
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Nhập email cần đặt lại mật khẩu
-Form --> Controller : yeuCauDatLaiMatKhau(email)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra tài khoản theo email\nTạo mã đặt lại mật khẩu
-Controller <--> E1 : Gửi email chứa liên kết đặt lại
-Controller --> Form : Thông báo đã gửi email hướng dẫn / Thông báo email không tồn tại hoặc không hợp lệ
-Controller --> UI : trả dữ liệu mới
+entity "NguoiDung" as MainEntity
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
 @enduml

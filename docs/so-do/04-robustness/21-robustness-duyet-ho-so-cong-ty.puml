@@ -1,43 +1,39 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Duyệt hồ sơ công ty"
 
-actor "Actor: Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "UI: quan-tri-cong-ty" as UI
-boundary "UI: form-duyet-cong-ty" as Form
-control "Controller: NhaTuyenDungController" as Controller
-entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: TaiKhoan" as E1
-entity "Entity: ThongBao" as E2
+actor "Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "quan-tri-cong-ty" as UI
+boundary "form-duyet-cong-ty" as Form
+control "duyet-ho-so-cong-ty" as Controller
 
-Actor --> UI : Mở danh sách công ty chờ duyệt
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Xem hồ sơ và chọn duyệt hoặc từ chối
-Form --> Controller : duyetHoSoCongTy(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra hồ sơ công ty và lý do từ chối nếu có\nCập nhật trạng thái duyệt công ty
-Controller <--> E1 : Gửi thông báo cho nhà tuyển dụng
-Controller --> Form : Thông báo xử lý hồ sơ công ty thành công / Thông báo hồ sơ công ty không hợp lệ
-Controller --> UI : trả dữ liệu mới
+entity "NhaTuyenDung" as MainEntity
+entity "NguoiDung" as E1
+entity "ThongBao" as E2
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
+Controller <--> E1
+Controller <--> E2
 @enduml

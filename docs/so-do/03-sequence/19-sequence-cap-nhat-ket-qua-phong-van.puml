@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,43 +15,50 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Cập nhật kết quả phỏng vấn
+title Sơ đồ Cập nhật kết quả phỏng vấn
 
 actor "Actor: Nhà tuyển dụng" as Actor
 boundary "UI: lich-phong-van-ntd" as UI
 boundary "UI: form-ket-qua-phong-van" as Form
 control "Controller: LichPhongVanController" as Controller
-entity "Entity: LichPhongVan" as MainEntity
-entity "Entity: HoSoUngTuyen" as E1
-entity "Entity: ThongBao" as E2
+entity "Entity: LichPhongVan" as LichPhongVan
+entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: ThongBao" as ThongBao
 
-Actor -> UI : 1. Mở lịch phỏng vấn cần cập nhật
+Actor -> UI : 1. Mở lịch phỏng vấn nhà tuyển dụng
 activate UI
-UI -> Form : 2. Hiển thị form-ket-qua-phong-van
+UI -> Form : 2. Chọn lịch cần cập nhật kết quả
 activate Form
-Actor -> Form : 3. Nhập kết quả đạt hoặc không đạt
-Form -> Controller : 4. capNhatKetQuaPhongVan(request)
+Actor -> Form : 3. Chọn kết quả đạt hoặc không đạt và ghi chú
+Form -> Controller : 4. POST /lichphongvan/:ma/hoan-thanh
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra lịch thuộc công ty và đã đến bước đánh giá
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Controller -> LichPhongVan : 5. Lấy lịch phỏng vấn
+LichPhongVan --> Controller : 6. Trả lịch
+Controller -> HoSoUngTuyen : 7. Lấy hồ sơ ứng tuyển của lịch
+HoSoUngTuyen --> Controller : 8. Trả hồ sơ
+Controller -> NhaTuyenDung : 9. Kiểm tra quyền công ty
+Controller -> TinTuyenDung : 10. Kiểm tra tin thuộc công ty
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Cập nhật kết quả phỏng vấn
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Cập nhật trạng thái hồ sơ và báo ứng viên
-  Controller --> Form : 10. Thông báo cập nhật kết quả thành công
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo lịch chưa thể cập nhật kết quả
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+alt Hợp lệ
+  Controller -> LichPhongVan : 11. Cập nhật trạng thái hoan_thanh và kết quả
+  LichPhongVan --> Controller : 12. Trả lịch đã cập nhật
+  Controller -> HoSoUngTuyen : 13. Cập nhật trạng thái dat hoặc khong_dat
+  HoSoUngTuyen --> Controller : 14. Trả hồ sơ đã cập nhật
+  Controller -> ThongBao : 15. Báo kết quả phỏng vấn cho ứng viên
+  Controller --> Form : 16. Trả kết quả cập nhật
+  Form --> UI : 17. Cập nhật danh sách lịch
+  UI --> Actor : 18. Hiển thị cập nhật thành công
+else Không hợp lệ
+  Controller --> Form : 16. Trả lỗi quyền, trạng thái hoặc kết quả
+  Form --> UI : 17. Hiển thị lỗi
+  UI --> Actor : 18. Yêu cầu kiểm tra lại
 end
+
 deactivate Controller
 deactivate Form
 deactivate UI

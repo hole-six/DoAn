@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,34 +10,33 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Quản lý danh mục kỹ năng
-
 start
-:Quản trị viên mở trang danh mục kỹ năng;
-:Hệ thống tải danh sách kỹ năng;
-fork
-  :Tìm kiếm kỹ năng;
-fork again
-  :Lọc theo nhóm kỹ năng;
-fork again
-  :Lọc theo trạng thái;
-end fork
-if (Chọn thêm kỹ năng?) then (Có)
-  :Nhập thông tin kỹ năng mới;
-else (Khóa hoặc mở khóa)
-  if (Chọn sửa kỹ năng?) then (Có)
-    :Cập nhật tên, nhóm hoặc mô tả kỹ năng;
-  else (Không)
-    :Chọn trạng thái kỹ năng;
+:Quản trị viên đăng nhập;
+:Mở trang quản lý kỹ năng;
+:Hệ thống tải DanhMucKyNang;
+if (Tải dữ liệu thành công?) then (Đúng)
+  :Hiển thị danh sách kỹ năng và loại kỹ năng;
+  if (Chọn thao tác?) then (Thêm mới)
+    :Nhấn nút "Thêm kỹ năng";
+    :Nhập tên kỹ năng bằng hộp thoại;
+    if (Có nhập tên kỹ năng?) then (Có)
+      :Hệ thống tạo DanhMucKyNang với loaiKyNang = khac;
+      :Hiển thị thông báo đã thêm kỹ năng;
+      :Tải lại danh sách kỹ năng;
+    else (Không)
+      :Hủy thao tác thêm;
+    endif
+  else (Xóa)
+    :Chọn kỹ năng cần xóa;
+    :Hiển thị cảnh báo kỹ năng đang được dùng có thể ảnh hưởng tin và CV;
+    :Xác nhận xóa kỹ năng;
+    :Hệ thống xóa DanhMucKyNang nếu được phép;
+    :Hiển thị thông báo đã xóa;
+    :Tải lại danh sách kỹ năng;
   endif
-endif
-:Hệ thống kiểm tra dữ liệu kỹ năng;
-if (Dữ liệu hợp lệ?) then (Có)
-  :Hệ thống lưu danh mục kỹ năng;
-  :Thông báo xử lý thành công;
-  stop
-else (Không)
-  :Thông báo lỗi dữ liệu kỹ năng;
+  :Kết thúc nhánh;
+else (Sai)
+  :Hiển thị thông báo không tải được danh mục kỹ năng;
   stop
 endif
 @enduml

@@ -472,6 +472,34 @@ textarea {
 /* AUTH PAGES RESPONSIVE                                                      */
 /* ========================================================================== */
 
+/* Deploy color guard: keep register actions from being flattened by global resets. */
+.auth-role-switch .auth-role-button--active,
+.auth-role-switch .auth-role-button[aria-pressed="true"],
+.auth-submit-button {
+  background: #062a4d !important;
+  background-color: #062a4d !important;
+  border-color: #062a4d !important;
+  color: #ffffff !important;
+}
+
+.auth-submit-button:hover {
+  background: #0b5c91 !important;
+  background-color: #0b5c91 !important;
+  border-color: #0b5c91 !important;
+  color: #ffffff !important;
+}
+
+.auth-role-switch .auth-role-button--inactive,
+.auth-role-switch .auth-role-button[aria-pressed="false"] {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #334155 !important;
+}
+
+.auth-submit-button:disabled {
+  opacity: 0.7 !important;
+}
+
 @media (max-width: 1024px) {
   .auth-page {
     grid-template-columns: 1fr !important;

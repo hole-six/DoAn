@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,32 +10,66 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Quản lý người dùng
-
 start
-:Quản trị viên mở trang quản lý người dùng;
-:Hệ thống tải danh sách tài khoản;
-fork
-  :Nhập từ khóa tìm kiếm;
-fork again
-  :Chọn vai trò;
-fork again
-  :Chọn trạng thái;
-end fork
-:Hệ thống lọc và phân trang danh sách;
-if (Quản trị viên chọn thêm người dùng?) then (Có)
-  :Nhập thông tin tài khoản mới;
-  :Hệ thống tạo người dùng;
-else (Xóa hoặc khóa)
-  if (Quản trị viên chọn sửa người dùng?) then (Có)
-    :Cập nhật thông tin tài khoản;
-    :Hệ thống lưu thay đổi;
-  else (Không)
-    :Xác nhận thao tác xóa hoặc khóa;
-    :Hệ thống kiểm tra ràng buộc quản trị;
-    :Hệ thống cập nhật trạng thái tài khoản;
+:Quản trị viên đăng nhập;
+:Mở trang quản lý người dùng;
+:Hệ thống tải danh sách NguoiDung;
+if (Tải dữ liệu thành công?) then (Đúng)
+  :Hiển thị bảng người dùng;
+  fork
+    :Tìm theo họ tên hoặc email;
+  fork again
+    :Lọc theo vai trò;
+  fork again
+    :Lọc theo trạng thái tài khoản;
+  end fork
+  if (Chọn thao tác?) then (Thêm mới)
+    :Nhấn nút "Thêm người dùng";
+    fork
+      :Nhập họ tên;
+    fork again
+      :Nhập email;
+    fork again
+      :Nhập mật khẩu;
+    fork again
+      :Nhập số điện thoại;
+    fork again
+      :Chọn vai trò;
+    fork again
+      :Chọn trạng thái;
+    end fork
+    :Nhấn nút "Lưu";
+    :Hệ thống kiểm tra email trùng và dữ liệu bắt buộc;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo NguoiDung;
+      :Hiển thị thông báo tạo thành công;
+    else (Sai)
+      :Hiển thị thông báo lỗi;
+    endif
+  elseif (Chọn chỉnh sửa?) then (Chỉnh sửa)
+    :Chọn người dùng cần sửa;
+    :Cập nhật họ tên, số điện thoại, vai trò, trạng thái hoặc mật khẩu;
+    :Nhấn nút "Cập nhật";
+    :Hệ thống kiểm tra dữ liệu và email trùng;
+    if (Hợp lệ?) then (Đúng)
+      :Cập nhật NguoiDung;
+      :Hiển thị thông báo cập nhật thành công;
+    else (Sai)
+      :Hiển thị thông báo lỗi;
+    endif
+  else (Xóa)
+    :Chọn người dùng cần xóa;
+    if (Là admin cuối cùng?) then (Có)
+      :Hiển thị lỗi không thể xóa admin cuối cùng;
+    else (Không)
+      :Xác nhận xóa;
+      :Hệ thống xóa NguoiDung;
+      :Hiển thị thông báo đã xóa;
+    endif
   endif
+  :Kết thúc nhánh;
+else (Sai)
+  :Hiển thị thông báo không tải được người dùng;
+  stop
 endif
-:Thông báo kết quả xử lý;
-stop
 @enduml

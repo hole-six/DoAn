@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,34 +10,42 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Đánh giá công ty
-
 start
 :Ứng viên đăng nhập;
-:Mở trang chi tiết công ty;
-:Chọn chức năng đánh giá công ty;
-:Hệ thống kiểm tra điều kiện đánh giá;
-if (Ứng viên đủ điều kiện?) then (Có)
-  fork
-    :Chọn điểm đánh giá;
-  fork again
-    :Nhập nội dung nhận xét;
-  fork again
-    :Chọn chế độ hiển thị tên nếu có;
-  end fork
-  :Ứng viên gửi đánh giá;
-  :Hệ thống kiểm tra nội dung đánh giá;
-  if (Đánh giá hợp lệ?) then (Có)
-    :Hệ thống lưu đánh giá ở trạng thái chờ duyệt;
-    :Hệ thống thông báo cho quản trị viên;
-    :Thông báo đánh giá đã được ghi nhận;
-    stop
-  else (Không)
-    :Thông báo lỗi nội dung đánh giá;
-    stop
+:Mở trang hồ sơ ứng tuyển hoặc chi tiết công ty;
+:Hệ thống tải UngVien và HoSoUngTuyen liên quan;
+if (Ứng viên đủ điều kiện đánh giá?) then (Đã được mời phỏng vấn)
+  :Nhấn nút "Đánh giá công ty";
+  :Hệ thống tải NhaTuyenDung từ HoSoUngTuyen;
+  if (Đã từng đánh giá hồ sơ này?) then (Có)
+    :Hiển thị thông báo đã đánh giá công ty;
+    :Kết thúc nhánh;
+  else (Chưa)
+    fork
+      :Chọn số sao từ 1 đến 5;
+    fork again
+      :Nhập nội dung đánh giá;
+    fork again
+      :Chọn ẩn danh nếu muốn;
+    end fork
+    if (Muốn thoát?) then (Có)
+      :Nhấn nút "Đóng";
+      :Kết thúc nhánh;
+    else (Không)
+      :Nhấn nút "Gửi đánh giá";
+    endif
+    :Hệ thống kiểm tra điểm và nội dung;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo DanhGiaCongTy trạng thái chưa duyệt;
+      :Hiển thị thông báo gửi đánh giá thành công;
+      :Kết thúc nhánh;
+    else (Sai)
+      :Hiển thị thông báo lỗi;
+      :Kết thúc nhánh;
+    endif
   endif
-else (Không)
-  :Thông báo chưa đủ điều kiện đánh giá;
+else (Chưa đủ điều kiện)
+  :Hiển thị yêu cầu phải được mời phỏng vấn trước khi đánh giá;
   stop
 endif
 @enduml

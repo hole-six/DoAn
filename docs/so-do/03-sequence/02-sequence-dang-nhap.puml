@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,42 +15,55 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Đăng nhập
+title Sơ đồ Đăng nhập
 
 actor "Actor: Khách vãng lai" as Actor
 boundary "UI: dang-nhap" as UI
 boundary "UI: form-dang-nhap" as Form
 control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: PhienDangNhap" as E1
+entity "Entity: NguoiDung" as NguoiDung
+entity "Entity: UngVien" as UngVien
 
-Actor -> UI : 1. Truy cập trang đăng nhập
+Actor -> UI : 1. Mở trang đăng nhập
 activate UI
-UI -> Form : 2. Hiển thị form-dang-nhap
+UI -> Form : 2. Hiển thị form email/mật khẩu và Google
 activate Form
-Actor -> Form : 3. Nhập email, mật khẩu hoặc chọn Google
-Form -> Controller : 4. dangNhap(request)
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra thông tin xác thực
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Tạo phiên đăng nhập và token
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Xác định vai trò để chuyển đúng dashboard
-  Controller --> Form : 10. Đăng nhập thành công
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo sai email hoặc mật khẩu
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+alt Đăng nhập email/mật khẩu
+  Actor -> Form : 3. Nhập email và mật khẩu
+  Form -> Controller : 4. POST /xacthuc/dang-nhap
+  activate Controller
+  Controller -> NguoiDung : 5. Tìm email, kiểm tra trạng thái và mật khẩu
+  activate NguoiDung
+  NguoiDung --> Controller : 6. Trả NguoiDung hợp lệ
+  deactivate NguoiDung
+else Đăng nhập Google
+  Actor -> Form : 3. Chọn Google
+  Form -> Controller : 4. POST /xacthuc/dang-nhap-google
+  activate Controller
+  Controller -> NguoiDung : 5. Tạo hoặc lấy NguoiDung theo email Google
+  activate NguoiDung
+  NguoiDung --> Controller : 6. Trả NguoiDung hợp lệ
+  deactivate NguoiDung
+  opt Vai trò ứng viên
+    Controller -> UngVien : 7. Đảm bảo hồ sơ ứng viên tồn tại
+    UngVien --> Controller : 8. Trả hồ sơ ứng viên
+  end
 end
+
+alt Hợp lệ
+  Controller --> Form : 9. Trả accessToken, refreshToken, NguoiDung
+  Form --> UI : 10. Lưu phiên đăng nhập ở trình duyệt
+  UI --> Actor : 11. Điều hướng theo vai trò
+else Không hợp lệ
+  Controller --> Form : 9. Trả lỗi xác thực hoặc tài khoản bị khóa
+  Form --> UI : 10. Hiển thị thông báo lỗi
+  UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
+end
+
 deactivate Controller
 deactivate Form
 deactivate UI

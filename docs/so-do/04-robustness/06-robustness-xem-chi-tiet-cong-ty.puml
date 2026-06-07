@@ -1,43 +1,39 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Xem chi tiết công ty"
 
-actor "Actor: Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "UI: chi-tiet-cong-ty" as UI
-boundary "UI: khung-thong-tin-cong-ty" as Form
-control "Controller: NhaTuyenDungController" as Controller
-entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: ReviewCongTy" as E2
+actor "Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
+boundary "chi-tiet-cong-ty" as UI
+boundary "khung-thong-tin-cong-ty" as Form
+control "xem-chi-tiet-cong-ty" as Controller
 
-Actor --> UI : Mở trang chi tiết công ty
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Xem hồ sơ, đánh giá và tin đang mở
-Form --> Controller : layChiTietCongTy(maCongTy)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra công ty đã được duyệt\nLấy hồ sơ công ty
-Controller <--> E1 : Lấy tin tuyển dụng và đánh giá liên quan
-Controller --> Form : Hiển thị chi tiết công ty / Thông báo công ty không tồn tại hoặc chưa được duyệt
-Controller --> UI : trả dữ liệu mới
+entity "NhaTuyenDung" as MainEntity
+entity "TinTuyenDung" as E1
+entity "DanhGiaCongTy" as E2
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
+Controller <--> E1
+Controller <--> E2
 @enduml

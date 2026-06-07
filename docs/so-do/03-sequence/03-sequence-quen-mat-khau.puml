@@ -6,8 +6,6 @@ skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 skinparam sequenceMessageAlign center
-skinparam ParticipantPadding 24
-skinparam BoxPadding 8
 skinparam sequence {
   ArrowColor #222222
   LifeLineBorderColor #666666
@@ -17,42 +15,57 @@ skinparam sequence {
   ActorBorderColor #222222
   ActorBackgroundColor White
   BoxBorderColor #888888
+  GroupBorderColor #222222
+  GroupHeaderFontColor #222222
 }
-title sd Quên mật khẩu
+title Sơ đồ Quên mật khẩu
 
 actor "Actor: Khách vãng lai" as Actor
 boundary "UI: quen-mat-khau" as UI
 boundary "UI: form-quen-mat-khau" as Form
 control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: EmailDatLaiMatKhau" as E1
+entity "Entity: NguoiDung" as NguoiDung
+entity "Entity: Email" as Email
 
-Actor -> UI : 1. Truy cập chức năng quên mật khẩu
+Actor -> UI : 1. Mở trang quên mật khẩu
 activate UI
-UI -> Form : 2. Hiển thị form-quen-mat-khau
+UI -> Form : 2. Hiển thị form nhập email
 activate Form
-Actor -> Form : 3. Nhập email cần đặt lại mật khẩu
-Form -> Controller : 4. yeuCauDatLaiMatKhau(email)
+Actor -> Form : 3. Nhập email
+Form -> Controller : 4. POST /xacthuc/quen-mat-khau
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra tài khoản theo email
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Controller -> NguoiDung : 5. Tìm NguoiDung đang hoạt động theo email
+NguoiDung --> Controller : 6. Trả kết quả tìm kiếm
 
-alt [Dữ liệu hợp lệ]
-  Controller -> MainEntity : 7. Tạo mã đặt lại mật khẩu
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Gửi email chứa liên kết đặt lại
-  Controller --> Form : 10. Thông báo đã gửi email hướng dẫn
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else [Dữ liệu không hợp lệ]
-  Controller --> Form : 10. Thông báo email không tồn tại hoặc không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+alt Email tồn tại và hoạt động
+  Controller -> NguoiDung : 7. Lưu hash token và thời hạn 30 phút
+  NguoiDung --> Controller : 8. Cập nhật thành công
+  Controller -> Email : 9. Gửi link đặt lại mật khẩu
+  Email --> Controller : 10. Đã gửi email
+else Email không tồn tại hoặc bị khóa
+  Controller -> Controller : 7. Không tiết lộ trạng thái email
 end
+
+Controller --> Form : 11. Trả thông báo hướng dẫn kiểm tra email
+Form --> UI : 12. Hiển thị thông báo
+Actor -> UI : 13. Mở link đặt lại mật khẩu
+UI -> Controller : 14. GET /xacthuc/dat-lai-mat-khau/:token
+Controller -> NguoiDung : 15. Kiểm tra hash token và hạn dùng
+NguoiDung --> Controller : 16. Trả kết quả token
+
+alt Token hợp lệ
+  UI -> Form : 17. Hiển thị form mật khẩu mới
+  Actor -> Form : 18. Nhập mật khẩu mới
+  Form -> Controller : 19. POST /xacthuc/dat-lai-mat-khau
+  Controller -> NguoiDung : 20. Hash mật khẩu mới và xóa token reset
+  NguoiDung --> Controller : 21. Cập nhật thành công
+  Controller --> Form : 22. Đặt lại mật khẩu thành công
+  Form --> UI : 23. Điều hướng sang đăng nhập
+else Token không hợp lệ
+  Controller --> UI : 17. Trả lỗi token hết hạn hoặc sai
+  UI --> Actor : 18. Yêu cầu gửi lại email
+end
+
 deactivate Controller
 deactivate Form
 deactivate UI

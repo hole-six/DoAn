@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,25 +10,41 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Lưu việc làm
-
 start
-:Ứng viên đăng nhập;
-:Mở danh sách hoặc chi tiết việc làm;
-:Chọn nút lưu việc làm;
-:Hệ thống kiểm tra tin tuyển dụng;
-if (Tin hợp lệ và chưa được lưu?) then (Có)
-  :Hệ thống lưu việc làm vào danh sách quan tâm;
-  :Thông báo lưu việc làm thành công;
-  stop
-else (Không)
-  if (Tin đã được lưu?) then (Có)
-    :Hệ thống hủy lưu việc làm;
-    :Thông báo đã bỏ lưu;
-    stop
+:Người dùng mở danh sách hoặc chi tiết việc làm;
+:Chọn một TinTuyenDung;
+if (Thao tác ở trang chi tiết?) then (Có)
+  if (Đã đăng nhập ứng viên?) then (Có)
+    :Nhấn nút "Lưu" hoặc "Đã lưu";
+    :Hệ thống gọi ViecLamDaLuu theo NguoiDung và TinTuyenDung;
   else (Không)
-    :Thông báo tin tuyển dụng không khả dụng;
-    stop
+    :Điều hướng tới trang đăng nhập với thông báo cần tài khoản ứng viên;
+    :Kết thúc nhánh;
   endif
+else (Trang danh sách việc làm)
+  if (Đã đăng nhập ứng viên?) then (Có)
+    :Nhấn icon lưu;
+    :Hệ thống gọi ViecLamDaLuu theo NguoiDung và TinTuyenDung;
+  else (Không)
+    :Nhấn icon lưu;
+    :Lưu tạm mã TinTuyenDung vào localStorage;
+    :Cập nhật trạng thái nút lưu trên trình duyệt;
+    :Kết thúc nhánh;
+  endif
+endif
+if (TinTuyenDung tồn tại?) then (Có)
+  if (Đã lưu?) then (Có)
+    :Xóa ViecLamDaLuu;
+    :Cập nhật trạng thái nút thành chưa lưu;
+    :Hiển thị thông báo đã bỏ lưu;
+  else (Chưa)
+    :Tạo ViecLamDaLuu;
+    :Cập nhật trạng thái nút thành đã lưu;
+    :Hiển thị thông báo đã lưu việc làm;
+  endif
+  :Kết thúc nhánh;
+else (Không)
+  :Hiển thị thông báo tin không tồn tại;
+  stop
 endif
 @enduml

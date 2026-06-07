@@ -395,3 +395,22 @@
     font-size: 12px !important;
   }
 }
+
+/* Final deploy color guard for the register CTA after all mobile overrides. */
+.site-header-rong .nav-actions-rong .nav-register-rong {
+  background: #0b5c91 !important;
+  border-color: #38bdf8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 28px rgba(14, 165, 233, 0.24) !important;
+}
+
+.site-header-rong .nav-actions-rong .nav-register-rong:hover {
+  background: #0e7490 !important;
+  border-color: #67e8f9 !important;
+  color: #ffffff !important;
+}
+
+.site-header-rong .nav-actions-rong .nav-register-rong span,
+.site-header-rong .nav-actions-rong .nav-register-rong svg {
+  color: #ffffff !important;
+}

@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,27 +10,32 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Duyệt đánh giá công ty
-
 start
-:Quản trị viên mở trang duyệt đánh giá công ty;
-:Hệ thống tải danh sách đánh giá chờ duyệt;
-:Quản trị viên chọn một đánh giá;
-fork
-  :Xem điểm đánh giá;
-fork again
-  :Xem nội dung nhận xét;
-fork again
-  :Xem công ty và người gửi đánh giá;
-end fork
-if (Quyết định xử lý?) then (Duyệt)
-  :Hệ thống công khai đánh giá;
-  :Thông báo kết quả xử lý;
-  stop
-else (Từ chối)
-  :Quản trị viên nhập lý do nếu cần;
-  :Hệ thống ẩn hoặc từ chối đánh giá;
-  :Thông báo kết quả xử lý;
+:Quản trị viên đăng nhập;
+:Mở trang duyệt đánh giá công ty;
+:Hệ thống tải danh sách DanhGiaCongTy;
+if (Có đánh giá?) then (Có)
+  :Chọn một đánh giá công ty;
+  :Xem điểm sao, nội dung, ngày tạo và trạng thái duyệt;
+  if (Quyết định xử lý?) then (Duyệt)
+    :Nhấn nút "Duyệt";
+    :Xác nhận duyệt review;
+    :Hệ thống cập nhật DanhGiaCongTy daDuyet = true;
+    :Hiển thị đánh giá đã được duyệt;
+    :Kết thúc nhánh;
+  else (Xóa)
+    :Nhấn nút "Xóa";
+    if (Xác nhận thao tác?) then (Có)
+      :Hệ thống xóa DanhGiaCongTy;
+      :Hiển thị thông báo đã xử lý đánh giá;
+      :Kết thúc nhánh;
+    else (Không)
+      :Đóng hộp xác nhận;
+      :Kết thúc nhánh;
+    endif
+  endif
+else (Không)
+  :Hiển thị trạng thái không có đánh giá;
   stop
 endif
 @enduml

@@ -1,45 +1,46 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
-skinparam linetype ortho
+skinparam linetype polyline
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Xem thống kê hệ thống"
 
-actor "Actor: Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "UI: quan-tri-dashboard" as UI
-boundary "UI: bo-loc-thong-ke" as Form
-control "Controller: ThongKeController" as Controller
-entity "Entity: ThongKeHeThong" as MainEntity
-entity "Entity: TaiKhoan" as E1
-entity "Entity: TinTuyenDung" as E2
-entity "Entity: HoSoUngTuyen" as E3
-entity "Entity: NhaTuyenDung" as E4
+actor "Quản trị viên\n(from Usecase Diagram)" as Actor
+boundary "quan-tri-dashboard" as UI
+boundary "bo-loc-thong-ke" as Form
+control "xem-thong-ke-he-thong" as Controller
 
-Actor --> UI : Mở dashboard quản trị
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Chọn khoảng thời gian hoặc loại thống kê
-Form --> Controller : layThongKeHeThong(filter)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra quyền quản trị và tham số thống kê\nTổng hợp số liệu hệ thống
-Controller <--> E1 : Đếm người dùng, công ty, tin và hồ sơ ứng tuyển
-Controller --> Form : Hiển thị biểu đồ và chỉ số thống kê / Thông báo không tải được dữ liệu thống kê
-Controller --> UI : trả dữ liệu mới
+entity "NguoiDung" as MainEntity
+entity "NhaTuyenDung" as E1
+entity "TinTuyenDung" as E2
+entity "HoSoUngTuyen" as E3
+
+Actor -right-> UI
+UI -right-> Form
+Form -right-> Controller
+
+Controller -right-> MainEntity
+Controller -right-> E1
+Controller -right-> E2
+Controller -right-> E3
+
+MainEntity -down[hidden]-> E1
+E1 -down[hidden]-> E2
+E2 -down[hidden]-> E3
 @enduml

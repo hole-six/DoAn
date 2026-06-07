@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,27 +10,54 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Cập nhật thông tin tài khoản
-
 start
-:Người dùng đăng nhập;
-:Mở trang thông tin tài khoản;
-fork
-  :Cập nhật họ tên;
-fork again
-  :Cập nhật số điện thoại;
-fork again
-  :Cập nhật thông tin liên hệ được phép sửa;
-end fork
-:Nhấn nút lưu thay đổi;
-:Hệ thống kiểm tra dữ liệu;
-if (Dữ liệu hợp lệ?) then (Có)
-  :Hệ thống lưu thông tin tài khoản;
-  :Thông báo cập nhật thành công;
-  stop
-else (Không)
-  :Thông báo lỗi dữ liệu;
-  :Người dùng chỉnh sửa lại;
+:Người dùng đã đăng nhập mở trang hồ sơ hoặc cài đặt tài khoản;
+:Hệ thống tải NguoiDung hiện tại;
+if (Tải dữ liệu thành công?) then (Đúng)
+  if (Vai trò ứng viên?) then (Có)
+    :Hệ thống tải UngVien theo NguoiDung;
+    fork
+      :Cập nhật họ tên;
+    fork again
+      :Cập nhật số điện thoại;
+    fork again
+      :Cập nhật ngày sinh, địa chỉ, vị trí mong muốn;
+    fork again
+      :Cập nhật kỹ năng và kinh nghiệm nếu có;
+    end fork
+  else (Nhà tuyển dụng hoặc quản trị viên)
+    fork
+      :Cập nhật họ tên;
+    fork again
+      :Cập nhật số điện thoại;
+    fork again
+      :Nhập mật khẩu mới nếu muốn đổi;
+    fork again
+      :Xem vai trò và trạng thái tài khoản;
+    end fork
+  endif
+  if (Muốn hủy?) then (Có)
+    :Nhấn nút "Hủy" hoặc rời trang;
+    :Kết thúc nhánh;
+  else (Không)
+    :Nhấn nút "Cập nhật" hoặc "Lưu";
+  endif
+  :Hệ thống kiểm tra dữ liệu tài khoản;
+  if (Dữ liệu hợp lệ?) then (Đúng)
+    :Cập nhật NguoiDung;
+    if (Có thay đổi hồ sơ ứng viên?) then (Có)
+      :Cập nhật UngVien;
+    else (Không)
+      :Giữ nguyên dữ liệu hồ sơ vai trò;
+    endif
+    :Hiển thị thông báo cập nhật thành công;
+    :Kết thúc nhánh;
+  else (Sai)
+    :Hiển thị thông báo lỗi;
+    :Kết thúc nhánh;
+  endif
+else (Sai)
+  :Yêu cầu đăng nhập lại;
   stop
 endif
 @enduml

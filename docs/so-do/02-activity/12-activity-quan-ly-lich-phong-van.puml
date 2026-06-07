@@ -1,8 +1,6 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
-skinparam defaultFontSize 14
-skinparam titleFontSize 20
+skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam activity {
@@ -12,30 +10,39 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
-title Activity Scenario - Quản lý lịch phỏng vấn
-
 start
 :Ứng viên đăng nhập;
 :Mở trang lịch phỏng vấn;
-:Hệ thống tải các lịch phỏng vấn liên quan;
+:Hệ thống tải LichPhongVan theo HoSoUngTuyen của ứng viên;
 if (Có lịch phỏng vấn?) then (Có)
-  :Ứng viên chọn lịch cần xem;
-  fork
-    :Xem thời gian phỏng vấn;
-  fork again
-    :Xem hình thức và địa điểm hoặc link họp;
-  fork again
-    :Xem trạng thái lịch;
-  end fork
-  if (Cần phản hồi lịch?) then (Có)
-    :Ứng viên gửi phản hồi hoặc yêu cầu đổi lịch;
-    :Hệ thống ghi nhận phản hồi;
-    :Thông báo cho nhà tuyển dụng;
-    stop
-  else (Không)
-    :Ứng viên xác nhận đã xem lịch;
-    stop
+  :Hiển thị danh sách lịch và trạng thái;
+  :Chọn một lịch phỏng vấn;
+  :Hệ thống hiển thị chi tiết thời gian, hình thức, địa chỉ và link họp;
+  if (Trạng thái lịch?) then (Đã lên lịch)
+    if (Chọn phản hồi?) then (Xác nhận)
+      :Nhấn nút "Xác nhận";
+      :Hệ thống cập nhật LichPhongVan thành da_xac_nhan;
+      :Gửi ThongBao cho nhà tuyển dụng;
+      :Hiển thị phản hồi thành công;
+    else (Đổi lịch)
+      :Nhấn nút "Yêu cầu đổi lịch";
+      :Nhập lý do hoặc thời gian mong muốn;
+      :Hệ thống cập nhật LichPhongVan thành doi_lich;
+      :Gửi ThongBao cho nhà tuyển dụng;
+      :Hiển thị đã gửi yêu cầu đổi lịch;
+    endif
+  elseif (Trạng thái đã xác nhận?) then (Đã xác nhận)
+    if (Muốn yêu cầu đổi lịch?) then (Có)
+      :Nhập lý do đổi lịch;
+      :Hệ thống cập nhật LichPhongVan thành doi_lich;
+      :Gửi ThongBao cho nhà tuyển dụng;
+    else (Không)
+      :Tiếp tục xem lịch;
+    endif
+  else (Hoàn thành hoặc đã hủy)
+    :Chỉ xem kết quả và ghi chú;
   endif
+  :Kết thúc nhánh;
 else (Không)
   :Hiển thị trạng thái chưa có lịch phỏng vấn;
   stop

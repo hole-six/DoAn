@@ -23,6 +23,7 @@ rectangle "Dashboard nhà tuyển dụng EffortIT" {
   usecase "Quản lý tin tuyển dụng" as ManageJob
   usecase "Quản lý hồ sơ ứng viên" as Applications
   usecase "Mời ứng viên phỏng vấn" as InviteInterview
+  usecase "Quản lý lịch phỏng vấn" as InterviewSchedule
   usecase "Cập nhật kết quả phỏng vấn" as InterviewResult
 }
 
@@ -32,11 +33,10 @@ Employer --> UpdateCompany
 Employer --> PostJob
 Employer --> ManageJob
 Employer --> Applications
-Employer --> InviteInterview
-Employer --> InterviewResult
+Employer --> InterviewSchedule
 
 PostJob ..> UpdateCompany : <<precondition>>
 ManageJob ..> PostJob : <<extend>>
-InviteInterview ..> Applications : <<include>>
-InterviewResult ..> InviteInterview : <<extend>>
+InviteInterview ..> Applications : <<extend>>
+InterviewResult ..> InterviewSchedule : <<extend>>
 @enduml

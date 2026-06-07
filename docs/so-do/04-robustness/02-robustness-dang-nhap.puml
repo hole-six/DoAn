@@ -1,42 +1,35 @@
 @startuml
 skinparam defaultFontName "Segoe UI"
-skinparam titleFontName "Segoe UI"
 skinparam defaultFontSize 13
-skinparam titleFontSize 18
 skinparam shadowing false
 skinparam linetype ortho
 left to right direction
 skinparam actorStyle stick
-skinparam roundcorner 12
-skinparam rectangleBorderColor #222222
+skinparam roundcorner 8
+skinparam ArrowColor #333333
+skinparam rectangleBorderColor #333333
 skinparam boundary {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam control {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
 skinparam entity {
   BackgroundColor White
-  BorderColor #222222
+  BorderColor #333333
 }
-title Robustness Usecase - "Đăng nhập"
 
-actor "Actor: Khách vãng lai\n(from Usecase Diagram)" as Actor
-boundary "UI: dang-nhap" as UI
-boundary "UI: form-dang-nhap" as Form
-control "Controller: XacThucController" as Controller
-entity "Entity: TaiKhoan" as MainEntity
-entity "Entity: PhienDangNhap" as E1
+actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
+boundary "dang-nhap" as UI
+boundary "form-dang-nhap" as Form
+control "dang-nhap" as Controller
 
-Actor --> UI : Truy cập trang đăng nhập
-UI <--> Form : mở form / hiển thị dữ liệu
-Actor --> Form : Nhập email, mật khẩu hoặc chọn Google
-Form --> Controller : dangNhap(request)
-UI --> Controller : tải dữ liệu hiện có
-Controller <--> MainEntity : Kiểm tra thông tin xác thực\nTạo phiên đăng nhập và token
-Controller <--> E1 : Xác định vai trò để chuyển đúng dashboard
-Controller --> Form : Đăng nhập thành công / Thông báo sai email hoặc mật khẩu
-Controller --> UI : trả dữ liệu mới
+entity "NguoiDung" as MainEntity
+
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
+Controller <--> MainEntity
 @enduml
