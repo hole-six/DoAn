@@ -60,13 +60,13 @@ function escapeHtml(value) {
 async function dangNhap(duLieu) {
     const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { email: duLieu.email.toLowerCase().trim() } });
     if (!nguoiDung)
-        throw new loiungdung_js_1.LoiUngDung('Email hoac mat khau khong dung', 401);
+        throw new loiungdung_js_1.LoiUngDung('Email hoặc mật khẩu không đúng', 401);
     if (nguoiDung.trangThai !== 'hoat_dong')
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan khong o trang thai hoat dong', 403);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản không ở trạng thái hoạt động', 403);
     if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro)
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan khong thuoc vai tro da chon', 403);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản không thuộc vai trò đã chọn', 403);
     if (!await bcryptjs_1.default.compare(duLieu.matKhau, nguoiDung.matKhau))
-        throw new loiungdung_js_1.LoiUngDung('Email hoac mat khau khong dung', 401);
+        throw new loiungdung_js_1.LoiUngDung('Email hoặc mật khẩu không đúng', 401);
     const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
     return { ...taoToken(nguoiDungCongKhai), nguoiDung: nguoiDungCongKhai };
 }
@@ -76,13 +76,13 @@ async function lamMoiToken(duLieu) {
         payload = jsonwebtoken_1.default.verify(duLieu.refreshToken, bienmoitruong_js_1.bienMoiTruong.khoaJwtLamMoi);
     }
     catch {
-        throw new loiungdung_js_1.LoiUngDung('Refresh token khong hop le hoac da het han', 401);
+        throw new loiungdung_js_1.LoiUngDung('Refresh token không hợp lệ hoặc đã hết hạn', 401);
     }
     if (payload.loai !== 'refresh')
-        throw new loiungdung_js_1.LoiUngDung('Refresh token khong hop le', 401);
+        throw new loiungdung_js_1.LoiUngDung('Refresh token không hợp lệ', 401);
     const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: payload.sub } });
     if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong')
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan khong con hieu luc', 401);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản không còn hiệu lực', 401);
     const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
     return { ...taoToken(nguoiDungCongKhai), nguoiDung: nguoiDungCongKhai };
 }
@@ -100,14 +100,14 @@ async function quenMatKhau(duLieu) {
     const link = taoLinkDatLaiMatKhau(token);
     await (0, email_js_1.guiEmail)({
         to: email,
-        subject: 'Dat lai mat khau Effort Job',
+        subject: 'Đặt lại mật khẩu Effort Job',
         html: `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
-        <h2>Dat lai mat khau Effort Job</h2>
-        <p>Chao ${escapeHtml(nguoiDung.hoTen || email)},</p>
-        <p>Ban vua yeu cau dat lai mat khau. Link nay co hieu luc trong 30 phut va chi dung mot lan.</p>
-        <p><a href="${link}" style="display:inline-block;background:#0b5c91;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700">Dat lai mat khau</a></p>
-        <p>Neu ban khong yeu cau, hay bo qua email nay.</p>
+        <h2>Đặt lại mật khẩu Effort Job</h2>
+        <p>Chào ${escapeHtml(nguoiDung.hoTen || email)},</p>
+        <p>Bạn vừa yêu cầu đặt lại mật khẩu. Link này có hiệu lực trong 30 phút và chỉ dùng một lần.</p>
+        <p><a href="${link}" style="display:inline-block;background:#0b5c91;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:700">Đặt lại mật khẩu</a></p>
+        <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
       </div>
     `,
     });
@@ -118,7 +118,7 @@ async function kiemTraTokenDatLaiMatKhau(token) {
         where: { maDatLaiMatKhauHash: hashToken(token), maDatLaiMatKhauHetHan: { gt: new Date() } },
     });
     if (!nguoiDung)
-        throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
+        throw new loiungdung_js_1.LoiUngDung('Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn', 400, 'RESET_TOKEN_INVALID');
     return { ok: true, email: nguoiDung.email.replace(/^(.{2}).+(@.+)$/, '$1***$2') };
 }
 async function datLaiMatKhau(duLieu) {
@@ -126,7 +126,7 @@ async function datLaiMatKhau(duLieu) {
         where: { maDatLaiMatKhauHash: hashToken(duLieu.token), maDatLaiMatKhauHetHan: { gt: new Date() } },
     });
     if (!nguoiDung)
-        throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
+        throw new loiungdung_js_1.LoiUngDung('Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn', 400, 'RESET_TOKEN_INVALID');
     await nguoidung_mohinh_js_1.NguoiDung.update({
         where: { id: nguoiDung.id },
         data: {
@@ -149,24 +149,24 @@ async function layNguoiDungTuAccessToken(authorization) {
         payload = jsonwebtoken_1.default.verify(token, bienmoitruong_js_1.bienMoiTruong.khoaJwt);
     }
     catch {
-        throw new loiungdung_js_1.LoiUngDung('Access token khong hop le hoac da het han', 401);
+        throw new loiungdung_js_1.LoiUngDung('Access token không hợp lệ hoặc đã hết hạn', 401);
     }
     if (payload.loai && payload.loai !== 'access')
-        throw new loiungdung_js_1.LoiUngDung('Access token khong hop le', 401);
+        throw new loiungdung_js_1.LoiUngDung('Access token không hợp lệ', 401);
     const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: payload.sub } });
     if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong')
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan khong con hieu luc', 401);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản không còn hiệu lực', 401);
     const congKhai = taoNguoiDungCongKhai(nguoiDung);
     nguoiDungTheoToken.set(token, { nguoiDung: congKhai, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS });
     return congKhai;
 }
 async function xacThucGoogleCredential(credential) {
     if (!bienmoitruong_js_1.bienMoiTruong.googleClientId)
-        throw new loiungdung_js_1.LoiUngDung('Chua cau hinh GOOGLE_CLIENT_ID tren backend', 503);
+        throw new loiungdung_js_1.LoiUngDung('Chưa cấu hình GOOGLE_CLIENT_ID trên backend', 503);
     const phanHoi = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
     const googleUser = await phanHoi.json();
     if (!phanHoi.ok || googleUser.aud !== bienmoitruong_js_1.bienMoiTruong.googleClientId || googleUser.email_verified !== 'true') {
-        throw new loiungdung_js_1.LoiUngDung('Google credential khong hop le', 401);
+        throw new loiungdung_js_1.LoiUngDung('Google credential không hợp lệ', 401);
     }
     return googleUser;
 }
@@ -187,9 +187,9 @@ async function dangNhapGoogle(duLieu) {
         }),
     });
     if (nguoiDung.trangThai !== 'hoat_dong')
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan khong o trang thai hoat dong', 403);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản không ở trạng thái hoạt động', 403);
     if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro)
-        throw new loiungdung_js_1.LoiUngDung('Tai khoan Google nay da duoc gan vai tro khac', 403);
+        throw new loiungdung_js_1.LoiUngDung('Tài khoản Google này đã được gán vai trò khác', 403);
     const nguoiDungCongKhai = taoNguoiDungCongKhai((0, prismaHelper_js_1.coId)(nguoiDung));
     if (nguoiDungCongKhai.vaiTro === 'ung_vien') {
         await ungvien_dichvu_js_1.dichVuUngVien.damBaoHoSoTheoNguoiDung(nguoiDungCongKhai.id);

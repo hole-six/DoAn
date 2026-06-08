@@ -252,7 +252,8 @@ export default function DanhSachCongTy() {
   const ketQua = companies.filter(c => {
     const keyword = normalize(tuKhoa)
     const ratingStat = stats.reviewMap.get(c.id)
-    const rating = ratingStat ? ratingStat.total / ratingStat.count : 5
+    const coDanhGiaThuc = Boolean(ratingStat?.count)
+    const rating = ratingStat?.count ? ratingStat.total / ratingStat.count : 0
     const companySkills = stats.companySkillMap.get(c.id) ?? new Set<string>()
     const companySkillTypes = stats.companySkillTypeMap.get(c.id) ?? new Set<string>()
     const industryText = c.nganh ?? ''
@@ -262,13 +263,15 @@ export default function DanhSachCongTy() {
       && (!linhVucDangChon.length || linhVucDangChon.some(item => normalize(industryText).includes(normalize(item))))
       && (!loaiKyNangDangChon.length || loaiKyNangDangChon.some(item => companySkillTypes.has(item)))
       && (!kyNangDangChon.length || kyNangDangChon.every(item => companySkills.has(item)))
-      && rating >= danhGiaToiThieu
+      && (!danhGiaToiThieu || (coDanhGiaThuc && rating >= danhGiaToiThieu))
   }).sort((a, b) => {
     if (sapXep === 'nhieu_viec') return (stats.jobCount.get(b.id) ?? 0) - (stats.jobCount.get(a.id) ?? 0)
     if (sapXep === 'danh_gia') {
       const ar = stats.reviewMap.get(a.id)
       const br = stats.reviewMap.get(b.id)
-      return ((br?.total ?? 5) / (br?.count ?? 1)) - ((ar?.total ?? 5) / (ar?.count ?? 1))
+      const diemA = ar?.count ? ar.total / ar.count : -1
+      const diemB = br?.count ? br.total / br.count : -1
+      return diemB - diemA
     }
     return (stats.jobCount.get(b.id) ?? 0) - (stats.jobCount.get(a.id) ?? 0)
   })
@@ -420,7 +423,7 @@ export default function DanhSachCongTy() {
           <div className="company-real-grid">
             {ketQuaPhanTrang.map((cty, index) => {
               const reviewStat = stats.reviewMap.get(cty.id)
-              const rating = reviewStat ? Math.round((reviewStat.total / reviewStat.count) * 10) / 10 : 5
+              const rating = reviewStat?.count ? Math.round((reviewStat.total / reviewStat.count) * 10) / 10 : 0
               const soReview = reviewStat?.count ?? 0
               const soViec = stats.jobCount.get(cty.id) ?? 0
               const hot = ((pageHienTai - 1) * pageSize + index) < 3 || soViec >= 3
@@ -434,7 +437,12 @@ export default function DanhSachCongTy() {
                     </div>
                     <div>
                       <h2>{hienThiTiengViet(cty.tenCongTy)}</h2>
-                      <p className="company-rating"><Star size={14} /> <strong>{rating}</strong><span>({soReview} reviews)</span></p>
+                      <p className="company-rating">
+                        <Star size={14} />
+                        {soReview > 0
+                          ? <><strong>{rating}</strong><span>({soReview} reviews)</span></>
+                          : <span>Chưa có đánh giá</span>}
+                      </p>
                       <p className="company-location"><MapPin size={14} /> {hienThiTiengViet(cty.diaChi, 'Đà Nẵng')}</p>
                     </div>
                   </div>

@@ -4,8 +4,8 @@ exports.taoDieuKhienCoBan = taoDieuKhienCoBan;
 const batloibatdongbo_js_1 = require("./batloibatdongbo.js");
 function taoDieuKhienCoBan(dichVu, kiemTraTao, kiemTraCapNhat) {
     return {
-        layDanhSach: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (_yeuCau, phanHoi) => {
-            const duLieu = await dichVu.layDanhSach();
+        layDanhSach: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+            const duLieu = await dichVu.layDanhSach(yeuCau.query);
             return phanHoi.json({ duLieu });
         }),
         layChiTiet: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {

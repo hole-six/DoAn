@@ -85,7 +85,7 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
     }
     if (String(yeuCau.method).toUpperCase() === 'PATCH') {
         if (TRANG_THAI_KHOA_SUA.has(String(tin.trangThai ?? ''))) {
-            throw new loiungdung_js_1.LoiUngDung('Tin da duyet chi cho phep doi trang thai dong/mo, khong the chinh sua noi dung', 409, 'JOB_POST_LOCKED', undefined, 'Su dung thao tac tam dong/mo lai cho tin da duyet');
+            throw new loiungdung_js_1.LoiUngDung('Tin đã duyệt chỉ cho phép đổi trạng thái đóng/mở, không thể chỉnh sửa nội dung', 409, 'JOB_POST_LOCKED', undefined, 'Sử dụng thao tác tạm đóng/mở lại cho tin đã duyệt');
         }
         yeuCau.body = {
             ...yeuCau.body,

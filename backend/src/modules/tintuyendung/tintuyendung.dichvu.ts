@@ -1,5 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { boUndefined, coId, ganKyNangVaCongTyChoTin } from '../../dungchung/prismaHelper.js'
+import { layLimit, locVaXepHangTheoTuKhoa } from '../../dungchung/timkiem.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
@@ -72,9 +73,18 @@ async function layDayDu(where: any, many = false) {
 }
 
 export const dichVuTinTuyenDung = {
-  async layDanhSach() {
+  async layDanhSach(boLoc: Record<string, unknown> = {}) {
     const danhSach = await layDayDu({}, true)
-    return (danhSach as any[]).map(chuanHoaTin)
+    const danhSachChuanHoa = (danhSach as any[]).map(chuanHoaTin)
+    const daLoc = locVaXepHangTheoTuKhoa(danhSachChuanHoa, boLoc.tuKhoa, item => [
+      item.tieuDe,
+      item.nhaTuyenDung?.tenCongTy,
+      item.diaChi,
+      item.capBac,
+      item.loaiHinh,
+      ...(item.kyNang ?? []).flatMap((kyNang: any) => [kyNang.tenKyNang, kyNang.loaiKyNang]),
+    ])
+    return daLoc.slice(0, layLimit(boLoc.limit, 50, 100))
   },
 
   async layTheoMa(ma: string) {

@@ -17,7 +17,7 @@ const cacDuongDanMoiTruong = [
 ];
 for (const duongDan of cacDuongDanMoiTruong) {
     if (node_fs_1.default.existsSync(duongDan)) {
-        dotenv_1.default.config({ path: duongDan });
+        dotenv_1.default.config({ path: duongDan, override: true });
     }
 }
 function tachDanhSachMoiTruong(value) {

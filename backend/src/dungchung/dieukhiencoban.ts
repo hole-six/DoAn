@@ -6,7 +6,7 @@ type BoKiemTra = {
 }
 
 type DichVuCoBan = {
-  layDanhSach: () => Promise<unknown>
+  layDanhSach: (boLoc?: Record<string, unknown>) => Promise<unknown>
   layTheoMa: (ma: string) => Promise<unknown>
   taoMoi: (duLieu: unknown) => Promise<unknown>
   capNhat: (ma: string, duLieu: unknown) => Promise<unknown>
@@ -15,8 +15,8 @@ type DichVuCoBan = {
 
 export function taoDieuKhienCoBan(dichVu: DichVuCoBan, kiemTraTao: BoKiemTra, kiemTraCapNhat: BoKiemTra) {
   return {
-    layDanhSach: batLoiBatDongBo(async (_yeuCau: Request, phanHoi: Response) => {
-      const duLieu = await dichVu.layDanhSach()
+    layDanhSach: batLoiBatDongBo(async (yeuCau: Request, phanHoi: Response) => {
+      const duLieu = await dichVu.layDanhSach(yeuCau.query as Record<string, unknown>)
       return phanHoi.json({ duLieu })
     }),
 

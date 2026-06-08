@@ -1,5 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { boUndefined, coId, ganNguoiDungChoCongTy } from '../../dungchung/prismaHelper.js'
+import { layLimit, locVaXepHangTheoTuKhoa } from '../../dungchung/timkiem.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { thongBaoAdminCongTyCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetCongTy } from '../thongbao/thongbao.helper.js'
 import { NhaTuyenDung } from './nhatuyendung.mohinh.js'
@@ -56,9 +57,17 @@ async function layDayDu(where: any, many = false) {
 }
 
 export const dichVuNhaTuyenDung = {
-  async layDanhSach() {
+  async layDanhSach(boLoc: Record<string, unknown> = {}) {
     const danhSach = await layDayDu({}, true)
-    return (danhSach as any[]).map(chuanHoaNhaTuyenDung)
+    const danhSachChuanHoa = (danhSach as any[]).map(chuanHoaNhaTuyenDung)
+    const daLoc = locVaXepHangTheoTuKhoa(danhSachChuanHoa, boLoc.tuKhoa, item => [
+      item.tenCongTy,
+      item.nganh,
+      item.diaChi,
+      item.moTa,
+      item.website,
+    ])
+    return daLoc.slice(0, layLimit(boLoc.limit, 50, 100))
   },
 
   async layTheoMa(ma: string) {

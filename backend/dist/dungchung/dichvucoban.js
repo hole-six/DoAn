@@ -3,15 +3,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.taoDichVuCoBan = taoDichVuCoBan;
 const loiungdung_js_1 = require("./loiungdung.js");
 const prismaHelper_js_1 = require("./prismaHelper.js");
+const timkiem_js_1 = require("./timkiem.js");
 function taoDichVuCoBan(moHinh) {
     return {
         async layDanhSach(boLoc = {}) {
+            const { tuKhoa, limit, ...where } = boLoc;
             const duLieu = await moHinh.findMany({
-                where: boLoc,
+                where,
                 orderBy: { ngayTao: 'desc' },
-                take: 50,
+                take: 300,
             });
-            return (0, prismaHelper_js_1.coIdNhieu)(duLieu);
+            const daCoId = (0, prismaHelper_js_1.coIdNhieu)(duLieu);
+            const daLoc = (0, timkiem_js_1.locVaXepHangTheoTuKhoa)(daCoId, tuKhoa, item => [
+                item.tenKyNang,
+                item.loaiKyNang,
+                item.ten,
+                item.tieuDe,
+                item.hoTen,
+            ]);
+            return daLoc.slice(0, (0, timkiem_js_1.layLimit)(limit, 50, 100));
         },
         async layTheoMa(ma) {
             const duLieu = await moHinh.findUnique({ where: { id: ma } });

@@ -1,5 +1,6 @@
 import { LoiUngDung } from './loiungdung.js'
 import { boUndefined, coId, coIdNhieu } from './prismaHelper.js'
+import { layLimit, locVaXepHangTheoTuKhoa } from './timkiem.js'
 
 type PrismaDelegateCoBan = any
 type DuLieuCapNhat = Record<string, unknown>
@@ -7,12 +8,21 @@ type DuLieuCapNhat = Record<string, unknown>
 export function taoDichVuCoBan(moHinh: PrismaDelegateCoBan) {
   return {
     async layDanhSach(boLoc: DuLieuCapNhat = {}) {
+      const { tuKhoa, limit, ...where } = boLoc
       const duLieu = await moHinh.findMany({
-        where: boLoc,
+        where,
         orderBy: { ngayTao: 'desc' },
-        take: 50,
+        take: 300,
       })
-      return coIdNhieu(duLieu)
+      const daCoId = coIdNhieu(duLieu)
+      const daLoc = locVaXepHangTheoTuKhoa(daCoId, tuKhoa, item => [
+        item.tenKyNang,
+        item.loaiKyNang,
+        item.ten,
+        item.tieuDe,
+        item.hoTen,
+      ])
+      return daLoc.slice(0, layLimit(limit, 50, 100))
     },
 
     async layTheoMa(ma: string) {

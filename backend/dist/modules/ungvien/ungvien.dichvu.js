@@ -61,13 +61,13 @@ exports.dichVuUngVien = {
     async layTheoMa(ma) {
         const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
         return chuanHoaUngVien(duLieu);
     },
     async layTheoMaNguoiDung(maNguoiDung) {
         const duLieu = await layDayDu({ maNguoiDung });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
         return chuanHoaUngVien(duLieu);
     },
     async damBaoHoSoTheoNguoiDung(maNguoiDung) {
@@ -87,9 +87,9 @@ exports.dichVuUngVien = {
     async capNhat(ma, duLieu, maNguoiDungHienTai) {
         const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { id: ma } });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
         if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
-            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so nay', 403);
+            throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403);
         }
         await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
         return this.layTheoMa(ma);
@@ -97,9 +97,9 @@ exports.dichVuUngVien = {
     async xoa(ma, maNguoiDungHienTai) {
         const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { id: ma } });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
         if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
-            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen xoa ho so nay', 403);
+            throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403);
         }
         await ungvien_mohinh_js_1.UngVien.delete({ where: { id: ma } });
         return chuanHoaUngVien((0, prismaHelper_js_1.coId)(hienTai));

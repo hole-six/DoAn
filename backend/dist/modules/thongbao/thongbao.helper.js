@@ -202,14 +202,14 @@ async function thongBaoAdminCongTyCanDuyet(params) {
     return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
         maNguoiDung: params.maAdmin,
         loai: 'he_thong',
-        tieuDe: params.capNhatLai ? 'Cong ty cap nhat ho so can duyet lai' : 'Cong ty moi can duyet',
-        noiDung: `${params.tenNguoiDangKy} ${params.capNhatLai ? 'da cap nhat lai ho so cong ty' : 'da dang ky cong ty'} ${params.tenCongTy}.`,
+        tieuDe: params.capNhatLai ? 'Công ty cập nhật hồ sơ cần duyệt lại' : 'Công ty mới cần duyệt',
+        noiDung: `${params.tenNguoiDangKy} ${params.capNhatLai ? 'đã cập nhật lại hồ sơ công ty' : 'đã đăng ký công ty'} ${params.tenCongTy}.`,
         lienKet: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`,
         mucDoUuTien: 'cao',
         icon: 'building',
         mauSac: '#8b5cf6',
         hanhDong: [
-            { nhan: 'Duyet cong ty', url: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`, loai: 'primary' },
+            { nhan: 'Duyệt công ty', url: `/quan-tri/cong-ty?congTy=${params.maNhaTuyenDung}`, loai: 'primary' },
         ],
     });
 }
@@ -217,15 +217,15 @@ async function thongBaoAdminTinTuyenDungCanDuyet(params) {
     return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
         maNguoiDung: params.maAdmin,
         loai: 'tin_tuyen_dung',
-        tieuDe: 'Tin tuyen dung moi can duyet',
-        noiDung: `${params.tenCongTy} vua gui tin "${params.tieuDeTin}" cho duyet.`,
+        tieuDe: 'Tin tuyển dụng mới cần duyệt',
+        noiDung: `${params.tenCongTy} vừa gửi tin "${params.tieuDeTin}" chờ duyệt.`,
         lienKet: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`,
         mucDoUuTien: 'cao',
         icon: 'briefcase',
         mauSac: '#0ea5e9',
         maTinTuyenDung: params.maTinTuyenDung,
         hanhDong: [
-            { nhan: 'Duyet tin', url: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`, loai: 'primary' },
+            { nhan: 'Duyệt tin', url: `/quan-tri/tin-tuyen-dung?tin=${params.maTinTuyenDung}`, loai: 'primary' },
         ],
     });
 }
@@ -234,10 +234,10 @@ async function thongBaoNhaTuyenDungKetQuaDuyetCongTy(params) {
     return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
         maNguoiDung: params.maNguoiDung,
         loai: 'he_thong',
-        tieuDe: daDuyet ? 'Cong ty da duoc duyet' : 'Ho so cong ty bi tu choi',
+        tieuDe: daDuyet ? 'Công ty đã được duyệt' : 'Hồ sơ công ty bị từ chối',
         noiDung: daDuyet
-            ? `${params.tenCongTy} da duoc duyet. Ban co the dang tin tuyen dung.`
-            : `${params.tenCongTy} chua duoc duyet.${params.lyDoTuChoi ? ` Ly do: ${params.lyDoTuChoi}` : ''}`,
+            ? `${params.tenCongTy} đã được duyệt. Bạn có thể đăng tin tuyển dụng.`
+            : `${params.tenCongTy} chưa được duyệt.${params.lyDoTuChoi ? ` Lý do: ${params.lyDoTuChoi}` : ''}`,
         lienKet: '/nha-tuyen-dung/cong-ty',
         mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
         icon: daDuyet ? 'check' : 'warning',
@@ -249,10 +249,10 @@ async function thongBaoNhaTuyenDungKetQuaDuyetTin(params) {
     return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
         maNguoiDung: params.maNguoiDung,
         loai: 'tin_tuyen_dung',
-        tieuDe: daDuyet ? 'Tin tuyen dung da duoc duyet' : 'Tin tuyen dung bi tu choi',
+        tieuDe: daDuyet ? 'Tin tuyển dụng đã được duyệt' : 'Tin tuyển dụng bị từ chối',
         noiDung: daDuyet
-            ? `Tin "${params.tieuDeTin}" da duoc mo cong khai.`
-            : `Tin "${params.tieuDeTin}" chua duoc duyet.`,
+            ? `Tin "${params.tieuDeTin}" đã được mở công khai.`
+            : `Tin "${params.tieuDeTin}" chưa được duyệt.`,
         lienKet: `/nha-tuyen-dung/quan-ly-tin?tin=${params.maTinTuyenDung}`,
         mucDoUuTien: daDuyet ? 'cao' : 'khan_cap',
         icon: daDuyet ? 'check' : 'warning',

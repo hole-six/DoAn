@@ -28,14 +28,14 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau, _phanHoi, tiepTheo) {
     if (vaiTro === 'ung_vien') {
         const ungVien = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
         if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
-            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN');
+            throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ ứng tuyển này', 403, 'FORBIDDEN');
         }
     }
     if (vaiTro === 'nha_tuyen_dung') {
         const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
         const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } });
         if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
-            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN');
+            throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ ứng tuyển này', 403, 'FORBIDDEN');
         }
     }
     (0, trangthai_dichvu_js_1.damBaoTrangThaiHoSoUngTuyen)(vaiTro, trangThaiHienTai, trangThaiMoi);

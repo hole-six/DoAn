@@ -379,13 +379,18 @@ export default function ChiTietViecLam() {
                   {[...kyNang, viec.capBac, viec.loaiHinh].filter(Boolean).map(kn => <span key={kn} style={{ background: '#f0f0f0', borderRadius: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600, color: '#374151' }}>{kn}</span>)}
                 </div>
               </div>
-              <div className="job-detail-card job-detail-actions-card" style={{ background: '#fff', borderRadius: 8, padding: '20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <button onClick={ungTuyenNgay} disabled={dangUngTuyen || daUngTuyen} style={{ flex: 1, minWidth: 200, background: daUngTuyen ? '#16a34a' : '#0058be', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: daUngTuyen ? 'default' : 'pointer', fontFamily: "'Lexend', system-ui, sans-serif" }}>
+              <div className="job-detail-card job-detail-actions-card" style={{ background: '#fff', borderRadius: 8, padding: '20px' }}>
+                <div className="job-action-group">
+                <button
+                  className={`job-action-button job-action-button-primary${daUngTuyen ? ' is-success' : ''}`}
+                  onClick={ungTuyenNgay}
+                  disabled={dangUngTuyen || daUngTuyen}
+                >
                   {dangUngTuyen ? 'Đang ứng tuyển...' : daUngTuyen ? 'Đã ứng tuyển' : 'Ứng tuyển ngay'}
                 </button>
-                <button onClick={() => void toggleSave()} style={{ background: daLuu ? '#eff6ff' : '#f3f4f6', color: daLuu ? '#0058be' : '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Bookmark size={16} fill={daLuu ? '#0058be' : 'none'} /> {daLuu ? 'Đã lưu' : 'Lưu'}</button>
-                <div style={{ position: 'relative' }}>
-                  <button type="button" onClick={() => setMoMenuChiaSe(value => !value)} style={{ background: '#f3f4f6', color: '#374151', border: '1px solid #e5e7eb', borderRadius: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}><Share2 size={16} /> Chia sẻ</button>
+                <button className={`job-action-button job-action-button-secondary${daLuu ? ' is-active' : ''}`} onClick={() => void toggleSave()}><Bookmark size={16} fill={daLuu ? '#0058be' : 'none'} /> {daLuu ? 'Đã lưu' : 'Lưu'}</button>
+                <div className="job-action-share">
+                  <button className="job-action-button job-action-button-secondary" type="button" onClick={() => setMoMenuChiaSe(value => !value)}><Share2 size={16} /> Chia sẻ</button>
                   {moMenuChiaSe && (
                     <div className="job-share-menu" style={{ position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 30, minWidth: 230, borderRadius: 14, border: '1px solid #dbe4f0', background: '#fff', padding: 8, boxShadow: '0 20px 45px rgba(15,23,42,.18)' }}>
                       <button type="button" onClick={() => void shareNative()}><Share2 size={15} /> Chia sẻ bằng thiết bị</button>
@@ -395,6 +400,7 @@ export default function ChiTietViecLam() {
                       <button type="button" onClick={() => openShare(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(shareUrl)}`)}><MessageCircle size={15} /> Messenger</button>
                     </div>
                   )}
+                </div>
                 </div>
               </div>
               {thongBaoUngTuyen && <div style={{ background: '#fff', borderRadius: 8, padding: '14px 18px', border: '1px solid #dbe4f0', color: daUngTuyen ? '#166534' : '#334155', fontWeight: 700 }}>{thongBaoUngTuyen}</div>}

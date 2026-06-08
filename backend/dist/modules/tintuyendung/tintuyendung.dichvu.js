@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuTinTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
+const timkiem_js_1 = require("../../dungchung/timkiem.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
@@ -70,9 +71,18 @@ async function layDayDu(where, many = false) {
     return many ? hydrated : hydrated[0];
 }
 exports.dichVuTinTuyenDung = {
-    async layDanhSach() {
+    async layDanhSach(boLoc = {}) {
         const danhSach = await layDayDu({}, true);
-        return danhSach.map(chuanHoaTin);
+        const danhSachChuanHoa = danhSach.map(chuanHoaTin);
+        const daLoc = (0, timkiem_js_1.locVaXepHangTheoTuKhoa)(danhSachChuanHoa, boLoc.tuKhoa, item => [
+            item.tieuDe,
+            item.nhaTuyenDung?.tenCongTy,
+            item.diaChi,
+            item.capBac,
+            item.loaiHinh,
+            ...(item.kyNang ?? []).flatMap((kyNang) => [kyNang.tenKyNang, kyNang.loaiKyNang]),
+        ]);
+        return daLoc.slice(0, (0, timkiem_js_1.layLimit)(boLoc.limit, 50, 100));
     },
     async layTheoMa(ma) {
         const duLieu = await layDayDu({ id: ma });

@@ -30,7 +30,7 @@ const taiLogo = (0, multer_1.default)({
 exports.dinhTuyenNhaTuyenDung = (0, express_1.Router)();
 exports.dinhTuyenNhaTuyenDung.post('/upload-logo', taiLogo.single('logo'), (yeuCau, phanHoi) => {
     if (!yeuCau.file)
-        return phanHoi.status(400).json({ thongBao: 'Chua co file logo' });
+        return phanHoi.status(400).json({ thongBao: 'Chưa có file logo' });
     const duongDan = `/uploads/${yeuCau.file.filename}`;
     const gocUrl = `${yeuCau.protocol}://${yeuCau.get('host')}`;
     return phanHoi.status(201).json({ duLieu: { duongDan, url: `${gocUrl}${duongDan}` } });
