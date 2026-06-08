@@ -1,4 +1,5 @@
 import { AlertTriangle, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { useEffect, useState } from 'react'
 import AppIcon from './AppIcon'
 
@@ -42,13 +43,13 @@ export function ConfirmDialog({
 
   const color = colors[type]
 
-  return (
+  return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[998] bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-[2147483646] bg-black/50 backdrop-blur-sm"
         onClick={onCancel}
       />
-      <div className="fixed left-1/2 top-1/2 z-[999] w-[92vw] max-w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="fixed left-1/2 top-1/2 z-[2147483647] w-[92vw] max-w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-start gap-3">
           <div
             className="grid h-12 w-12 shrink-0 place-items-center rounded-full"
@@ -90,7 +91,8 @@ export function ConfirmDialog({
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   )
 }
 

@@ -65,20 +65,27 @@ export function InterviewTimeRangePicker({ value, onChange, errors }: Props) {
       <div className="grid gap-2">
         <span className="text-sm font-black text-slate-700">Thời lượng</span>
         <div className="flex flex-wrap gap-2">
-          {DURATIONS.map(minutes => (
-            <button
-              key={minutes}
-              type="button"
-              className={`min-h-10 rounded-xl border px-3 text-sm font-black transition ${
-                duration === minutes
-                  ? 'border-blue-700 bg-blue-700 text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'
-              }`}
-              onClick={() => setDuration(minutes)}
-            >
-              {minutes} phút
-            </button>
-          ))}
+          {DURATIONS.map(minutes => {
+            const selected = duration === minutes
+            return (
+              <button
+                key={minutes}
+                type="button"
+                aria-pressed={selected}
+                className={`min-h-10 rounded-xl border px-3 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-blue-200 ${
+                  selected
+                    ? '!border-blue-700 !bg-blue-700 !text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50'
+                }`}
+                style={selected
+                  ? { borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', color: '#ffffff' }
+                  : undefined}
+                onClick={() => setDuration(minutes)}
+              >
+                {minutes} phút
+              </button>
+            )
+          })}
         </div>
       </div>
 

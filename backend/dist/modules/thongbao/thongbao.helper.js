@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.thongBaoHoSoDuocXem = thongBaoHoSoDuocXem;
+exports.thongBaoHoSoDangXetDuyet = thongBaoHoSoDangXetDuyet;
 exports.thongBaoMoiPhongVan = thongBaoMoiPhongVan;
 exports.thongBaoUngVienYeuCauDoiLich = thongBaoUngVienYeuCauDoiLich;
 exports.thongBaoAdminUngVienYeuCauDoiLich = thongBaoAdminUngVienYeuCauDoiLich;
@@ -27,6 +28,19 @@ async function thongBaoHoSoDuocXem(params) {
         mucDoUuTien: 'trung_binh',
         icon: 'eye',
         mauSac: '#3b82f6',
+        maHoSoUngTuyen: params.maHoSoUngTuyen,
+    });
+}
+async function thongBaoHoSoDangXetDuyet(params) {
+    return (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
+        maNguoiDung: params.maUngVien,
+        loai: 'ho_so_ung_tuyen',
+        tieuDe: 'Hồ sơ của bạn đang được xét duyệt',
+        noiDung: `${params.tenCongTy} đang xem xét hồ sơ ứng tuyển vị trí ${params.viTriUngTuyen} của bạn.`,
+        lienKet: `/ung-vien/ung-tuyen?hoSo=${params.maHoSoUngTuyen}`,
+        mucDoUuTien: 'cao',
+        icon: 'hourglass',
+        mauSac: '#2563eb',
         maHoSoUngTuyen: params.maHoSoUngTuyen,
     });
 }

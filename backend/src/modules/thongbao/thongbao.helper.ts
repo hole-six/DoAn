@@ -19,6 +19,25 @@ export async function thongBaoHoSoDuocXem(params: {
   })
 }
 
+export async function thongBaoHoSoDangXetDuyet(params: {
+  maUngVien: string
+  tenCongTy: string
+  viTriUngTuyen: string
+  maHoSoUngTuyen: string
+}) {
+  return taoVaGuiThongBao({
+    maNguoiDung: params.maUngVien,
+    loai: 'ho_so_ung_tuyen',
+    tieuDe: 'Hồ sơ của bạn đang được xét duyệt',
+    noiDung: `${params.tenCongTy} đang xem xét hồ sơ ứng tuyển vị trí ${params.viTriUngTuyen} của bạn.`,
+    lienKet: `/ung-vien/ung-tuyen?hoSo=${params.maHoSoUngTuyen}`,
+    mucDoUuTien: 'cao',
+    icon: 'hourglass',
+    mauSac: '#2563eb',
+    maHoSoUngTuyen: params.maHoSoUngTuyen,
+  })
+}
+
 export async function thongBaoMoiPhongVan(params: {
   maUngVien: string
   tenCongTy: string

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { apiCoXacThuc, layNguoiDung } from '../../../lib/auth'
+import { boLangNgheEvent, kiemTraKetNoi, langNgheEvent, langNgheTrangThaiKetNoi } from '../../../lib/socket'
 import type { DanhGiaCongTy, HoSoNangLuc, HoSoUngTuyen, KyNang, LichPhongVan, ThongBao, TinTuyenDung, UngVien } from '../../../types/recruitment'
 
 type UngVienState = {
@@ -35,8 +36,9 @@ function sameId(left?: string, right?: string) {
 
 export function useUngVienData() {
   const [state, setState] = useState<UngVienState>(initialState)
+  const reloadTimerRef = useRef<number | null>(null)
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const current = layNguoiDung()
     try {
       setState(prev => ({ ...prev, loading: true, error: '', current }))
@@ -65,9 +67,44 @@ export function useUngVienData() {
         error: error instanceof Error ? error.message : 'Không tải được dữ liệu',
       }))
     }
-  }
+  }, [])
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  useEffect(() => {
+    const current = layNguoiDung()
+    if (!current || current.vaiTro !== 'ung_vien') return
+
+    const scheduleReload = () => {
+      if (reloadTimerRef.current) window.clearTimeout(reloadTimerRef.current)
+      reloadTimerRef.current = window.setTimeout(() => {
+        reloadTimerRef.current = null
+        void load()
+      }, 250)
+    }
+
+    const handleNotification = () => scheduleReload()
+
+    langNgheEvent('thong_bao_moi', handleNotification)
+
+    const removeConnectionListeners = langNgheTrangThaiKetNoi({
+      onConnect: scheduleReload,
+      onReconnect: scheduleReload,
+    })
+
+    if (!kiemTraKetNoi()) scheduleReload()
+
+    return () => {
+      boLangNgheEvent('thong_bao_moi', handleNotification)
+      removeConnectionListeners()
+      if (reloadTimerRef.current) {
+        window.clearTimeout(reloadTimerRef.current)
+        reloadTimerRef.current = null
+      }
+    }
+  }, [load])
 
   return { ...state, reload: load }
 }

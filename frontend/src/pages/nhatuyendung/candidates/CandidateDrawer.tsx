@@ -107,32 +107,74 @@ function CvSection({ title, items }: { title: string; items: string[] }) {
   )
 }
 
+function resolveCvFileUrl(cv?: HoSoNangLuc) {
+  const candidate = String(cv?.fileCvData ?? cv?.fileCvPath ?? '').trim()
+  if (!candidate) return ''
+  if (/^https?:\/\//i.test(candidate) || candidate.startsWith('data:')) return candidate
+  if (candidate.startsWith('/')) return `${window.location.origin}${candidate}`
+  return `${window.location.origin}/${candidate}`
+}
+
 function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {
+  const previewUrl = resolveCvFileUrl(cv)
+
   return (
     <div className="grid gap-4">
       <div className="flex flex-col gap-3 rounded-xl border border-sky-100 bg-sky-50 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-black text-sky-950">CV PDF ứng viên đã nộp</p>
-          <p className="mt-1 break-words text-sm font-semibold text-sky-700">{cv.fileCvTen || 'File CV đính kèm'}</p>
+          <p className="text-sm font-black text-sky-950">CV PDF ?ng vi?n ?? n?p</p>
+          <p className="mt-1 break-words text-sm font-semibold text-sky-700">{cv.fileCvTen || 'File CV ??nh k?m'}</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(cv.fileCvData, '_blank', 'noopener,noreferrer')}>
-            Mở tab mới
+          <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => previewUrl && window.open(previewUrl, '_blank', 'noopener,noreferrer')}>
+            M? tab m?i
           </Button>
           <a
             className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-black text-slate-700"
-            href={cv.fileCvData}
+            href={previewUrl}
             download={cv.fileCvTen || 'cv.pdf'}
           >
-            <Download size={15} /> Tải PDF
+            <Download size={15} /> T?i PDF
           </a>
         </div>
       </div>
-      <iframe
-        title={cv.fileCvTen || 'CV PDF'}
-        src={cv.fileCvData}
-        className="h-[72vh] min-h-[520px] w-full rounded-xl border border-slate-200 bg-slate-100"
-      />
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+        {previewUrl ? (
+          <object
+            data={previewUrl}
+            type="application/pdf"
+            className="h-[72vh] min-h-[520px] w-full bg-slate-50"
+            aria-label={cv.fileCvTen || 'CV PDF'}
+          >
+            <div className="grid min-h-[520px] place-items-center gap-3 p-6 text-center">
+              <FileText size={28} className="text-slate-400" />
+              <div className="grid gap-1">
+                <p className="text-sm font-black text-slate-800">Kh?ng th? xem PDF tr?c ti?p trong khung n?y.</p>
+                <p className="text-sm font-semibold text-slate-500">B?n v?n c? th? m? file ? tab m?i ho?c t?i xu?ng ?? xem ??y ??.</p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}>
+                  M? tab m?i
+                </Button>
+                <a
+                  className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-black text-slate-700"
+                  href={previewUrl}
+                  download={cv.fileCvTen || 'cv.pdf'}
+                >
+                  <Download size={15} /> T?i PDF
+                </a>
+              </div>
+            </div>
+          </object>
+        ) : (
+          <div className="grid min-h-[520px] place-items-center p-6 text-center">
+            <div className="grid gap-1">
+              <p className="text-sm font-black text-slate-800">Kh?ng t?m th?y ???ng d?n PDF ?? preview.</p>
+              <p className="text-sm font-semibold text-slate-500">H? s? n?y c? file g?c nh?ng ch?a c? URL hi?n th? h?p l?.</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -298,8 +340,8 @@ export function CandidateDrawer({
             <p><strong>Thư xin việc:</strong> {item.thuXinViec || '-'}</p>
             {cv?.fileCvData && (
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(cv.fileCvData, '_blank', 'noopener,noreferrer')}>Mở file CV</Button>
-                <a className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={cv.fileCvData} download={cv.fileCvTen || 'cv'}>
+                <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(resolveCvFileUrl(cv), '_blank', 'noopener,noreferrer')}>Mở file CV</Button>
+                <a className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={resolveCvFileUrl(cv)} download={cv.fileCvTen || 'cv'}>
                   <Download size={15} /> Tải file gốc
                 </a>
               </div>
@@ -322,7 +364,7 @@ export function CandidateDrawer({
                         <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-600">{contact.join(' | ') || 'Chưa có thông tin liên hệ'}</p>
                       </div>
                       {cv.fileCvData && (
-                        <a className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={cv.fileCvData} download={cv.fileCvTen || 'cv'}>
+                        <a className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm font-black text-slate-700" href={resolveCvFileUrl(cv)} download={cv.fileCvTen || 'cv'}>
                           <Download size={16} /> Tải file CV gốc
                         </a>
                       )}
