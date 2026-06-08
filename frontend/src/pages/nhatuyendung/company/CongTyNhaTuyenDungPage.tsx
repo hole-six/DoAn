@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Building2, RefreshCw, Save, Upload, X } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../../lib/auth'
+import { phatCapNhatCongTyNhaTuyenDung } from '../../../lib/employerCompanySync'
 import { getEmployerGate } from '../../../lib/employerGate'
 import { imageUrl } from '../../../lib/format'
 import type { NhaTuyenDung } from '../../../types/recruitment'
@@ -120,6 +121,7 @@ export default function CongTyNhaTuyenDungPage() {
         }),
       })
       setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
+      phatCapNhatCongTyNhaTuyenDung()
       await data.reload()
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Không lưu được hồ sơ công ty.' })

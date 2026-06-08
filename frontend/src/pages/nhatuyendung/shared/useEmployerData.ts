@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiCoXacThuc, layNguoiDung } from '../../../lib/auth'
 import { refId } from '../../../lib/employerGate'
+import { langNgheCapNhatCongTyNhaTuyenDung } from '../../../lib/employerCompanySync'
 import type { HoSoUngTuyen, KyNang, LichPhongVan, NhaTuyenDung, ThongBao, TinTuyenDung } from '../../../types/recruitment'
 
 type EmployerState = {
@@ -54,7 +55,12 @@ export function useEmployerData() {
     }
   }
 
-  useEffect(() => { void load() }, [])
+  useEffect(() => {
+    void load()
+    return langNgheCapNhatCongTyNhaTuyenDung(() => {
+      void load()
+    })
+  }, [])
 
   return { ...state, reload: load }
 }

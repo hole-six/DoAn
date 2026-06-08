@@ -24,6 +24,7 @@ import logoWeb from '../assets/logoweb.png'
 import { useChat } from '../contexts/ChatContext'
 import { useThongBao } from '../contexts/ThongBaoContext'
 import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
+import { langNgheCapNhatCongTyNhaTuyenDung } from '../lib/employerCompanySync'
 import { EMPLOYER_RECRUITMENT_PATHS, getEmployerGate, refId, type EmployerGateResult } from '../lib/employerGate'
 import type { NhaTuyenDung } from '../types/recruitment'
 import AppIcon from './AppIcon'
@@ -171,16 +172,25 @@ export default function DashboardShell({ vaiTro }: Props) {
       return
     }
     let active = true
-    apiCoXacThuc('/nhatuyendung')
-      .then((companies: NhaTuyenDung[]) => {
-        if (!active) return
-        const company = (companies ?? []).find(item => refId(item.maNguoiDung) === nguoiDung.id)
-        setEmployerGate(getEmployerGate(company))
-      })
-      .catch(() => {
-        if (active) setEmployerGate(getEmployerGate(null))
-      })
-    return () => { active = false }
+    const taiCongTy = () => {
+      apiCoXacThuc('/nhatuyendung')
+        .then((companies: NhaTuyenDung[]) => {
+          if (!active) return
+          const company = (companies ?? []).find(item => refId(item.maNguoiDung) === nguoiDung.id)
+          setEmployerGate(getEmployerGate(company))
+        })
+        .catch(() => {
+          if (active) setEmployerGate(getEmployerGate(null))
+        })
+    }
+    taiCongTy()
+    const huyLangNghe = langNgheCapNhatCongTyNhaTuyenDung(() => {
+      taiCongTy()
+    })
+    return () => {
+      active = false
+      huyLangNghe()
+    }
   }, [vaiTro, nguoiDung?.id])
 
   if (!nguoiDung) return <Navigate to="/dang-nhap" replace />
