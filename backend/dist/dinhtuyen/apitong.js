@@ -5,6 +5,7 @@ const express_1 = require("express");
 const ai_dinhtuyen_js_1 = require("../modules/ai/ai.dinhtuyen.js");
 const canhbaoquantri_dinhtuyen_js_1 = require("../modules/canhbaoquantri/canhbaoquantri.dinhtuyen.js");
 const danhgiacongty_dinhtuyen_js_1 = require("../modules/danhgiacongty/danhgiacongty.dinhtuyen.js");
+const danhgiaphongvan_dinhtuyen_js_1 = require("../modules/danhgiaphongvan/danhgiaphongvan.dinhtuyen.js");
 const danhmuckynang_dinhtuyen_js_1 = require("../modules/danhmuckynang/danhmuckynang.dinhtuyen.js");
 const deploy_dinhtuyen_js_1 = require("../modules/deploy/deploy.dinhtuyen.js");
 const hosonangluc_dinhtuyen_js_1 = require("../modules/hosonangluc/hosonangluc.dinhtuyen.js");
@@ -40,5 +41,6 @@ exports.apiTong.use('/lichphongvan', lichphongvan_dinhtuyen_js_1.dinhTuyenLichPh
 exports.apiTong.use('/thongbao', thongbao_dinhtuyen_js_1.dinhTuyenThongBao);
 exports.apiTong.use('/tinnhan', tinnhan_dinhtuyen_js_1.dinhTuyenTinNhan);
 exports.apiTong.use('/danhgiacongty', danhgiacongty_dinhtuyen_js_1.dinhTuyenDanhGiaCongTy);
+exports.apiTong.use('/danhgiaphongvan', danhgiaphongvan_dinhtuyen_js_1.dinhTuyenDanhGiaPhongVan);
 exports.apiTong.use('/ai', ai_dinhtuyen_js_1.dinhTuyenAi);
 exports.apiTong.use('/deploy', deploy_dinhtuyen_js_1.dinhTuyenDeploy);

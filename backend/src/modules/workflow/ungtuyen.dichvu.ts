@@ -123,6 +123,12 @@ function chuanHoaDateTime(value: Date | string | undefined, field: string) {
   return date
 }
 
+function damBaoKhoangThoiGianPhongVan(thoiGianBatDau: Date, thoiGianKetThuc?: Date) {
+  if (thoiGianKetThuc && thoiGianKetThuc.getTime() <= thoiGianBatDau.getTime()) {
+    throw new LoiUngDung('Thời gian kết thúc phải sau thời gian bắt đầu', 422, 'INVALID_DATETIME_RANGE')
+  }
+}
+
 export const dichVuWorkflowUngTuyen = {
   async ungTuyen(nguoiDung: NguoiDungHienTai, duLieu: { maTinTuyenDung: string; maHoSoNangLuc?: string; thuXinViec?: string }) {
     const ungVien = await layUngVienCuaNguoiDung(nguoiDung)
@@ -184,6 +190,7 @@ export const dichVuWorkflowUngTuyen = {
       const thoiGianBatDau = chuanHoaDateTime(duLieu.thoiGianBatDau, 'thoiGianBatDau')
       const thoiGianKetThuc = chuanHoaDateTime(duLieu.thoiGianKetThuc, 'thoiGianKetThuc')
       if (!thoiGianBatDau) throw new LoiUngDung('Thi?u th?i gian b?t ??u ph?ng v?n', 422, 'INVALID_DATETIME')
+      damBaoKhoangThoiGianPhongVan(thoiGianBatDau, thoiGianKetThuc)
       const lich = await prisma.lichPhongVan.create({ data: { maHoSoUngTuyen, thoiGianBatDau, thoiGianKetThuc, diaChi: duLieu.diaChi, hinhThuc: duLieu.hinhThuc ?? 'online', linkHop: duLieu.linkHop, ghiChu: duLieu.ghiChu, trangThai: 'da_len_lich', ketQua: 'cho_ket_qua' } })
       const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, 'moi_phong_van', nguoiDung, 'Nh? tuy?n d?ng m?i ph?ng v?n')
       const info = thongTinThongBao(hoSoMoi)
@@ -218,6 +225,7 @@ export const dichVuWorkflowUngTuyen = {
       if (['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) throw new LoiUngDung('Kh?ng th? c?p nh?t l?ch ?? k?t th?c ho?c ?? h?y', 409, 'INVALID_INTERVIEW_STATE')
       const thoiGianBatDau = chuanHoaDateTime(duLieu.thoiGianBatDau, 'thoiGianBatDau')
       const thoiGianKetThuc = chuanHoaDateTime(duLieu.thoiGianKetThuc, 'thoiGianKetThuc')
+      damBaoKhoangThoiGianPhongVan(thoiGianBatDau ?? lich.thoiGianBatDau, thoiGianKetThuc ?? lich.thoiGianKetThuc ?? undefined)
       const lichMoi = await prisma.lichPhongVan.update({
         where: { id: maLichPhongVan },
         data: { thoiGianBatDau: thoiGianBatDau ?? lich.thoiGianBatDau, thoiGianKetThuc: thoiGianKetThuc ?? lich.thoiGianKetThuc, diaChi: duLieu.diaChi ?? lich.diaChi, hinhThuc: duLieu.hinhThuc ?? lich.hinhThuc, linkHop: duLieu.linkHop ?? lich.linkHop, ghiChu: duLieu.ghiChu ?? lich.ghiChu, trangThai: lich.trangThai === 'doi_lich' ? 'da_len_lich' : lich.trangThai },

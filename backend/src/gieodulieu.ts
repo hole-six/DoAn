@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from './cauhinh/prisma.js'
+import { dongBoTatCaKyNangTuJson } from './dungchung/dongboQuanHe.js'
 
 const matKhauMau = '123456'
 const emailAdmin = 'admin@ef.vn'
@@ -181,14 +182,17 @@ async function xoaDuLieuCu() {
   await prisma.cuocTroChuyen.deleteMany()
   await prisma.goiYViecLam.deleteMany()
   await prisma.thongBao.deleteMany()
+  await prisma.danhGiaPhongVan.deleteMany()
   await prisma.lichPhongVan.deleteMany()
   await prisma.lichSuHoSoUngTuyen.deleteMany()
   await prisma.danhGiaCongTy.deleteMany()
   await prisma.hoSoUngTuyen.deleteMany()
   await prisma.hoSoNangLuc.deleteMany()
   await prisma.viecLamDaLuu.deleteMany()
+  await prisma.tinTuyenDungKyNang.deleteMany()
   await prisma.tinTuyenDung.deleteMany()
   await prisma.nhaTuyenDung.deleteMany()
+  await prisma.ungVienKyNang.deleteMany()
   await prisma.ungVien.deleteMany()
   await prisma.danhMucKyNang.deleteMany()
   await prisma.nguoiDung.deleteMany()
@@ -339,6 +343,7 @@ async function main() {
       }))
     }
   }
+  await dongBoTatCaKyNangTuJson()
 
   const specialJob = jobs[0]
   const specialCv = candidateProfiles[0]

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuTinTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
+const dongboQuanHe_js_1 = require("../../dungchung/dongboQuanHe.js");
 const timkiem_js_1 = require("../../dungchung/timkiem.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
@@ -91,7 +92,9 @@ exports.dichVuTinTuyenDung = {
         return chuanHoaTin(duLieu);
     },
     async taoMoi(duLieu) {
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const payload = duLieu;
+        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(payload) });
+        await (0, dongboQuanHe_js_1.dongBoKyNangTinTuyenDung)(String(ketQua.id), payload.kyNang);
         const dayDu = await layDayDu({ id: ketQua.id });
         if (dayDu?.trangThai === 'cho_duyet')
             await guiThongBaoAdminTinCanDuyet(dayDu);
@@ -107,6 +110,7 @@ exports.dichVuTinTuyenDung = {
             ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
         };
         await tintuyendung_mohinh_js_1.TinTuyenDung.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieuCapNhat) });
+        await (0, dongboQuanHe_js_1.dongBoKyNangTinTuyenDung)(ma, duLieu.kyNang);
         const ketQua = await layDayDu({ id: ma });
         if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
             await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetTin)({

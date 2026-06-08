@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma_js_1 = require("./cauhinh/prisma.js");
+const dongboQuanHe_js_1 = require("./dungchung/dongboQuanHe.js");
 const matKhauMau = '123456';
 const emailAdmin = 'admin@ef.vn';
 const danhSachKyNang = [
@@ -178,14 +179,17 @@ async function xoaDuLieuCu() {
     await prisma_js_1.prisma.cuocTroChuyen.deleteMany();
     await prisma_js_1.prisma.goiYViecLam.deleteMany();
     await prisma_js_1.prisma.thongBao.deleteMany();
+    await prisma_js_1.prisma.danhGiaPhongVan.deleteMany();
     await prisma_js_1.prisma.lichPhongVan.deleteMany();
     await prisma_js_1.prisma.lichSuHoSoUngTuyen.deleteMany();
     await prisma_js_1.prisma.danhGiaCongTy.deleteMany();
     await prisma_js_1.prisma.hoSoUngTuyen.deleteMany();
     await prisma_js_1.prisma.hoSoNangLuc.deleteMany();
     await prisma_js_1.prisma.viecLamDaLuu.deleteMany();
+    await prisma_js_1.prisma.tinTuyenDungKyNang.deleteMany();
     await prisma_js_1.prisma.tinTuyenDung.deleteMany();
     await prisma_js_1.prisma.nhaTuyenDung.deleteMany();
+    await prisma_js_1.prisma.ungVienKyNang.deleteMany();
     await prisma_js_1.prisma.ungVien.deleteMany();
     await prisma_js_1.prisma.danhMucKyNang.deleteMany();
     await prisma_js_1.prisma.nguoiDung.deleteMany();
@@ -310,6 +314,7 @@ async function main() {
             }));
         }
     }
+    await (0, dongboQuanHe_js_1.dongBoTatCaKyNangTuJson)();
     const specialJob = jobs[0];
     const specialCv = candidateProfiles[0];
     const applications = [];

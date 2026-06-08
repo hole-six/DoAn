@@ -122,19 +122,19 @@ function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {
     <div className="grid gap-4">
       <div className="flex flex-col gap-3 rounded-xl border border-sky-100 bg-sky-50 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-black text-sky-950">CV PDF ?ng vi?n ?? n?p</p>
-          <p className="mt-1 break-words text-sm font-semibold text-sky-700">{cv.fileCvTen || 'File CV ??nh k?m'}</p>
+          <p className="text-sm font-black text-sky-950">CV PDF ứng viên đã nộp</p>
+          <p className="mt-1 break-words text-sm font-semibold text-sky-700">{cv.fileCvTen || 'File CV đính kèm'}</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => previewUrl && window.open(previewUrl, '_blank', 'noopener,noreferrer')}>
-            M? tab m?i
+            Mở tab mới
           </Button>
           <a
             className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-black text-slate-700"
             href={previewUrl}
             download={cv.fileCvTen || 'cv.pdf'}
           >
-            <Download size={15} /> T?i PDF
+            <Download size={15} /> Tải PDF
           </a>
         </div>
       </div>
@@ -149,19 +149,19 @@ function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {
             <div className="grid min-h-[520px] place-items-center gap-3 p-6 text-center">
               <FileText size={28} className="text-slate-400" />
               <div className="grid gap-1">
-                <p className="text-sm font-black text-slate-800">Kh?ng th? xem PDF tr?c ti?p trong khung n?y.</p>
-                <p className="text-sm font-semibold text-slate-500">B?n v?n c? th? m? file ? tab m?i ho?c t?i xu?ng ?? xem ??y ??.</p>
+                <p className="text-sm font-black text-slate-800">Không thể xem PDF trực tiếp trong khung này.</p>
+                <p className="text-sm font-semibold text-slate-500">Bạn vẫn có thể mở file ở tab mới hoặc tải xuống để xem đầy đủ.</p>
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <Button size="sm" icon={<ExternalLink size={15} />} onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}>
-                  M? tab m?i
+                  Mở tab mới
                 </Button>
                 <a
                   className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 text-sm font-black text-slate-700"
                   href={previewUrl}
                   download={cv.fileCvTen || 'cv.pdf'}
                 >
-                  <Download size={15} /> T?i PDF
+                  <Download size={15} /> Tải PDF
                 </a>
               </div>
             </div>
@@ -169,8 +169,8 @@ function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {
         ) : (
           <div className="grid min-h-[520px] place-items-center p-6 text-center">
             <div className="grid gap-1">
-              <p className="text-sm font-black text-slate-800">Kh?ng t?m th?y ???ng d?n PDF ?? preview.</p>
-              <p className="text-sm font-semibold text-slate-500">H? s? n?y c? file g?c nh?ng ch?a c? URL hi?n th? h?p l?.</p>
+              <p className="text-sm font-black text-slate-800">Không tìm thấy đường dẫn PDF để preview.</p>
+              <p className="text-sm font-semibold text-slate-500">Hồ sơ này có file gốc nhưng chưa có URL hiển thị hợp lệ.</p>
             </div>
           </div>
         )}

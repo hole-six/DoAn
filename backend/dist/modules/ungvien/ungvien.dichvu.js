@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuUngVien = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
+const dongboQuanHe_js_1 = require("../../dungchung/dongboQuanHe.js");
 const ungvien_mohinh_js_1 = require("./ungvien.mohinh.js");
 function chuanHoaUngVien(taiLieu) {
     const duLieu = taiLieu ?? {};
@@ -81,7 +82,9 @@ exports.dichVuUngVien = {
         return chuanHoaUngVien(dayDu);
     },
     async taoMoi(duLieu) {
-        const ketQua = await ungvien_mohinh_js_1.UngVien.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const payload = duLieu;
+        const ketQua = await ungvien_mohinh_js_1.UngVien.create({ data: (0, prismaHelper_js_1.boUndefined)(payload) });
+        await (0, dongboQuanHe_js_1.dongBoKyNangUngVien)(String(ketQua.id), payload.kyNang);
         return this.layTheoMa(String(ketQua.id));
     },
     async capNhat(ma, duLieu, maNguoiDungHienTai) {
@@ -91,7 +94,9 @@ exports.dichVuUngVien = {
         if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403);
         }
-        await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const payload = duLieu;
+        await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(payload) });
+        await (0, dongboQuanHe_js_1.dongBoKyNangUngVien)(ma, payload.kyNang);
         return this.layTheoMa(ma);
     },
     async xoa(ma, maNguoiDungHienTai) {

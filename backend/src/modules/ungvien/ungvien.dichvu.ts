@@ -1,5 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { boUndefined, coId, ganKyNangJson, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
+import { dongBoKyNangUngVien } from '../../dungchung/dongboQuanHe.js'
 import { UngVien } from './ungvien.mohinh.js'
 
 function chuanHoaUngVien(taiLieu: any) {
@@ -84,7 +85,9 @@ export const dichVuUngVien = {
   },
 
   async taoMoi(duLieu: unknown) {
-    const ketQua = await UngVien.create({ data: boUndefined(duLieu as Record<string, any>) as any })
+    const payload = duLieu as Record<string, any>
+    const ketQua = await UngVien.create({ data: boUndefined(payload) as any })
+    await dongBoKyNangUngVien(String(ketQua.id), payload.kyNang)
     return this.layTheoMa(String(ketQua.id))
   },
 
@@ -96,7 +99,9 @@ export const dichVuUngVien = {
       throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403)
     }
 
-    await UngVien.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) as any })
+    const payload = duLieu as Record<string, any>
+    await UngVien.update({ where: { id: ma }, data: boUndefined(payload) as any })
+    await dongBoKyNangUngVien(ma, payload.kyNang)
     return this.layTheoMa(ma)
   },
 

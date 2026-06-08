@@ -1,5 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
 import { boUndefined, coId, ganKyNangVaCongTyChoTin } from '../../dungchung/prismaHelper.js'
+import { dongBoKyNangTinTuyenDung } from '../../dungchung/dongboQuanHe.js'
 import { layLimit, locVaXepHangTheoTuKhoa } from '../../dungchung/timkiem.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
@@ -94,7 +95,9 @@ export const dichVuTinTuyenDung = {
   },
 
   async taoMoi(duLieu: unknown) {
-    const ketQua = await TinTuyenDung.create({ data: boUndefined(duLieu as Record<string, any>) as any })
+    const payload = duLieu as Record<string, any>
+    const ketQua = await TinTuyenDung.create({ data: boUndefined(payload) as any })
+    await dongBoKyNangTinTuyenDung(String(ketQua.id), payload.kyNang)
     const dayDu = await layDayDu({ id: ketQua.id }) as any
     if (dayDu?.trangThai === 'cho_duyet') await guiThongBaoAdminTinCanDuyet(dayDu)
     return chuanHoaTin(dayDu)
@@ -110,6 +113,7 @@ export const dichVuTinTuyenDung = {
       ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
     }
     await TinTuyenDung.update({ where: { id: ma }, data: boUndefined(duLieuCapNhat) as any })
+    await dongBoKyNangTinTuyenDung(ma, duLieu.kyNang)
     const ketQua = await layDayDu({ id: ma }) as any
 
     if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
