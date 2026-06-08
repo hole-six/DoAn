@@ -12,13 +12,13 @@ skinparam activity {
 }
 start
 :Khách vãng lai hoặc ứng viên mở trang việc làm;
-:Hệ thống tải danh sách TinTuyenDung;
+:Hệ thống tải danh sách TinTuyểnDụng;
 if (Người dùng là ứng viên đã đăng nhập?) then (Có)
-  :Hệ thống tải ViecLamDaLuu của ứng viên;
+  :Hệ thống tải ViệcLàmĐãLưu của ứng viên;
 else (Không)
   :Dùng danh sách việc đã lưu trong trình duyệt nếu có;
 endif
-:Hệ thống chỉ hiển thị tin có trangThai = dang_mo;
+:Hệ thống chỉ hiển thị tin có trạng thái đang mở;
 fork
   :Nhập từ khóa tìm kiếm;
 fork again
@@ -40,9 +40,9 @@ if (Muốn xóa bộ lọc?) then (Có)
 else (Không)
   :Giữ bộ lọc hiện tại;
 endif
-:Hệ thống lọc TinTuyenDung theo từ khóa và bộ lọc động;
+:Hệ thống lọc TinTuyểnDụng theo từ khóa và bộ lọc động;
 if (Người dùng hỏi trợ lý AI?) then (Có)
-  :Gửi câu hỏi tới AI chatbot;
+  :Gửi câu hỏi tới trợ lý AI;
   :Hiển thị câu trả lời gợi ý tìm việc;
 else (Không)
   :Tiếp tục xem kết quả;
@@ -50,16 +50,15 @@ endif
 if (Có kết quả?) then (Có)
   :Hiển thị danh sách việc làm theo phân trang;
   if (Người dùng chọn một tin?) then (Có)
-    :Mở trang chi tiết TinTuyenDung;
+    :Mở trang chi tiết TinTuyểnDụng;
   elseif (Chọn lưu việc?) then (Lưu việc)
-    :Lưu hoặc bỏ lưu TinTuyenDung;
+    :Lưu hoặc bỏ lưu TinTuyểnDụng;
   else (Không)
     :Tiếp tục xem danh sách;
   endif
-  :Kết thúc nhánh;
 else (Không)
   :Hiển thị trạng thái không có việc phù hợp;
   :Gợi ý đổi từ khóa hoặc bộ lọc;
-  stop
 endif
+stop
 @enduml

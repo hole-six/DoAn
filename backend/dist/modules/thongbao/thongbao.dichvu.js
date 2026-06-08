@@ -8,13 +8,14 @@ exports.demThongBaoChuaDoc = demThongBaoChuaDoc;
 exports.xoaThongBaoCu = xoaThongBaoCu;
 const socket_js_1 = require("../../cauhinh/socket.js");
 const dichvucoban_js_1 = require("../../dungchung/dichvucoban.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const thongbao_mohinh_js_1 = require("./thongbao.mohinh.js");
 exports.dichVuThongBao = (0, dichvucoban_js_1.taoDichVuCoBan)(thongbao_mohinh_js_1.ThongBao);
-// Tao va gui thong bao real-time
 async function taoVaGuiThongBao(duLieu) {
-    const thongBao = await thongbao_mohinh_js_1.ThongBao.create(duLieu);
+    const thongBao = (0, prismaHelper_js_1.coId)(await thongbao_mohinh_js_1.ThongBao.create({ data: duLieu }));
     (0, socket_js_1.guiThongBaoChoNguoiDung)(duLieu.maNguoiDung, 'thong_bao_moi', {
         _id: thongBao._id,
+        id: thongBao.id,
         loai: thongBao.loai,
         tieuDe: thongBao.tieuDe,
         noiDung: thongBao.noiDung,
@@ -30,26 +31,21 @@ async function taoVaGuiThongBao(duLieu) {
     });
     return thongBao;
 }
-// Danh dau da doc
 async function danhDauDaDoc(maThongBao, maNguoiDung) {
-    const thongBao = await thongbao_mohinh_js_1.ThongBao.findOneAndUpdate({ _id: maThongBao, maNguoiDung }, { daDoc: true }, { new: true });
-    return thongBao;
+    const thongBao = await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: maThongBao, maNguoiDung } });
+    if (!thongBao)
+        return null;
+    return (0, prismaHelper_js_1.coId)(await thongbao_mohinh_js_1.ThongBao.update({ where: { id: maThongBao }, data: { daDoc: true } }));
 }
-// Danh dau tat ca da doc
 async function danhDauTatCaDaDoc(maNguoiDung) {
-    await thongbao_mohinh_js_1.ThongBao.updateMany({ maNguoiDung, daDoc: false }, { daDoc: true });
+    await thongbao_mohinh_js_1.ThongBao.updateMany({ where: { maNguoiDung, daDoc: false }, data: { daDoc: true } });
 }
-// Lay so thong bao chua doc
 async function demThongBaoChuaDoc(maNguoiDung) {
-    return await thongbao_mohinh_js_1.ThongBao.countDocuments({ maNguoiDung, daDoc: false });
+    return thongbao_mohinh_js_1.ThongBao.count({ where: { maNguoiDung, daDoc: false } });
 }
-// Xoa thong bao cu (> 30 ngay)
 async function xoaThongBaoCu() {
     const ngayCu = new Date();
     ngayCu.setDate(ngayCu.getDate() - 30);
-    const ketQua = await thongbao_mohinh_js_1.ThongBao.deleteMany({
-        ngayTao: { $lt: ngayCu },
-        daDoc: true,
-    });
-    return ketQua.deletedCount;
+    const ketQua = await thongbao_mohinh_js_1.ThongBao.deleteMany({ where: { ngayTao: { lt: ngayCu }, daDoc: true } });
+    return ketQua.count;
 }

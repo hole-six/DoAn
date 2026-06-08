@@ -1,10 +1,10 @@
-﻿import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
+import { guiThongBaoChoNguoiDung } from '../../cauhinh/socket.js'
 import { taoDichVuCoBan } from '../../dungchung/dichvucoban.js'
+import { coId } from '../../dungchung/prismaHelper.js'
 import { ThongBao } from './thongbao.mohinh.js'
 
 export const dichVuThongBao = taoDichVuCoBan(ThongBao)
 
-// Tao va gui thong bao real-time
 export async function taoVaGuiThongBao(duLieu: {
   maNguoiDung: string
   loai: string
@@ -17,10 +17,11 @@ export async function taoVaGuiThongBao(duLieu: {
   hanhDong?: Array<{ nhan: string; url: string; loai: string }>
   [key: string]: any
 }) {
-  const thongBao = await ThongBao.create(duLieu)
+  const thongBao = coId(await ThongBao.create({ data: duLieu })) as any
 
   guiThongBaoChoNguoiDung(duLieu.maNguoiDung, 'thong_bao_moi', {
     _id: thongBao._id,
+    id: thongBao.id,
     loai: thongBao.loai,
     tieuDe: thongBao.tieuDe,
     noiDung: thongBao.noiDung,
@@ -38,37 +39,23 @@ export async function taoVaGuiThongBao(duLieu: {
   return thongBao
 }
 
-// Danh dau da doc
 export async function danhDauDaDoc(maThongBao: string, maNguoiDung: string) {
-  const thongBao = await ThongBao.findOneAndUpdate(
-    { _id: maThongBao, maNguoiDung },
-    { daDoc: true },
-    { new: true },
-  )
-  return thongBao
+  const thongBao = await ThongBao.findFirst({ where: { id: maThongBao, maNguoiDung } })
+  if (!thongBao) return null
+  return coId(await ThongBao.update({ where: { id: maThongBao }, data: { daDoc: true } }))
 }
 
-// Danh dau tat ca da doc
 export async function danhDauTatCaDaDoc(maNguoiDung: string) {
-  await ThongBao.updateMany({ maNguoiDung, daDoc: false }, { daDoc: true })
+  await ThongBao.updateMany({ where: { maNguoiDung, daDoc: false }, data: { daDoc: true } })
 }
 
-// Lay so thong bao chua doc
 export async function demThongBaoChuaDoc(maNguoiDung: string) {
-  return await ThongBao.countDocuments({ maNguoiDung, daDoc: false })
+  return ThongBao.count({ where: { maNguoiDung, daDoc: false } })
 }
 
-// Xoa thong bao cu (> 30 ngay)
 export async function xoaThongBaoCu() {
   const ngayCu = new Date()
   ngayCu.setDate(ngayCu.getDate() - 30)
-
-  const ketQua = await ThongBao.deleteMany({
-    ngayTao: { $lt: ngayCu },
-    daDoc: true,
-  })
-
-  return ketQua.deletedCount
+  const ketQua = await ThongBao.deleteMany({ where: { ngayTao: { lt: ngayCu }, daDoc: true } })
+  return ketQua.count
 }
-
-

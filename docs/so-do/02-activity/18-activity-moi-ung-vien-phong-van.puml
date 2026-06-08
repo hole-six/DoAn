@@ -12,13 +12,12 @@ skinparam activity {
 }
 start
 :Nhà tuyển dụng đăng nhập;
-:Mở pipeline ứng viên;
-:Hệ thống tải HoSoUngTuyen, UngVien và TinTuyenDung;
+:Mở luồng xử lý ứng viên;
+:Hệ thống tải HồSơỨngTuyển, ỨngViên và TinTuyểnDụng;
 :Chọn hồ sơ ứng viên cần mời phỏng vấn;
 if (Hồ sơ thuộc công ty?) then (Đúng)
-  if (Đã có LichPhongVan?) then (Có)
+  if (Đã có LịchPhỏngVấn?) then (Có)
     :Hiển thị thông báo hồ sơ đã có lịch phỏng vấn;
-    :Kết thúc nhánh;
   else (Chưa)
     :Nhấn nút "Mời phỏng vấn";
     fork
@@ -34,24 +33,21 @@ if (Hồ sơ thuộc công ty?) then (Đúng)
     end fork
     if (Muốn thoát?) then (Có)
       :Nhấn nút "Đóng";
-      :Kết thúc nhánh;
     else (Không)
       :Nhấn nút "Lưu lịch";
-    endif
-    :Hệ thống kiểm tra thời gian và dữ liệu lịch;
-    if (Dữ liệu hợp lệ?) then (Đúng)
-      :Tạo LichPhongVan trạng thái da_len_lich;
-      :Cập nhật HoSoUngTuyen thành moi_phong_van;
-      :Gửi ThongBao mời phỏng vấn cho ứng viên;
-      :Hiển thị gửi lời mời thành công;
-      :Kết thúc nhánh;
-    else (Sai)
-      :Hiển thị thông báo lỗi dữ liệu lịch;
-      :Kết thúc nhánh;
+      :Hệ thống kiểm tra thời gian và dữ liệu lịch;
+      if (Dữ liệu hợp lệ?) then (Đúng)
+        :Tạo LịchPhỏngVấn trạng thái đã lên lịch;
+        :Cập nhật HồSơỨngTuyển thành moi_phong_van;
+        :Gửi ThôngBáo mời phỏng vấn cho ứng viên;
+        :Hiển thị gửi lời mời thành công;
+      else (Sai)
+        :Hiển thị thông báo lỗi dữ liệu lịch;
+      endif
     endif
   endif
 else (Sai)
   :Hiển thị thông báo không có quyền mời phỏng vấn;
-  stop
 endif
+stop
 @enduml

@@ -13,7 +13,7 @@ skinparam activity {
 start
 :Ứng viên đăng nhập;
 :Mở trang hồ sơ năng lực;
-:Hệ thống tải UngVien và danh sách HoSoNangLuc;
+:Hệ thống tải ỨngViên và danh sách HồSơNăngLực;
 if (Đã có hồ sơ?) then (Có)
   :Hiển thị danh sách CV và CV chính;
 else (Không)
@@ -21,44 +21,57 @@ else (Không)
 endif
 if (Chọn thao tác?) then (Tạo mới)
   :Nhấn nút "Tạo CV";
+  fork
+    :Nhập tiêu đề CV;
+  fork again
+    :Nhập thông tin cá nhân hiển thị;
+  fork again
+    :Nhập học vấn, kinh nghiệm, chứng chỉ;
+  fork again
+    :Nhập kỹ năng mềm và kỹ năng lập trình;
+  fork again
+    :Nhập dự án và liên kết portfolio;
+  fork again
+    :Tải ảnh đại diện hoặc file CV nếu có;
+  end fork
+  if (Đặt làm CV chính?) then (Có)
+    :Đánh dấu HồSơNăngLực là CV chính;
+  else (Không)
+    :Giữ trạng thái CV phụ;
+  endif
+  :Nhấn nút "Lưu";
+  :Hệ thống kiểm tra dữ liệu hồ sơ;
+  if (Hợp lệ?) then (Đúng)
+    :Tạo HồSơNăngLực;
+    :Hiển thị thông báo lưu thành công;
+  else (Sai)
+    :Hiển thị thông báo lỗi;
+  endif
 elseif (Chọn chỉnh sửa?) then (Chỉnh sửa)
-  :Chọn một HoSoNangLuc;
+  :Chọn một HồSơNăngLực;
+  fork
+    :Cập nhật tiêu đề và thông tin cá nhân;
+  fork again
+    :Cập nhật học vấn, kinh nghiệm, chứng chỉ;
+  fork again
+    :Cập nhật kỹ năng, dự án và liên kết;
+  end fork
+  :Nhấn nút "Lưu";
+  :Hệ thống kiểm tra dữ liệu hồ sơ;
+  if (Hợp lệ?) then (Đúng)
+    :Cập nhật HồSơNăngLực;
+    :Hiển thị thông báo lưu thành công;
+  else (Sai)
+    :Hiển thị thông báo lỗi;
+  endif
 else (Xóa)
-  :Chọn HoSoNangLuc cần xóa;
+  :Chọn HồSơNăngLực cần xóa;
   if (Xác nhận xóa?) then (Có)
-    :Hệ thống xóa HoSoNangLuc;
+    :Hệ thống xóa HồSơNăngLực;
     :Hiển thị thông báo thành công;
   else (Không)
     :Đóng hộp xác nhận;
   endif
-  :Kết thúc nhánh;
 endif
-fork
-  :Nhập tiêu đề CV;
-fork again
-  :Nhập thông tin cá nhân hiển thị;
-fork again
-  :Nhập học vấn, kinh nghiệm, chứng chỉ;
-fork again
-  :Nhập kỹ năng mềm và kỹ năng lập trình;
-fork again
-  :Nhập dự án và liên kết portfolio;
-fork again
-  :Tải ảnh đại diện hoặc file CV nếu có;
-end fork
-if (Đặt làm CV chính?) then (Có)
-  :Đánh dấu HoSoNangLuc là CV chính;
-else (Không)
-  :Giữ trạng thái CV phụ;
-endif
-:Nhấn nút "Lưu";
-:Hệ thống kiểm tra dữ liệu hồ sơ;
-if (Hợp lệ?) then (Đúng)
-  :Tạo hoặc cập nhật HoSoNangLuc;
-  :Hiển thị thông báo lưu thành công;
-  :Kết thúc nhánh;
-else (Sai)
-  :Hiển thị thông báo lỗi;
-  stop
-endif
+stop
 @enduml

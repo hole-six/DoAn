@@ -16,11 +16,15 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bienmoitruong_js_1 = require("../../cauhinh/bienmoitruong.js");
 const email_js_1 = require("../../dungchung/email.js");
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const ungvien_dichvu_js_1 = require("../ungvien/ungvien.dichvu.js");
+const TOKEN_CACHE_TTL_MS = Number(process.env.AUTH_CACHE_TTL_MS ?? 15000);
+const nguoiDungTheoToken = new Map();
 function taoNguoiDungCongKhai(nguoiDung) {
     return {
-        id: String(nguoiDung._id),
+        id: String(nguoiDung.id ?? nguoiDung._id),
+        _id: String(nguoiDung.id ?? nguoiDung._id),
         email: nguoiDung.email,
         hoTen: nguoiDung.hoTen,
         soDienThoai: nguoiDung.soDienThoai,
@@ -36,13 +40,8 @@ function taoToken(nguoiDungCongKhai) {
     };
     const accessToken = jsonwebtoken_1.default.sign({ ...payload, loai: 'access' }, bienmoitruong_js_1.bienMoiTruong.khoaJwt, { expiresIn: '15m' });
     const refreshToken = jsonwebtoken_1.default.sign({ ...payload, loai: 'refresh' }, bienmoitruong_js_1.bienMoiTruong.khoaJwtLamMoi, { expiresIn: '30d' });
-    return {
-        accessToken,
-        refreshToken,
-        token: accessToken,
-        expiresIn: 15 * 60,
-        tokenType: 'Bearer',
-    };
+    nguoiDungTheoToken.set(accessToken, { nguoiDung: nguoiDungCongKhai, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS });
+    return { accessToken, refreshToken, token: accessToken, expiresIn: 15 * 60, tokenType: 'Bearer' };
 }
 function hashToken(token) {
     return node_crypto_1.default.createHash('sha256').update(token).digest('hex');
@@ -59,25 +58,17 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 async function dangNhap(duLieu) {
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({ email: duLieu.email.toLowerCase().trim() });
-    if (!nguoiDung) {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { email: duLieu.email.toLowerCase().trim() } });
+    if (!nguoiDung)
         throw new loiungdung_js_1.LoiUngDung('Email hoac mat khau khong dung', 401);
-    }
-    if (nguoiDung.trangThai !== 'hoat_dong') {
+    if (nguoiDung.trangThai !== 'hoat_dong')
         throw new loiungdung_js_1.LoiUngDung('Tai khoan khong o trang thai hoat dong', 403);
-    }
-    if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro) {
+    if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro)
         throw new loiungdung_js_1.LoiUngDung('Tai khoan khong thuoc vai tro da chon', 403);
-    }
-    const matKhauDung = await bcryptjs_1.default.compare(duLieu.matKhau, nguoiDung.matKhau);
-    if (!matKhauDung) {
+    if (!await bcryptjs_1.default.compare(duLieu.matKhau, nguoiDung.matKhau))
         throw new loiungdung_js_1.LoiUngDung('Email hoac mat khau khong dung', 401);
-    }
     const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
-    return {
-        ...taoToken(nguoiDungCongKhai),
-        nguoiDung: nguoiDungCongKhai,
-    };
+    return { ...taoToken(nguoiDungCongKhai), nguoiDung: nguoiDungCongKhai };
 }
 async function lamMoiToken(duLieu) {
     let payload;
@@ -87,30 +78,24 @@ async function lamMoiToken(duLieu) {
     catch {
         throw new loiungdung_js_1.LoiUngDung('Refresh token khong hop le hoac da het han', 401);
     }
-    if (payload.loai !== 'refresh') {
+    if (payload.loai !== 'refresh')
         throw new loiungdung_js_1.LoiUngDung('Refresh token khong hop le', 401);
-    }
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(payload.sub);
-    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: payload.sub } });
+    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong')
         throw new loiungdung_js_1.LoiUngDung('Tai khoan khong con hieu luc', 401);
-    }
     const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
-    return {
-        ...taoToken(nguoiDungCongKhai),
-        nguoiDung: nguoiDungCongKhai,
-    };
+    return { ...taoToken(nguoiDungCongKhai), nguoiDung: nguoiDungCongKhai };
 }
 async function quenMatKhau(duLieu) {
     const email = duLieu.email.toLowerCase().trim();
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({ email });
-    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { email } });
+    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong')
         return { ok: true };
-    }
     const token = node_crypto_1.default.randomBytes(32).toString('hex');
     const hetHan = new Date(Date.now() + 30 * 60 * 1000);
-    await nguoidung_mohinh_js_1.NguoiDung.findByIdAndUpdate(nguoiDung._id, {
-        maDatLaiMatKhauHash: hashToken(token),
-        maDatLaiMatKhauHetHan: hetHan,
+    await nguoidung_mohinh_js_1.NguoiDung.update({
+        where: { id: nguoiDung.id },
+        data: { maDatLaiMatKhauHash: hashToken(token), maDatLaiMatKhauHetHan: hetHan },
     });
     const link = taoLinkDatLaiMatKhau(token);
     await (0, email_js_1.guiEmail)({
@@ -129,34 +114,34 @@ async function quenMatKhau(duLieu) {
     return { ok: true };
 }
 async function kiemTraTokenDatLaiMatKhau(token) {
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({
-        maDatLaiMatKhauHash: hashToken(token),
-        maDatLaiMatKhauHetHan: { $gt: new Date() },
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findFirst({
+        where: { maDatLaiMatKhauHash: hashToken(token), maDatLaiMatKhauHetHan: { gt: new Date() } },
     });
-    if (!nguoiDung) {
+    if (!nguoiDung)
         throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
-    }
     return { ok: true, email: nguoiDung.email.replace(/^(.{2}).+(@.+)$/, '$1***$2') };
 }
 async function datLaiMatKhau(duLieu) {
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOne({
-        maDatLaiMatKhauHash: hashToken(duLieu.token),
-        maDatLaiMatKhauHetHan: { $gt: new Date() },
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findFirst({
+        where: { maDatLaiMatKhauHash: hashToken(duLieu.token), maDatLaiMatKhauHetHan: { gt: new Date() } },
     });
-    if (!nguoiDung) {
+    if (!nguoiDung)
         throw new loiungdung_js_1.LoiUngDung('Token dat lai mat khau khong hop le hoac da het han', 400, 'RESET_TOKEN_INVALID');
-    }
-    await nguoidung_mohinh_js_1.NguoiDung.findByIdAndUpdate(nguoiDung._id, {
-        matKhau: await bcryptjs_1.default.hash(duLieu.matKhau, 10),
-        $unset: {
-            maDatLaiMatKhauHash: '',
-            maDatLaiMatKhauHetHan: '',
+    await nguoidung_mohinh_js_1.NguoiDung.update({
+        where: { id: nguoiDung.id },
+        data: {
+            matKhau: await bcryptjs_1.default.hash(duLieu.matKhau, 10),
+            maDatLaiMatKhauHash: null,
+            maDatLaiMatKhauHetHan: null,
         },
     });
     return { ok: true };
 }
 async function layNguoiDungTuAccessToken(authorization) {
     const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : '';
+    const cached = nguoiDungTheoToken.get(token);
+    if (cached && cached.expiresAt > Date.now())
+        return cached.nguoiDung;
     if (!token)
         throw new loiungdung_js_1.LoiUngDung('Thiếu access token', 401);
     let payload;
@@ -166,19 +151,18 @@ async function layNguoiDungTuAccessToken(authorization) {
     catch {
         throw new loiungdung_js_1.LoiUngDung('Access token khong hop le hoac da het han', 401);
     }
-    if (payload.loai && payload.loai !== 'access') {
+    if (payload.loai && payload.loai !== 'access')
         throw new loiungdung_js_1.LoiUngDung('Access token khong hop le', 401);
-    }
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(payload.sub);
-    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: payload.sub } });
+    if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong')
         throw new loiungdung_js_1.LoiUngDung('Tai khoan khong con hieu luc', 401);
-    }
-    return taoNguoiDungCongKhai(nguoiDung);
+    const congKhai = taoNguoiDungCongKhai(nguoiDung);
+    nguoiDungTheoToken.set(token, { nguoiDung: congKhai, expiresAt: Date.now() + TOKEN_CACHE_TTL_MS });
+    return congKhai;
 }
 async function xacThucGoogleCredential(credential) {
-    if (!bienmoitruong_js_1.bienMoiTruong.googleClientId) {
+    if (!bienmoitruong_js_1.bienMoiTruong.googleClientId)
         throw new loiungdung_js_1.LoiUngDung('Chua cau hinh GOOGLE_CLIENT_ID tren backend', 503);
-    }
     const phanHoi = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
     const googleUser = await phanHoi.json();
     if (!phanHoi.ok || googleUser.aud !== bienmoitruong_js_1.bienMoiTruong.googleClientId || googleUser.email_verified !== 'true') {
@@ -190,28 +174,25 @@ async function dangNhapGoogle(duLieu) {
     const googleUser = await xacThucGoogleCredential(duLieu.credential);
     const email = googleUser.email.toLowerCase().trim();
     const matKhauHeThong = await bcryptjs_1.default.hash(`google:${googleUser.sub}:${bienmoitruong_js_1.bienMoiTruong.khoaJwt}`, 10);
-    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findOneAndUpdate({ email }, {
-        $setOnInsert: {
+    const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.upsert({
+        where: { email },
+        update: {},
+        create: (0, prismaHelper_js_1.boUndefined)({
             email,
             matKhau: matKhauHeThong,
             hoTen: googleUser.name || email,
             soDienThoai: '',
             vaiTro: duLieu.vaiTro ?? 'ung_vien',
             trangThai: 'hoat_dong',
-        },
-    }, { upsert: true, returnDocument: 'after' });
-    if (nguoiDung.trangThai !== 'hoat_dong') {
+        }),
+    });
+    if (nguoiDung.trangThai !== 'hoat_dong')
         throw new loiungdung_js_1.LoiUngDung('Tai khoan khong o trang thai hoat dong', 403);
-    }
-    if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro) {
+    if (duLieu.vaiTro && nguoiDung.vaiTro !== duLieu.vaiTro)
         throw new loiungdung_js_1.LoiUngDung('Tai khoan Google nay da duoc gan vai tro khac', 403);
-    }
-    const nguoiDungCongKhai = taoNguoiDungCongKhai(nguoiDung);
+    const nguoiDungCongKhai = taoNguoiDungCongKhai((0, prismaHelper_js_1.coId)(nguoiDung));
     if (nguoiDungCongKhai.vaiTro === 'ung_vien') {
         await ungvien_dichvu_js_1.dichVuUngVien.damBaoHoSoTheoNguoiDung(nguoiDungCongKhai.id);
     }
-    return {
-        ...taoToken(nguoiDungCongKhai),
-        nguoiDung: nguoiDungCongKhai,
-    };
+    return { ...taoToken(nguoiDungCongKhai), nguoiDung: nguoiDungCongKhai };
 }

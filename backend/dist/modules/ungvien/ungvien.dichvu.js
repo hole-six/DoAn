@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuUngVien = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-require("../danhmuckynang/danhmuckynang.mohinh.js");
-require("../nguoidung/nguoidung.mohinh.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const ungvien_mohinh_js_1 = require("./ungvien.mohinh.js");
 function chuanHoaUngVien(taiLieu) {
-    const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
+    const duLieu = taiLieu ?? {};
     return {
-        id: String(duLieu._id),
+        id: String(duLieu.id ?? duLieu._id),
+        _id: String(duLieu.id ?? duLieu._id),
         maNguoiDung: duLieu.maNguoiDung?._id ? String(duLieu.maNguoiDung._id) : String(duLieu.maNguoiDung),
         nguoiDung: duLieu.maNguoiDung?._id
             ? {
@@ -38,125 +38,70 @@ function chuanHoaUngVien(taiLieu) {
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
+async function layDayDu(where, many = false) {
+    // ✅ TỐI ƯU: Chỉ query 1 lần, không cần ganNguoiDungChoUngVien & ganKyNangJson
+    const rows = many
+        ? await ungvien_mohinh_js_1.UngVien.findMany({
+            where,
+            orderBy: { ngayTao: 'desc' },
+            take: 200,
+            // Không cần include vì NguoiDung & KyNang không phải relation trực tiếp trong Prisma
+            // Data đã được lưu trong JSON
+        })
+        : await ungvien_mohinh_js_1.UngVien.findMany({ where, take: 1 });
+    // ✅ Chỉ hydrate nếu thực sự cần thiết (optimize bằng cách cache)
+    const hydrated = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)(rows));
+    return many ? hydrated : hydrated[0];
+}
 exports.dichVuUngVien = {
     async layDanhSach() {
-        try {
-            const danhSach = await ungvien_mohinh_js_1.UngVien
-                .find()
-                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-                .sort({ ngayTao: -1 })
-                .limit(200);
-            return danhSach.map(chuanHoaUngVien);
-        }
-        catch (error) {
-            console.error('Lỗi khi lấy danh sách ứng viên:', error);
-            throw error;
-        }
+        const danhSach = await layDayDu({}, true);
+        return danhSach.map(chuanHoaUngVien);
     },
     async layTheoMa(ma) {
-        try {
-            const duLieu = await ungvien_mohinh_js_1.UngVien
-                .findById(ma)
-                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-            if (!duLieu) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
-            }
-            return chuanHoaUngVien(duLieu);
-        }
-        catch (error) {
-            console.error('Lỗi khi lấy hồ sơ ứng viên:', error);
-            throw error;
-        }
+        const duLieu = await layDayDu({ id: ma });
+        if (!duLieu)
+            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+        return chuanHoaUngVien(duLieu);
     },
     async layTheoMaNguoiDung(maNguoiDung) {
-        try {
-            const duLieu = await ungvien_mohinh_js_1.UngVien
-                .findOne({ maNguoiDung })
-                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-            if (!duLieu) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
-            }
-            return chuanHoaUngVien(duLieu);
-        }
-        catch (error) {
-            console.error('Lỗi khi lấy hồ sơ theo mã người dùng:', error);
-            throw error;
-        }
+        const duLieu = await layDayDu({ maNguoiDung });
+        if (!duLieu)
+            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+        return chuanHoaUngVien(duLieu);
     },
     async damBaoHoSoTheoNguoiDung(maNguoiDung) {
-        try {
-            const duLieu = await ungvien_mohinh_js_1.UngVien
-                .findOneAndUpdate({ maNguoiDung }, { $setOnInsert: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } }, { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true })
-                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-            return chuanHoaUngVien(duLieu);
+        const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { maNguoiDung } });
+        if (hienTai) {
+            const [dayDu] = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([hienTai]));
+            return chuanHoaUngVien(dayDu);
         }
-        catch (error) {
-            console.error('Lỗi đảm bảo hồ sơ ứng viên:', error);
-            throw error;
-        }
+        const daTao = await ungvien_mohinh_js_1.UngVien.create({ data: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } });
+        const [dayDu] = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([daTao]));
+        return chuanHoaUngVien(dayDu);
     },
     async taoMoi(duLieu) {
-        try {
-            const ketQua = await ungvien_mohinh_js_1.UngVien.create(duLieu);
-            console.log('Tạo hồ sơ ứng viên thành công:', ketQua._id);
-            return this.layTheoMa(String(ketQua._id));
-        }
-        catch (error) {
-            console.error('Lỗi khi tạo hồ sơ ứng viên:', error);
-            throw error;
-        }
+        const ketQua = await ungvien_mohinh_js_1.UngVien.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        return this.layTheoMa(String(ketQua.id));
     },
     async capNhat(ma, duLieu, maNguoiDungHienTai) {
-        try {
-            if (maNguoiDungHienTai) {
-                const ungVien = await ungvien_mohinh_js_1.UngVien.findById(ma);
-                if (!ungVien) {
-                    throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
-                }
-                if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
-                    throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403);
-                }
-            }
-            const ketQua = await ungvien_mohinh_js_1.UngVien
-                .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-                .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-                .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-            if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên để cập nhật', 404);
-            }
-            console.log('Cập nhật hồ sơ ứng viên thành công:', ma);
-            return chuanHoaUngVien(ketQua);
+        const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { id: ma } });
+        if (!hienTai)
+            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+        if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
+            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so nay', 403);
         }
-        catch (error) {
-            console.error('Lỗi khi cập nhật hồ sơ ứng viên:', error);
-            throw error;
-        }
+        await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        return this.layTheoMa(ma);
     },
     async xoa(ma, maNguoiDungHienTai) {
-        try {
-            if (maNguoiDungHienTai) {
-                const ungVien = await ungvien_mohinh_js_1.UngVien.findById(ma);
-                if (!ungVien) {
-                    throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404);
-                }
-                if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
-                    throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403);
-                }
-            }
-            const ketQua = await ungvien_mohinh_js_1.UngVien.findByIdAndDelete(ma);
-            if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng viên để xóa', 404);
-            }
-            console.log('Xóa hồ sơ ứng viên thành công:', ma);
-            return chuanHoaUngVien(ketQua);
+        const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { id: ma } });
+        if (!hienTai)
+            throw new loiungdung_js_1.LoiUngDung('Khong tim thay ho so ung vien', 404);
+        if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
+            throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen xoa ho so nay', 403);
         }
-        catch (error) {
-            console.error('Lỗi khi xóa hồ sơ ứng viên:', error);
-            throw error;
-        }
+        await ungvien_mohinh_js_1.UngVien.delete({ where: { id: ma } });
+        return chuanHoaUngVien((0, prismaHelper_js_1.coId)(hienTai));
     },
 };

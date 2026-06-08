@@ -12,55 +12,50 @@ skinparam activity {
 }
 start
 :Ứng viên đăng nhập vào hệ thống;
-:Mở chi tiết TinTuyenDung;
-:Hệ thống tải TinTuyenDung, NhaTuyenDung và trạng thái ứng tuyển;
+:Mở chi tiết TinTuyểnDụng;
+:Hệ thống tải TinTuyểnDụng, NhàTuyểnDụng và trạng thái ứng tuyển;
 if (Tin đang mở?) then (Đúng)
-  if (Ứng viên đã có UngVien?) then (Có)
+  if (Ứng viên đã có ỨngViên?) then (Có)
     :Nhấn nút "Ứng tuyển ngay";
-    :Hệ thống tải HoSoNangLuc của ứng viên;
+    :Hệ thống tải HồSơNăngLực của ứng viên;
     if (Đã từng ứng tuyển tin này và chưa rút?) then (Có)
       :Hiển thị thông báo đã ứng tuyển tin này;
-      :Kết thúc nhánh;
     else (Chưa)
       :Mở form ứng tuyển;
-    endif
-    fork
-      :Chọn CV có sẵn nếu có;
-    fork again
-      :Upload CV PDF mới nếu muốn hoặc chưa có CV;
-    fork again
-      :Nhập thư xin việc nếu cần;
-    end fork
-    if (Muốn thoát?) then (Có)
-      :Nhấn nút "Hủy" hoặc đóng form;
-      :Kết thúc nhánh;
-    else (Không)
-      :Nhấn nút "Gửi ứng tuyển";
-    endif
-    if (Upload CV PDF mới?) then (Có)
-      :Upload file qua HoSoNangLuc/upload-file;
-      :Tạo HoSoNangLuc loại file_upload;
-    else (Không)
-      :Dùng HoSoNangLuc đã chọn;
-    endif
-    :Hệ thống kiểm tra CV hợp lệ;
-    if (Có HoSoNangLuc hợp lệ?) then (Có)
-      :Tạo HoSoUngTuyen trạng thái da_nop;
-      :Ghi LichSuHoSoUngTuyen;
-      :Gửi ThongBao hồ sơ mới cho nhà tuyển dụng;
-      :Hiển thị ứng tuyển thành công;
-      :Kết thúc nhánh;
-    else (Không)
-      :Hiển thị lỗi cần chọn hoặc upload CV;
-      :Kết thúc nhánh;
+      fork
+        :Chọn CV có sẵn nếu có;
+      fork again
+        :Upload CV PDF mới nếu muốn hoặc chưa có CV;
+      fork again
+        :Nhập thư xin việc nếu cần;
+      end fork
+      if (Muốn thoát?) then (Có)
+        :Nhấn nút "Hủy" hoặc đóng form;
+      else (Không)
+        :Nhấn nút "Gửi ứng tuyển";
+        if (Tải lên CV PDF mới?) then (Có)
+          :Tải file qua chức năng tải hồ sơ năng lực;
+          :Tạo HồSơNăngLực loại file tải lên;
+        else (Không)
+          :Dùng HồSơNăngLực đã chọn;
+        endif
+        :Hệ thống kiểm tra CV hợp lệ;
+        if (Có HồSơNăngLực hợp lệ?) then (Có)
+          :Tạo HồSơỨngTuyển trạng thái đã nộp;
+          :Ghi LịchSửHồSơỨngTuyển;
+          :Gửi ThôngBáo hồ sơ mới cho nhà tuyển dụng;
+          :Hiển thị ứng tuyển thành công;
+        else (Không)
+          :Hiển thị lỗi cần chọn hoặc tải lên CV;
+        endif
+      endif
     endif
   else (Không)
     :Hiển thị lỗi cần hoàn thiện hồ sơ ứng viên;
     :Điều hướng tới trang hồ sơ ứng viên;
-    :Kết thúc nhánh;
   endif
 else (Sai)
   :Hiển thị lỗi tin đã đóng, hết hạn hoặc không khả dụng;
-  stop
 endif
+stop
 @enduml

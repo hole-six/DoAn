@@ -13,33 +13,30 @@ skinparam activity {
 start
 :Quản trị viên đăng nhập;
 :Mở trang quản lý công ty;
-:Hệ thống tải danh sách NhaTuyenDung;
+:Hệ thống tải danh sách NhàTuyểnDụng;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị công ty, ngành, trạng thái và ngày tạo;
   :Chọn một hồ sơ công ty;
   if (Chọn thao tác?) then (Duyệt)
     :Nhấn nút "Duyệt" hoặc "Duyệt lại";
     :Xác nhận duyệt công ty;
-    :Hệ thống cập nhật NhaTuyenDung.trangThaiDuyet = da_duyet;
-    :Gửi ThongBao kết quả duyệt cho nhà tuyển dụng;
+    :Hệ thống cập nhật trạng thái duyệt của NhàTuyểnDụng thành đã duyệt;
+    :Gửi ThôngBáo kết quả duyệt cho nhà tuyển dụng;
     :Tải lại danh sách công ty;
-    :Kết thúc nhánh;
   elseif (Chọn từ chối?) then (Từ chối)
     :Nhấn nút "Từ chối";
     :Xác nhận từ chối công ty;
-    :Hệ thống cập nhật NhaTuyenDung.trangThaiDuyet = tu_choi;
-    :Gửi ThongBao kết quả từ chối cho nhà tuyển dụng;
+    :Hệ thống cập nhật trạng thái duyệt của NhàTuyểnDụng thành từ chối;
+    :Gửi ThôngBáo kết quả từ chối cho nhà tuyển dụng;
     :Tải lại danh sách công ty;
-    :Kết thúc nhánh;
   else (Xóa)
     :Nhấn nút "Xóa";
     :Xác nhận xóa hồ sơ công ty;
-    :Hệ thống xóa NhaTuyenDung nếu được phép;
+    :Hệ thống xóa NhàTuyểnDụng nếu được phép;
     :Tải lại danh sách công ty;
-    :Kết thúc nhánh;
   endif
 else (Sai)
   :Hiển thị thông báo không tải được dữ liệu công ty;
-  stop
 endif
+stop
 @enduml

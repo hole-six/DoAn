@@ -14,11 +14,11 @@ start
 :Ứng viên đăng nhập;
 :Mở trang hồ sơ ứng tuyển;
 fork
-  :Hệ thống tải HoSoUngTuyen của ứng viên;
+  :Hệ thống tải HồSơỨngTuyển của ứng viên;
 fork again
-  :Hệ thống tải TinTuyenDung liên quan;
+  :Hệ thống tải TinTuyểnDụng liên quan;
 fork again
-  :Hệ thống tải LichPhongVan liên quan;
+  :Hệ thống tải LịchPhỏngVấn liên quan;
 end fork
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách hồ sơ ứng tuyển;
@@ -30,7 +30,7 @@ if (Tải dữ liệu thành công?) then (Đúng)
     :Sắp xếp theo ngày nộp;
   end fork
   if (Chọn một hồ sơ?) then (Có)
-    :Mở chi tiết HoSoUngTuyen;
+    :Mở chi tiết HồSơỨngTuyển;
     if (Trạng thái cho phép rút?) then (Có)
       if (Nhấn "Rút hồ sơ"?) then (Có)
         :Nhập lý do nếu có;
@@ -45,9 +45,8 @@ if (Tải dữ liệu thành công?) then (Đúng)
   else (Không)
     :Tiếp tục xem danh sách;
   endif
-  :Kết thúc nhánh;
 else (Sai)
   :Hiển thị thông báo không tải được hồ sơ ứng tuyển;
-  stop
 endif
+stop
 @enduml

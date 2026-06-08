@@ -6,11 +6,18 @@
 
 Tao file `backend/.env` tu `backend/.env.example`.
 
+Tao database PostgreSQL local:
+
+```bash
+createdb da_nang_it_jobs
+```
+
 Gia tri mac dinh local:
 
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/da_nang_it_jobs
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/da_nang_it_jobs?schema=public
 FRONTEND_URL=http://localhost:5173
 CLIENT_URL=http://localhost:5173
 CORS_ORIGINS=http://localhost:5173,http://localhost:5174
@@ -37,6 +44,15 @@ npm run dev
 
 Tao file `.env.production` o thu muc root du an tren VPS tu `.env.production.example`.
 
+Tao database va user PostgreSQL tren VPS:
+
+```bash
+sudo -u postgres psql
+CREATE USER itjob WITH PASSWORD 'doi-mat-khau-manh';
+CREATE DATABASE da_nang_it_jobs OWNER itjob;
+\q
+```
+
 Bat buoc doi:
 
 ```env
@@ -53,6 +69,7 @@ GOOGLE_CALLBACK_URL=https://effortit.site/api/auth/google/callback
 Them cac khoa rieng:
 
 ```env
+DATABASE_URL=postgresql://itjob:...@127.0.0.1:5432/da_nang_it_jobs?schema=public
 JWT_SECRET=...
 JWT_REFRESH_SECRET=...
 GEMINI_API_KEY=...
@@ -63,11 +80,21 @@ SMTP_FROM=Effort Job <no-reply@effortit.site>
 DEPLOY_WEBHOOK_SECRET=...
 ```
 
+Neu dung Neon PostgreSQL, tao lai password/connection string moi tren Neon truoc khi deploy neu chuoi cu da tung bi gui qua chat. Dat chuoi moi vao `.env.production` tren VPS, khong commit vao repo:
+
+```env
+DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require
+```
+
+Khong chay `prisma db push --accept-data-loss` tren database production. Neu Neon da co schema/du lieu cu va `db:push` bao xung dot, tao branch/database Neon moi, push schema vao database sach, migrate MongoDB sang do, smoke test xong moi doi env production.
+
 ## 3. Build thu cong tren VPS
 
 ```bash
 npm --prefix backend ci
 npm --prefix frontend ci
+npm --prefix backend run prisma:generate
+npm --prefix backend run db:push
 npm --prefix backend run build
 export NODE_OPTIONS=--max-old-space-size=4096
 npm --prefix frontend run build
@@ -77,6 +104,12 @@ pm2 save
 ```
 
 Backend tu doc `.env.production`, `.env`, `backend/.env.production`, hoac `backend/.env`.
+
+Neu server dang co du lieu MongoDB cu, chay mot lan sau khi `db:push`:
+
+```bash
+npm --prefix backend run migrate:mongo-postgres
+```
 
 ## 4. Nginx
 

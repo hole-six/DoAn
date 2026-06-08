@@ -17,23 +17,23 @@ const lichphongvan_mohinh_js_1 = require("./lichphongvan.mohinh.js");
 async function kiemTraQuyenLichPhongVan(yeuCau, _phanHoi, tiepTheo) {
     const nguoiDung = yeuCau.nguoiDung;
     const ma = String(yeuCau.params.ma ?? '');
-    const lich = await lichphongvan_mohinh_js_1.LichPhongVan.findById(ma).populate('maHoSoUngTuyen');
+    const lich = await lichphongvan_mohinh_js_1.LichPhongVan.findUnique({ where: { id: ma } });
     if (!lich)
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn', 404, 'NOT_FOUND');
-    const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(lich.maHoSoUngTuyen?._id ?? lich.maHoSoUngTuyen).select('maUngVien maTinTuyenDung');
+    const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findUnique({ where: { id: lich.maHoSoUngTuyen }, select: { maUngVien: true, maTinTuyenDung: true } });
     if (!hoSo)
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND');
     const vaiTro = String(nguoiDung.vaiTro ?? '');
     if (vaiTro === 'ung_vien') {
-        const ungVien = await ungvien_mohinh_js_1.UngVien.findOne({ maNguoiDung: nguoiDung.id }).select('_id');
-        if (!ungVien || String(ungVien._id) !== String(hoSo.maUngVien)) {
+        const ungVien = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
+        if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật lịch phỏng vấn này', 403, 'FORBIDDEN');
         }
     }
     if (vaiTro === 'nha_tuyen_dung') {
-        const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung: nguoiDung.id }).select('_id');
-        const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(hoSo.maTinTuyenDung).select('maNhaTuyenDung');
-        if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+        const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
+        const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } });
+        if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật lịch phỏng vấn này', 403, 'FORBIDDEN');
         }
     }

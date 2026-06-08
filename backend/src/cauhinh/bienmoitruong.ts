@@ -14,7 +14,6 @@ const cacDuongDanMoiTruong = [
 for (const duongDan of cacDuongDanMoiTruong) {
   if (fs.existsSync(duongDan)) {
     dotenv.config({ path: duongDan })
-    break
   }
 }
 
@@ -27,7 +26,7 @@ function tachDanhSachMoiTruong(value?: string) {
 
 export const bienMoiTruong = {
   cong: Number(process.env.PORT ?? 5000),
-  chuoiKetNoiMongo: process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/da_nang_it_jobs',
+  chuoiKetNoiPostgres: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:5432/da_nang_it_jobs?schema=public',
   khoaJwt: process.env.JWT_SECRET ?? 'development-secret',
   khoaJwtLamMoi: process.env.JWT_REFRESH_SECRET ?? `${process.env.JWT_SECRET ?? 'development-secret'}-refresh`,
   duongDanFrontend: process.env.FRONTEND_URL ?? process.env.CLIENT_URL ?? 'http://localhost:5173',

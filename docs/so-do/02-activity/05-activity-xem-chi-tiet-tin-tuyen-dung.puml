@@ -12,25 +12,25 @@ skinparam activity {
 }
 start
 :Khách vãng lai hoặc ứng viên chọn một tin tuyển dụng;
-:Hệ thống tải TinTuyenDung theo mã;
+:Hệ thống tải TinTuyểnDụng theo mã;
 if (Tin tồn tại?) then (Có)
   fork
-    :Tải NhaTuyenDung liên quan;
+    :Tải NhàTuyểnDụng liên quan;
   fork again
-    :Tải danh sách TinTuyenDung để gợi ý việc tương tự;
+    :Tải danh sách TinTuyểnDụng để gợi ý việc tương tự;
   end fork
   :Hiển thị mô tả, yêu cầu, quyền lợi, mức lương, địa điểm và kỹ năng của tin;
   if (Người dùng đăng nhập ứng viên?) then (Có)
     fork
-      :Kiểm tra HoSoUngTuyen đã nộp;
+      :Kiểm tra HồSơỨngTuyển đã nộp;
     fork again
-      :Kiểm tra ViecLamDaLuu;
+      :Kiểm tra ViệcLàmĐãLưu;
     fork again
-      :Tải HoSoNangLuc để ứng tuyển;
+      :Tải HồSơNăngLực để ứng tuyển;
     end fork
     if (Chọn thao tác?) then (Ứng tuyển)
       :Mở form ứng tuyển;
-      :Chọn CV có sẵn hoặc upload CV PDF mới;
+      :Chọn CV có sẵn hoặc tải lên CV PDF mới;
       :Nhập thư xin việc nếu có;
     elseif (Chọn lưu việc?) then (Lưu việc)
       :Gọi chức năng lưu hoặc bỏ lưu việc làm;
@@ -44,9 +44,8 @@ if (Tin tồn tại?) then (Có)
       :Tiếp tục xem thông tin tin tuyển dụng;
     endif
   endif
-  :Kết thúc nhánh;
 else (Không)
   :Hiển thị thông báo không tìm thấy tin tuyển dụng;
-  stop
 endif
+stop
 @enduml

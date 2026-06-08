@@ -2,13 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuTinTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
-require("../nhatuyendung/nhatuyendung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
 async function layAdminIds() {
-    const admins = await nguoidung_mohinh_js_1.NguoiDung.find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id');
-    return admins.map((item) => String(item._id));
+    const admins = await nguoidung_mohinh_js_1.NguoiDung.findMany({
+        where: { vaiTro: 'admin', trangThai: 'hoat_dong' },
+        select: { id: true },
+    });
+    return admins.map(item => item.id);
 }
 async function guiThongBaoAdminTinCanDuyet(tin) {
     const adminIds = await layAdminIds();
@@ -20,9 +23,10 @@ async function guiThongBaoAdminTinCanDuyet(tin) {
     })));
 }
 function chuanHoaTin(taiLieu) {
-    const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
+    const duLieu = taiLieu ?? {};
     return {
-        id: String(duLieu._id),
+        id: String(duLieu.id ?? duLieu._id),
+        _id: String(duLieu.id ?? duLieu._id),
         maNhaTuyenDung: duLieu.maNhaTuyenDung?._id ? String(duLieu.maNhaTuyenDung._id) : String(duLieu.maNhaTuyenDung),
         nhaTuyenDung: duLieu.maNhaTuyenDung?._id
             ? {
@@ -58,50 +62,43 @@ function chuanHoaTin(taiLieu) {
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
+async function layDayDu(where, many = false) {
+    const rows = many
+        ? await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 300 })
+        : await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({ where, take: 1 });
+    const hydrated = await (0, prismaHelper_js_1.ganKyNangVaCongTyChoTin)(rows);
+    return many ? hydrated : hydrated[0];
+}
 exports.dichVuTinTuyenDung = {
     async layDanhSach() {
-        const danhSach = await tintuyendung_mohinh_js_1.TinTuyenDung
-            .find()
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-            .sort({ ngayTao: -1 })
-            .limit(300);
+        const danhSach = await layDayDu({}, true);
         return danhSach.map(chuanHoaTin);
     },
     async layTheoMa(ma) {
-        const duLieu = await tintuyendung_mohinh_js_1.TinTuyenDung
-            .findById(ma)
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
+        const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng', 404);
         return chuanHoaTin(duLieu);
     },
     async taoMoi(duLieu) {
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create(duLieu);
-        const dayDu = await tintuyendung_mohinh_js_1.TinTuyenDung
-            .findById(ketQua._id)
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-        if (dayDu?.trangThai === 'cho_duyet') {
+        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const dayDu = await layDayDu({ id: ketQua.id });
+        if (dayDu?.trangThai === 'cho_duyet')
             await guiThongBaoAdminTinCanDuyet(dayDu);
-        }
         return chuanHoaTin(dayDu);
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
-        const hienTai = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(ma).populate('maNhaTuyenDung', 'tenCongTy maNguoiDung');
+        const hienTai = await layDayDu({ id: ma });
+        if (!hienTai)
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
         const duLieuCapNhat = {
             ...duLieu,
             ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
         };
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
-            .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-        if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
-        if (hienTai && hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
+        await tintuyendung_mohinh_js_1.TinTuyenDung.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieuCapNhat) });
+        const ketQua = await layDayDu({ id: ma });
+        if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
             await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetTin)({
                 maNguoiDung: String(ketQua.maNhaTuyenDung?.maNguoiDung ?? hienTai.maNhaTuyenDung?.maNguoiDung),
                 tieuDeTin: ketQua.tieuDe,
@@ -112,12 +109,10 @@ exports.dichVuTinTuyenDung = {
         return chuanHoaTin(ketQua);
     },
     async xoa(ma) {
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung
-            .findByIdAndDelete(ma)
-            .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-            .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang');
-        if (!ketQua)
+        const hienTai = await layDayDu({ id: ma });
+        if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404);
-        return chuanHoaTin(ketQua);
+        await tintuyendung_mohinh_js_1.TinTuyenDung.delete({ where: { id: ma } });
+        return chuanHoaTin((0, prismaHelper_js_1.coId)(hienTai));
     },
 };

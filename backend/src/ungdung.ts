@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import path from 'node:path'
 import { apiTong } from './dinhtuyen/apitong.js'
+import { cacheGetNgan, xoaCacheSauGhi } from './dungchung/cacheNhe.js'
 import { xuLyLoi } from './dungchung/xulyloi.js'
 
 export function taoUngDung() {
@@ -13,6 +14,8 @@ export function taoUngDung() {
   ungDung.use(cors())
   ungDung.use(morgan('dev'))
   ungDung.use(express.json({ limit: '10mb' }))
+  ungDung.use(cacheGetNgan())
+  ungDung.use(xoaCacheSauGhi())
   ungDung.use(
     '/uploads',
     express.static(path.join(process.cwd(), 'uploads'), {

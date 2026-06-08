@@ -1,0 +1,333 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NguoiDung {
+  id                       String   @id @default(uuid()) @map("_id")
+  email                    String   @unique
+  matKhau                  String
+  hoTen                    String
+  soDienThoai              String?
+  vaiTro                   String   @default("ung_vien")
+  trangThai                String   @default("hoat_dong")
+  maDatLaiMatKhauHash      String?
+  maDatLaiMatKhauHetHan    DateTime?
+  ngayTao                  DateTime @default(now())
+  ngayCapNhat              DateTime @updatedAt
+
+  @@index([vaiTro])
+  @@index([trangThai])
+  @@index([ngayTao])
+  @@map("nguoi_dung")
+}
+
+model UngVien {
+  id                 String   @id @default(uuid()) @map("_id")
+  maNguoiDung        String   @unique
+  ngaySinh           DateTime?
+  gioiTinh           String?
+  diaChi             String?
+  anhDaiDien         String?
+  tomTat             String?
+  kinhNghiem         Float    @default(0)
+  viTriMongMuon      String?
+  mucLuongMongMuon   Float?
+  kyNang             Json     @default("[]")
+  portfolio          Json     @default("[]")
+  ngayTao            DateTime @default(now())
+  ngayCapNhat        DateTime @updatedAt
+
+  @@map("ung_vien")
+}
+
+model NhaTuyenDung {
+  id               String   @id @default(uuid()) @map("_id")
+  maNguoiDung      String   @unique
+  tenCongTy        String
+  maSoThue         String?
+  moTa             String?
+  diaChi           String?  @default("Da Nang")
+  website          String?
+  logo             String?
+  quyMo            Int?
+  nganh            String?  @default("Cong nghe thong tin")
+  trangThaiDuyet   String   @default("cho_duyet")
+  lyDoTuChoi       String?
+  ngayDuyet        DateTime?
+  ngayTao          DateTime @default(now())
+  ngayCapNhat      DateTime @updatedAt
+
+  @@index([trangThaiDuyet])
+  @@index([ngayTao])
+  @@map("nha_tuyen_dung")
+}
+
+model DanhMucKyNang {
+  id            String   @id @default(uuid()) @map("_id")
+  tenKyNang     String   @unique
+  loaiKyNang    String
+  ngayTao       DateTime @default(now())
+  ngayCapNhat   DateTime @updatedAt
+
+  @@map("danh_muc_ky_nang")
+}
+
+model TinTuyenDung {
+  id                  String   @id @default(uuid()) @map("_id")
+  maNhaTuyenDung      String
+  tieuDe              String
+  yeuCauKinhNghiem    String?
+  diaChi              String?  @default("Da Nang")
+  luongMin            Float?
+  luongMax            Float?
+  loaiHinh            String   @default("toan_thoi_gian")
+  capBac              String   @default("junior")
+  anhDaiDien          String?
+  hanNop              DateTime?
+  soLuong             Int      @default(1)
+  moTa                String
+  yeuCau              String
+  quyenLoi            String?
+  luotXem             Int      @default(0)
+  trangThai           String   @default("cho_duyet")
+  ngayDang            DateTime?
+  kyNang              Json     @default("[]")
+  ngayTao             DateTime @default(now())
+  ngayCapNhat         DateTime @updatedAt
+
+  @@index([maNhaTuyenDung])
+  @@index([trangThai])
+  @@index([trangThai, hanNop])
+  @@index([trangThai, ngayTao])
+  @@index([ngayDang])
+  @@map("tin_tuyen_dung")
+}
+
+model ViecLamDaLuu {
+  id                String   @id @default(uuid()) @map("_id")
+  maNguoiDung       String
+  maTinTuyenDung    String
+  ngayLuu           DateTime @default(now())
+  ngayTao           DateTime @default(now())
+  ngayCapNhat       DateTime @updatedAt
+
+  @@unique([maNguoiDung, maTinTuyenDung])
+  @@index([maNguoiDung])
+  @@index([maTinTuyenDung])
+  @@map("viec_lam_da_luu")
+}
+
+model HoSoNangLuc {
+  id                  String   @id @default(uuid()) @map("_id")
+  maUngVien           String
+  tieuDe              String
+  hocVan              Json     @default("[]")
+  kinhNghiemLam       Json     @default("[]")
+  chungChi            Json     @default("[]")
+  duAn                Json     @default("[]")
+  hoTenHienThi        String?
+  chucDanh            String?
+  soDienThoai         String?
+  emailLienHe         String?
+  facebook            String?
+  github              String?
+  portfolioUrl        String?
+  diaDiem             String?
+  tomTatKinhNghiem    Json     @default("[]")
+  kyNangMem           Json     @default("[]")
+  kyNangLapTrinh      Json     @default("[]")
+  baiVietKyThuat      Json     @default("[]")
+  duAnChiTiet         Json     @default("[]")
+  fileCvTen           String?
+  fileCvLoai          String?
+  fileCvData          String?
+  fileCvText          String?
+  fileCvPath          String?
+  fileCvTextStatus    String   @default("empty")
+  fileCvTextError     String?
+  loaiHoSo            String   @default("builder")
+  anhDaiDien          String?
+  templateCv          String   @default("classic-blue")
+  mauChinh            String   @default("#2563eb")
+  mauPhu              String   @default("#0f172a")
+  font                String   @default("Inter")
+  markdownGoc         String?
+  ghiChuAi            String?
+  cvChinh             Boolean  @default(false)
+  congKhai            Boolean  @default(true)
+  ngayTao             DateTime @default(now())
+  ngayCapNhat         DateTime @updatedAt
+
+  @@index([maUngVien])
+  @@map("ho_so_nang_luc")
+}
+
+model HoSoUngTuyen {
+  id                String   @id @default(uuid()) @map("_id")
+  maUngVien         String
+  maTinTuyenDung    String
+  maHoSoNangLuc     String?
+  thuXinViec        String?
+  diemKhopKyNang    Float    @default(0)
+  trangThai         String   @default("da_nop")
+  ngayNop           DateTime @default(now())
+  ngayTao           DateTime @default(now())
+  ngayCapNhat       DateTime @updatedAt
+
+  @@unique([maUngVien, maTinTuyenDung])
+  @@index([maUngVien])
+  @@index([maTinTuyenDung])
+  @@index([trangThai])
+  @@index([trangThai, ngayNop])
+  @@map("ho_so_ung_tuyen")
+}
+
+model LichSuHoSoUngTuyen {
+  id                String   @id @default(uuid()) @map("_id")
+  maHoSoUngTuyen    String
+  trangThaiCu       String?
+  trangThaiMoi      String
+  ghiChu            String?
+  maNguoiDung       String?
+  thoiGian          DateTime @default(now())
+  ngayTao           DateTime @default(now())
+  ngayCapNhat       DateTime @updatedAt
+
+  @@index([maHoSoUngTuyen])
+  @@map("lich_su_ho_so_ung_tuyen")
+}
+
+model LichPhongVan {
+  id                  String   @id @default(uuid()) @map("_id")
+  maHoSoUngTuyen      String   @unique
+  thoiGianBatDau      DateTime
+  thoiGianKetThuc     DateTime?
+  diaChi              String?
+  hinhThuc            String   @default("online")
+  linkHop             String?
+  ghiChu              String?
+  trangThai           String   @default("da_len_lich")
+  ketQua              String   @default("cho_ket_qua")
+  ngayTao             DateTime @default(now())
+  ngayCapNhat         DateTime @updatedAt
+
+  @@index([thoiGianBatDau])
+  @@index([trangThai])
+  @@index([ketQua])
+  @@map("lich_phong_van")
+}
+
+model DanhGiaCongTy {
+  id                String   @id @default(uuid()) @map("_id")
+  maUngVien         String
+  maNhaTuyenDung    String
+  maHoSoUngTuyen    String?  @unique
+  diem              Int
+  noiDung           String
+  anDanh            Boolean  @default(false)
+  daDuyet           Boolean  @default(false)
+  ngayTao           DateTime @default(now())
+  ngayCapNhat       DateTime @updatedAt
+
+  @@index([maNhaTuyenDung])
+  @@index([maUngVien])
+  @@index([daDuyet])
+  @@index([ngayTao])
+  @@map("danh_gia_cong_ty")
+}
+
+model ThongBao {
+  id                  String   @id @default(uuid()) @map("_id")
+  maNguoiDung         String
+  loai                String   @default("he_thong")
+  tieuDe              String
+  noiDung             String
+  lienKet             String?
+  maHoSoUngTuyen      String?
+  maLichPhongVan      String?
+  maTinTuyenDung      String?
+  daDoc               Boolean  @default(false)
+  daGui               Boolean  @default(false)
+  mucDoUuTien         String   @default("trung_binh")
+  hanhDong            Json     @default("[]")
+  icon                String?
+  mauSac              String?
+  hetHan              DateTime?
+  ngayTao             DateTime @default(now())
+  ngayCapNhat         DateTime @updatedAt
+
+  @@index([maNguoiDung, daDoc, ngayTao])
+  @@index([hetHan])
+  @@map("thong_bao")
+}
+
+model CuocTroChuyen {
+  id                         String   @id @default(uuid()) @map("_id")
+  nguoiThamGia               Json     @default("[]")
+  loai                       String   @default("ung_vien_nha_tuyen_dung")
+  tenNhom                    String?
+  moTaNhom                   String?
+  anhNhom                    String?
+  quanTriNhom                Json     @default("[]")
+  maHoSoUngTuyen             String?
+  maTinTuyenDung             String?
+  maHoSoUngTuyenGanNhat      String?
+  maTinTuyenDungGanNhat      String?
+  contextSummary             Json?
+  tinNhanCuoiCung            Json?
+  soChuaDoc                  Json     @default("{}")
+  daLuuTru                   Boolean  @default(false)
+  thoiGianLuuTru             DateTime?
+  ngayTao                    DateTime @default(now())
+  ngayCapNhat                DateTime @updatedAt
+
+  @@index([maHoSoUngTuyen])
+  @@index([maTinTuyenDung])
+  @@index([daLuuTru])
+  @@index([loai, daLuuTru])
+  @@index([ngayCapNhat])
+  @@map("cuoc_tro_chuyen")
+}
+
+model TinNhan {
+  id                    String   @id @default(uuid()) @map("_id")
+  maCuocTroChuyenId     String
+  nguoiGui              String
+  loai                  String   @default("text")
+  noiDung               String
+  tepDinhKem            Json     @default("[]")
+  traloiTinNhan         String?
+  daDuocDocBoi          Json     @default("[]")
+  phanUng               Json     @default("[]")
+  daXoa                 Boolean  @default(false)
+  daChinhSua            Boolean  @default(false)
+  thoiGianChinhSua      DateTime?
+  ngayTao               DateTime @default(now())
+  ngayCapNhat           DateTime @updatedAt
+
+  @@index([maCuocTroChuyenId, ngayTao])
+  @@index([nguoiGui])
+  @@index([daXoa])
+  @@map("tin_nhan")
+}
+
+model GoiYViecLam {
+  id              String   @id @default(uuid()) @map("_id")
+  maUngVien       String
+  maHoSoNangLuc   String?
+  ketQua          Json     @default("[]")
+  trangThai       String   @default("hoan_thanh")
+  loi             String?
+  nguon           String   @default("gemini")
+  lanQuet         DateTime @default(now())
+  ngayTao         DateTime @default(now())
+  ngayCapNhat     DateTime @updatedAt
+
+  @@index([maUngVien, lanQuet])
+  @@map("goi_y_viec_lam")
+}

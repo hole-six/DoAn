@@ -1,8 +1,12 @@
 @startuml
+scale 0.82
 skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 13
+skinparam defaultFontSize 11
 skinparam shadowing false
 skinparam linetype ortho
+skinparam nodesep 18
+skinparam ranksep 18
+skinparam Padding 2
 skinparam activity {
   BackgroundColor White
   BorderColor #222222
@@ -19,55 +23,54 @@ if (Chọn phương thức?) then (Email/mật khẩu)
     :Nhập mật khẩu;
   end fork
   if (Muốn thoát?) then (Có)
-    :Nhấn quay lại trang chủ;
-    :Kết thúc nhánh;
+    :Quay lại trang chủ;
   else (Không)
     :Nhấn nút "Đăng nhập";
-  endif
-  :Hệ thống tìm NguoiDung theo email;
-  if (Tài khoản tồn tại và hoạt động?) then (Đúng)
-    :Kiểm tra mật khẩu;
-    if (Mật khẩu đúng?) then (Đúng)
-      :Tạo accessToken và refreshToken;
+    :Tìm NgườiDùng theo email;
+    if (Tài khoản tồn tại và hoạt động?) then (Đúng)
+      :Kiểm tra mật khẩu;
+      if (Mật khẩu đúng?) then (Đúng)
+        :Xác thực email/mật khẩu thành công;
+      else (Sai)
+        :Hiển thị sai email hoặc mật khẩu;
+      endif
     else (Sai)
-      :Hiển thị sai email hoặc mật khẩu;
-      :Kết thúc nhánh;
+      :Hiển thị tài khoản không tồn tại hoặc bị khóa;
     endif
-  else (Sai)
-    :Hiển thị tài khoản không tồn tại hoặc bị khóa;
-    :Kết thúc nhánh;
   endif
 else (Google)
   :Nhấn nút đăng nhập Google;
   :Chọn tài khoản Google;
-  :Hệ thống xác thực Google credential;
-  if (Google credential hợp lệ?) then (Đúng)
-    :Tìm NguoiDung theo email Google;
+  :Xác thực thông tin đăng nhập Google;
+  if (Thông tin Google hợp lệ?) then (Đúng)
+    :Tìm NgườiDùng theo email Google;
     if (Chưa có tài khoản?) then (Có)
-      :Tạo NguoiDung vai trò ung_vien trạng thái hoạt động;
-      :Tạo hoặc đảm bảo hồ sơ UngVien;
+      :Tạo NgườiDùng vai trò ứng viên;
+      :Tạo hồ sơ ỨngViên nếu cần;
     else (Không)
-      :Dùng NguoiDung hiện có;
+      :Dùng NgườiDùng hiện có;
     endif
     if (Tài khoản đang hoạt động?) then (Đúng)
-      :Tạo accessToken và refreshToken;
+      :Xác thực Google thành công;
     else (Sai)
-      :Hiển thị tài khoản không ở trạng thái hoạt động;
-      :Kết thúc nhánh;
+      :Hiển thị tài khoản không hoạt động;
     endif
   else (Sai)
     :Hiển thị đăng nhập Google thất bại;
-    :Kết thúc nhánh;
   endif
 endif
-:Lưu phiên đăng nhập ở trình duyệt;
-:Hệ thống tự nhận vai trò từ NguoiDung;
-if (Vai trò?) then (Ứng viên)
-  :Điều hướng tới dashboard ứng viên;
-elseif (Vai trò nhà tuyển dụng?) then (Nhà tuyển dụng)
-  :Điều hướng tới dashboard nhà tuyển dụng;
-else (Quản trị viên)
-  :Điều hướng tới dashboard quản trị;
+if (Đăng nhập thành công?) then (Có)
+  :Tạo mã truy cập và mã làm mới phiên;
+  :Lưu phiên đăng nhập ở trình duyệt;
+  :Xác định vai trò người dùng;
+  if (Vai trò?) then (Ứng viên)
+    :Đi tới bảng điều khiển ứng viên;
+  elseif (Nhà tuyển dụng?) then (Nhà tuyển dụng)
+    :Đi tới bảng điều khiển nhà tuyển dụng;
+  else (Quản trị viên)
+    :Đi tới bảng điều khiển quản trị;
+  endif
+else (Không)
 endif
 stop
 @enduml

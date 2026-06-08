@@ -1,42 +1,47 @@
-﻿import type { Model } from 'mongoose'
 import { LoiUngDung } from './loiungdung.js'
+import { boUndefined, coId, coIdNhieu } from './prismaHelper.js'
 
-type MoHinhMongoose = Model<any>
+type PrismaDelegateCoBan = any
 type DuLieuCapNhat = Record<string, unknown>
 
-export function taoDichVuCoBan(moHinh: MoHinhMongoose) {
+export function taoDichVuCoBan(moHinh: PrismaDelegateCoBan) {
   return {
     async layDanhSach(boLoc: DuLieuCapNhat = {}) {
-      return moHinh.find(boLoc).sort({ ngayTao: -1 }).limit(50)
+      const duLieu = await moHinh.findMany({
+        where: boLoc,
+        orderBy: { ngayTao: 'desc' },
+        take: 50,
+      })
+      return coIdNhieu(duLieu)
     },
 
     async layTheoMa(ma: string) {
-      const duLieu = await moHinh.findById(ma)
+      const duLieu = await moHinh.findUnique({ where: { id: ma } })
       if (!duLieu) {
-        throw new LoiUngDung('Không tìm thấy dữ liệu', 404)
+        throw new LoiUngDung('Khong tim thay du lieu', 404)
       }
-      return duLieu
+      return coId(duLieu)
     },
 
     async taoMoi(duLieu: unknown) {
-      return moHinh.create(duLieu as Record<string, any>)
+      return coId(await moHinh.create({ data: boUndefined(duLieu as Record<string, any>) }))
     },
 
     async capNhat(ma: string, duLieu: unknown) {
-      const ketQua = await moHinh.findByIdAndUpdate(ma, duLieu as Record<string, any>, { new: true, runValidators: true })
-      if (!ketQua) {
-        throw new LoiUngDung('Không tìm thấy dữ liệu de cap nhat', 404)
+      const hienTai = await moHinh.findUnique({ where: { id: ma }, select: { id: true } })
+      if (!hienTai) {
+        throw new LoiUngDung('Khong tim thay du lieu de cap nhat', 404)
       }
-      return ketQua
+      return coId(await moHinh.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) }))
     },
 
     async xoa(ma: string) {
-      const ketQua = await moHinh.findByIdAndDelete(ma)
+      const ketQua = await moHinh.findUnique({ where: { id: ma } })
       if (!ketQua) {
-        throw new LoiUngDung('Không tìm thấy dữ liệu de xoa', 404)
+        throw new LoiUngDung('Khong tim thay du lieu de xoa', 404)
       }
-      return ketQua
+      await moHinh.delete({ where: { id: ma } })
+      return coId(ketQua)
     },
   }
 }
-

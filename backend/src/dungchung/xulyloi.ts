@@ -1,5 +1,4 @@
 import type { ErrorRequestHandler } from 'express'
-import mongoose from 'mongoose'
 import { ZodError } from 'zod'
 import { LoiUngDung } from './loiungdung.js'
 
@@ -15,36 +14,21 @@ export const xuLyLoi: ErrorRequestHandler = (loi, _yeuCau, phanHoi, _tiepTheo) =
     })
   }
 
-  if (loi instanceof mongoose.Error.ValidationError) {
-    const fieldErrors = Object.entries(loi.errors).reduce<Record<string, string[]>>((acc, [field, error]) => {
-      acc[field] = [error.message]
-      return acc
-    }, {})
-    return phanHoi.status(422).json({
-      code: 'MONGOOSE_VALIDATION_ERROR',
-      message: loi.message,
-      thongBao: loi.message,
-      fieldErrors,
-      loi: fieldErrors,
-      actionHint: 'Kiem tra lai du lieu da nhap va thu lai',
-    })
-  }
-
-  if (loi instanceof mongoose.Error.CastError) {
-    return phanHoi.status(400).json({
-      code: 'MONGOOSE_CAST_ERROR',
-      message: loi.message,
-      thongBao: loi.message,
-      actionHint: 'Du lieu dinh danh khong hop le, hay tai lai trang va thu lai',
-    })
-  }
-
-  if (typeof loi === 'object' && loi && 'code' in loi && (loi as any).code === 11000) {
+  if (typeof loi === 'object' && loi && 'code' in loi && ((loi as any).code === 11000 || (loi as any).code === 'P2002')) {
     return phanHoi.status(409).json({
       code: 'DUPLICATE_KEY',
       message: 'Du lieu da ton tai',
       thongBao: 'Du lieu da ton tai',
       actionHint: 'Kiem tra lai gia tri trung lap',
+    })
+  }
+
+  if (typeof loi === 'object' && loi && 'code' in loi && (loi as any).code === 'P2025') {
+    return phanHoi.status(404).json({
+      code: 'RECORD_NOT_FOUND',
+      message: 'Không tìm thấy dữ liệu',
+      thongBao: 'Không tìm thấy dữ liệu',
+      actionHint: 'Tải lại trang và thử lại',
     })
   }
 

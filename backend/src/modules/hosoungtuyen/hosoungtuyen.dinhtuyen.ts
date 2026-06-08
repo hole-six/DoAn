@@ -13,7 +13,7 @@ import { dichVuWorkflowUngTuyen } from '../workflow/ungtuyen.dichvu.js'
 async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau: any, _phanHoi: any, tiepTheo: any) {
   const nguoiDung = yeuCau.nguoiDung
   const ma = String(yeuCau.params.ma ?? '')
-  const hoSo = await (HoSoUngTuyen as any).findById(ma).populate('maTinTuyenDung maUngVien')
+  const hoSo = await HoSoUngTuyen.findUnique({ where: { id: ma } })
   if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND')
 
   const trangThaiMoi = String(yeuCau.body?.trangThai ?? '')
@@ -26,16 +26,16 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau: any, _phanHoi: any, tiepT
   const vaiTro = String(nguoiDung.vaiTro ?? '')
 
   if (vaiTro === 'ung_vien') {
-    const ungVien = await (UngVien as any).findOne({ maNguoiDung: nguoiDung.id }).select('_id')
-    if (!ungVien || String(ungVien._id) !== String(hoSo.maUngVien?._id ?? hoSo.maUngVien)) {
+    const ungVien = await UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
+    if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
       throw new LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN')
     }
   }
 
   if (vaiTro === 'nha_tuyen_dung') {
-    const congTy = await (NhaTuyenDung as any).findOne({ maNguoiDung: nguoiDung.id }).select('_id')
-    const tin = await (TinTuyenDung as any).findById(hoSo.maTinTuyenDung?._id ?? hoSo.maTinTuyenDung).select('maNhaTuyenDung')
-    if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+    const congTy = await NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
+    const tin = await TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } })
+    if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
       throw new LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN')
     }
   }

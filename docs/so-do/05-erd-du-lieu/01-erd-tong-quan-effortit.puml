@@ -137,7 +137,10 @@ package "CV, ứng tuyển và phỏng vấn" {
     github : String
     portfolioUrl : String
     diaDiem : String
-    hocVan / kinhNghiemLam / chungChi / duAn : Embedded[]
+    hocVan : Embedded[]
+    kinhNghiemLam : Embedded[]
+    chungChi : Embedded[]
+    duAn : Embedded[]
     tomTatKinhNghiem : String[]
     kyNangMem : String[]
     kyNangLapTrinh : Embedded[]
@@ -149,6 +152,7 @@ package "CV, ứng tuyển và phỏng vấn" {
     fileCvText : String
     fileCvPath : String
     fileCvTextStatus : Enum
+    fileCvTextError : String
     loaiHoSo : Enum
     anhDaiDien : String
     templateCv : String
@@ -346,10 +350,26 @@ GoiYViecLam ||--o{ EAIResult : chứa kết quả
 EAIResult }o--|| TinTuyenDung : đề xuất
 
 legend right
-  |= Ký hiệu |= Ý nghĩa |
-  | <<PK>> | Khóa chính MongoDB `_id` |
+  |= **Ký hiệu** |= **Ý nghĩa** |
+  | <<PK>> | Khóa chính MongoDB `_id` (ObjectId) |
   | <<FK>> | ObjectId `ref` trong Mongoose |
   | Embedded | Tài liệu con nhúng trong collection cha |
+  | Embedded[] | Mảng tài liệu con |
+  | String[] | Mảng chuỗi đơn giản |
+  | ObjectId[] | Mảng ObjectId tham chiếu |
+  | Map<K,V> | Key-value pairs |
   | UNIQUE | Index duy nhất trong schema |
+  |= **Kiểu dữ liệu** |= **MongoDB BSON Type** |
+  | ObjectId | ObjectId (12 bytes) |
+  | String | String / UTF-8 |
+  | Number | Double / Int32 / Int64 |
+  | Date | ISODate (DateTime) |
+  | Boolean | Boolean |
+  | Enum | String + validation |
+  |= **Thống kê** |= |
+  | Collections | 15 collections |
+  | Bảng bổ sung | 5 bảng mới (từ ERD cũ) |
+  | Trường bổ sung | ~26 trường mới |
+  | **Tổng thay đổi** | **5 bảng + 26 trường** |
 endlegend
 @enduml

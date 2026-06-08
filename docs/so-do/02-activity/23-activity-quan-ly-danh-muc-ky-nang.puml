@@ -13,14 +13,14 @@ skinparam activity {
 start
 :Quản trị viên đăng nhập;
 :Mở trang quản lý kỹ năng;
-:Hệ thống tải DanhMucKyNang;
+:Hệ thống tải DanhMụcKỹNăng;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách kỹ năng và loại kỹ năng;
   if (Chọn thao tác?) then (Thêm mới)
     :Nhấn nút "Thêm kỹ năng";
     :Nhập tên kỹ năng bằng hộp thoại;
     if (Có nhập tên kỹ năng?) then (Có)
-      :Hệ thống tạo DanhMucKyNang với loaiKyNang = khac;
+      :Hệ thống tạo DanhMụcKỹNăng với loại kỹ năng là khác;
       :Hiển thị thông báo đã thêm kỹ năng;
       :Tải lại danh sách kỹ năng;
     else (Không)
@@ -30,13 +30,12 @@ if (Tải dữ liệu thành công?) then (Đúng)
     :Chọn kỹ năng cần xóa;
     :Hiển thị cảnh báo kỹ năng đang được dùng có thể ảnh hưởng tin và CV;
     :Xác nhận xóa kỹ năng;
-    :Hệ thống xóa DanhMucKyNang nếu được phép;
+    :Hệ thống xóa DanhMụcKỹNăng nếu được phép;
     :Hiển thị thông báo đã xóa;
     :Tải lại danh sách kỹ năng;
   endif
-  :Kết thúc nhánh;
 else (Sai)
   :Hiển thị thông báo không tải được danh mục kỹ năng;
-  stop
 endif
+stop
 @enduml

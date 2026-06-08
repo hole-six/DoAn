@@ -1,18 +1,45 @@
-﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import '../hosonangluc/hosonangluc.mohinh.js'
-import '../nhatuyendung/nhatuyendung.mohinh.js'
-import '../nguoidung/nguoidung.mohinh.js'
-import '../tintuyendung/tintuyendung.mohinh.js'
-import '../ungvien/ungvien.mohinh.js'
-import { NhaTuyenDung } from '../nhatuyendung/nhatuyendung.mohinh.js'
+import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { boUndefined, coId, ganCongTyChoTin, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
+import { prisma } from '../../cauhinh/prisma.js'
 import { thongBaoHeThong, thongBaoHoSoDuocXem, thongBaoHoSoMoiUngTuyen } from '../thongbao/thongbao.helper.js'
 import { HoSoUngTuyen } from './hosoungtuyen.mohinh.js'
 
+async function hydrateUngTuyen(rows: any[]) {
+  const ungVienIds = [...new Set(rows.map(row => row.maUngVien).filter(Boolean))]
+  const tinIds = [...new Set(rows.map(row => row.maTinTuyenDung).filter(Boolean))]
+  const hoSoIds = [...new Set(rows.map(row => row.maHoSoNangLuc).filter(Boolean))]
+
+  const [ungVienRows, tinRows, hoSoRows] = await Promise.all([
+    prisma.ungVien.findMany({ where: { id: { in: ungVienIds } } }),
+    prisma.tinTuyenDung.findMany({ where: { id: { in: tinIds } } }),
+    hoSoIds.length ? prisma.hoSoNangLuc.findMany({ where: { id: { in: hoSoIds } } }) : Promise.resolve([]),
+  ])
+  const [ungVienDayDu, tinDayDu] = await Promise.all([
+    ganNguoiDungChoUngVien(ungVienRows as any[]),
+    ganCongTyChoTin(tinRows as any[]),
+  ])
+  const ungVienMap = new Map(ungVienDayDu.map(row => [row.id, coId(row)]))
+  const tinMap = new Map(tinDayDu.map(row => [row.id, coId(row)]))
+  const hoSoMap = new Map(hoSoRows.map(row => [row.id, coId(row)]))
+
+  return rows.map(row => coId({
+    ...row,
+    maUngVien: ungVienMap.get(row.maUngVien) ?? row.maUngVien,
+    maTinTuyenDung: tinMap.get(row.maTinTuyenDung) ?? row.maTinTuyenDung,
+    maHoSoNangLuc: row.maHoSoNangLuc ? (hoSoMap.get(row.maHoSoNangLuc) ?? row.maHoSoNangLuc) : null,
+  }))
+}
+
+export async function hydrateHoSoUngTuyenNoiBo(rows: any[]) {
+  return hydrateUngTuyen(rows)
+}
+
 function chuanHoaUngTuyen(taiLieu: any) {
-  const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
+  const duLieu = taiLieu ?? {}
   const tin = duLieu.maTinTuyenDung
   return {
-    id: String(duLieu._id),
+    id: String(duLieu.id ?? duLieu._id),
+    _id: String(duLieu.id ?? duLieu._id),
     maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
     maTinTuyenDung: tin?._id ? String(tin._id) : String(tin),
     maHoSoNangLuc: duLieu.maHoSoNangLuc?._id ? String(duLieu.maHoSoNangLuc._id) : duLieu.maHoSoNangLuc ? String(duLieu.maHoSoNangLuc) : undefined,
@@ -29,13 +56,7 @@ function chuanHoaUngTuyen(taiLieu: any) {
           nhaTuyenDung: tin.maNhaTuyenDung?._id
             ? {
                 id: String(tin.maNhaTuyenDung._id),
-                maNguoiDung: tin.maNhaTuyenDung.maNguoiDung?._id
-                  ? {
-                      id: String(tin.maNhaTuyenDung.maNguoiDung._id),
-                      hoTen: tin.maNhaTuyenDung.maNguoiDung.hoTen,
-                      email: tin.maNhaTuyenDung.maNguoiDung.email,
-                    }
-                  : tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
+                maNguoiDung: tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
                 tenCongTy: tin.maNhaTuyenDung.tenCongTy,
                 logo: tin.maNhaTuyenDung.logo,
               }
@@ -106,37 +127,30 @@ function chuanHoaUngTuyen(taiLieu: any) {
   }
 }
 
-function query() {
-  return (HoSoUngTuyen as any)
-    .find()
-    .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-    .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-    .populate('maHoSoNangLuc')
+async function layDayDu(where: any, many = false) {
+  const rows = many
+    ? await HoSoUngTuyen.findMany({ where, orderBy: { ngayNop: 'desc' }, take: 300 })
+    : await HoSoUngTuyen.findMany({ where, take: 1 })
+  const hydrated = await hydrateUngTuyen(rows)
+  return many ? hydrated : hydrated[0]
 }
 
 export const dichVuHoSoUngTuyen = {
   async layDanhSach() {
-    const danhSach = await query().sort({ ngayNop: -1 }).limit(300)
-    return danhSach.map(chuanHoaUngTuyen)
+    const danhSach = await layDayDu({}, true)
+    return (danhSach as any[]).map(chuanHoaUngTuyen)
   },
   async layTheoMa(ma: string) {
-    const duLieu = await (HoSoUngTuyen as any)
-      .findById(ma)
-      .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-      .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-      .populate('maHoSoNangLuc')
+    const duLieu = await layDayDu({ id: ma })
     if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404)
     return chuanHoaUngTuyen(duLieu)
   },
   async taoMoi(duLieu: unknown) {
     try {
-      const ketQua = await (HoSoUngTuyen as any).create(duLieu)
-      const hoSoMoi = await this.layTheoMa(String(ketQua._id))
-
+      const ketQua = await HoSoUngTuyen.create({ data: boUndefined(duLieu as Record<string, any>) as any })
+      const hoSoMoi = await this.layTheoMa(String(ketQua.id))
       try {
-        const maCongTy = hoSoMoi.tinTuyenDung?.nhaTuyenDung?.id
-        const congTy = maCongTy ? await (NhaTuyenDung as any).findById(maCongTy).select('maNguoiDung') : null
-        const maNguoiDungNhaTuyenDung = String(congTy?.maNguoiDung ?? '')
+        const maNguoiDungNhaTuyenDung = String(hoSoMoi.tinTuyenDung?.nhaTuyenDung?.maNguoiDung ?? '')
         if (maNguoiDungNhaTuyenDung) {
           await thongBaoHoSoMoiUngTuyen({
             maNhaTuyenDung: maNguoiDungNhaTuyenDung,
@@ -149,27 +163,17 @@ export const dichVuHoSoUngTuyen = {
       } catch (error) {
         console.error('Lỗi gửi thông báo hồ sơ mới:', error)
       }
-
       return hoSoMoi
     } catch (loi: any) {
-      if (loi?.code === 11000) throw new LoiUngDung('Ban da ung tuyen tin nay', 409)
+      if (loi?.code === 'P2002') throw new LoiUngDung('Ban da ung tuyen tin nay', 409)
       throw loi
     }
   },
   async capNhat(ma: string, duLieu: unknown) {
-    const truocKhiCapNhat = await (HoSoUngTuyen as any)
-      .findById(ma)
-      .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-      .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-      .populate('maHoSoNangLuc')
-
-    const ketQua = await (HoSoUngTuyen as any)
-      .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-      .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-      .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-      .populate('maHoSoNangLuc')
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404)
-    const ketQuaChuanHoa = chuanHoaUngTuyen(ketQua)
+    const truocKhiCapNhat = await layDayDu({ id: ma }) as any
+    if (!truocKhiCapNhat) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404)
+    await HoSoUngTuyen.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) as any })
+    const ketQuaChuanHoa = await this.layTheoMa(ma)
 
     try {
       const trangThaiCu = String(truocKhiCapNhat?.trangThai ?? '')
@@ -177,16 +181,9 @@ export const dichVuHoSoUngTuyen = {
       const maNguoiDungUngVien = ketQuaChuanHoa.ungVien?.nguoiDung?.id
       const tenCongTy = ketQuaChuanHoa.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? 'Cong ty'
       const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen'
-
       if (trangThaiCu !== 'da_xem' && trangThaiMoi === 'da_xem' && maNguoiDungUngVien) {
-        await thongBaoHoSoDuocXem({
-          maUngVien: maNguoiDungUngVien,
-          tenCongTy,
-          viTriUngTuyen,
-          maHoSoUngTuyen: ketQuaChuanHoa.id,
-        })
+        await thongBaoHoSoDuocXem({ maUngVien: maNguoiDungUngVien, tenCongTy, viTriUngTuyen, maHoSoUngTuyen: ketQuaChuanHoa.id })
       }
-
       if (trangThaiCu !== trangThaiMoi && ['dat', 'tu_choi'].includes(trangThaiMoi) && maNguoiDungUngVien) {
         await thongBaoHeThong({
           maNguoiDung: maNguoiDungUngVien,
@@ -199,15 +196,16 @@ export const dichVuHoSoUngTuyen = {
     } catch (error) {
       console.error('Lỗi gửi thông báo cập nhật hồ sơ ứng tuyển:', error)
     }
-
     return ketQuaChuanHoa
   },
   async xoa(ma: string) {
-    const ketQua = await (HoSoUngTuyen as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404)
-    return chuanHoaUngTuyen(ketQua)
+    const hienTai = await layDayDu({ id: ma }) as any
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404)
+    await HoSoUngTuyen.delete({ where: { id: ma } })
+    return chuanHoaUngTuyen(hienTai)
   },
 }
 
-
-
+export async function layHoSoUngTuyenDayDuNoiBo(ma: string) {
+  return layDayDu({ id: ma })
+}

@@ -13,10 +13,10 @@ skinparam activity {
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang quản lý tin tuyển dụng;
-:Hệ thống kiểm tra hồ sơ NhaTuyenDung;
+:Hệ thống kiểm tra hồ sơ NhàTuyểnDụng;
 if (Công ty đã được duyệt?) then (Đúng)
   :Nhấn nút "Đăng tin";
-  :Hệ thống tải DanhMucKyNang;
+  :Hệ thống tải DanhMụcKỹNăng;
   fork
     :Nhập tiêu đề tin tuyển dụng;
   fork again
@@ -36,22 +36,19 @@ if (Công ty đã được duyệt?) then (Đúng)
   end fork
   if (Muốn thoát?) then (Có)
     :Nhấn nút "Đóng";
-    :Kết thúc nhánh;
   else (Không)
     :Nhấn nút "Lưu tin";
-  endif
-  :Hệ thống kiểm tra dữ liệu TinTuyenDung;
-  if (Dữ liệu hợp lệ?) then (Đúng)
-    :Tạo TinTuyenDung trạng thái cho_duyet;
-    :Gửi ThongBao cho quản trị viên duyệt tin;
-    :Hiển thị đăng tin thành công và chờ duyệt;
-    :Kết thúc nhánh;
-  else (Sai)
-    :Hiển thị thông báo lỗi;
-    :Kết thúc nhánh;
+    :Hệ thống kiểm tra dữ liệu TinTuyểnDụng;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo TinTuyểnDụng trạng thái chờ duyệt;
+      :Gửi ThôngBáo cho quản trị viên duyệt tin;
+      :Hiển thị đăng tin thành công và chờ duyệt;
+    else (Sai)
+      :Hiển thị thông báo lỗi;
+    endif
   endif
 else (Sai)
   :Hiển thị yêu cầu cập nhật hoặc chờ duyệt hồ sơ công ty;
-  stop
 endif
+stop
 @enduml

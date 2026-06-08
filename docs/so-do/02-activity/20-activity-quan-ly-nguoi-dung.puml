@@ -13,7 +13,7 @@ skinparam activity {
 start
 :Quản trị viên đăng nhập;
 :Mở trang quản lý người dùng;
-:Hệ thống tải danh sách NguoiDung;
+:Hệ thống tải danh sách NgườiDùng;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị bảng người dùng;
   fork
@@ -41,7 +41,7 @@ if (Tải dữ liệu thành công?) then (Đúng)
     :Nhấn nút "Lưu";
     :Hệ thống kiểm tra email trùng và dữ liệu bắt buộc;
     if (Dữ liệu hợp lệ?) then (Đúng)
-      :Tạo NguoiDung;
+      :Tạo NgườiDùng;
       :Hiển thị thông báo tạo thành công;
     else (Sai)
       :Hiển thị thông báo lỗi;
@@ -52,24 +52,23 @@ if (Tải dữ liệu thành công?) then (Đúng)
     :Nhấn nút "Cập nhật";
     :Hệ thống kiểm tra dữ liệu và email trùng;
     if (Hợp lệ?) then (Đúng)
-      :Cập nhật NguoiDung;
+      :Cập nhật NgườiDùng;
       :Hiển thị thông báo cập nhật thành công;
     else (Sai)
       :Hiển thị thông báo lỗi;
     endif
   else (Xóa)
     :Chọn người dùng cần xóa;
-    if (Là admin cuối cùng?) then (Có)
-      :Hiển thị lỗi không thể xóa admin cuối cùng;
+    if (Là quản trị viên cuối cùng?) then (Có)
+      :Hiển thị lỗi không thể xóa quản trị viên cuối cùng;
     else (Không)
       :Xác nhận xóa;
-      :Hệ thống xóa NguoiDung;
+      :Hệ thống xóa NgườiDùng;
       :Hiển thị thông báo đã xóa;
     endif
   endif
-  :Kết thúc nhánh;
 else (Sai)
   :Hiển thị thông báo không tải được người dùng;
-  stop
 endif
+stop
 @enduml

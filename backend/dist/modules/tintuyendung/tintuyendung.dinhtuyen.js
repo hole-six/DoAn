@@ -35,7 +35,7 @@ const taiAnhTin = (0, multer_1.default)({
     },
 });
 async function layCongTyTheoNguoiDung(maNguoiDung) {
-    return nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung }).select('_id trangThaiDuyet');
+    return nhatuyendung_mohinh_js_1.NhaTuyenDung.findUnique({ where: { maNguoiDung }, select: { id: true, trangThaiDuyet: true } });
 }
 const damBaoQuyenTaoTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, _phanHoi, tiepTheo) => {
     const nguoiDung = await (0, xacthuc_dichvu_js_1.layNguoiDungTuAccessToken)(yeuCau.headers.authorization);
@@ -51,7 +51,7 @@ const damBaoQuyenTaoTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCa
         }
         yeuCau.body = {
             ...yeuCau.body,
-            maNhaTuyenDung: String(congTy._id),
+            maNhaTuyenDung: String(congTy.id),
             trangThai: 'cho_duyet',
         };
     }
@@ -63,7 +63,7 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
         throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền sửa tin tuyển dụng', 403);
     }
     const ma = String(yeuCau.params.ma ?? '');
-    const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(ma);
+    const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findUnique({ where: { id: ma } });
     if (!tin)
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng', 404);
     if (nguoiDung.vaiTro === 'admin') {
@@ -76,7 +76,7 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
     const congTy = await layCongTyTheoNguoiDung(nguoiDung.id);
     if (!congTy)
         throw new loiungdung_js_1.LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422);
-    if (String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+    if (String(tin.maNhaTuyenDung) !== String(congTy.id)) {
         throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền sửa tin tuyển dụng nay', 403);
     }
     if (yeuCau.body?.trangThai) {
@@ -89,7 +89,7 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
         }
         yeuCau.body = {
             ...yeuCau.body,
-            maNhaTuyenDung: String(congTy._id),
+            maNhaTuyenDung: String(congTy.id),
         };
     }
     tiepTheo();

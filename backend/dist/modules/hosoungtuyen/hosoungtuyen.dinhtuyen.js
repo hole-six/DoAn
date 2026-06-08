@@ -15,7 +15,7 @@ const ungtuyen_dichvu_js_1 = require("../workflow/ungtuyen.dichvu.js");
 async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau, _phanHoi, tiepTheo) {
     const nguoiDung = yeuCau.nguoiDung;
     const ma = String(yeuCau.params.ma ?? '');
-    const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findById(ma).populate('maTinTuyenDung maUngVien');
+    const hoSo = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findUnique({ where: { id: ma } });
     if (!hoSo)
         throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND');
     const trangThaiMoi = String(yeuCau.body?.trangThai ?? '');
@@ -26,15 +26,15 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau, _phanHoi, tiepTheo) {
     const trangThaiHienTai = String(hoSo.trangThai ?? '');
     const vaiTro = String(nguoiDung.vaiTro ?? '');
     if (vaiTro === 'ung_vien') {
-        const ungVien = await ungvien_mohinh_js_1.UngVien.findOne({ maNguoiDung: nguoiDung.id }).select('_id');
-        if (!ungVien || String(ungVien._id) !== String(hoSo.maUngVien?._id ?? hoSo.maUngVien)) {
+        const ungVien = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
+        if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
             throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN');
         }
     }
     if (vaiTro === 'nha_tuyen_dung') {
-        const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findOne({ maNguoiDung: nguoiDung.id }).select('_id');
-        const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findById(hoSo.maTinTuyenDung?._id ?? hoSo.maTinTuyenDung).select('maNhaTuyenDung');
-        if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+        const congTy = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } });
+        const tin = await tintuyendung_mohinh_js_1.TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } });
+        if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
             throw new loiungdung_js_1.LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN');
         }
     }

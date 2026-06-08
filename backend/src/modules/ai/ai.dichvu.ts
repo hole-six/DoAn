@@ -1,13 +1,9 @@
 import path from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { bienMoiTruong } from '../../cauhinh/bienmoitruong.js'
+import { prisma } from '../../cauhinh/prisma.js'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import '../danhmuckynang/danhmuckynang.mohinh.js'
-import '../nhatuyendung/nhatuyendung.mohinh.js'
-import { HoSoNangLuc } from '../hosonangluc/hosonangluc.mohinh.js'
-import { TinTuyenDung } from '../tintuyendung/tintuyendung.mohinh.js'
-import { UngVien } from '../ungvien/ungvien.mohinh.js'
-import { GoiYViecLam } from './goiyvieclam.mohinh.js'
+import { coId, ganCongTyChoTin, ganKyNangVaCongTyChoTin, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
 
 type NguoiDungHienTai = { id: string; vaiTro: string }
 type MatchResult = {
@@ -169,14 +165,17 @@ function ketQuaRong(ma?: string, thongBao?: string) {
 
 async function layUngVienCuaNguoiDung(nguoiDung: NguoiDungHienTai) {
   if (nguoiDung.vaiTro !== 'ung_vien') throw new LoiUngDung('Chỉ ứng viên mới được quét gợi ý việc làm', 403, 'FORBIDDEN')
-  const ungVien = await (UngVien as any).findOne({ maNguoiDung: nguoiDung.id }).populate('maNguoiDung', 'hoTen email')
+  const row = await prisma.ungVien.findUnique({ where: { maNguoiDung: nguoiDung.id } })
+  const ungVien = row ? (await ganNguoiDungChoUngVien([row as any]))[0] : null
   if (!ungVien) throw new LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước', 422, 'CANDIDATE_PROFILE_REQUIRED')
   return ungVien
 }
 
 async function layCvChinh(ungVien: any, maHoSoNangLuc?: string) {
-  if (maHoSoNangLuc) return (HoSoNangLuc as any).findOne({ _id: maHoSoNangLuc, maUngVien: ungVien._id })
-  return (HoSoNangLuc as any).findOne({ maUngVien: ungVien._id, cvChinh: true })
+  const row = maHoSoNangLuc
+    ? await prisma.hoSoNangLuc.findFirst({ where: { id: maHoSoNangLuc, maUngVien: id(ungVien) } })
+    : await prisma.hoSoNangLuc.findFirst({ where: { maUngVien: id(ungVien), cvChinh: true } })
+  return row ? coId(row) : null
 }
 
 async function layUngVienVaCv(nguoiDung: NguoiDungHienTai, maHoSoNangLuc?: string) {
@@ -190,15 +189,15 @@ async function layUngVienVaCv(nguoiDung: NguoiDungHienTai, maHoSoNangLuc?: strin
 async function layTinDangMo() {
   const homNay = new Date()
   homNay.setHours(0, 0, 0, 0)
-  return (TinTuyenDung as any)
-    .find({
+  const rows = await prisma.tinTuyenDung.findMany({
+    where: {
       trangThai: 'dang_mo',
-      $or: [{ hanNop: { $exists: false } }, { hanNop: null }, { hanNop: { $gte: homNay } }],
-    })
-    .populate('maNhaTuyenDung', 'tenCongTy logo maNguoiDung')
-    .populate('kyNang.maKyNang', 'tenKyNang')
-    .sort({ ngayDang: -1, ngayTao: -1 })
-    .limit(80)
+      OR: [{ hanNop: null }, { hanNop: { gte: homNay } }],
+    },
+    orderBy: [{ ngayDang: 'desc' }, { ngayTao: 'desc' }],
+    take: 80,
+  })
+  return ganKyNangVaCongTyChoTin(rows as any[])
 }
 
 function tinhDiemFallback(cv: any, ungVien: any, tin: any) {
@@ -360,6 +359,17 @@ function duongDanFileCv(cv: any) {
   return path.join(process.cwd(), 'uploads', tenTep)
 }
 
+async function luuTrangThaiDocCv(cv: any) {
+  await prisma.hoSoNangLuc.update({
+    where: { id: id(cv) },
+    data: {
+      fileCvText: cv.fileCvText,
+      fileCvTextStatus: cv.fileCvTextStatus,
+      fileCvTextError: cv.fileCvTextError,
+    },
+  })
+}
+
 async function trichXuatPdfBangPdfParse(duongDanTep: string) {
   try {
     const pdfParseModule = await import('pdf-parse')
@@ -380,7 +390,7 @@ async function damBaoNoiDungCvPdf(cv: any) {
   if (!duongDan) {
     cv.fileCvTextStatus = 'failed'
     cv.fileCvTextError = 'Không xác định được file PDF đã upload.'
-    await cv.save()
+    await luuTrangThaiDocCv(cv)
     throw new LoiUngDung('CV PDF chính chưa có file gốc để đọc lại. Hãy upload lại CV PDF hoặc dùng CV tạo trong hệ thống.', 422, 'CV_TEXT_REQUIRED')
   }
 
@@ -389,7 +399,7 @@ async function damBaoNoiDungCvPdf(cv: any) {
     cv.fileCvText = textPdfParse
     cv.fileCvTextStatus = 'ok'
     cv.fileCvTextError = ''
-    await cv.save()
+    await luuTrangThaiDocCv(cv)
     return
   }
 
@@ -399,7 +409,7 @@ async function damBaoNoiDungCvPdf(cv: any) {
       cv.fileCvText = textGemini
       cv.fileCvTextStatus = 'gemini_pdf'
       cv.fileCvTextError = ''
-      await cv.save()
+      await luuTrangThaiDocCv(cv)
       return
     }
   } catch (error) {
@@ -407,17 +417,16 @@ async function damBaoNoiDungCvPdf(cv: any) {
   }
 
   cv.fileCvTextStatus = 'failed'
-  await cv.save()
+  await luuTrangThaiDocCv(cv)
   throw new LoiUngDung('CV PDF chính chưa đọc được nội dung. PDF này có thể là ảnh scan; hãy upload PDF có text hoặc tạo CV trong hệ thống.', 422, 'CV_TEXT_REQUIRED')
 }
 
 async function layUngVienCoCvChinh() {
-  const ungVienList = await (UngVien as any)
-    .find()
-    .populate('maNguoiDung', 'hoTen email trangThai')
-    .sort({ ngayCapNhat: -1 })
-    .limit(1000)
-  const cvList = await (HoSoNangLuc as any).find({ cvChinh: true, maUngVien: { $in: ungVienList.map((item: any) => item._id) } })
+  const ungVienRows = await prisma.ungVien.findMany({ orderBy: { ngayCapNhat: 'desc' }, take: 1000 })
+  const ungVienList = await ganNguoiDungChoUngVien(ungVienRows as any[])
+  const cvList = (await prisma.hoSoNangLuc.findMany({
+    where: { cvChinh: true, maUngVien: { in: ungVienList.map((item: any) => id(item)) } },
+  })).map(row => coId(row))
   const cvTheoUngVien = new Map(cvList.map((cv: any) => [id(cv.maUngVien), cv]))
   return ungVienList.map((ungVien: any) => ({ ungVien, cv: cvTheoUngVien.get(id(ungVien)) })).filter((item: any) => item.cv)
 }
@@ -494,24 +503,27 @@ async function luuKetQua(maUngVien: string, maHoSoNangLuc: string, ketQua: Match
       kyNangThieu: item.kyNangThieu,
     }))
 
-  const doc = await (GoiYViecLam as any).create({
-    maUngVien,
-    maHoSoNangLuc,
-    ketQua: ketQuaSapXep,
-    trangThai: 'hoan_thanh',
-    nguon,
-    lanQuet: new Date(),
+  const doc = await prisma.goiYViecLam.create({
+    data: { maUngVien, maHoSoNangLuc, ketQua: ketQuaSapXep, trangThai: 'hoan_thanh', nguon, lanQuet: new Date() },
   })
   return layGoiYGanNhatTheoUngVien(maUngVien, id(doc))
 }
 
 export async function layGoiYGanNhatTheoUngVien(maUngVien: string, maGoiY?: string) {
-  const query = maGoiY ? (GoiYViecLam as any).findById(maGoiY) : (GoiYViecLam as any).findOne({ maUngVien }).sort({ lanQuet: -1 })
-  const doc = await query.populate({
-    path: 'ketQua.maTinTuyenDung',
-    populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo' },
+  const doc = maGoiY
+    ? await prisma.goiYViecLam.findUnique({ where: { id: maGoiY } })
+    : await prisma.goiYViecLam.findFirst({ where: { maUngVien }, orderBy: { lanQuet: 'desc' } })
+  if (!doc) return null
+  const ketQua = Array.isArray(doc.ketQua) ? doc.ketQua as any[] : []
+  const tinRows = await prisma.tinTuyenDung.findMany({
+    where: { id: { in: [...new Set(ketQua.map(item => id(item.maTinTuyenDung)).filter(Boolean))] } },
   })
-  return doc ? chuanHoaKetQua(doc) : null
+  const tinDayDu = await ganCongTyChoTin(tinRows as any[])
+  const tinMap = new Map(tinDayDu.map((tin: any) => [tin.id, coId(tin)]))
+  return chuanHoaKetQua(coId({
+    ...doc,
+    ketQua: ketQua.map(item => ({ ...item, maTinTuyenDung: tinMap.get(id(item.maTinTuyenDung)) ?? item.maTinTuyenDung })),
+  }))
 }
 
 function cauHoiLienQuanJob(cauHoi: string) {
@@ -537,9 +549,13 @@ function goiYTuMatch(ketQua: MatchResult[], tinDangMo: any[]): ChatJobSuggestion
 
 export const dichVuAi = {
   async layGoiY(nguoiDung: NguoiDungHienTai) {
-    const ungVien = await layUngVienCuaNguoiDung(nguoiDung)
-    const cv = await layCvChinh(ungVien)
-    const ganNhat = await layGoiYGanNhatTheoUngVien(id(ungVien))
+    const ungVienRaw = await prisma.ungVien.findUnique({ where: { maNguoiDung: nguoiDung.id } })
+    if (!ungVienRaw) throw new LoiUngDung('Khong tim thay ho so ung vien', 404, 'CANDIDATE_PROFILE_NOT_FOUND')
+    const ungVien = coId(ungVienRaw) as any
+    const [cv, ganNhat] = await Promise.all([
+      layCvChinh(ungVien),
+      layGoiYGanNhatTheoUngVien(id(ungVien)),
+    ])
     if (!cv) return ganNhat ?? ketQuaRong('NO_PRIMARY_CV', 'Bạn cần đặt CV chính trước khi quét việc phù hợp.')
     if (cv.loaiHoSo === 'file_upload' && !String(cv.fileCvText ?? '').trim()) {
       return ganNhat ?? ketQuaRong('CV_TEXT_REQUIRED', 'CV PDF chính chưa có nội dung đã đọc. Hãy bấm Quét nhanh để hệ thống thử đọc PDF bằng AI.')
@@ -795,19 +811,21 @@ export async function chayCrawlerGoiYViecLam() {
   if (dangChayCrawler) return
   dangChayCrawler = true
   try {
-    const ungVienList = await (UngVien as any).find().sort({ ngayCapNhat: -1 }).limit(bienMoiTruong.crawlerBatchLimit)
+    const ungVienList = await prisma.ungVien.findMany({ orderBy: { ngayCapNhat: 'desc' }, take: bienMoiTruong.crawlerBatchLimit })
     for (const ungVien of ungVienList) {
       const nguoiDung = { id: id(ungVien.maNguoiDung), vaiTro: 'ung_vien' }
       if (!nguoiDung.id) continue
       try {
         await dichVuAi.chayGoiY(nguoiDung)
       } catch (error: any) {
-        await (GoiYViecLam as any).create({
-          maUngVien: ungVien._id,
-          trangThai: 'loi',
-          loi: error?.message || 'Crawler failed',
-          lanQuet: new Date(),
-          nguon: 'crawler',
+        await prisma.goiYViecLam.create({
+          data: {
+            maUngVien: ungVien.id,
+            trangThai: 'loi',
+            loi: error?.message || 'Crawler failed',
+            lanQuet: new Date(),
+            nguon: 'crawler',
+          },
         })
       }
     }

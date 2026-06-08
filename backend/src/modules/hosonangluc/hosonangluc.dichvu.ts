@@ -1,11 +1,12 @@
-﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import '../ungvien/ungvien.mohinh.js'
+import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { boUndefined, coId } from '../../dungchung/prismaHelper.js'
 import { HoSoNangLuc } from './hosonangluc.mohinh.js'
 
 function chuanHoaHoSo(taiLieu: any) {
-  const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
+  const duLieu = taiLieu ?? {}
   return {
-    id: String(duLieu._id),
+    id: String(duLieu.id ?? duLieu._id),
+    _id: String(duLieu.id ?? duLieu._id),
     maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
     tieuDe: duLieu.tieuDe,
     hocVan: duLieu.hocVan ?? [],
@@ -49,41 +50,42 @@ function chuanHoaHoSo(taiLieu: any) {
 
 export const dichVuHoSoNangLuc = {
   async layDanhSach() {
-    const danhSach = await (HoSoNangLuc as any).find().sort({ cvChinh: -1, ngayCapNhat: -1 }).limit(300)
-    return danhSach.map(chuanHoaHoSo)
+    const danhSach = await HoSoNangLuc.findMany({
+      orderBy: [{ cvChinh: 'desc' }, { ngayCapNhat: 'desc' }],
+      take: 300,
+    })
+    return danhSach.map(row => chuanHoaHoSo(coId(row)))
   },
   async layTheoMa(ma: string) {
-    const duLieu = await (HoSoNangLuc as any).findById(ma)
+    const duLieu = await HoSoNangLuc.findUnique({ where: { id: ma } })
     if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực', 404)
-    return chuanHoaHoSo(duLieu)
+    return chuanHoaHoSo(coId(duLieu))
   },
   async taoMoi(duLieu: unknown) {
     const payload = duLieu as any
-    if (payload.cvChinh) await (HoSoNangLuc as any).updateMany({ maUngVien: payload.maUngVien }, { $set: { cvChinh: false } })
-    const ketQua = await (HoSoNangLuc as any).create(payload)
-    return chuanHoaHoSo(ketQua)
+    if (payload.cvChinh) await HoSoNangLuc.updateMany({ where: { maUngVien: payload.maUngVien }, data: { cvChinh: false } })
+    const ketQua = await HoSoNangLuc.create({ data: boUndefined(payload) as any })
+    return chuanHoaHoSo(coId(ketQua))
   },
   async capNhat(ma: string, duLieu: unknown) {
     const payload = duLieu as any
-    const ketQua = await (HoSoNangLuc as any).findById(ma)
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để cập nhật', 404)
+    const hienTai = await HoSoNangLuc.findUnique({ where: { id: ma } })
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để cập nhật', 404)
 
-    if (payload.cvChinh && payload.maUngVien) {
-      await (HoSoNangLuc as any).updateMany(
-        { maUngVien: payload.maUngVien, _id: { $ne: ma } },
-        { $set: { cvChinh: false } },
-      )
+    if (payload.cvChinh && (payload.maUngVien || hienTai.maUngVien)) {
+      await HoSoNangLuc.updateMany({
+        where: { maUngVien: String(payload.maUngVien ?? hienTai.maUngVien), id: { not: ma } },
+        data: { cvChinh: false },
+      })
     }
 
-    Object.assign(ketQua, payload)
-    await ketQua.save()
-    return chuanHoaHoSo(ketQua)
+    const ketQua = await HoSoNangLuc.update({ where: { id: ma }, data: boUndefined(payload) as any })
+    return chuanHoaHoSo(coId(ketQua))
   },
   async xoa(ma: string) {
-    const ketQua = await (HoSoNangLuc as any).findByIdAndDelete(ma)
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để xóa', 404)
-    return chuanHoaHoSo(ketQua)
+    const hienTai = await HoSoNangLuc.findUnique({ where: { id: ma } })
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ năng lực để xóa', 404)
+    await HoSoNangLuc.delete({ where: { id: ma } })
+    return chuanHoaHoSo(coId(hienTai))
   },
 }
-
-

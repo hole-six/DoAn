@@ -2,21 +2,26 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuNhaTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const nhatuyendung_mohinh_js_1 = require("./nhatuyendung.mohinh.js");
 async function layAdminIds() {
-    const admins = await nguoidung_mohinh_js_1.NguoiDung.find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id');
-    return admins.map((item) => String(item._id));
+    const admins = await nguoidung_mohinh_js_1.NguoiDung.findMany({
+        where: { vaiTro: 'admin', trangThai: 'hoat_dong' },
+        select: { id: true },
+    });
+    return admins.map(item => item.id);
 }
 async function guiThongBaoAdminCongTy(params) {
     const adminIds = await layAdminIds();
     await Promise.all(adminIds.map((maAdmin) => (0, thongbao_helper_js_1.thongBaoAdminCongTyCanDuyet)({ maAdmin, ...params })));
 }
 function chuanHoaNhaTuyenDung(taiLieu) {
-    const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
+    const duLieu = taiLieu ?? {};
     return {
-        id: String(duLieu._id),
+        id: String(duLieu.id ?? duLieu._id),
+        _id: String(duLieu.id ?? duLieu._id),
         maNguoiDung: duLieu.maNguoiDung?._id ? String(duLieu.maNguoiDung._id) : String(duLieu.maNguoiDung),
         nguoiDung: duLieu.maNguoiDung?._id
             ? {
@@ -41,24 +46,27 @@ function chuanHoaNhaTuyenDung(taiLieu) {
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
+async function layDayDu(where, many = false) {
+    const rows = many
+        ? await nhatuyendung_mohinh_js_1.NhaTuyenDung.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 200 })
+        : await nhatuyendung_mohinh_js_1.NhaTuyenDung.findMany({ where, take: 1 });
+    const hydrated = await (0, prismaHelper_js_1.ganNguoiDungChoCongTy)(rows);
+    return many ? hydrated : hydrated[0];
+}
 exports.dichVuNhaTuyenDung = {
     async layDanhSach() {
-        const danhSach = await nhatuyendung_mohinh_js_1.NhaTuyenDung
-            .find()
-            .populate('maNguoiDung', 'hoTen email soDienThoai')
-            .sort({ ngayTao: -1 })
-            .limit(200);
+        const danhSach = await layDayDu({}, true);
         return danhSach.map(chuanHoaNhaTuyenDung);
     },
     async layTheoMa(ma) {
-        const duLieu = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
+        const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng', 404);
         return chuanHoaNhaTuyenDung(duLieu);
     },
     async taoMoi(duLieu) {
-        const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.create(duLieu);
-        const dayDu = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ketQua._id).populate('maNguoiDung', 'hoTen email soDienThoai');
+        const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const dayDu = await layDayDu({ id: ketQua.id });
         if (dayDu?.trangThaiDuyet === 'cho_duyet') {
             await guiThongBaoAdminCongTy({
                 tenCongTy: dayDu.tenCongTy,
@@ -70,21 +78,18 @@ exports.dichVuNhaTuyenDung = {
     },
     async capNhat(ma, duLieuNhan) {
         const duLieu = duLieuNhan;
-        const hienTai = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
+        const hienTai = await layDayDu({ id: ma });
         if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
         if (hienTai.trangThaiDuyet === 'da_duyet' && duLieu.trangThaiDuyet === 'tu_choi') {
             throw new loiungdung_js_1.LoiUngDung('Không thể từ chối công ty đã được duyệt. Nếu hồ sơ có vấn đề, hãy xóa hoặc khóa công ty.', 409, 'COMPANY_ALREADY_APPROVED');
         }
-        const duLieuCapNhat = {
+        const duLieuCapNhat = (0, prismaHelper_js_1.boUndefined)({
             ...duLieu,
-            ...(duLieu.trangThaiDuyet === 'da_duyet' ? { ngayDuyet: new Date(), lyDoTuChoi: undefined } : {}),
-        };
-        const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung
-            .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
-            .populate('maNguoiDung', 'hoTen email soDienThoai');
-        if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để cập nhật', 404);
+            ...(duLieu.trangThaiDuyet === 'da_duyet' ? { ngayDuyet: new Date(), lyDoTuChoi: null } : {}),
+        });
+        await nhatuyendung_mohinh_js_1.NhaTuyenDung.update({ where: { id: ma }, data: duLieuCapNhat });
+        const ketQua = await layDayDu({ id: ma });
         const trangThaiCu = hienTai.trangThaiDuyet;
         const trangThaiMoi = ketQua.trangThaiDuyet;
         if (trangThaiCu !== trangThaiMoi && ['da_duyet', 'tu_choi'].includes(trangThaiMoi)) {
@@ -107,9 +112,10 @@ exports.dichVuNhaTuyenDung = {
         return chuanHoaNhaTuyenDung(ketQua);
     },
     async xoa(ma) {
-        const ketQua = await nhatuyendung_mohinh_js_1.NhaTuyenDung.findByIdAndDelete(ma).populate('maNguoiDung', 'hoTen email soDienThoai');
-        if (!ketQua)
+        const hienTai = await layDayDu({ id: ma });
+        if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy nhà tuyển dụng để xóa', 404);
-        return chuanHoaNhaTuyenDung(ketQua);
+        await nhatuyendung_mohinh_js_1.NhaTuyenDung.delete({ where: { id: ma } });
+        return chuanHoaNhaTuyenDung((0, prismaHelper_js_1.coId)(hienTai));
     },
 };

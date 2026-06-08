@@ -13,7 +13,7 @@ skinparam activity {
 start
 :Ứng viên đăng nhập;
 :Mở trang lịch phỏng vấn;
-:Hệ thống tải LichPhongVan theo HoSoUngTuyen của ứng viên;
+:Hệ thống tải LịchPhỏngVấn theo HồSơỨngTuyển của ứng viên;
 if (Có lịch phỏng vấn?) then (Có)
   :Hiển thị danh sách lịch và trạng thái;
   :Chọn một lịch phỏng vấn;
@@ -21,30 +21,29 @@ if (Có lịch phỏng vấn?) then (Có)
   if (Trạng thái lịch?) then (Đã lên lịch)
     if (Chọn phản hồi?) then (Xác nhận)
       :Nhấn nút "Xác nhận";
-      :Hệ thống cập nhật LichPhongVan thành da_xac_nhan;
-      :Gửi ThongBao cho nhà tuyển dụng;
+      :Hệ thống cập nhật LịchPhỏngVấn thành da_xac_nhan;
+      :Gửi ThôngBáo cho nhà tuyển dụng;
       :Hiển thị phản hồi thành công;
     else (Đổi lịch)
       :Nhấn nút "Yêu cầu đổi lịch";
       :Nhập lý do hoặc thời gian mong muốn;
-      :Hệ thống cập nhật LichPhongVan thành doi_lich;
-      :Gửi ThongBao cho nhà tuyển dụng;
+      :Hệ thống cập nhật LịchPhỏngVấn thành đổi lịch;
+      :Gửi ThôngBáo cho nhà tuyển dụng;
       :Hiển thị đã gửi yêu cầu đổi lịch;
     endif
   elseif (Trạng thái đã xác nhận?) then (Đã xác nhận)
     if (Muốn yêu cầu đổi lịch?) then (Có)
       :Nhập lý do đổi lịch;
-      :Hệ thống cập nhật LichPhongVan thành doi_lich;
-      :Gửi ThongBao cho nhà tuyển dụng;
+      :Hệ thống cập nhật LịchPhỏngVấn thành đổi lịch;
+      :Gửi ThôngBáo cho nhà tuyển dụng;
     else (Không)
       :Tiếp tục xem lịch;
     endif
   else (Hoàn thành hoặc đã hủy)
     :Chỉ xem kết quả và ghi chú;
   endif
-  :Kết thúc nhánh;
 else (Không)
   :Hiển thị trạng thái chưa có lịch phỏng vấn;
-  stop
 endif
+stop
 @enduml

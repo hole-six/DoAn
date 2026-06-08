@@ -1,12 +1,15 @@
-﻿import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { boUndefined, coId, ganKyNangVaCongTyChoTin } from '../../dungchung/prismaHelper.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
-import '../nhatuyendung/nhatuyendung.mohinh.js'
 import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
 
 async function layAdminIds() {
-  const admins = await (NguoiDung as any).find({ vaiTro: 'admin', trangThai: 'hoat_dong' }).select('_id')
-  return admins.map((item: any) => String(item._id))
+  const admins = await NguoiDung.findMany({
+    where: { vaiTro: 'admin', trangThai: 'hoat_dong' },
+    select: { id: true },
+  })
+  return admins.map(item => item.id)
 }
 
 async function guiThongBaoAdminTinCanDuyet(tin: any) {
@@ -20,10 +23,10 @@ async function guiThongBaoAdminTinCanDuyet(tin: any) {
 }
 
 function chuanHoaTin(taiLieu: any) {
-  const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
-
+  const duLieu = taiLieu ?? {}
   return {
-    id: String(duLieu._id),
+    id: String(duLieu.id ?? duLieu._id),
+    _id: String(duLieu.id ?? duLieu._id),
     maNhaTuyenDung: duLieu.maNhaTuyenDung?._id ? String(duLieu.maNhaTuyenDung._id) : String(duLieu.maNhaTuyenDung),
     nhaTuyenDung: duLieu.maNhaTuyenDung?._id
       ? {
@@ -60,53 +63,46 @@ function chuanHoaTin(taiLieu: any) {
   }
 }
 
+async function layDayDu(where: any, many = false) {
+  const rows = many
+    ? await TinTuyenDung.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 300 })
+    : await TinTuyenDung.findMany({ where, take: 1 })
+  const hydrated = await ganKyNangVaCongTyChoTin(rows as any[])
+  return many ? hydrated : hydrated[0]
+}
+
 export const dichVuTinTuyenDung = {
   async layDanhSach() {
-    const danhSach = await (TinTuyenDung as any)
-      .find()
-      .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-      .sort({ ngayTao: -1 })
-      .limit(300)
-
-    return danhSach.map(chuanHoaTin)
+    const danhSach = await layDayDu({}, true)
+    return (danhSach as any[]).map(chuanHoaTin)
   },
 
   async layTheoMa(ma: string) {
-    const duLieu = await (TinTuyenDung as any)
-      .findById(ma)
-      .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+    const duLieu = await layDayDu({ id: ma })
     if (!duLieu) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
     return chuanHoaTin(duLieu)
   },
 
   async taoMoi(duLieu: unknown) {
-    const ketQua = await (TinTuyenDung as any).create(duLieu)
-    const dayDu = await (TinTuyenDung as any)
-      .findById(ketQua._id)
-      .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (dayDu?.trangThai === 'cho_duyet') {
-      await guiThongBaoAdminTinCanDuyet(dayDu)
-    }
+    const ketQua = await TinTuyenDung.create({ data: boUndefined(duLieu as Record<string, any>) as any })
+    const dayDu = await layDayDu({ id: ketQua.id }) as any
+    if (dayDu?.trangThai === 'cho_duyet') await guiThongBaoAdminTinCanDuyet(dayDu)
     return chuanHoaTin(dayDu)
   },
 
   async capNhat(ma: string, duLieuNhan: unknown) {
-    const duLieu = duLieuNhan as Record<string, unknown>
-    const hienTai = await (TinTuyenDung as any).findById(ma).populate('maNhaTuyenDung', 'tenCongTy maNguoiDung')
+    const duLieu = duLieuNhan as Record<string, any>
+    const hienTai = await layDayDu({ id: ma }) as any
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
+
     const duLieuCapNhat = {
       ...duLieu,
       ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
     }
-    const ketQua = await (TinTuyenDung as any)
-      .findByIdAndUpdate(ma, duLieuCapNhat, { returnDocument: 'after', runValidators: true })
-      .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
+    await TinTuyenDung.update({ where: { id: ma }, data: boUndefined(duLieuCapNhat) as any })
+    const ketQua = await layDayDu({ id: ma }) as any
 
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
-    if (hienTai && hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
+    if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
       await thongBaoNhaTuyenDungKetQuaDuyetTin({
         maNguoiDung: String(ketQua.maNhaTuyenDung?.maNguoiDung ?? hienTai.maNhaTuyenDung?.maNguoiDung),
         tieuDeTin: ketQua.tieuDe,
@@ -118,14 +114,9 @@ export const dichVuTinTuyenDung = {
   },
 
   async xoa(ma: string) {
-    const ketQua = await (TinTuyenDung as any)
-      .findByIdAndDelete(ma)
-      .populate('maNhaTuyenDung', 'tenCongTy logo trangThaiDuyet')
-      .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404)
-    return chuanHoaTin(ketQua)
+    const hienTai = await layDayDu({ id: ma }) as any
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404)
+    await TinTuyenDung.delete({ where: { id: ma } })
+    return chuanHoaTin(coId(hienTai))
   },
 }
-
-
-

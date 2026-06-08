@@ -15,48 +15,44 @@ start
 :Nhập email tài khoản;
 if (Muốn thoát?) then (Có)
   :Nhấn quay lại đăng nhập;
-  :Kết thúc nhánh;
 else (Không)
   :Nhấn nút "Gửi link đặt lại mật khẩu";
-endif
-:Hệ thống kiểm tra định dạng email;
-if (Email hợp lệ?) then (Đúng)
-  :Tìm NguoiDung theo email;
-  if (Tài khoản tồn tại và đang hoạt động?) then (Đúng)
-    :Tạo token đặt lại mật khẩu;
-    :Lưu hash token và thời hạn vào NguoiDung;
-    :Gửi email chứa liên kết /dat-lai-mat-khau?token=...;
+  :Hệ thống kiểm tra định dạng email;
+  if (Email hợp lệ?) then (Đúng)
+    :Tìm NgườiDùng theo email;
+    if (Tài khoản tồn tại và đang hoạt động?) then (Đúng)
+      :Tạo token đặt lại mật khẩu;
+      :Lưu hash token và thời hạn vào NgườiDùng;
+      :Gửi email chứa liên kết đặt lại mật khẩu;
+    else (Sai)
+      :Không tiết lộ tài khoản có tồn tại hay không;
+    endif
+    :Hiển thị thông báo đã gửi hướng dẫn nếu email hợp lệ;
+    :Người dùng mở liên kết đặt lại mật khẩu từ email;
+    :Hệ thống kiểm tra token đặt lại mật khẩu;
+    if (Token hợp lệ và chưa hết hạn?) then (Đúng)
+      fork
+        :Nhập mật khẩu mới;
+      fork again
+        :Nhập xác nhận mật khẩu;
+      end fork
+      :Nhấn nút "Đặt lại mật khẩu";
+      :Hệ thống kiểm tra mật khẩu và xác nhận mật khẩu;
+      if (Dữ liệu hợp lệ?) then (Đúng)
+        :Cập nhật mật khẩu NgườiDùng;
+        :Xóa token đặt lại mật khẩu đã dùng;
+        :Hiển thị đặt lại mật khẩu thành công;
+        :Điều hướng về đăng nhập;
+      else (Sai)
+        :Hiển thị lỗi mật khẩu không hợp lệ hoặc không khớp;
+      endif
+    else (Sai)
+      :Hiển thị lỗi token không hợp lệ hoặc đã hết hạn;
+    endif
   else (Sai)
-    :Không tiết lộ tài khoản có tồn tại hay không;
+    :Hiển thị lỗi email không hợp lệ;
+    :Người dùng nhập lại email;
   endif
-  :Hiển thị thông báo đã gửi hướng dẫn nếu email hợp lệ;
-else (Sai)
-  :Hiển thị lỗi email không hợp lệ;
-  :Người dùng nhập lại email;
-  :Kết thúc nhánh;
 endif
-:Người dùng mở liên kết đặt lại mật khẩu từ email;
-:Hệ thống kiểm tra token đặt lại mật khẩu;
-if (Token hợp lệ và chưa hết hạn?) then (Đúng)
-  fork
-    :Nhập mật khẩu mới;
-  fork again
-    :Nhập xác nhận mật khẩu;
-  end fork
-  :Nhấn nút "Đặt lại mật khẩu";
-  :Hệ thống kiểm tra mật khẩu và xác nhận mật khẩu;
-  if (Dữ liệu hợp lệ?) then (Đúng)
-    :Cập nhật mật khẩu NguoiDung;
-    :Xóa token đặt lại mật khẩu đã dùng;
-    :Hiển thị đặt lại mật khẩu thành công;
-    :Điều hướng về đăng nhập;
-    :Kết thúc nhánh;
-  else (Sai)
-    :Hiển thị lỗi mật khẩu không hợp lệ hoặc không khớp;
-    :Kết thúc nhánh;
-  endif
-else (Sai)
-  :Hiển thị lỗi token không hợp lệ hoặc đã hết hạn;
-  stop
-endif
+stop
 @enduml

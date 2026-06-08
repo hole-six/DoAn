@@ -1,0 +1,641 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 11
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+hide circle
+left to right direction
+title ERD Đầy đủ Hệ thống EffortIT - Phiên bản SQL (MySQL/SQL Server)
+
+' ========================================
+' PACKAGE 1: TÀI KHOẢN VÀ VAI TRÒ
+' ========================================
+package "Tài khoản và vai trò" #TECHNOLOGY {
+  entity "NGUOIDUNG" as NguoiDung {
+    * id : INT <<PK>>
+    --
+    email : VARCHAR(255) <<UNIQUE>>
+    mat_khau : VARCHAR(255)
+    ho_ten : VARCHAR(255)
+    so_dien_thoai : VARCHAR(20)
+    vai_tro : ENUM('ung_vien', 'nha_tuyen_dung', 'admin')
+    trang_thai : ENUM('hoat_dong', 'tam_khoa', 'bi_khoa')
+    ma_dat_lai_mat_khau_hash : VARCHAR(255)
+    ma_dat_lai_mat_khau_het_han : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "UNGVIEN" as UngVien {
+    * id : INT <<PK>>
+    --
+    ma_nguoi_dung : INT <<FK, UNIQUE>>
+    ngay_sinh : DATE
+    gioi_tinh : ENUM('nam', 'nu', 'khac')
+    dia_chi : VARCHAR(500)
+    anh_dai_dien : VARCHAR(500)
+    tom_tat : TEXT
+    kinh_nghiem : INT
+    vi_tri_mong_muon : VARCHAR(200)
+    muc_luong_mong_muon : DECIMAL(15,2)
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "NHATUYENDUNG" as NhaTuyenDung {
+    * id : INT <<PK>>
+    --
+    ma_nguoi_dung : INT <<FK, UNIQUE>>
+    ten_cong_ty : VARCHAR(255)
+    ma_so_thue : VARCHAR(20)
+    mo_ta : TEXT
+    dia_chi : VARCHAR(255)
+    website : VARCHAR(255)
+    logo : VARCHAR(500)
+    quy_mo : INT
+    nganh : VARCHAR(100)
+    trang_thai_duyet : ENUM('cho_duyet', 'da_duyet', 'tu_choi', 'bi_khoa')
+    ly_do_tu_choi : VARCHAR(500)
+    ngay_duyet : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+}
+
+' ========================================
+' PACKAGE 2: TUYỂN DỤNG
+' ========================================
+package "Tuyển dụng" #APPLICATION {
+  entity "DANHMUC_KYNANG" as KyNang {
+    * id : INT <<PK>>
+    --
+    ten_ky_nang : VARCHAR(100) <<UNIQUE>>
+    loai_ky_nang : VARCHAR(100)
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "TINTUYENDUNG" as TinTuyenDung {
+    * id : INT <<PK>>
+    --
+    ma_nha_tuyen_dung : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    yeu_cau_kinh_nghiem : VARCHAR(200)
+    dia_chi : VARCHAR(255)
+    luong_min : DECIMAL(15,2)
+    luong_max : DECIMAL(15,2)
+    loai_hinh : ENUM('toan_thoi_gian', 'ban_thoi_gian', 'thuc_tap', 'tu_xa', 'hybrid')
+    cap_bac : ENUM('intern', 'fresher', 'junior', 'middle', 'senior', 'lead')
+    anh_dai_dien : VARCHAR(500)
+    han_nop : DATE
+    so_luong : INT
+    mo_ta : TEXT
+    yeu_cau : TEXT
+    quyen_loi : TEXT
+    luot_xem : INT
+    trang_thai : ENUM('nhap', 'cho_duyet', 'dang_mo', 'tam_dong', 'het_han', 'tu_choi')
+    ngay_dang : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "VIECLAMDALUU" as ViecLamDaLuu {
+    * id : INT <<PK>>
+    --
+    ma_nguoi_dung : INT <<FK>>
+    ma_tin_tuyen_dung : INT <<FK>>
+    ngay_luu : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+    --
+    UNIQUE(ma_nguoi_dung, ma_tin_tuyen_dung)
+  }
+
+  entity "DANHGIACONGTY" as DanhGiaCongTy {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    ma_nha_tuyen_dung : INT <<FK>>
+    ma_ho_so_ung_tuyen : INT <<FK>>
+    diem : TINYINT
+    noi_dung : TEXT
+    an_danh : BIT
+    da_duyet : BIT
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+}
+
+' ========================================
+' PACKAGE 3: CV, ỨNG TUYỂN VÀ PHỎNG VẤN
+' ========================================
+package "CV, ứng tuyển và phỏng vấn" #PHYSICAL {
+  entity "HOSONANGLUC" as HoSoNangLuc {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    ho_ten_hien_thi : VARCHAR(255)
+    chuc_danh : VARCHAR(200)
+    email_lien_he : VARCHAR(255)
+    so_dien_thoai : VARCHAR(20)
+    facebook : VARCHAR(255)
+    github : VARCHAR(255)
+    portfolio_url : VARCHAR(255)
+    dia_diem : VARCHAR(200)
+    tom_tat_kinh_nghiem : TEXT
+    ky_nang_mem : TEXT
+    file_cv_ten : VARCHAR(255)
+    file_cv_loai : VARCHAR(50)
+    file_cv_data : LONGTEXT
+    file_cv_text : LONGTEXT
+    file_cv_path : VARCHAR(500)
+    file_cv_text_status : ENUM('ok', 'empty', 'gemini_pdf', 'failed')
+    file_cv_text_error : TEXT
+    loai_ho_so : ENUM('builder', 'file_upload')
+    anh_dai_dien : VARCHAR(500)
+    template_cv : VARCHAR(50)
+    mau_chinh : VARCHAR(20)
+    mau_phu : VARCHAR(20)
+    font : VARCHAR(50)
+    markdown_goc : LONGTEXT
+    ghi_chu_ai : TEXT
+    cv_chinh : BIT
+    cong_khai : BIT
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "HOSOUNGTUYEN" as HoSoUngTuyen {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    ma_tin_tuyen_dung : INT <<FK>>
+    ma_ho_so_nang_luc : INT <<FK>>
+    thu_xin_viec : TEXT
+    diem_khop_ky_nang : FLOAT
+    trang_thai : ENUM('da_nop', 'da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat', 'tu_choi', 'da_rut')
+    ngay_nop : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+    --
+    UNIQUE(ma_ung_vien, ma_tin_tuyen_dung)
+  }
+
+  entity "LICHPHONGVAN" as LichPhongVan {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_ung_tuyen : INT <<FK, UNIQUE>>
+    thoi_gian_bat_dau : DATETIME
+    thoi_gian_ket_thuc : DATETIME
+    dia_chi : VARCHAR(500)
+    hinh_thuc : ENUM('online', 'offline')
+    link_hop : VARCHAR(500)
+    ghi_chu : TEXT
+    trang_thai : ENUM('da_len_lich', 'da_xac_nhan', 'doi_lich', 'hoan_thanh', 'da_huy')
+    ket_qua : ENUM('cho_ket_qua', 'dat', 'khong_dat')
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "LICHSUHOSOUNGTUYEN" as LichSu {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_ung_tuyen : INT <<FK>>
+    trang_thai_cu : VARCHAR(50)
+    trang_thai_moi : VARCHAR(50)
+    ghi_chu : TEXT
+    ma_nguoi_dung : INT <<FK>>
+    thoi_gian : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+}
+
+' ========================================
+' PACKAGE 4: THÔNG BÁO VÀ TRÒ CHUYỆN
+' ========================================
+package "Thông báo và trò chuyện" #MOTIVATION {
+  entity "THONGBAO" as ThongBao {
+    * id : INT <<PK>>
+    --
+    ma_nguoi_dung : INT <<FK>>
+    loai : ENUM('he_thong', 'ho_so_ung_tuyen', 'lich_phong_van', 'tin_tuyen_dung', 'cong_ty', 'tin_nhan', 'ket_qua_phong_van')
+    tieu_de : VARCHAR(255)
+    noi_dung : TEXT
+    lien_ket : VARCHAR(500)
+    ma_ho_so_ung_tuyen : INT <<FK>>
+    ma_lich_phong_van : INT <<FK>>
+    ma_tin_tuyen_dung : INT <<FK>>
+    da_doc : BIT
+    da_gui : BIT
+    muc_do_uu_tien : ENUM('thap', 'trung_binh', 'cao', 'khan_cap')
+    icon : VARCHAR(50)
+    mau_sac : VARCHAR(20)
+    het_han : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "CUOCTROCHUYEN" as CuocTroChuyen {
+    * id : INT <<PK>>
+    --
+    loai : ENUM('ung_vien_nha_tuyen_dung', 'admin_support', 'nhom_cong_dong')
+    ten_nhom : VARCHAR(255)
+    mo_ta_nhom : TEXT
+    anh_nhom : VARCHAR(500)
+    ma_ho_so_ung_tuyen : INT <<FK>>
+    ma_tin_tuyen_dung : INT <<FK>>
+    ma_ho_so_ung_tuyen_gan_nhat : INT <<FK>>
+    ma_tin_tuyen_dung_gan_nhat : INT <<FK>>
+    tin_nhan_cuoi_cung_noi_dung : TEXT
+    tin_nhan_cuoi_cung_nguoi_gui : INT <<FK>>
+    tin_nhan_cuoi_cung_thoi_gian : DATETIME
+    da_luu_tru : BIT
+    thoi_gian_luu_tru : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+
+  entity "TINNHAN" as TinNhan {
+    * id : INT <<PK>>
+    --
+    ma_cuoc_tro_chuyen_id : INT <<FK>>
+    nguoi_gui : INT <<FK>>
+    loai : ENUM('text', 'file', 'image', 'system')
+    noi_dung : TEXT
+    tra_loi_tin_nhan : INT <<FK>>
+    da_xoa : BIT
+    da_chinh_sua : BIT
+    thoi_gian_chinh_sua : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+}
+
+' ========================================
+' PACKAGE 5: AI GỢI Ý VIỆC LÀM
+' ========================================
+package "AI gợi ý việc làm" #STRATEGY {
+  entity "GOIYVIECLAM" as GoiYViecLam {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    ma_ho_so_nang_luc : INT <<FK>>
+    trang_thai : ENUM('dang_chay', 'hoan_thanh', 'loi')
+    loi : TEXT
+    nguon : VARCHAR(50)
+    lan_quet : DATETIME
+    ngay_tao : DATETIME
+    ngay_cap_nhat : DATETIME
+  }
+}
+
+' ========================================
+' PACKAGE 6: BẢNG LIÊN KẾT VÀ PHỤ TRỢ
+' ========================================
+package "Bảng liên kết và phụ trợ" #IMPLEMENTATION {
+  ' Bảng liên kết n-n: Ứng viên - Kỹ năng
+  entity "UNGVIEN_KYNANG" as UngVienKyNang {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    ma_ky_nang : INT <<FK>>
+    muc_do : TINYINT
+    --
+    UNIQUE(ma_ung_vien, ma_ky_nang)
+  }
+
+  ' Bảng liên kết n-n: Tin tuyển dụng - Kỹ năng
+  entity "TINTUYENDUNG_KYNANG" as TinTuyenDungKyNang {
+    * id : INT <<PK>>
+    --
+    ma_tin_tuyen_dung : INT <<FK>>
+    ma_ky_nang : INT <<FK>>
+    bat_buoc : BIT
+    --
+    UNIQUE(ma_tin_tuyen_dung, ma_ky_nang)
+  }
+
+  ' Portfolio của ứng viên
+  entity "UNGVIEN_PORTFOLIO" as UngVienPortfolio {
+    * id : INT <<PK>>
+    --
+    ma_ung_vien : INT <<FK>>
+    ten_du_an : VARCHAR(255)
+    lien_ket : VARCHAR(500)
+    mo_ta : TEXT
+    cong_nghe : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Học vấn trong hồ sơ năng lực
+  entity "HOSO_HOCVAN" as HoSoHocVan {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    don_vi : VARCHAR(255)
+    thoi_gian : VARCHAR(100)
+    mo_ta : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Kinh nghiệm làm việc
+  entity "HOSO_KINHNGHIEM" as HoSoKinhNghiem {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    don_vi : VARCHAR(255)
+    thoi_gian : VARCHAR(100)
+    mo_ta : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Chứng chỉ
+  entity "HOSO_CHUNGCHI" as HoSoChungChi {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    don_vi : VARCHAR(255)
+    thoi_gian : VARCHAR(100)
+    mo_ta : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Dự án đơn giản
+  entity "HOSO_DUAN" as HoSoDuAn {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    tieu_de : VARCHAR(255)
+    don_vi : VARCHAR(255)
+    thoi_gian : VARCHAR(100)
+    mo_ta : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Bài viết kỹ thuật
+  entity "HOSO_BAIVIЕТ" as HoSoBaiViet {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    nhan : VARCHAR(255)
+    url : VARCHAR(500)
+    ngay_tao : DATETIME
+  }
+
+  ' Dự án chi tiết
+  entity "HOSO_DUANCHIТIET" as HoSoDuAnChiTiet {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    ten_du_an : VARCHAR(255)
+    thoi_gian : VARCHAR(100)
+    vi_tri : VARCHAR(100)
+    mo_ta : TEXT
+    trach_nhiem : TEXT
+    he_dieu_hanh : VARCHAR(100)
+    ngon_ngu : VARCHAR(100)
+    framework : VARCHAR(100)
+    ky_thuat : VARCHAR(255)
+    dia_diem : VARCHAR(200)
+    ngay_tao : DATETIME
+  }
+
+  ' Kỹ năng lập trình (nhóm)
+  entity "HOSO_KYNANGLAPTRINH" as HoSoKyNangLapTrinh {
+    * id : INT <<PK>>
+    --
+    ma_ho_so_nang_luc : INT <<FK>>
+    nhom : VARCHAR(100)
+    muc : TEXT
+    ngay_tao : DATETIME
+  }
+
+  ' Hành động trong thông báo
+  entity "THONGBAO_HANHDONG" as ThongBaoHanhDong {
+    * id : INT <<PK>>
+    --
+    ma_thong_bao : INT <<FK>>
+    nhan : VARCHAR(100)
+    url : VARCHAR(500)
+    loai : ENUM('primary', 'secondary', 'danger')
+  }
+
+  ' Thành viên cuộc trò chuyện (n-n)
+  entity "CUOCTROCHUYEN_THANHVIEN" as CuocTroChuyenThanhVien {
+    * id : INT <<PK>>
+    --
+    ma_cuoc_tro_chuyen : INT <<FK>>
+    ma_nguoi_dung : INT <<FK>>
+    so_chua_doc : INT
+    --
+    UNIQUE(ma_cuoc_tro_chuyen, ma_nguoi_dung)
+  }
+
+  ' Quản trị nhóm chat
+  entity "CUOCTROCHUYEN_QUANTRI" as CuocTroChuyenQuanTri {
+    * id : INT <<PK>>
+    --
+    ma_cuoc_tro_chuyen : INT <<FK>>
+    ma_nguoi_dung : INT <<FK>>
+    --
+    UNIQUE(ma_cuoc_tro_chuyen, ma_nguoi_dung)
+  }
+
+  ' File đính kèm tin nhắn
+  entity "TINNHAN_TEPDINHKEM" as TinNhanTepDinhKem {
+    * id : INT <<PK>>
+    --
+    ma_tin_nhan : INT <<FK>>
+    ten_file : VARCHAR(255)
+    duong_dan : VARCHAR(500)
+    kich_thuoc : BIGINT
+    loai_file : VARCHAR(100)
+  }
+
+  ' Đã đọc tin nhắn
+  entity "TINNHAN_DADUOCDOC" as TinNhanDaDuocDoc {
+    * id : INT <<PK>>
+    --
+    ma_tin_nhan : INT <<FK>>
+    ma_nguoi_dung : INT <<FK>>
+    thoi_gian : DATETIME
+    --
+    UNIQUE(ma_tin_nhan, ma_nguoi_dung)
+  }
+
+  ' Phản ứng tin nhắn
+  entity "TINNHAN_PHANUNG" as TinNhanPhanUng {
+    * id : INT <<PK>>
+    --
+    ma_tin_nhan : INT <<FK>>
+    ma_nguoi_dung : INT <<FK>>
+    emoji : VARCHAR(10)
+    --
+    UNIQUE(ma_tin_nhan, ma_nguoi_dung)
+  }
+
+  ' Kết quả gợi ý AI
+  entity "GOIY_KETQUA" as GoiYKetQua {
+    * id : INT <<PK>>
+    --
+    ma_goi_y_viec_lam : INT <<FK>>
+    ma_tin_tuyen_dung : INT <<FK>>
+    diem : FLOAT
+    ly_do : TEXT
+    ky_nang_khop : TEXT
+    ky_nang_thieu : TEXT
+  }
+}
+
+
+' ========================================
+' QUAN HỆ GIỮA CÁC BẢNG
+' ========================================
+
+' Tài khoản và vai trò
+NguoiDung ||--o| UngVien : "1-1"
+NguoiDung ||--o| NhaTuyenDung : "1-1"
+
+' Kỹ năng
+UngVien ||--o{ UngVienKyNang : "1-n"
+UngVienKyNang }o--|| KyNang : "n-1"
+UngVien ||--o{ UngVienPortfolio : "1-n"
+
+' Tin tuyển dụng
+NhaTuyenDung ||--o{ TinTuyenDung : "1-n"
+TinTuyenDung ||--o{ TinTuyenDungKyNang : "1-n"
+TinTuyenDungKyNang }o--|| KyNang : "n-1"
+
+' Lưu việc làm
+NguoiDung ||--o{ ViecLamDaLuu : "1-n"
+TinTuyenDung ||--o{ ViecLamDaLuu : "1-n"
+
+' Đánh giá công ty
+UngVien ||--o{ DanhGiaCongTy : "1-n"
+NhaTuyenDung ||--o{ DanhGiaCongTy : "1-n"
+HoSoUngTuyen ||--o| DanhGiaCongTy : "1-1"
+
+' Hồ sơ năng lực và các bảng phụ
+UngVien ||--o{ HoSoNangLuc : "1-n"
+HoSoNangLuc ||--o{ HoSoHocVan : "1-n"
+HoSoNangLuc ||--o{ HoSoKinhNghiem : "1-n"
+HoSoNangLuc ||--o{ HoSoChungChi : "1-n"
+HoSoNangLuc ||--o{ HoSoDuAn : "1-n"
+HoSoNangLuc ||--o{ HoSoBaiViet : "1-n"
+HoSoNangLuc ||--o{ HoSoDuAnChiTiet : "1-n"
+HoSoNangLuc ||--o{ HoSoKyNangLapTrinh : "1-n"
+
+' Hồ sơ ứng tuyển
+UngVien ||--o{ HoSoUngTuyen : "1-n"
+TinTuyenDung ||--o{ HoSoUngTuyen : "1-n"
+HoSoNangLuc ||--o{ HoSoUngTuyen : "1-n"
+
+' Lịch phỏng vấn
+HoSoUngTuyen ||--o| LichPhongVan : "1-1"
+
+' Lịch sử hồ sơ
+HoSoUngTuyen ||--o{ LichSu : "1-n"
+NguoiDung ||--o{ LichSu : "1-n"
+
+' Thông báo
+NguoiDung ||--o{ ThongBao : "1-n"
+HoSoUngTuyen ||--o{ ThongBao : "1-n"
+LichPhongVan ||--o{ ThongBao : "1-n"
+TinTuyenDung ||--o{ ThongBao : "1-n"
+ThongBao ||--o{ ThongBaoHanhDong : "1-n"
+
+' Cuộc trò chuyện
+CuocTroChuyen ||--o{ CuocTroChuyenThanhVien : "1-n"
+CuocTroChuyenThanhVien }o--|| NguoiDung : "n-1"
+CuocTroChuyen ||--o{ CuocTroChuyenQuanTri : "1-n"
+CuocTroChuyenQuanTri }o--|| NguoiDung : "n-1"
+HoSoUngTuyen ||--o{ CuocTroChuyen : "1-n"
+TinTuyenDung ||--o{ CuocTroChuyen : "1-n"
+
+' Tin nhắn
+CuocTroChuyen ||--o{ TinNhan : "1-n"
+NguoiDung ||--o{ TinNhan : "1-n"
+TinNhan ||--o{ TinNhanTepDinhKem : "1-n"
+TinNhan ||--o{ TinNhanDaDuocDoc : "1-n"
+TinNhanDaDuocDoc }o--|| NguoiDung : "n-1"
+TinNhan ||--o{ TinNhanPhanUng : "1-n"
+TinNhanPhanUng }o--|| NguoiDung : "n-1"
+TinNhan }o--o| TinNhan : "reply"
+
+' AI gợi ý việc làm
+UngVien ||--o{ GoiYViecLam : "1-n"
+HoSoNangLuc ||--o{ GoiYViecLam : "1-n"
+GoiYViecLam ||--o{ GoiYKetQua : "1-n"
+GoiYKetQua }o--|| TinTuyenDung : "n-1"
+
+' ========================================
+' LEGEND - CHÚ THÍCH
+' ========================================
+legend right
+  |= **Ký hiệu** |= **Ý nghĩa** |
+  | <<PK>> | PRIMARY KEY - Khóa chính |
+  | <<FK>> | FOREIGN KEY - Khóa ngoại |
+  | <<UNIQUE>> | Ràng buộc duy nhất |
+  | INT | Số nguyên 32-bit |
+  | BIGINT | Số nguyên 64-bit |
+  | TINYINT | Số nguyên nhỏ (0-255) |
+  | FLOAT | Số thực độ chính xác đơn |
+  | DECIMAL(p,s) | Số thập phân chính xác |
+  | VARCHAR(n) | Chuỗi ký tự độ dài n |
+  | TEXT | Văn bản dài |
+  | LONGTEXT | Văn bản rất dài (>64KB) |
+  | DATE | Ngày (YYYY-MM-DD) |
+  | DATETIME | Ngày + giờ |
+  | BIT | Boolean (0/1) |
+  | ENUM('a','b') | Tập giá trị cố định |
+  |= **Thống kê** |= |
+  | Tổng bảng chính | 15 bảng |
+  | Tổng bảng phụ/liên kết | 19 bảng |
+  | **TỔNG CỘNG** | **34 bảng** |
+endlegend
+
+' ========================================
+' GHI CHÚ QUAN TRỌNG
+' ========================================
+note top of NguoiDung
+  **Bảng gốc từ MongoDB**
+  Chuyển đổi:
+  - _id → id (INT AUTO_INCREMENT)
+  - ObjectId → INT (FK)
+  - String → VARCHAR
+  - Date → DATETIME
+end note
+
+note top of HoSoNangLuc
+  **Bổ sung 18 trường mới**
+  So với ERD cũ:
+  - Liên hệ: facebook, github, portfolioUrl
+  - File CV: 6 trường
+  - UI Template: 5 trường
+  - AI: markdownGoc, ghiChuAi
+end note
+
+note top of CuocTroChuyen
+  **5 BẢNG MỚI BỔ SUNG**
+  1. ViecLamDaLuu
+  2. LichSuHoSoUngTuyen
+  3. CuocTroChuyen + ThanhVien
+  4. TinNhan + Attachments
+  5. GoiYViecLam
+end note
+
+note bottom of GoiYKetQua
+  **Chuyển từ Embedded → Table**
+  MongoDB: ketQua[] embedded
+  SQL: Tách thành bảng riêng
+  với quan hệ 1-n
+end note
+
+@enduml

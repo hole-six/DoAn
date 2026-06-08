@@ -13,7 +13,7 @@ skinparam activity {
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang thông tin công ty;
-:Hệ thống tải NhaTuyenDung theo NguoiDung hiện tại;
+:Hệ thống tải NhàTuyểnDụng theo NgườiDùng hiện tại;
 if (Có hồ sơ công ty?) then (Có)
   :Hiển thị thông tin công ty hiện tại;
   if (Hồ sơ đang bị từ chối?) then (Có)
@@ -21,42 +21,39 @@ if (Có hồ sơ công ty?) then (Có)
   else (Không)
     :Hiển thị trạng thái duyệt hiện tại;
   endif
+  fork
+    :Nhập tên công ty;
+  fork again
+    :Nhập mã số thuế;
+  fork again
+    :Nhập địa chỉ và website;
+  fork again
+    :Nhập ngành và quy mô;
+  fork again
+    :Nhập mô tả công ty;
+  fork again
+    :Tải logo công ty nếu có;
+  end fork
+  if (Muốn thoát?) then (Có)
+    :Rời trang hoặc không lưu thay đổi;
+  else (Không)
+    :Nhấn nút "Lưu hồ sơ";
+    :Hệ thống kiểm tra dữ liệu công ty;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Cập nhật NhàTuyểnDụng;
+      if (Hồ sơ từng bị từ chối và có cập nhật nội dung?) then (Có)
+        :Gửi ThôngBáo cho quản trị viên duyệt lại;
+      else (Không)
+        :Giữ trạng thái duyệt hiện tại;
+      endif
+      :Hiển thị thông báo lưu hồ sơ công ty thành công;
+    else (Sai)
+      :Hiển thị thông báo lỗi hồ sơ công ty;
+    endif
+  endif
 else (Không)
   :Hiển thị thông báo không tìm thấy hồ sơ công ty;
   :Yêu cầu liên hệ quản trị viên hoặc đăng ký lại đúng vai trò;
-  :Kết thúc nhánh;
 endif
-fork
-  :Nhập tên công ty;
-fork again
-  :Nhập mã số thuế;
-fork again
-  :Nhập địa chỉ và website;
-fork again
-  :Nhập ngành và quy mô;
-fork again
-  :Nhập mô tả công ty;
-fork again
-  :Tải logo công ty nếu có;
-end fork
-if (Muốn thoát?) then (Có)
-  :Rời trang hoặc không lưu thay đổi;
-  :Kết thúc nhánh;
-else (Không)
-  :Nhấn nút "Lưu hồ sơ";
-endif
-:Hệ thống kiểm tra dữ liệu công ty;
-if (Dữ liệu hợp lệ?) then (Đúng)
-  :Cập nhật NhaTuyenDung;
-  if (Hồ sơ từng bị từ chối và có cập nhật nội dung?) then (Có)
-    :Gửi ThongBao cho quản trị viên duyệt lại;
-  else (Không)
-    :Giữ trạng thái duyệt hiện tại;
-  endif
-  :Hiển thị thông báo lưu hồ sơ công ty thành công;
-  :Kết thúc nhánh;
-else (Sai)
-  :Hiển thị thông báo lỗi hồ sơ công ty;
-  stop
-endif
+stop
 @enduml

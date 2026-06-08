@@ -4,15 +4,22 @@
   "description": "API cho website quản lý tuyển dụng việc làm CNTT tại Đà Nẵng",
   "main": "dist/maychu.js",
   "scripts": {
+    "don-port": "node scripts/don-port.cjs",
+    "predev": "node scripts/don-port.cjs",
     "dev": "node scripts/chay-dev.cjs",
     "build": "tsc",
+    "prestart": "node scripts/don-port.cjs",
     "start": "node dist/maychu.js",
-    "seed": "node ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts"
+    "seed": "node ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts",
+    "preprisma:generate": "node scripts/don-port.cjs",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "db:push": "prisma db push --schema prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@types/bull": "^3.15.9",
     "@types/nodemailer": "^8.0.0",
     "@types/pdf-parse": "^1.1.5",
@@ -25,11 +32,11 @@
     "helmet": "^8.1.0",
     "ioredis": "^5.11.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.6.2",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "nodemailer": "^7.0.13",
     "pdf-parse": "^2.4.5",
+    "prisma": "^6.19.3",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "zod": "^4.4.3"

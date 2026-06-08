@@ -13,23 +13,23 @@ skinparam activity {
 start
 :Quản trị viên đăng nhập;
 :Mở trang duyệt tin tuyển dụng;
-:Hệ thống tải TinTuyenDung và NhaTuyenDung liên quan;
+:Hệ thống tải TinTuyểnDụng và NhàTuyểnDụng liên quan;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách tin, công ty, trạng thái và hạn nộp;
   if (Chọn thao tác?) then (Xem chi tiết)
-    :Mở ngăn chi tiết TinTuyenDung;
+    :Mở ngăn chi tiết TinTuyểnDụng;
     :Xem tiêu đề, mô tả, yêu cầu, quyền lợi, kỹ năng và công ty đăng;
     if (Tin đang chờ duyệt?) then (Có)
       if (Quyết định?) then (Duyệt)
         :Nhấn nút "Duyệt";
         :Xác nhận duyệt tin;
-        :Hệ thống cập nhật TinTuyenDung thành dang_mo và ngày đăng hiện tại;
-        :Gửi ThongBao kết quả duyệt tin cho nhà tuyển dụng;
+        :Hệ thống cập nhật TinTuyểnDụng thành đang mở và ngày đăng hiện tại;
+        :Gửi ThôngBáo kết quả duyệt tin cho nhà tuyển dụng;
       else (Từ chối)
         :Nhấn nút "Từ chối";
         :Xác nhận từ chối tin;
-        :Hệ thống cập nhật TinTuyenDung thành tu_choi;
-        :Gửi ThongBao kết quả từ chối cho nhà tuyển dụng;
+        :Hệ thống cập nhật TinTuyểnDụng thành từ chối;
+        :Gửi ThôngBáo kết quả từ chối cho nhà tuyển dụng;
       endif
     else (Không)
       :Chỉ xem chi tiết hoặc đóng ngăn chi tiết;
@@ -37,7 +37,7 @@ if (Tải dữ liệu thành công?) then (Đúng)
   elseif (Chọn xóa tin?) then (Xóa tin)
     :Nhấn nút "Xóa";
     :Xác nhận xóa tin tuyển dụng;
-    :Hệ thống xóa TinTuyenDung nếu được phép;
+    :Hệ thống xóa TinTuyểnDụng nếu được phép;
   else (Gửi gợi ý việc làm)
     :Nhấn nút "Gửi gợi ý việc làm";
     :Hệ thống xem trước danh sách ứng viên có CV chính phù hợp;
@@ -45,9 +45,8 @@ if (Tải dữ liệu thành công?) then (Đúng)
     :Hệ thống gửi email gợi ý việc làm cho ứng viên phù hợp;
   endif
   :Tải lại danh sách tin tuyển dụng;
-  :Kết thúc nhánh;
 else (Sai)
   :Hiển thị thông báo không tải được dữ liệu;
-  stop
 endif
+stop
 @enduml

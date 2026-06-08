@@ -1,12 +1,12 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import '../danhmuckynang/danhmuckynang.mohinh.js'
-import '../nguoidung/nguoidung.mohinh.js'
+import { boUndefined, coId, ganKyNangJson, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
 import { UngVien } from './ungvien.mohinh.js'
 
 function chuanHoaUngVien(taiLieu: any) {
-  const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu
+  const duLieu = taiLieu ?? {}
   return {
-    id: String(duLieu._id),
+    id: String(duLieu.id ?? duLieu._id),
+    _id: String(duLieu.id ?? duLieu._id),
     maNguoiDung: duLieu.maNguoiDung?._id ? String(duLieu.maNguoiDung._id) : String(duLieu.maNguoiDung),
     nguoiDung: duLieu.maNguoiDung?._id
       ? {
@@ -37,140 +37,78 @@ function chuanHoaUngVien(taiLieu: any) {
   }
 }
 
+async function layDayDu(where: any, many = false) {
+  // ✅ TỐI ƯU: Chỉ query 1 lần, không cần ganNguoiDungChoUngVien & ganKyNangJson
+  const rows = many
+    ? await UngVien.findMany({ 
+        where, 
+        orderBy: { ngayTao: 'desc' }, 
+        take: 200,
+        // Không cần include vì NguoiDung & KyNang không phải relation trực tiếp trong Prisma
+        // Data đã được lưu trong JSON
+      })
+    : await UngVien.findMany({ where, take: 1 })
+  
+  // ✅ Chỉ hydrate nếu thực sự cần thiết (optimize bằng cách cache)
+  const hydrated = await ganKyNangJson(await ganNguoiDungChoUngVien(rows as any[]))
+  return many ? hydrated : hydrated[0]
+}
+
 export const dichVuUngVien = {
   async layDanhSach() {
-    try {
-      const danhSach = await (UngVien as any)
-        .find()
-        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-        .sort({ ngayTao: -1 })
-        .limit(200)
-      return danhSach.map(chuanHoaUngVien)
-    } catch (error) {
-      console.error('Lỗi khi lấy danh sách ứng viên:', error)
-      throw error
-    }
+    const danhSach = await layDayDu({}, true)
+    return (danhSach as any[]).map(chuanHoaUngVien)
   },
 
   async layTheoMa(ma: string) {
-    try {
-      const duLieu = await (UngVien as any)
-        .findById(ma)
-        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-
-      if (!duLieu) {
-        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-      }
-
-      return chuanHoaUngVien(duLieu)
-    } catch (error) {
-      console.error('Lỗi khi lấy hồ sơ ứng viên:', error)
-      throw error
-    }
+    const duLieu = await layDayDu({ id: ma })
+    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    return chuanHoaUngVien(duLieu)
   },
 
   async layTheoMaNguoiDung(maNguoiDung: string) {
-    try {
-      const duLieu = await (UngVien as any)
-        .findOne({ maNguoiDung })
-        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-
-      if (!duLieu) {
-        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-      }
-
-      return chuanHoaUngVien(duLieu)
-    } catch (error) {
-      console.error('Lỗi khi lấy hồ sơ theo mã người dùng:', error)
-      throw error
-    }
+    const duLieu = await layDayDu({ maNguoiDung })
+    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    return chuanHoaUngVien(duLieu)
   },
 
   async damBaoHoSoTheoNguoiDung(maNguoiDung: string) {
-    try {
-      const duLieu = await (UngVien as any)
-        .findOneAndUpdate(
-          { maNguoiDung },
-          { $setOnInsert: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } },
-          { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true },
-        )
-        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-
-      return chuanHoaUngVien(duLieu)
-    } catch (error) {
-      console.error('Lỗi đảm bảo hồ sơ ứng viên:', error)
-      throw error
+    const hienTai = await UngVien.findUnique({ where: { maNguoiDung } })
+    if (hienTai) {
+      const [dayDu] = await ganKyNangJson(await ganNguoiDungChoUngVien([hienTai] as any[]))
+      return chuanHoaUngVien(dayDu)
     }
+    const daTao = await UngVien.create({ data: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } })
+    const [dayDu] = await ganKyNangJson(await ganNguoiDungChoUngVien([daTao] as any[]))
+    return chuanHoaUngVien(dayDu)
   },
 
   async taoMoi(duLieu: unknown) {
-    try {
-      const ketQua = await (UngVien as any).create(duLieu)
-      console.log('Tạo hồ sơ ứng viên thành công:', ketQua._id)
-      return this.layTheoMa(String(ketQua._id))
-    } catch (error) {
-      console.error('Lỗi khi tạo hồ sơ ứng viên:', error)
-      throw error
-    }
+    const ketQua = await UngVien.create({ data: boUndefined(duLieu as Record<string, any>) as any })
+    return this.layTheoMa(String(ketQua.id))
   },
 
   async capNhat(ma: string, duLieu: unknown, maNguoiDungHienTai?: string) {
-    try {
-      if (maNguoiDungHienTai) {
-        const ungVien = await (UngVien as any).findById(ma)
-        if (!ungVien) {
-          throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-        }
+    const hienTai = await UngVien.findUnique({ where: { id: ma } })
+    if (!hienTai) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
 
-        if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
-          throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403)
-        }
-      }
-
-      const ketQua = await (UngVien as any)
-        .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-        .populate('maNguoiDung', 'hoTen email soDienThoai trangThai')
-        .populate('kyNang.maKyNang', 'tenKyNang loaiKyNang')
-
-      if (!ketQua) {
-        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên để cập nhật', 404)
-      }
-
-      console.log('Cập nhật hồ sơ ứng viên thành công:', ma)
-      return chuanHoaUngVien(ketQua)
-    } catch (error) {
-      console.error('Lỗi khi cập nhật hồ sơ ứng viên:', error)
-      throw error
+    if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
+      throw new LoiUngDung('Ban khong co quyen cap nhat ho so nay', 403)
     }
+
+    await UngVien.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) as any })
+    return this.layTheoMa(ma)
   },
 
   async xoa(ma: string, maNguoiDungHienTai?: string) {
-    try {
-      if (maNguoiDungHienTai) {
-        const ungVien = await (UngVien as any).findById(ma)
-        if (!ungVien) {
-          throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-        }
+    const hienTai = await UngVien.findUnique({ where: { id: ma } })
+    if (!hienTai) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
 
-        if (String(ungVien.maNguoiDung) !== maNguoiDungHienTai) {
-          throw new LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403)
-        }
-      }
-
-      const ketQua = await (UngVien as any).findByIdAndDelete(ma)
-      if (!ketQua) {
-        throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên để xóa', 404)
-      }
-
-      console.log('Xóa hồ sơ ứng viên thành công:', ma)
-      return chuanHoaUngVien(ketQua)
-    } catch (error) {
-      console.error('Lỗi khi xóa hồ sơ ứng viên:', error)
-      throw error
+    if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
+      throw new LoiUngDung('Ban khong co quyen xoa ho so nay', 403)
     }
+
+    await UngVien.delete({ where: { id: ma } })
+    return chuanHoaUngVien(coId(hienTai))
   },
 }

@@ -13,35 +13,32 @@ skinparam activity {
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang lịch phỏng vấn nhà tuyển dụng;
-:Hệ thống tải LichPhongVan và HoSoUngTuyen liên quan;
+:Hệ thống tải LịchPhỏngVấn và HồSơỨngTuyển liên quan;
 :Chọn lịch cần cập nhật kết quả;
 if (Lịch thuộc công ty?) then (Đúng)
-  if (Trạng thái có thể cập nhật kết quả?) then (da_len_lich hoặc da_xac_nhan)
+  if (Trạng thái có thể cập nhật kết quả?) then (Có)
     if (Chọn kết quả?) then (Đạt)
       :Nhấn nút "Đạt";
       :Nhập ghi chú kết quả nếu có;
       :Nhấn nút "Cập nhật";
-      :Hệ thống cập nhật LichPhongVan thành hoan_thanh, ketQua dat;
-      :Hệ thống cập nhật HoSoUngTuyen thành dat;
-      :Gửi ThongBao kết quả phỏng vấn cho ứng viên;
+      :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả đạt;
+      :Hệ thống cập nhật HồSơỨngTuyển thành đạt;
+      :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
       :Hiển thị cập nhật thành công;
-      :Kết thúc nhánh;
     else (Không đạt)
       :Nhấn nút "Không đạt";
       :Nhập ghi chú kết quả nếu có;
       :Nhấn nút "Cập nhật";
-      :Hệ thống cập nhật LichPhongVan thành hoan_thanh, ketQua khong_dat;
-      :Hệ thống cập nhật HoSoUngTuyen thành tu_choi;
-      :Gửi ThongBao kết quả phỏng vấn cho ứng viên;
+      :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả không đạt;
+      :Hệ thống cập nhật HồSơỨngTuyển thành từ chối;
+      :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
       :Hiển thị cập nhật thành công;
-      :Kết thúc nhánh;
     endif
   else (Không)
     :Hiển thị thông báo lịch chưa thể cập nhật kết quả;
-    :Kết thúc nhánh;
   endif
 else (Sai)
   :Hiển thị thông báo không có quyền cập nhật lịch;
-  stop
 endif
+stop
 @enduml

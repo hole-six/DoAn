@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.xuLyLoi = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
 const zod_1 = require("zod");
 const loiungdung_js_1 = require("./loiungdung.js");
 const xuLyLoi = (loi, _yeuCau, phanHoi, _tiepTheo) => {
@@ -18,34 +14,20 @@ const xuLyLoi = (loi, _yeuCau, phanHoi, _tiepTheo) => {
             actionHint: 'Kiem tra lai du lieu da nhap va thu lai',
         });
     }
-    if (loi instanceof mongoose_1.default.Error.ValidationError) {
-        const fieldErrors = Object.entries(loi.errors).reduce((acc, [field, error]) => {
-            acc[field] = [error.message];
-            return acc;
-        }, {});
-        return phanHoi.status(422).json({
-            code: 'MONGOOSE_VALIDATION_ERROR',
-            message: loi.message,
-            thongBao: loi.message,
-            fieldErrors,
-            loi: fieldErrors,
-            actionHint: 'Kiem tra lai du lieu da nhap va thu lai',
-        });
-    }
-    if (loi instanceof mongoose_1.default.Error.CastError) {
-        return phanHoi.status(400).json({
-            code: 'MONGOOSE_CAST_ERROR',
-            message: loi.message,
-            thongBao: loi.message,
-            actionHint: 'Du lieu dinh danh khong hop le, hay tai lai trang va thu lai',
-        });
-    }
-    if (typeof loi === 'object' && loi && 'code' in loi && loi.code === 11000) {
+    if (typeof loi === 'object' && loi && 'code' in loi && (loi.code === 11000 || loi.code === 'P2002')) {
         return phanHoi.status(409).json({
             code: 'DUPLICATE_KEY',
             message: 'Du lieu da ton tai',
             thongBao: 'Du lieu da ton tai',
             actionHint: 'Kiem tra lai gia tri trung lap',
+        });
+    }
+    if (typeof loi === 'object' && loi && 'code' in loi && loi.code === 'P2025') {
+        return phanHoi.status(404).json({
+            code: 'RECORD_NOT_FOUND',
+            message: 'Không tìm thấy dữ liệu',
+            thongBao: 'Không tìm thấy dữ liệu',
+            actionHint: 'Tải lại trang và thử lại',
         });
     }
     if (typeof loi === 'object' && loi && 'type' in loi && loi.type === 'entity.too.large') {

@@ -21,6 +21,11 @@ export const ganNguoiDungNeuCo: RequestHandler = async (yeuCau, _phanHoi, tiepTh
 }
 
 export const yeuCauDangNhap: RequestHandler = async (yeuCau, _phanHoi, tiepTheo) => {
+  if ((yeuCau as any).nguoiDung) {
+    tiepTheo()
+    return
+  }
+
   try {
     const nguoiDung = await layNguoiDungTuAccessToken(yeuCau.headers.authorization)
     ;(yeuCau as any).nguoiDung = { ...nguoiDung, _id: nguoiDung.id }

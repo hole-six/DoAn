@@ -1,20 +1,45 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuHoSoUngTuyen = void 0;
+exports.hydrateHoSoUngTuyenNoiBo = hydrateHoSoUngTuyenNoiBo;
+exports.layHoSoUngTuyenDayDuNoiBo = layHoSoUngTuyenDayDuNoiBo;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-require("../hosonangluc/hosonangluc.mohinh.js");
-require("../nhatuyendung/nhatuyendung.mohinh.js");
-require("../nguoidung/nguoidung.mohinh.js");
-require("../tintuyendung/tintuyendung.mohinh.js");
-require("../ungvien/ungvien.mohinh.js");
-const nhatuyendung_mohinh_js_1 = require("../nhatuyendung/nhatuyendung.mohinh.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
+const prisma_js_1 = require("../../cauhinh/prisma.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const hosoungtuyen_mohinh_js_1 = require("./hosoungtuyen.mohinh.js");
+async function hydrateUngTuyen(rows) {
+    const ungVienIds = [...new Set(rows.map(row => row.maUngVien).filter(Boolean))];
+    const tinIds = [...new Set(rows.map(row => row.maTinTuyenDung).filter(Boolean))];
+    const hoSoIds = [...new Set(rows.map(row => row.maHoSoNangLuc).filter(Boolean))];
+    const [ungVienRows, tinRows, hoSoRows] = await Promise.all([
+        prisma_js_1.prisma.ungVien.findMany({ where: { id: { in: ungVienIds } } }),
+        prisma_js_1.prisma.tinTuyenDung.findMany({ where: { id: { in: tinIds } } }),
+        hoSoIds.length ? prisma_js_1.prisma.hoSoNangLuc.findMany({ where: { id: { in: hoSoIds } } }) : Promise.resolve([]),
+    ]);
+    const [ungVienDayDu, tinDayDu] = await Promise.all([
+        (0, prismaHelper_js_1.ganNguoiDungChoUngVien)(ungVienRows),
+        (0, prismaHelper_js_1.ganCongTyChoTin)(tinRows),
+    ]);
+    const ungVienMap = new Map(ungVienDayDu.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
+    const tinMap = new Map(tinDayDu.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
+    const hoSoMap = new Map(hoSoRows.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
+    return rows.map(row => (0, prismaHelper_js_1.coId)({
+        ...row,
+        maUngVien: ungVienMap.get(row.maUngVien) ?? row.maUngVien,
+        maTinTuyenDung: tinMap.get(row.maTinTuyenDung) ?? row.maTinTuyenDung,
+        maHoSoNangLuc: row.maHoSoNangLuc ? (hoSoMap.get(row.maHoSoNangLuc) ?? row.maHoSoNangLuc) : null,
+    }));
+}
+async function hydrateHoSoUngTuyenNoiBo(rows) {
+    return hydrateUngTuyen(rows);
+}
 function chuanHoaUngTuyen(taiLieu) {
-    const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
+    const duLieu = taiLieu ?? {};
     const tin = duLieu.maTinTuyenDung;
     return {
-        id: String(duLieu._id),
+        id: String(duLieu.id ?? duLieu._id),
+        _id: String(duLieu.id ?? duLieu._id),
         maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
         maTinTuyenDung: tin?._id ? String(tin._id) : String(tin),
         maHoSoNangLuc: duLieu.maHoSoNangLuc?._id ? String(duLieu.maHoSoNangLuc._id) : duLieu.maHoSoNangLuc ? String(duLieu.maHoSoNangLuc) : undefined,
@@ -31,13 +56,7 @@ function chuanHoaUngTuyen(taiLieu) {
                 nhaTuyenDung: tin.maNhaTuyenDung?._id
                     ? {
                         id: String(tin.maNhaTuyenDung._id),
-                        maNguoiDung: tin.maNhaTuyenDung.maNguoiDung?._id
-                            ? {
-                                id: String(tin.maNhaTuyenDung.maNguoiDung._id),
-                                hoTen: tin.maNhaTuyenDung.maNguoiDung.hoTen,
-                                email: tin.maNhaTuyenDung.maNguoiDung.email,
-                            }
-                            : tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
+                        maNguoiDung: tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
                         tenCongTy: tin.maNhaTuyenDung.tenCongTy,
                         logo: tin.maNhaTuyenDung.logo,
                     }
@@ -107,36 +126,30 @@ function chuanHoaUngTuyen(taiLieu) {
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
-function query() {
-    return hosoungtuyen_mohinh_js_1.HoSoUngTuyen
-        .find()
-        .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-        .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-        .populate('maHoSoNangLuc');
+async function layDayDu(where, many = false) {
+    const rows = many
+        ? await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findMany({ where, orderBy: { ngayNop: 'desc' }, take: 300 })
+        : await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findMany({ where, take: 1 });
+    const hydrated = await hydrateUngTuyen(rows);
+    return many ? hydrated : hydrated[0];
 }
 exports.dichVuHoSoUngTuyen = {
     async layDanhSach() {
-        const danhSach = await query().sort({ ngayNop: -1 }).limit(300);
+        const danhSach = await layDayDu({}, true);
         return danhSach.map(chuanHoaUngTuyen);
     },
     async layTheoMa(ma) {
-        const duLieu = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
-            .findById(ma)
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-            .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-            .populate('maHoSoNangLuc');
+        const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404);
         return chuanHoaUngTuyen(duLieu);
     },
     async taoMoi(duLieu) {
         try {
-            const ketQua = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.create(duLieu);
-            const hoSoMoi = await this.layTheoMa(String(ketQua._id));
+            const ketQua = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+            const hoSoMoi = await this.layTheoMa(String(ketQua.id));
             try {
-                const maCongTy = hoSoMoi.tinTuyenDung?.nhaTuyenDung?.id;
-                const congTy = maCongTy ? await nhatuyendung_mohinh_js_1.NhaTuyenDung.findById(maCongTy).select('maNguoiDung') : null;
-                const maNguoiDungNhaTuyenDung = String(congTy?.maNguoiDung ?? '');
+                const maNguoiDungNhaTuyenDung = String(hoSoMoi.tinTuyenDung?.nhaTuyenDung?.maNguoiDung ?? '');
                 if (maNguoiDungNhaTuyenDung) {
                     await (0, thongbao_helper_js_1.thongBaoHoSoMoiUngTuyen)({
                         maNhaTuyenDung: maNguoiDungNhaTuyenDung,
@@ -153,25 +166,17 @@ exports.dichVuHoSoUngTuyen = {
             return hoSoMoi;
         }
         catch (loi) {
-            if (loi?.code === 11000)
+            if (loi?.code === 'P2002')
                 throw new loiungdung_js_1.LoiUngDung('Ban da ung tuyen tin nay', 409);
             throw loi;
         }
     },
     async capNhat(ma, duLieu) {
-        const truocKhiCapNhat = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
-            .findById(ma)
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-            .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-            .populate('maHoSoNangLuc');
-        const ketQua = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen
-            .findByIdAndUpdate(ma, duLieu, { returnDocument: 'after', runValidators: true })
-            .populate({ path: 'maTinTuyenDung', populate: { path: 'maNhaTuyenDung', select: 'tenCongTy logo maNguoiDung', populate: { path: 'maNguoiDung', select: 'hoTen email' } } })
-            .populate({ path: 'maUngVien', populate: { path: 'maNguoiDung', select: 'hoTen email soDienThoai' } })
-            .populate('maHoSoNangLuc');
-        if (!ketQua)
+        const truocKhiCapNhat = await layDayDu({ id: ma });
+        if (!truocKhiCapNhat)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404);
-        const ketQuaChuanHoa = chuanHoaUngTuyen(ketQua);
+        await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
+        const ketQuaChuanHoa = await this.layTheoMa(ma);
         try {
             const trangThaiCu = String(truocKhiCapNhat?.trangThai ?? '');
             const trangThaiMoi = String(ketQuaChuanHoa.trangThai ?? '');
@@ -179,12 +184,7 @@ exports.dichVuHoSoUngTuyen = {
             const tenCongTy = ketQuaChuanHoa.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? 'Cong ty';
             const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen';
             if (trangThaiCu !== 'da_xem' && trangThaiMoi === 'da_xem' && maNguoiDungUngVien) {
-                await (0, thongbao_helper_js_1.thongBaoHoSoDuocXem)({
-                    maUngVien: maNguoiDungUngVien,
-                    tenCongTy,
-                    viTriUngTuyen,
-                    maHoSoUngTuyen: ketQuaChuanHoa.id,
-                });
+                await (0, thongbao_helper_js_1.thongBaoHoSoDuocXem)({ maUngVien: maNguoiDungUngVien, tenCongTy, viTriUngTuyen, maHoSoUngTuyen: ketQuaChuanHoa.id });
             }
             if (trangThaiCu !== trangThaiMoi && ['dat', 'tu_choi'].includes(trangThaiMoi) && maNguoiDungUngVien) {
                 await (0, thongbao_helper_js_1.thongBaoHeThong)({
@@ -202,9 +202,13 @@ exports.dichVuHoSoUngTuyen = {
         return ketQuaChuanHoa;
     },
     async xoa(ma) {
-        const ketQua = await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findByIdAndDelete(ma);
-        if (!ketQua)
+        const hienTai = await layDayDu({ id: ma });
+        if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404);
-        return chuanHoaUngTuyen(ketQua);
+        await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.delete({ where: { id: ma } });
+        return chuanHoaUngTuyen(hienTai);
     },
 };
+async function layHoSoUngTuyenDayDuNoiBo(ma) {
+    return layDayDu({ id: ma });
+}

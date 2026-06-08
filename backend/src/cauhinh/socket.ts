@@ -2,7 +2,7 @@
 import { Server as SocketIOServer } from 'socket.io'
 import { bienMoiTruong } from './bienmoitruong.js'
 import jwt from 'jsonwebtoken'
-import { NguoiDung } from '../modules/nguoidung/nguoidung.mohinh.js'
+import { prisma } from './prisma.js'
 
 export interface NguoiDungSocket {
   _id: string
@@ -59,13 +59,16 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
         return next(new Error('Token khong hop le'))
       }
 
-      const nguoiDung = await (NguoiDung as any).findById(decoded.sub).select('_id email vaiTro trangThai')
+      const nguoiDung = await prisma.nguoiDung.findUnique({
+        where: { id: decoded.sub },
+        select: { id: true, email: true, vaiTro: true, trangThai: true },
+      })
       if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
         return next(new Error('Tai khoan khong con hieu luc'))
       }
 
       ;(socket as SocketXacThuc).nguoiDung = {
-        _id: String(nguoiDung._id),
+        _id: String(nguoiDung.id),
         email: nguoiDung.email,
         vaiTro: nguoiDung.vaiTro,
       }

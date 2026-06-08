@@ -15,24 +15,24 @@ import { LichPhongVan } from './lichphongvan.mohinh.js'
 async function kiemTraQuyenLichPhongVan(yeuCau: any, _phanHoi: any, tiepTheo: any) {
   const nguoiDung = yeuCau.nguoiDung
   const ma = String(yeuCau.params.ma ?? '')
-  const lich = await (LichPhongVan as any).findById(ma).populate('maHoSoUngTuyen')
+  const lich = await LichPhongVan.findUnique({ where: { id: ma } })
   if (!lich) throw new LoiUngDung('Không tìm thấy lịch phỏng vấn', 404, 'NOT_FOUND')
 
-  const hoSo = await (HoSoUngTuyen as any).findById(lich.maHoSoUngTuyen?._id ?? lich.maHoSoUngTuyen).select('maUngVien maTinTuyenDung')
+  const hoSo = await HoSoUngTuyen.findUnique({ where: { id: lich.maHoSoUngTuyen }, select: { maUngVien: true, maTinTuyenDung: true } })
   if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'NOT_FOUND')
 
   const vaiTro = String(nguoiDung.vaiTro ?? '')
   if (vaiTro === 'ung_vien') {
-    const ungVien = await (UngVien as any).findOne({ maNguoiDung: nguoiDung.id }).select('_id')
-    if (!ungVien || String(ungVien._id) !== String(hoSo.maUngVien)) {
+    const ungVien = await UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
+    if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
       throw new LoiUngDung('Bạn không có quyền cập nhật lịch phỏng vấn này', 403, 'FORBIDDEN')
     }
   }
 
   if (vaiTro === 'nha_tuyen_dung') {
-    const congTy = await (NhaTuyenDung as any).findOne({ maNguoiDung: nguoiDung.id }).select('_id')
-    const tin = await (TinTuyenDung as any).findById(hoSo.maTinTuyenDung).select('maNhaTuyenDung')
-    if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+    const congTy = await NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
+    const tin = await TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } })
+    if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
       throw new LoiUngDung('Bạn không có quyền cập nhật lịch phỏng vấn này', 403, 'FORBIDDEN')
     }
   }

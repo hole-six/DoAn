@@ -31,7 +31,7 @@ const taiAnhTin = multer({
 })
 
 async function layCongTyTheoNguoiDung(maNguoiDung: string) {
-  return (NhaTuyenDung as any).findOne({ maNguoiDung }).select('_id trangThaiDuyet')
+  return NhaTuyenDung.findUnique({ where: { maNguoiDung }, select: { id: true, trangThaiDuyet: true } })
 }
 
 const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
@@ -49,7 +49,7 @@ const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => 
 
     yeuCau.body = {
       ...yeuCau.body,
-      maNhaTuyenDung: String(congTy._id),
+      maNhaTuyenDung: String(congTy.id),
       trangThai: 'cho_duyet',
     }
   }
@@ -64,7 +64,7 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
   }
 
   const ma = String(yeuCau.params.ma ?? '')
-  const tin = await (TinTuyenDung as any).findById(ma)
+  const tin = await TinTuyenDung.findUnique({ where: { id: ma } })
   if (!tin) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
 
   if (nguoiDung.vaiTro === 'admin') {
@@ -78,7 +78,7 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
   const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
   if (!congTy) throw new LoiUngDung('Tài khoản này chưa có hồ sơ nhà tuyển dụng', 422)
 
-  if (String(tin.maNhaTuyenDung) !== String(congTy._id)) {
+  if (String(tin.maNhaTuyenDung) !== String(congTy.id)) {
     throw new LoiUngDung('Bạn không có quyền sửa tin tuyển dụng nay', 403)
   }
 
@@ -100,7 +100,7 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
 
     yeuCau.body = {
       ...yeuCau.body,
-      maNhaTuyenDung: String(congTy._id),
+      maNhaTuyenDung: String(congTy.id),
     }
   }
 

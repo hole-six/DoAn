@@ -13,29 +13,26 @@ skinparam activity {
 start
 :Quản trị viên đăng nhập;
 :Mở trang duyệt đánh giá công ty;
-:Hệ thống tải danh sách DanhGiaCongTy;
+:Hệ thống tải danh sách ĐánhGiáCôngTy;
 if (Có đánh giá?) then (Có)
   :Chọn một đánh giá công ty;
   :Xem điểm sao, nội dung, ngày tạo và trạng thái duyệt;
   if (Quyết định xử lý?) then (Duyệt)
     :Nhấn nút "Duyệt";
-    :Xác nhận duyệt review;
-    :Hệ thống cập nhật DanhGiaCongTy daDuyet = true;
+    :Xác nhận duyệt đánh giá;
+    :Hệ thống cập nhật ĐánhGiáCôngTy daDuyet = true;
     :Hiển thị đánh giá đã được duyệt;
-    :Kết thúc nhánh;
   else (Xóa)
     :Nhấn nút "Xóa";
     if (Xác nhận thao tác?) then (Có)
-      :Hệ thống xóa DanhGiaCongTy;
+      :Hệ thống xóa ĐánhGiáCôngTy;
       :Hiển thị thông báo đã xử lý đánh giá;
-      :Kết thúc nhánh;
     else (Không)
       :Đóng hộp xác nhận;
-      :Kết thúc nhánh;
     endif
   endif
 else (Không)
   :Hiển thị trạng thái không có đánh giá;
-  stop
 endif
+stop
 @enduml

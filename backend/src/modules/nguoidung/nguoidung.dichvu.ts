@@ -1,13 +1,14 @@
-﻿import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs'
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { boUndefined, coId } from '../../dungchung/prismaHelper.js'
 import { NguoiDung } from './nguoidung.mohinh.js'
 
 type DuLieuNguoiDung = {
-  _id: unknown
+  id: string
   email: string
   matKhau?: string
   hoTen: string
-  soDienThoai?: string
+  soDienThoai?: string | null
   vaiTro: 'ung_vien' | 'nha_tuyen_dung' | 'admin'
   trangThai: 'hoat_dong' | 'tam_khoa' | 'bi_khoa'
   ngayTao?: Date
@@ -25,7 +26,8 @@ type DuLieuCapNhatNguoiDung = Partial<{
 
 function boMatKhau(nguoiDung: DuLieuNguoiDung) {
   return {
-    id: String(nguoiDung._id),
+    id: String(nguoiDung.id),
+    _id: String(nguoiDung.id),
     email: nguoiDung.email,
     hoTen: nguoiDung.hoTen,
     soDienThoai: nguoiDung.soDienThoai,
@@ -38,48 +40,39 @@ function boMatKhau(nguoiDung: DuLieuNguoiDung) {
 
 async function bamMatKhauNeuCo(duLieu: DuLieuCapNhatNguoiDung) {
   if (!duLieu.matKhau) return duLieu
-
-  return {
-    ...duLieu,
-    matKhau: await bcrypt.hash(duLieu.matKhau, 10),
-  }
+  return { ...duLieu, matKhau: await bcrypt.hash(duLieu.matKhau, 10) }
 }
 
 export const dichVuNguoiDung = {
   async layDanhSach() {
-    const danhSach = await (NguoiDung as any).find().sort({ ngayTao: -1 }).limit(200) as DuLieuNguoiDung[]
-    return danhSach.map(boMatKhau)
+    const danhSach = await NguoiDung.findMany({ orderBy: { ngayTao: 'desc' }, take: 200 })
+    return danhSach.map(boMatKhau as any)
   },
 
   async layTheoMa(ma: string) {
-    const nguoiDung = await (NguoiDung as any).findById(ma) as DuLieuNguoiDung | null
-
-    if (!nguoiDung) {
-      throw new LoiUngDung('Không tìm thấy người dùng', 404)
-    }
-
+    const nguoiDung = await NguoiDung.findUnique({ where: { id: ma } }) as DuLieuNguoiDung | null
+    if (!nguoiDung) throw new LoiUngDung('Không tìm thấy người dùng', 404)
     return boMatKhau(nguoiDung)
   },
 
   async taoMoi(duLieuNhan: unknown) {
     const duLieu = duLieuNhan as DuLieuCapNhatNguoiDung
     const email = duLieu.email?.toLowerCase().trim()
-
     if (!email || !duLieu.matKhau || !duLieu.hoTen) {
       throw new LoiUngDung('Thieu thong tin tao nguoi dung', 422)
     }
 
-    const daTonTai = await (NguoiDung as any).exists({ email })
-    if (daTonTai) {
-      throw new LoiUngDung('Email da ton tai', 409)
-    }
+    const daTonTai = await NguoiDung.findUnique({ where: { email }, select: { id: true } })
+    if (daTonTai) throw new LoiUngDung('Email da ton tai', 409)
 
-    const nguoiDung = await (NguoiDung as any).create(await bamMatKhauNeuCo({
-      ...duLieu,
-      email,
-      trangThai: duLieu.trangThai ?? 'hoat_dong',
-      vaiTro: duLieu.vaiTro ?? 'ung_vien',
-    })) as DuLieuNguoiDung
+    const nguoiDung = await NguoiDung.create({
+      data: boUndefined(await bamMatKhauNeuCo({
+        ...duLieu,
+        email,
+        trangThai: duLieu.trangThai ?? 'hoat_dong',
+        vaiTro: duLieu.vaiTro ?? 'ung_vien',
+      })) as any,
+    }) as DuLieuNguoiDung
 
     return boMatKhau(nguoiDung)
   },
@@ -90,47 +83,36 @@ export const dichVuNguoiDung = {
 
     if (duLieuCapNhat.email) {
       duLieuCapNhat.email = duLieuCapNhat.email.toLowerCase().trim()
-      const trungEmail = await (NguoiDung as any).exists({ email: duLieuCapNhat.email, _id: { $ne: ma } })
-      if (trungEmail) {
-        throw new LoiUngDung('Email da duoc su dung boi tai khoan khac', 409)
-      }
+      const trungEmail = await NguoiDung.findFirst({
+        where: { email: duLieuCapNhat.email, id: { not: ma } },
+        select: { id: true },
+      })
+      if (trungEmail) throw new LoiUngDung('Email da duoc su dung boi tai khoan khac', 409)
     }
 
-    if (!duLieuCapNhat.matKhau) {
-      delete duLieuCapNhat.matKhau
-    }
+    if (!duLieuCapNhat.matKhau) delete duLieuCapNhat.matKhau
 
-    const nguoiDung = await (NguoiDung as any).findByIdAndUpdate(
-      ma,
-      await bamMatKhauNeuCo(duLieuCapNhat),
-      { returnDocument: 'after', runValidators: true },
-    ) as DuLieuNguoiDung | null
+    const hienTai = await NguoiDung.findUnique({ where: { id: ma }, select: { id: true } })
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy người dùng de cap nhat', 404)
 
-    if (!nguoiDung) {
-      throw new LoiUngDung('Không tìm thấy người dùng de cap nhat', 404)
-    }
+    const nguoiDung = await NguoiDung.update({
+      where: { id: ma },
+      data: boUndefined(await bamMatKhauNeuCo(duLieuCapNhat)) as any,
+    }) as DuLieuNguoiDung
 
     return boMatKhau(nguoiDung)
   },
 
   async xoa(ma: string) {
-    const nguoiDung = await (NguoiDung as any).findById(ma) as DuLieuNguoiDung | null
-
-    if (!nguoiDung) {
-      throw new LoiUngDung('Không tìm thấy người dùng de xoa', 404)
-    }
+    const nguoiDung = await NguoiDung.findUnique({ where: { id: ma } }) as DuLieuNguoiDung | null
+    if (!nguoiDung) throw new LoiUngDung('Không tìm thấy người dùng de xoa', 404)
 
     if (nguoiDung.vaiTro === 'admin') {
-      const soAdmin = await (NguoiDung as any).countDocuments({ vaiTro: 'admin' })
-      if (soAdmin <= 1) {
-        throw new LoiUngDung('Không thể xóa admin cuối cùng của hệ thống', 409)
-      }
+      const soAdmin = await NguoiDung.count({ where: { vaiTro: 'admin' } })
+      if (soAdmin <= 1) throw new LoiUngDung('Không thể xóa admin cuối cùng của hệ thống', 409)
     }
 
-    await (NguoiDung as any).findByIdAndDelete(ma)
-    return boMatKhau(nguoiDung)
+    await NguoiDung.delete({ where: { id: ma } })
+    return boMatKhau(coId(nguoiDung) as any)
   },
 }
-
-
-

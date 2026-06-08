@@ -13,7 +13,7 @@ exports.layDanhSachUserOnline = layDanhSachUserOnline;
 const socket_io_1 = require("socket.io");
 const bienmoitruong_js_1 = require("./bienmoitruong.js");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const nguoidung_mohinh_js_1 = require("../modules/nguoidung/nguoidung.mohinh.js");
+const prisma_js_1 = require("./prisma.js");
 let io = null;
 const usersOnline = new Map(); // userId -> [socketId1, socketId2, ...]
 const typingUsers = new Map(); // conversationId -> Set<userId>
@@ -43,13 +43,16 @@ function khoiTaoSocket(httpServer) {
             if (decoded.loai && decoded.loai !== 'access') {
                 return next(new Error('Token khong hop le'));
             }
-            const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findById(decoded.sub).select('_id email vaiTro trangThai');
+            const nguoiDung = await prisma_js_1.prisma.nguoiDung.findUnique({
+                where: { id: decoded.sub },
+                select: { id: true, email: true, vaiTro: true, trangThai: true },
+            });
             if (!nguoiDung || nguoiDung.trangThai !== 'hoat_dong') {
                 return next(new Error('Tai khoan khong con hieu luc'));
             }
             ;
             socket.nguoiDung = {
-                _id: String(nguoiDung._id),
+                _id: String(nguoiDung.id),
                 email: nguoiDung.email,
                 vaiTro: nguoiDung.vaiTro,
             };

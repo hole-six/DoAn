@@ -12,10 +12,10 @@ skinparam activity {
 }
 start
 :Người dùng đã đăng nhập mở trang hồ sơ hoặc cài đặt tài khoản;
-:Hệ thống tải NguoiDung hiện tại;
+:Hệ thống tải NgườiDùng hiện tại;
 if (Tải dữ liệu thành công?) then (Đúng)
   if (Vai trò ứng viên?) then (Có)
-    :Hệ thống tải UngVien theo NguoiDung;
+    :Hệ thống tải ỨngViên theo NgườiDùng;
     fork
       :Cập nhật họ tên;
     fork again
@@ -38,26 +38,23 @@ if (Tải dữ liệu thành công?) then (Đúng)
   endif
   if (Muốn hủy?) then (Có)
     :Nhấn nút "Hủy" hoặc rời trang;
-    :Kết thúc nhánh;
   else (Không)
     :Nhấn nút "Cập nhật" hoặc "Lưu";
-  endif
-  :Hệ thống kiểm tra dữ liệu tài khoản;
-  if (Dữ liệu hợp lệ?) then (Đúng)
-    :Cập nhật NguoiDung;
-    if (Có thay đổi hồ sơ ứng viên?) then (Có)
-      :Cập nhật UngVien;
-    else (Không)
-      :Giữ nguyên dữ liệu hồ sơ vai trò;
+    :Hệ thống kiểm tra dữ liệu tài khoản;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Cập nhật NgườiDùng;
+      if (Có thay đổi hồ sơ ứng viên?) then (Có)
+        :Cập nhật ỨngViên;
+      else (Không)
+        :Giữ nguyên dữ liệu hồ sơ vai trò;
+      endif
+      :Hiển thị thông báo cập nhật thành công;
+    else (Sai)
+      :Hiển thị thông báo lỗi;
     endif
-    :Hiển thị thông báo cập nhật thành công;
-    :Kết thúc nhánh;
-  else (Sai)
-    :Hiển thị thông báo lỗi;
-    :Kết thúc nhánh;
   endif
 else (Sai)
   :Yêu cầu đăng nhập lại;
-  stop
 endif
+stop
 @enduml

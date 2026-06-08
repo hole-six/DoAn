@@ -12,25 +12,25 @@ skinparam activity {
 }
 start
 :Quản trị viên đăng nhập;
-:Mở dashboard quản trị;
-if (Phiên đăng nhập hợp lệ và vai trò admin?) then (Đúng)
+:Mở bảng điều khiển quản trị;
+if (Phiên đăng nhập hợp lệ và vai trò quản trị viên?) then (Đúng)
   fork
-    :Hệ thống tải NguoiDung;
+    :Hệ thống tải NgườiDùng;
   fork again
-    :Hệ thống tải NhaTuyenDung;
+    :Hệ thống tải NhàTuyểnDụng;
   fork again
-    :Hệ thống tải TinTuyenDung;
+    :Hệ thống tải TinTuyểnDụng;
   fork again
-    :Hệ thống tải HoSoUngTuyen;
+    :Hệ thống tải HồSơỨngTuyển;
   fork again
-    :Hệ thống tải CanhBaoQuanTri;
+    :Hệ thống tải CảnhBáoQuảnTrị;
   end fork
   if (Tải dữ liệu thành công?) then (Đúng)
     :Tổng hợp tổng người dùng và tài khoản hoạt động;
     :Tổng hợp việc làm đang mở và tin chờ duyệt;
     :Tổng hợp công ty chờ duyệt;
     :Tổng hợp hồ sơ ứng tuyển mới trong 24 giờ;
-    :Hiển thị cảnh báo vận hành từ CanhBaoQuanTri;
+    :Hiển thị cảnh báo vận hành từ CảnhBáoQuảnTrị;
     :Hiển thị danh sách tin tuyển dụng chờ duyệt;
     if (Quản trị viên chọn thao tác nhanh?) then (Người dùng)
       :Điều hướng tới trang quản lý người dùng;
@@ -41,14 +41,12 @@ if (Phiên đăng nhập hợp lệ và vai trò admin?) then (Đúng)
     else (Cài đặt)
       :Điều hướng tới trang cài đặt quản trị;
     endif
-    :Kết thúc nhánh;
   else (Sai)
-    :Hiển thị thông báo không tải được dữ liệu dashboard;
+    :Hiển thị thông báo không tải được dữ liệu bảng điều khiển;
     :Cho phép nhấn tải lại;
-    :Kết thúc nhánh;
   endif
 else (Sai)
   :Điều hướng tới trang đăng nhập hoặc báo không có quyền;
-  stop
 endif
+stop
 @enduml

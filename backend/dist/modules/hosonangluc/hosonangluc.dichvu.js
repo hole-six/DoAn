@@ -2,12 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuHoSoNangLuc = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-require("../ungvien/ungvien.mohinh.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const hosonangluc_mohinh_js_1 = require("./hosonangluc.mohinh.js");
 function chuanHoaHoSo(taiLieu) {
-    const duLieu = typeof taiLieu.toObject === 'function' ? taiLieu.toObject() : taiLieu;
+    const duLieu = taiLieu ?? {};
     return {
-        id: String(duLieu._id),
+        id: String(duLieu.id ?? duLieu._id),
+        _id: String(duLieu.id ?? duLieu._id),
         maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
         tieuDe: duLieu.tieuDe,
         hocVan: duLieu.hocVan ?? [],
@@ -50,38 +51,44 @@ function chuanHoaHoSo(taiLieu) {
 }
 exports.dichVuHoSoNangLuc = {
     async layDanhSach() {
-        const danhSach = await hosonangluc_mohinh_js_1.HoSoNangLuc.find().sort({ cvChinh: -1, ngayCapNhat: -1 }).limit(300);
-        return danhSach.map(chuanHoaHoSo);
+        const danhSach = await hosonangluc_mohinh_js_1.HoSoNangLuc.findMany({
+            orderBy: [{ cvChinh: 'desc' }, { ngayCapNhat: 'desc' }],
+            take: 300,
+        });
+        return danhSach.map(row => chuanHoaHoSo((0, prismaHelper_js_1.coId)(row)));
     },
     async layTheoMa(ma) {
-        const duLieu = await hosonangluc_mohinh_js_1.HoSoNangLuc.findById(ma);
+        const duLieu = await hosonangluc_mohinh_js_1.HoSoNangLuc.findUnique({ where: { id: ma } });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực', 404);
-        return chuanHoaHoSo(duLieu);
+        return chuanHoaHoSo((0, prismaHelper_js_1.coId)(duLieu));
     },
     async taoMoi(duLieu) {
         const payload = duLieu;
         if (payload.cvChinh)
-            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ maUngVien: payload.maUngVien }, { $set: { cvChinh: false } });
-        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.create(payload);
-        return chuanHoaHoSo(ketQua);
+            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ where: { maUngVien: payload.maUngVien }, data: { cvChinh: false } });
+        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.create({ data: (0, prismaHelper_js_1.boUndefined)(payload) });
+        return chuanHoaHoSo((0, prismaHelper_js_1.coId)(ketQua));
     },
     async capNhat(ma, duLieu) {
         const payload = duLieu;
-        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findById(ma);
-        if (!ketQua)
+        const hienTai = await hosonangluc_mohinh_js_1.HoSoNangLuc.findUnique({ where: { id: ma } });
+        if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực để cập nhật', 404);
-        if (payload.cvChinh && payload.maUngVien) {
-            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({ maUngVien: payload.maUngVien, _id: { $ne: ma } }, { $set: { cvChinh: false } });
+        if (payload.cvChinh && (payload.maUngVien || hienTai.maUngVien)) {
+            await hosonangluc_mohinh_js_1.HoSoNangLuc.updateMany({
+                where: { maUngVien: String(payload.maUngVien ?? hienTai.maUngVien), id: { not: ma } },
+                data: { cvChinh: false },
+            });
         }
-        Object.assign(ketQua, payload);
-        await ketQua.save();
-        return chuanHoaHoSo(ketQua);
+        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(payload) });
+        return chuanHoaHoSo((0, prismaHelper_js_1.coId)(ketQua));
     },
     async xoa(ma) {
-        const ketQua = await hosonangluc_mohinh_js_1.HoSoNangLuc.findByIdAndDelete(ma);
-        if (!ketQua)
+        const hienTai = await hosonangluc_mohinh_js_1.HoSoNangLuc.findUnique({ where: { id: ma } });
+        if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ năng lực để xóa', 404);
-        return chuanHoaHoSo(ketQua);
+        await hosonangluc_mohinh_js_1.HoSoNangLuc.delete({ where: { id: ma } });
+        return chuanHoaHoSo((0, prismaHelper_js_1.coId)(hienTai));
     },
 };

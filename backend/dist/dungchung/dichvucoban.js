@@ -2,34 +2,41 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.taoDichVuCoBan = taoDichVuCoBan;
 const loiungdung_js_1 = require("./loiungdung.js");
+const prismaHelper_js_1 = require("./prismaHelper.js");
 function taoDichVuCoBan(moHinh) {
     return {
         async layDanhSach(boLoc = {}) {
-            return moHinh.find(boLoc).sort({ ngayTao: -1 }).limit(50);
+            const duLieu = await moHinh.findMany({
+                where: boLoc,
+                orderBy: { ngayTao: 'desc' },
+                take: 50,
+            });
+            return (0, prismaHelper_js_1.coIdNhieu)(duLieu);
         },
         async layTheoMa(ma) {
-            const duLieu = await moHinh.findById(ma);
+            const duLieu = await moHinh.findUnique({ where: { id: ma } });
             if (!duLieu) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu', 404);
+                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu', 404);
             }
-            return duLieu;
+            return (0, prismaHelper_js_1.coId)(duLieu);
         },
         async taoMoi(duLieu) {
-            return moHinh.create(duLieu);
+            return (0, prismaHelper_js_1.coId)(await moHinh.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) }));
         },
         async capNhat(ma, duLieu) {
-            const ketQua = await moHinh.findByIdAndUpdate(ma, duLieu, { new: true, runValidators: true });
-            if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu de cap nhat', 404);
+            const hienTai = await moHinh.findUnique({ where: { id: ma }, select: { id: true } });
+            if (!hienTai) {
+                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de cap nhat', 404);
             }
-            return ketQua;
+            return (0, prismaHelper_js_1.coId)(await moHinh.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) }));
         },
         async xoa(ma) {
-            const ketQua = await moHinh.findByIdAndDelete(ma);
+            const ketQua = await moHinh.findUnique({ where: { id: ma } });
             if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu de xoa', 404);
+                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de xoa', 404);
             }
-            return ketQua;
+            await moHinh.delete({ where: { id: ma } });
+            return (0, prismaHelper_js_1.coId)(ketQua);
         },
     };
 }

@@ -14,16 +14,16 @@ start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang quản lý tin tuyển dụng;
 fork
-  :Hệ thống tải NhaTuyenDung của tài khoản;
+  :Hệ thống tải NhàTuyểnDụng của tài khoản;
 fork again
-  :Hệ thống tải danh sách TinTuyenDung;
+  :Hệ thống tải danh sách TinTuyểnDụng;
 fork again
-  :Hệ thống tải DanhMucKyNang;
+  :Hệ thống tải DanhMụcKỹNăng;
 end fork
 if (Có quyền quản lý tin?) then (Có)
   :Hiển thị danh sách tin của công ty;
   if (Chọn thao tác?) then (Sửa tin)
-    :Chọn TinTuyenDung cần sửa;
+    :Chọn TinTuyểnDụng cần sửa;
     :Mở form sửa tin;
     fork
       :Cập nhật tiêu đề, mô tả, yêu cầu;
@@ -33,26 +33,25 @@ if (Có quyền quản lý tin?) then (Có)
       :Cập nhật kỹ năng;
     end fork
     :Nhấn nút "Lưu";
-    :Hệ thống cập nhật TinTuyenDung;
+    :Hệ thống cập nhật TinTuyểnDụng;
     :Hiển thị thông báo lưu thành công;
   elseif (Chọn tạm đóng hoặc mở lại?) then (Tạm đóng hoặc mở lại)
     :Chọn trạng thái mới;
-    :Hệ thống cập nhật trạng thái TinTuyenDung;
+    :Hệ thống cập nhật trạng thái TinTuyểnDụng;
     :Hiển thị thông báo thành công;
   elseif (Chọn xóa tin?) then (Xóa tin)
-    :Nhấn icon "Xóa";
+    :Nhấn biểu tượng "Xóa";
     if (Xác nhận xóa?) then (Có)
-      :Hệ thống xóa TinTuyenDung;
+      :Hệ thống xóa TinTuyểnDụng;
       :Hiển thị thông báo đã xóa;
     else (Không)
       :Đóng hộp xác nhận;
     endif
   else (Xem ứng viên)
-    :Điều hướng tới pipeline ứng viên theo tin;
+    :Điều hướng tới luồng xử lý ứng viên theo tin;
   endif
-  :Kết thúc nhánh;
 else (Không)
   :Hiển thị thông báo công ty chưa được duyệt hoặc không có quyền;
-  stop
 endif
+stop
 @enduml

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dieuKhienThongBao = void 0;
 const batloibatdongbo_js_1 = require("../../dungchung/batloibatdongbo.js");
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
+const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const thongbao_dichvu_js_1 = require("./thongbao.dichvu.js");
 const thongbao_kiemtra_js_1 = require("./thongbao.kiemtra.js");
 const thongbao_mohinh_js_1 = require("./thongbao.mohinh.js");
@@ -20,16 +21,13 @@ exports.dieuKhienThongBao = {
         const boLoc = { maNguoiDung };
         if (yeuCau.query.loai)
             boLoc.loai = String(yeuCau.query.loai);
-        const duLieu = await thongbao_mohinh_js_1.ThongBao
-            .find(boLoc)
-            .sort({ ngayTao: -1 })
-            .limit(limit);
+        const duLieu = (await thongbao_mohinh_js_1.ThongBao.findMany({ where: boLoc, orderBy: { ngayTao: 'desc' }, take: limit })).map(item => (0, prismaHelper_js_1.coId)(item));
         phanHoi.json({ duLieu });
     }),
     layChiTiet: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         const ma = String(yeuCau.params.ma ?? '');
-        const duLieu = await thongbao_mohinh_js_1.ThongBao.findOne({ _id: ma, maNguoiDung });
+        const duLieu = (0, prismaHelper_js_1.coId)(await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: ma, maNguoiDung } }));
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND');
         phanHoi.json({ duLieu });
@@ -39,18 +37,15 @@ exports.dieuKhienThongBao = {
         const nguoiDung = yeuCau.nguoiDung;
         const coQuyenTaoThongBaoKhac = nguoiDung?.vaiTro === 'admin';
         const maNguoiDung = coQuyenTaoThongBaoKhac ? payload.maNguoiDung : maNguoiDungTuRequest(yeuCau);
-        const duLieu = await (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({
-            ...payload,
-            maNguoiDung,
-            loai: payload.loai ?? 'he_thong',
-        });
+        const duLieu = await (0, thongbao_dichvu_js_1.taoVaGuiThongBao)({ ...payload, maNguoiDung, loai: payload.loai ?? 'he_thong' });
         phanHoi.status(201).json({ duLieu });
     }),
     capNhat: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         const payload = thongbao_kiemtra_js_1.kiemTraCapNhatThongBao.parse(yeuCau.body);
         const ma = String(yeuCau.params.ma ?? '');
-        const duLieu = await thongbao_mohinh_js_1.ThongBao.findOneAndUpdate({ _id: ma, maNguoiDung }, payload, { new: true, runValidators: true });
+        const hienTai = await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: ma, maNguoiDung }, select: { id: true } });
+        const duLieu = hienTai ? (0, prismaHelper_js_1.coId)(await thongbao_mohinh_js_1.ThongBao.update({ where: { id: ma }, data: payload })) : null;
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de cap nhat', 404, 'NOT_FOUND');
         phanHoi.json({ duLieu });
@@ -58,9 +53,10 @@ exports.dieuKhienThongBao = {
     xoa: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         const ma = String(yeuCau.params.ma ?? '');
-        const duLieu = await thongbao_mohinh_js_1.ThongBao.findOneAndDelete({ _id: ma, maNguoiDung });
+        const duLieu = await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: ma, maNguoiDung } });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de xoa', 404, 'NOT_FOUND');
+        await thongbao_mohinh_js_1.ThongBao.delete({ where: { id: ma } });
         phanHoi.status(204).send();
     }),
     danhDauDaDoc: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
@@ -69,23 +65,16 @@ exports.dieuKhienThongBao = {
         const thongBao = await (0, thongbao_dichvu_js_1.danhDauDaDoc)(String(id), maNguoiDung);
         if (!thongBao)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo', 404, 'NOT_FOUND');
-        phanHoi.json({
-            thongBao: 'Danh dau da doc thanh cong',
-            duLieu: thongBao,
-        });
+        phanHoi.json({ thongBao: 'Danh dau da doc thanh cong', duLieu: thongBao });
     }),
     danhDauTatCaDaDoc: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         await (0, thongbao_dichvu_js_1.danhDauTatCaDaDoc)(maNguoiDung);
-        phanHoi.json({
-            thongBao: 'Danh dau tat ca da doc thanh cong',
-        });
+        phanHoi.json({ thongBao: 'Danh dau tat ca da doc thanh cong' });
     }),
     demChuaDoc: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
         const maNguoiDung = maNguoiDungTuRequest(yeuCau);
         const soLuong = await (0, thongbao_dichvu_js_1.demThongBaoChuaDoc)(maNguoiDung);
-        phanHoi.json({
-            duLieu: { soLuong },
-        });
+        phanHoi.json({ duLieu: { soLuong } });
     }),
 };

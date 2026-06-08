@@ -40,28 +40,26 @@ else (Nhà tuyển dụng)
   fork again
     :Nhập tên công ty;
   end fork
-  :Hệ thống nhắc sẽ hoàn thiện mã số thuế, website, địa chỉ, logo và mô tả sau đăng ký;
+  :Hệ thống nhắc hoàn thiện thông tin công ty sau đăng ký;
 endif
 if (Muốn thoát?) then (Có)
   :Quay lại trang chủ hoặc mở trang đăng nhập;
-  :Kết thúc nhánh;
 else (Không)
   :Nhấn nút "Đăng ký";
-endif
-:Hệ thống kiểm tra email, mật khẩu, xác nhận mật khẩu, vai trò và tên công ty nếu là nhà tuyển dụng;
-if (Dữ liệu hợp lệ?) then (Đúng)
-  :Tạo NguoiDung với trạng thái hoạt động;
-  if (Đăng ký nhà tuyển dụng?) then (Có)
-    :Tạo NhaTuyenDung tối thiểu với tên công ty và trạng thái chờ duyệt;
-    :Gửi ThongBao cho quản trị viên về hồ sơ công ty chờ duyệt;
-  else (Không)
-    :Tạo hồ sơ UngVien mặc định;
+  :Hệ thống kiểm tra email, mật khẩu, xác nhận mật khẩu, vai trò và tên công ty;
+  if (Dữ liệu hợp lệ?) then (Đúng)
+    :Tạo NgườiDùng với trạng thái hoạt động;
+    if (Đăng ký nhà tuyển dụng?) then (Có)
+      :Tạo NhàTuyểnDụng tối thiểu với trạng thái chờ duyệt;
+      :Gửi ThôngBáo cho quản trị viên về hồ sơ công ty chờ duyệt;
+    else (Không)
+      :Tạo hồ sơ ỨngViên mặc định;
+    endif
+    :Điều hướng sang trang đăng nhập;
+  else (Sai)
+    :Hệ thống hiển thị thông báo lỗi;
+    :Người dùng chỉnh lại thông tin;
   endif
-  :Điều hướng sang trang đăng nhập;
-  :Kết thúc nhánh;
-else (Sai)
-  :Hệ thống hiển thị thông báo lỗi;
-  :Người dùng chỉnh lại thông tin;
-  stop
 endif
+stop
 @enduml

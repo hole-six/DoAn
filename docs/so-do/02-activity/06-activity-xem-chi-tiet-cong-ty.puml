@@ -12,30 +12,29 @@ skinparam activity {
 }
 start
 :Khách vãng lai hoặc ứng viên chọn một công ty;
-:Hệ thống tải NhaTuyenDung theo mã;
+:Hệ thống tải NhàTuyểnDụng theo mã;
 if (Công ty tồn tại?) then (Có)
   fork
-    :Tải danh sách TinTuyenDung của công ty;
+    :Tải danh sách TinTuyểnDụng của công ty;
   fork again
-    :Tải DanhGiaCongTy đã duyệt;
+    :Tải ĐánhGiáCôngTy đã duyệt;
   end fork
   :Lọc tin đang mở của công ty;
-  :Hiển thị hồ sơ công ty, thông tin chung, tin đang tuyển và điểm đánh giá;
+  :Hiển thị hồ sơ công ty, tin đang tuyển và điểm đánh giá;
   if (Người dùng chọn tab?) then (Giới thiệu)
     :Xem mô tả, website, quy mô, ngành và địa chỉ công ty;
   elseif (Chọn đánh giá?) then (Đánh giá)
-    :Xem danh sách đánh giá đã được quản trị viên duyệt;
+    :Xem danh sách đánh giá đã được duyệt;
   else (Bài viết)
     :Hiển thị trạng thái chưa có bài viết;
   endif
   if (Chọn một tin tuyển dụng?) then (Có)
-    :Mở chi tiết TinTuyenDung;
+    :Mở chi tiết TinTuyểnDụng;
   else (Không)
     :Quay lại danh sách công ty hoặc danh sách việc làm;
   endif
-  :Kết thúc nhánh;
 else (Không)
   :Hiển thị thông báo không tìm thấy công ty;
-  stop
 endif
+stop
 @enduml
