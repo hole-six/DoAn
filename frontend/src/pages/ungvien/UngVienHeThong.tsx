@@ -419,6 +419,56 @@ function CvModal({ cv, setCv, onClose, onSubmit }: any) {
   )
 }
 
+function sanitizeCvPayload(cv: any, maUngVien: string) {
+  const cleanText = (value: unknown) => typeof value === 'string' ? value : undefined
+  const cleanList = (value: unknown) => Array.isArray(value) ? value : []
+  const cleanItems = (value: unknown) => cleanList(value).map((item: any) => ({
+    tieuDe: cleanText(item?.tieuDe),
+    donVi: cleanText(item?.donVi),
+    thoiGian: cleanText(item?.thoiGian),
+    moTa: cleanText(item?.moTa),
+  }))
+
+  return {
+    maUngVien,
+    tieuDe: typeof cv?.tieuDe === 'string' ? cv.tieuDe : 'CV mới',
+    hocVan: cleanItems(cv?.hocVan),
+    kinhNghiemLam: cleanItems(cv?.kinhNghiemLam),
+    chungChi: cleanItems(cv?.chungChi),
+    duAn: cleanItems(cv?.duAn),
+    hoTenHienThi: cleanText(cv?.hoTenHienThi),
+    chucDanh: cleanText(cv?.chucDanh),
+    soDienThoai: cleanText(cv?.soDienThoai),
+    emailLienHe: cleanText(cv?.emailLienHe),
+    facebook: cleanText(cv?.facebook),
+    github: cleanText(cv?.github),
+    portfolioUrl: cleanText(cv?.portfolioUrl),
+    diaDiem: cleanText(cv?.diaDiem),
+    tomTatKinhNghiem: cleanList(cv?.tomTatKinhNghiem).filter((item: unknown) => typeof item === 'string'),
+    kyNangMem: cleanList(cv?.kyNangMem).filter((item: unknown) => typeof item === 'string'),
+    kyNangLapTrinh: cleanList(cv?.kyNangLapTrinh),
+    baiVietKyThuat: cleanList(cv?.baiVietKyThuat),
+    duAnChiTiet: cleanList(cv?.duAnChiTiet),
+    fileCvTen: cleanText(cv?.fileCvTen),
+    fileCvLoai: cleanText(cv?.fileCvLoai),
+    fileCvData: cleanText(cv?.fileCvData),
+    fileCvText: cleanText(cv?.fileCvText),
+    fileCvPath: cleanText(cv?.fileCvPath),
+    fileCvTextStatus: cleanText(cv?.fileCvTextStatus),
+    fileCvTextError: cleanText(cv?.fileCvTextError),
+    loaiHoSo: cv?.loaiHoSo === 'file_upload' ? 'file_upload' : 'builder',
+    anhDaiDien: cleanText(cv?.anhDaiDien),
+    templateCv: cleanText(cv?.templateCv),
+    mauChinh: cleanText(cv?.mauChinh),
+    mauPhu: cleanText(cv?.mauPhu),
+    font: cleanText(cv?.font),
+    markdownGoc: cleanText(cv?.markdownGoc),
+    ghiChuAi: cleanText(cv?.ghiChuAi),
+    cvChinh: Boolean(cv?.cvChinh),
+    congKhai: cv?.congKhai !== false,
+  }
+}
+
 export function HoSoUngVienPage() {
   const data = useUngVienData()
   const [error, setError] = useState('')
@@ -448,7 +498,8 @@ export function HoSoUngVienPage() {
       cv.id ? 'Cập nhật CV' : 'Tạo CV mới',
       cv.id ? 'Xác nhận cập nhật nội dung CV này?' : 'Xác nhận tạo CV mới cho hồ sơ của bạn?',
       async () => {
-        await api(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify({ ...cv, maUngVien: data.ungVien.id }) })
+        const payload = sanitizeCvPayload(cv, data.ungVien.id)
+        await api(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
         setCv(null); await data.reload()
       },
       'info',

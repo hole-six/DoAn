@@ -112,15 +112,17 @@ export function NotificationInbox({ items, onReload }: Props) {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition ${
+                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
                   active
-                    ? 'notification-filter-active border-sky-700 bg-sky-700 text-white shadow-sm'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800'
+                    ? 'notification-filter-active border-sky-700 bg-gradient-to-r from-sky-700 to-cyan-600 text-white shadow-[0_12px_24px_rgba(3,105,161,0.24)]'
+                    : 'border-slate-200 bg-slate-50 text-slate-700 shadow-sm hover:border-sky-300 hover:bg-white hover:text-sky-800'
                 }`}
               >
-                <Icon size={15} />
+                <span className={`grid h-6 w-6 place-items-center rounded-full ${active ? 'bg-white/15 text-white' : 'bg-white text-sky-700 ring-1 ring-slate-200'}`}>
+                  <Icon size={14} />
+                </span>
                 {label}
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${active ? 'bg-white/20 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
                   {count}
                 </span>
               </button>

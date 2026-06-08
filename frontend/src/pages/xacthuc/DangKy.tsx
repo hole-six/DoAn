@@ -17,11 +17,6 @@ const navyButtonStyle = {
   color: '#ffffff',
   boxShadow: '0 18px 34px rgba(6, 42, 77, 0.24)',
 }
-const homeLinkStyle = {
-  backgroundColor: '#062a4d',
-  border: '1px solid rgba(255, 255, 255, 0.22)',
-  color: '#ffffff',
-}
 
 export default function DangKy() {
   const [vaiTro, setVaiTro] = useState<'ungvien' | 'nhatuyendung'>('ungvien')
@@ -85,7 +80,9 @@ export default function DangKy() {
         })
       }
 
-      navigate('/dang-nhap')
+      sessionStorage.setItem('itjob_recent_register_email', form.email.trim())
+      sessionStorage.setItem('itjob_recent_register_password', form.matKhau)
+      navigate('/dang-nhap?notice=register_success', { replace: true })
     } catch (err) {
       setLoi(err instanceof Error ? err.message : 'Không thể tạo tài khoản')
     } finally {
@@ -100,7 +97,7 @@ export default function DangKy() {
           <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={dangKyImg} alt="Đăng ký Effort Job" />
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(2,7,24,0.96),rgba(3,22,52,0.82),rgba(2,7,24,0.58))]" />
           <div className="relative z-10 flex min-h-dvh flex-col justify-between p-12 xl:p-16">
-            <Link to="/" style={homeLinkStyle} className="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-black uppercase tracking-wide text-white ring-1 ring-white/20 transition hover:bg-white/20">
+            <Link to="/" className="inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white px-4 py-2 text-sm font-black uppercase tracking-wide text-[#062a4d] shadow-lg shadow-slate-950/10 transition hover:bg-slate-100 hover:text-[#0b5c91]">
               <ArrowLeft size={18} /> Về trang chủ
             </Link>
 
@@ -129,7 +126,7 @@ export default function DangKy() {
         <section className="flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
           <div className="w-full max-w-[600px] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10">
             <div className="mb-8 flex items-center justify-between gap-4 lg:hidden">
-              <Link to="/" style={homeLinkStyle} className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-black text-white">
+              <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-[#062a4d] shadow-sm transition hover:border-sky-200 hover:text-[#0b5c91]">
                 <ArrowLeft size={18} /> Trang chủ
               </Link>
               <img src={logoWeb} alt="Effort Job" className="object-contain" style={{ height: 40, width: 'auto', maxWidth: 120 }} />

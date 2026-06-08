@@ -13,7 +13,7 @@ const cacDuongDanMoiTruong = [
 
 for (const duongDan of cacDuongDanMoiTruong) {
   if (fs.existsSync(duongDan)) {
-    dotenv.config({ path: duongDan })
+    dotenv.config({ path: duongDan, override: true })
   }
 }
 

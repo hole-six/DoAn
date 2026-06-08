@@ -32,6 +32,7 @@ export default function ViecDaLuuPage() {
   const [dangTai, setDangTai] = useState(true)
   const [error, setError] = useState('')
   const { confirm, ConfirmDialogComponent } = useConfirm()
+  const ctaClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#0a3659] bg-gradient-to-r from-[#0b5c91] via-[#0e629d] to-[#0a4c78] px-4 text-sm font-black !text-white shadow-[0_14px_30px_rgba(11,92,145,0.28)] transition hover:-translate-y-0.5 hover:from-[#0a4c78] hover:via-[#0b5c91] hover:to-[#08395f] hover:!text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-200'
 
   const load = useCallback(async () => {
     setDangTai(true)
@@ -80,7 +81,7 @@ export default function ViecDaLuuPage() {
       action={
         <Link
           to="/viec-lam"
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#0e4d7d] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#08395f]"
+          className={ctaClass}
         >
           <Search size={16} />
           Tìm thêm việc làm
@@ -128,7 +129,7 @@ export default function ViecDaLuuPage() {
               <p>Bạn chưa lưu việc làm nào. Khi thấy tin phù hợp, nhấn biểu tượng lưu để quay lại sau.</p>
               <Link
                 to="/viec-lam"
-                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#0e4d7d] px-4 text-sm font-black text-white shadow-sm transition hover:bg-[#08395f]"
+                className={ctaClass}
               >
                 <Search size={16} />
                 Tìm thêm việc làm

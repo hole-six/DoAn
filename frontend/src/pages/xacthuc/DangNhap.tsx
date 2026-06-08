@@ -21,6 +21,7 @@ const navyButtonStyle = {
 
 const loginNoticeMap: Record<string, string> = {
   save_candidate_only: 'Bạn cần đăng nhập bằng tài khoản ứng viên để lưu việc làm.',
+  register_success: 'Tạo tài khoản thành công. Bạn có thể đăng nhập ngay bằng thông tin vừa tạo.',
 }
 
 export default function DangNhap() {
@@ -33,7 +34,19 @@ export default function DangNhap() {
   const navigate = useNavigate()
   const query = new URLSearchParams(window.location.search)
   const redirect = query.get('redirect') ?? ''
-  const notice = loginNoticeMap[query.get('notice') ?? '']
+  const noticeKey = query.get('notice') ?? ''
+  const notice = loginNoticeMap[noticeKey]
+
+  useEffect(() => {
+    const savedEmail = sessionStorage.getItem('itjob_recent_register_email')
+    const savedPassword = sessionStorage.getItem('itjob_recent_register_password')
+    if (savedEmail) setEmail(savedEmail)
+    if (savedPassword) setMatKhau(savedPassword)
+    if (savedEmail || savedPassword) {
+      sessionStorage.removeItem('itjob_recent_register_email')
+      sessionStorage.removeItem('itjob_recent_register_password')
+    }
+  }, [])
 
   const hoanTatDangNhap = (duLieu: any) => {
     luuPhienDangNhap(duLieu)
@@ -125,7 +138,7 @@ export default function DangNhap() {
           <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={dangNhapImg} alt="Đăng nhập ITJob" />
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(2,7,24,0.96),rgba(3,22,52,0.82),rgba(2,7,24,0.58))]" />
           <div className="relative z-10 flex min-h-dvh flex-col justify-between p-12 xl:p-16">
-            <Link to="/" className="inline-flex w-fit items-center gap-2 text-sm font-black uppercase tracking-wide text-cyan-100 transition hover:text-white">
+            <Link to="/" className="inline-flex w-fit items-center gap-2 rounded-full border border-white/70 bg-white px-4 py-2 text-sm font-black uppercase tracking-wide text-[#062a4d] shadow-lg shadow-slate-950/10 transition hover:bg-slate-100 hover:text-[#0b5c91]">
               <ArrowLeft size={18} /> Về trang chủ
             </Link>
 
@@ -147,7 +160,7 @@ export default function DangNhap() {
         <section className="flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
           <div className="w-full max-w-[560px] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10">
             <div className="mb-8 flex items-center justify-between gap-4 lg:hidden">
-              <Link to="/" className="inline-flex items-center gap-2 text-sm font-black text-[#0b5c91]">
+              <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-[#062a4d] shadow-sm transition hover:border-sky-200 hover:text-[#0b5c91]">
                 <ArrowLeft size={18} /> Trang chủ
               </Link>
               <img src={logoWeb} alt="ITJob" className="object-contain" style={{ height: 40, width: 'auto', maxWidth: 120 }} />
@@ -167,7 +180,7 @@ export default function DangNhap() {
             </div>
 
             {notice && (
-              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black leading-6 text-amber-800">
+              <div className={`mt-4 rounded-xl px-4 py-3 text-sm font-black leading-6 ${noticeKey === 'register_success' ? 'border border-emerald-200 bg-emerald-50 text-emerald-800' : 'border border-amber-200 bg-amber-50 text-amber-800'}`}>
                 {notice}
               </div>
             )}
