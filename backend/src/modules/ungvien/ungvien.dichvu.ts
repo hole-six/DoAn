@@ -62,13 +62,13 @@ export const dichVuUngVien = {
 
   async layTheoMa(ma: string) {
     const duLieu = await layDayDu({ id: ma })
-    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
     return chuanHoaUngVien(duLieu)
   },
 
   async layTheoMaNguoiDung(maNguoiDung: string) {
     const duLieu = await layDayDu({ maNguoiDung })
-    if (!duLieu) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
     return chuanHoaUngVien(duLieu)
   },
 
@@ -90,10 +90,10 @@ export const dichVuUngVien = {
 
   async capNhat(ma: string, duLieu: unknown, maNguoiDungHienTai?: string) {
     const hienTai = await UngVien.findUnique({ where: { id: ma } })
-    if (!hienTai) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
 
     if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
-      throw new LoiUngDung('Ban khong co quyen cap nhat ho so nay', 403)
+      throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403)
     }
 
     await UngVien.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) as any })
@@ -102,10 +102,10 @@ export const dichVuUngVien = {
 
   async xoa(ma: string, maNguoiDungHienTai?: string) {
     const hienTai = await UngVien.findUnique({ where: { id: ma } })
-    if (!hienTai) throw new LoiUngDung('Khong tim thay ho so ung vien', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
 
     if (maNguoiDungHienTai && String(hienTai.maNguoiDung) !== maNguoiDungHienTai) {
-      throw new LoiUngDung('Ban khong co quyen xoa ho so nay', 403)
+      throw new LoiUngDung('Bạn không có quyền xóa hồ sơ này', 403)
     }
 
     await UngVien.delete({ where: { id: ma } })

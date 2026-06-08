@@ -90,11 +90,11 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
   if (String(yeuCau.method).toUpperCase() === 'PATCH') {
     if (TRANG_THAI_KHOA_SUA.has(String(tin.trangThai ?? ''))) {
       throw new LoiUngDung(
-        'Tin da duyet chi cho phep doi trang thai dong/mo, khong the chinh sua noi dung',
+        'Tin đã duyệt chỉ cho phép đổi trạng thái đóng/mở, không thể chỉnh sửa nội dung',
         409,
         'JOB_POST_LOCKED',
         undefined,
-        'Su dung thao tac tam dong/mo lai cho tin da duyet',
+        'Sử dụng thao tác tạm đóng/mở lại cho tin đã duyệt',
       )
     }
 

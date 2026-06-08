@@ -22,7 +22,7 @@ function id(value: any) {
 }
 
 function damBaoVaiTro(nguoiDung: NguoiDungHienTai, vaiTro: string) {
-  if (nguoiDung.vaiTro !== vaiTro) throw new LoiUngDung('Ban khong co quyen thuc hien thao tac nay', 403, 'FORBIDDEN')
+  if (nguoiDung.vaiTro !== vaiTro) throw new LoiUngDung('Bạn không có quyền thực hiện thao tác này', 403, 'FORBIDDEN')
 }
 
 async function layUngVienCuaNguoiDung(nguoiDung: NguoiDungHienTai) {
@@ -95,15 +95,15 @@ function thongTinThongBao(hoSo: any) {
     maNguoiDungUngVien: id(ungVien?.maNguoiDung),
     maNguoiDungNhaTuyenDung: id(congTy?.maNguoiDung),
     tenUngVien: ungVien?.maNguoiDung?.hoTen ?? ungVien?.hoTen ?? 'Ứng viên',
-    kinhNghiem: `${ungVien?.kinhNghiem ?? 0} nam kinh nghiem`,
-    tenCongTy: congTy?.tenCongTy ?? 'Cong ty',
-    viTriUngTuyen: tin?.tieuDe ?? 'Vi tri ung tuyen',
+    kinhNghiem: `${ungVien?.kinhNghiem ?? 0} năm kinh nghiệm`,
+    tenCongTy: congTy?.tenCongTy ?? 'Công ty',
+    viTriUngTuyen: tin?.tieuDe ?? 'Vị trí ứng tuyển',
   }
 }
 
 function damBaoTinDangMo(tin: any) {
   if (!tin) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404, 'JOB_NOT_FOUND')
-  if (String(tin.trangThai ?? '') !== 'dang_mo') throw new LoiUngDung('Chi co the ung tuyen tin dang mo', 409, 'JOB_NOT_OPEN')
+  if (String(tin.trangThai ?? '') !== 'dang_mo') throw new LoiUngDung('Chỉ có thể ứng tuyển tin đang mở', 409, 'JOB_NOT_OPEN')
   if (tin.hanNop && new Date(tin.hanNop).getTime() < Date.now()) throw new LoiUngDung('Tin tuyển dụng đã hết hạn nộp hồ sơ', 409, 'JOB_EXPIRED')
 }
 
@@ -126,7 +126,7 @@ export const dichVuWorkflowUngTuyen = {
       if (info.maNguoiDungNhaTuyenDung) await thongBaoHoSoMoiUngTuyen({ maNhaTuyenDung: info.maNguoiDungNhaTuyenDung, tenUngVien: info.tenUngVien, viTriUngTuyen: info.viTriUngTuyen, maHoSoUngTuyen: hoSo.id, kinhNghiem: info.kinhNghiem })
       return dichVuHoSoUngTuyen.layTheoMa(hoSo.id)
     } catch (loi: any) {
-      if (loi?.code === 'P2002') throw new LoiUngDung('Ban da ung tuyen tin nay', 409, 'APPLICATION_EXISTS')
+      if (loi?.code === 'P2002') throw new LoiUngDung('Bạn đã ứng tuyển tin này', 409, 'APPLICATION_EXISTS')
       throw loi
     }
   },
@@ -143,13 +143,13 @@ export const dichVuWorkflowUngTuyen = {
 
   async danhGiaHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: { trangThai: 'dang_xet_duyet' | 'tu_choi'; ghiChu?: string; giaiDoanTuChoi?: 'sang_loc' | 'phong_van' }) {
     const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
-    if (!['dang_xet_duyet', 'tu_choi'].includes(duLieu.trangThai)) throw new LoiUngDung('Trang thai danh gia khong hop le', 422, 'INVALID_REVIEW_STATUS')
-    if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Ho so khong con o trang thai co the danh gia', 409, 'INVALID_APPLICATION_STATE')
+    if (!['dang_xet_duyet', 'tu_choi'].includes(duLieu.trangThai)) throw new LoiUngDung('Trạng thái đánh giá không hợp lệ', 422, 'INVALID_REVIEW_STATUS')
+    if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Hồ sơ không còn ở trạng thái có thể đánh giá', 409, 'INVALID_APPLICATION_STATE')
     const ghiChu = duLieu.trangThai === 'tu_choi' ? `[tu_choi_${duLieu.giaiDoanTuChoi ?? 'sang_loc'}] ${duLieu.ghiChu ?? ''}`.trim() : duLieu.ghiChu
     const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, duLieu.trangThai, nguoiDung, ghiChu)
     if (duLieu.trangThai === 'tu_choi') {
       const info = thongTinThongBao(hoSoMoi)
-      if (info.maNguoiDungUngVien) await thongBaoHeThong({ maNguoiDung: info.maNguoiDungUngVien, tieuDe: 'Ho so ung tuyen chua phu hop', noiDung: `${info.tenCongTy} đã cập nhật kết quả hồ sơ vi tri ${info.viTriUngTuyen}.`, lienKet: '/ung-vien/ung-tuyen', mucDoUuTien: 'cao' })
+      if (info.maNguoiDungUngVien) await thongBaoHeThong({ maNguoiDung: info.maNguoiDungUngVien, tieuDe: 'Hồ sơ ứng tuyển chưa phù hợp', noiDung: `${info.tenCongTy} đã cập nhật kết quả hồ sơ vị trí ${info.viTriUngTuyen}.`, lienKet: '/ung-vien/ung-tuyen', mucDoUuTien: 'cao' })
     }
     return dichVuHoSoUngTuyen.layTheoMa(maHoSoUngTuyen)
   },
@@ -169,7 +169,7 @@ export const dichVuWorkflowUngTuyen = {
   async xacNhanLichPhongVan(nguoiDung: NguoiDungHienTai, maLichPhongVan: string) {
     const { lich, hoSo } = await layLichVaHoSo(maLichPhongVan)
     await damBaoHoSoThuocUngVien(id(hoSo), nguoiDung)
-    if (lich.trangThai !== 'da_len_lich') throw new LoiUngDung('Chi co the xac nhan lich dang cho phan hoi', 409, 'INVALID_INTERVIEW_STATE')
+    if (lich.trangThai !== 'da_len_lich') throw new LoiUngDung('Chỉ có thể xác nhận lịch đang chờ phản hồi', 409, 'INVALID_INTERVIEW_STATE')
     const lichMoi = await prisma.lichPhongVan.update({ where: { id: maLichPhongVan }, data: { trangThai: 'da_xac_nhan' } })
     const info = thongTinThongBao(hoSo)
     if (info.maNguoiDungNhaTuyenDung) await thongBaoUngVienChapNhanLich({ maNhaTuyenDung: info.maNguoiDungNhaTuyenDung, tenUngVien: info.tenUngVien, viTriUngTuyen: info.viTriUngTuyen, thoiGian: lichMoi.thoiGianBatDau, maLichPhongVan })
@@ -184,7 +184,7 @@ export const dichVuWorkflowUngTuyen = {
     const info = thongTinThongBao(hoSo)
     if (info.maNguoiDungNhaTuyenDung) await thongBaoUngVienYeuCauDoiLich({ maNhaTuyenDung: info.maNguoiDungNhaTuyenDung, tenUngVien: info.tenUngVien, viTriUngTuyen: info.viTriUngTuyen, lyDo: ghiChu, maLichPhongVan, maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) })
     const admins = await prisma.nguoiDung.findMany({ where: { vaiTro: 'admin' }, select: { id: true } })
-    await Promise.all(admins.map(admin => thongBaoAdminUngVienYeuCauDoiLich({ maAdmin: admin.id, tenUngVien: info.tenUngVien, viTriUngTuyen: info.viTriUngTuyen, lyDo: ghiChu, maLichPhongVan, maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) })))
+    await Promise.all(admins.map((admin: { id: string }) => thongBaoAdminUngVienYeuCauDoiLich({ maAdmin: admin.id, tenUngVien: info.tenUngVien, viTriUngTuyen: info.viTriUngTuyen, lyDo: ghiChu, maLichPhongVan, maHoSoUngTuyen: id(hoSo), maTinTuyenDung: id(hoSo.maTinTuyenDung) })))
     return dichVuLichPhongVan.layTheoMa(maLichPhongVan)
   },
 
@@ -204,7 +204,7 @@ export const dichVuWorkflowUngTuyen = {
   async capNhatKetQuaPhongVan(nguoiDung: NguoiDungHienTai, maLichPhongVan: string, duLieu: { ketQua: 'dat' | 'khong_dat'; ghiChu?: string }) {
     const { lich, hoSo } = await layLichVaHoSo(maLichPhongVan)
     await damBaoHoSoThuocCongTy(id(hoSo), nguoiDung)
-    if (!['da_len_lich', 'da_xac_nhan'].includes(String(lich.trangThai ?? ''))) throw new LoiUngDung('Chi co the hoan tat lich chua ket thuc', 409, 'INVALID_INTERVIEW_STATE')
+    if (!['da_len_lich', 'da_xac_nhan'].includes(String(lich.trangThai ?? ''))) throw new LoiUngDung('Chỉ có thể hoàn tất lịch chưa kết thúc', 409, 'INVALID_INTERVIEW_STATE')
     if (!['dat', 'khong_dat'].includes(duLieu.ketQua)) throw new LoiUngDung('Kết quả phỏng vấn không hợp lệ', 422, 'INVALID_INTERVIEW_RESULT')
     await prisma.lichPhongVan.update({ where: { id: maLichPhongVan }, data: { trangThai: 'hoan_thanh', ketQua: duLieu.ketQua, ghiChu: duLieu.ghiChu } })
     const trangThaiHoSo = duLieu.ketQua === 'dat' ? 'dat' : 'tu_choi'
@@ -217,7 +217,7 @@ export const dichVuWorkflowUngTuyen = {
 
   async rutHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, ghiChu?: string) {
     const { hoSo } = await damBaoHoSoThuocUngVien(maHoSoUngTuyen, nguoiDung)
-    if (!TRANG_THAI_HO_SO_CHUA_KET_THUC.includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Ho so da co ket qua nen khong the rut', 409, 'INVALID_APPLICATION_STATE')
+    if (!TRANG_THAI_HO_SO_CHUA_KET_THUC.includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Hồ sơ đã có kết quả nên không thể rút', 409, 'INVALID_APPLICATION_STATE')
     const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, 'da_rut', nguoiDung, ghiChu)
     const lich = await prisma.lichPhongVan.findUnique({ where: { maHoSoUngTuyen } })
     if (lich && !['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) await prisma.lichPhongVan.update({ where: { id: lich.id }, data: { trangThai: 'da_huy', ghiChu: ghiChu ?? 'Ứng viên rút hồ sơ' } })

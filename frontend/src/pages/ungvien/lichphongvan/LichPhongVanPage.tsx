@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Building2, CalendarDays, Clock, ExternalLink, MapPin, Monitor } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
+import { DetailDrawer } from '../../../components/DetailDrawer'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
@@ -11,6 +12,7 @@ import type { LichPhongVan } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/UngVienAtoms'
 import { useUngVienData } from '../shared/useUngVienData'
 import { ItvDetail } from './ItvDetail'
+import { Field, Textarea } from '../../quantrivien/shared/AdminFormControls'
 
 function idOf(item: { id?: string; _id?: string }) {
   return String(item.id ?? item._id ?? '')
@@ -18,8 +20,8 @@ function idOf(item: { id?: string; _id?: string }) {
 
 function dateOnly(value?: string) {
   if (!value) return 'Chưa cập nhật ngày'
-  const d = new Date(value)
-  return Number.isNaN(d.getTime()) ? 'Chưa cập nhật ngày' : d.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Chưa cập nhật ngày' : date.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 function timeRange(item: LichPhongVan) {
@@ -44,9 +46,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
     <button
       type="button"
       onClick={onOpen}
-      className={`grid w-full min-w-0 gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md lg:grid-cols-[64px_minmax(0,1fr)_auto] ${
-        active ? 'border-sky-400 ring-4 ring-sky-100' : 'border-slate-200'
-      }`}
+      className={`grid w-full min-w-0 gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md lg:grid-cols-[64px_minmax(0,1fr)_auto] ${active ? 'border-sky-400 ring-4 ring-sky-100' : 'border-slate-200'}`}
     >
       <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
         {company?.logo ? (
@@ -81,6 +81,8 @@ export default function LichPhongVanPage() {
   const queryLich = searchParams.get('lich')
   const openedQueryRef = useRef('')
   const [selected, setSelected] = useState<LichPhongVan | null>(null)
+  const [rescheduleOpen, setRescheduleOpen] = useState(false)
+  const [rescheduleNote, setRescheduleNote] = useState('')
   const { confirm: askConfirm, ConfirmDialogComponent } = useConfirm()
 
   useEffect(() => {
@@ -135,16 +137,21 @@ export default function LichPhongVanPage() {
     )
   }
 
-  const reschedule = async () => {
+  const openReschedule = () => {
+    setRescheduleNote('')
+    setRescheduleOpen(true)
+  }
+
+  const submitReschedule = async () => {
     if (!selected) return
-    const reason = window.prompt('Lý do muốn đổi lịch?') ?? ''
     const target = selected
     askConfirm(
       'Yêu cầu đổi lịch',
       `Gửi yêu cầu đổi lịch phỏng vấn lúc ${formatDateTime(target.thoiGianBatDau)}?`,
       async () => {
         try {
-          await apiCoXacThuc(`/lichphongvan/${idOf(target)}/doi-lich`, { method: 'POST', body: JSON.stringify({ ghiChu: reason }) })
+          await apiCoXacThuc(`/lichphongvan/${idOf(target)}/doi-lich`, { method: 'POST', body: JSON.stringify({ ghiChu: rescheduleNote }) })
+          setRescheduleOpen(false)
           setSelected(null)
           toast.success('Đã gửi yêu cầu đổi lịch.')
           await data.reload()
@@ -178,7 +185,24 @@ export default function LichPhongVanPage() {
           <EmptyState>Chưa có lịch phỏng vấn.</EmptyState>
         </Panel>
       )}
-      {selected && <ItvDetail item={selected} onClose={() => setSelected(null)} onConfirm={() => void confirm()} onReschedule={() => void reschedule()} />}
+      {selected && <ItvDetail item={selected} onClose={() => setSelected(null)} onConfirm={() => void confirm()} onReschedule={openReschedule} />}
+      {selected && rescheduleOpen && (
+        <DetailDrawer
+          title="Yêu cầu đổi lịch"
+          subtitle={formatDateTime(selected.thoiGianBatDau)}
+          onClose={() => setRescheduleOpen(false)}
+          footer={(
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <Button variant="secondary" onClick={() => setRescheduleOpen(false)}>Hủy</Button>
+              <Button onClick={() => void submitReschedule()}>Gửi yêu cầu</Button>
+            </div>
+          )}
+        >
+          <Field label="Lý do đổi lịch">
+            <Textarea value={rescheduleNote} onChange={event => setRescheduleNote(event.target.value)} placeholder="Nhập lý do hoặc khung giờ mong muốn..." />
+          </Field>
+        </DetailDrawer>
+      )}
       <ConfirmDialogComponent />
     </Page>
   )

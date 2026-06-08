@@ -20,7 +20,7 @@ export function kiemTraHoTroPush(): boolean {
  */
 export async function yeuCauQuyenThongBao(): Promise<NotificationPermission> {
   if (!kiemTraHoTroPush()) {
-    throw new Error('Trinh duyet khong ho tro push notifications')
+    throw new Error('Trình duyệt không hỗ trợ push notifications')
   }
 
   const permission = await Notification.requestPermission()

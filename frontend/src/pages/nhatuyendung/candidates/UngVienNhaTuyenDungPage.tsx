@@ -46,7 +46,7 @@ export default function UngVienNhaTuyenDungPage() {
   const review = async (trangThai: 'dang_xet_duyet' | 'tu_choi', giaiDoanTuChoi: 'sang_loc' | 'phong_van' = 'sang_loc') => {
     if (!selected) return
     const ghiChu = trangThai === 'tu_choi'
-      ? window.prompt(giaiDoanTuChoi === 'phong_van' ? 'Lý do từ chối sau phỏng vấn?' : 'Lý do từ chối sàng lọc?') ?? ''
+      ? 'Hồ sơ chưa phù hợp'
       : 'Nhà tuyển dụng đang xét duyệt hồ sơ'
     const target = selected
     const rejecting = trangThai === 'tu_choi'
@@ -136,7 +136,7 @@ export default function UngVienNhaTuyenDungPage() {
         </div>
         <div className="grid gap-2">
           {data.applications.length ? data.applications.map(item => (
-            <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+            <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]" onClick={() => setSelected(item)}>
               <span className="min-w-0">
                 <strong className="block truncate text-sm font-black text-slate-950">{item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'}</strong>
                 <span className="mt-1 block truncate text-xs font-semibold text-slate-500">{item.tinTuyenDung?.tieuDe ?? '-'}</span>
@@ -146,12 +146,12 @@ export default function UngVienNhaTuyenDungPage() {
                 </span>
               </span>
               <Badge tone={toneForApplicationStatus(item.trangThai)}>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
-              <div className="flex flex-wrap gap-2">
-                <Button size="sm" icon={<Search size={14} />} onClick={() => setSelected(item)}>Xem</Button>
+              <div className="flex flex-wrap gap-2" onClick={event => event.stopPropagation()}>
+                <Button size="sm" icon={<Search size={14} />} onClick={() => setSelected(item)}>Chi tiết</Button>
                 <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!item.ungVien?.nguoiDung?.id || !TRANG_THAI_CHAT.includes(item.trangThai as any)} onClick={() => void openChat(item)}>Chat</Button>
               </div>
             </article>
-          )) : <EmptyState>Chưa có ứng viên ứng tuyển.</EmptyState>}
+          )) : <EmptyState>Bạn chưa ứng tuyển vị trí nào.</EmptyState>}
         </div>
       </Panel>
       {selected && (

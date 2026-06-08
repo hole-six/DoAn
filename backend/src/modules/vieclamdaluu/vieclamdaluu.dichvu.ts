@@ -46,7 +46,7 @@ export const dichVuViecLamDaLuu = {
 
   async luu(maNguoiDung: string, maTinTuyenDung: string) {
     const tin = await TinTuyenDung.findUnique({ where: { id: maTinTuyenDung }, select: { id: true } })
-    if (!tin) throw new LoiUngDung('Khong tim thay tin tuyen dung de luu', 404, 'JOB_NOT_FOUND')
+    if (!tin) throw new LoiUngDung('Không tìm thấy tin tuyển dụng để lưu', 404, 'JOB_NOT_FOUND')
 
     await ViecLamDaLuu.upsert({
       where: { maNguoiDung_maTinTuyenDung: { maNguoiDung, maTinTuyenDung } },

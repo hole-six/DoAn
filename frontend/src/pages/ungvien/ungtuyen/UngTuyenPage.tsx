@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Eye } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
+import { DetailDrawer } from '../../../components/DetailDrawer'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
@@ -10,22 +11,30 @@ import type { HoSoUngTuyen } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel, Row } from '../shared/UngVienAtoms'
 import { useUngVienData } from '../shared/useUngVienData'
 import { AppDrawer } from './AppDrawer'
+import { Field, Textarea } from '../../quantrivien/shared/AdminFormControls'
 
 export default function UngTuyenPage() {
   const data = useUngVienData()
   const [selected, setSelected] = useState<HoSoUngTuyen | null>(null)
+  const [withdrawOpen, setWithdrawOpen] = useState(false)
+  const [withdrawReason, setWithdrawReason] = useState('')
   const { confirm, ConfirmDialogComponent } = useConfirm()
+
+  const openWithdraw = () => {
+    setWithdrawReason('')
+    setWithdrawOpen(true)
+  }
 
   const withdraw = async () => {
     if (!selected) return
-    const reason = window.prompt('Lý do rút hồ sơ?') ?? ''
     const target = selected
     confirm(
       'Rút hồ sơ ứng tuyển',
       `Bạn chắc chắn muốn rút hồ sơ ứng tuyển vị trí "${target.tinTuyenDung?.tieuDe ?? 'này'}"?`,
       async () => {
         try {
-          await apiCoXacThuc(`/hosoungtuyen/${target.id}/rut`, { method: 'POST', body: JSON.stringify({ ghiChu: reason }) })
+          await apiCoXacThuc(`/hosoungtuyen/${target.id}/rut`, { method: 'POST', body: JSON.stringify({ ghiChu: withdrawReason }) })
+          setWithdrawOpen(false)
           setSelected(null)
           toast.success('Đã rút hồ sơ ứng tuyển.')
           await data.reload()
@@ -63,9 +72,26 @@ export default function UngTuyenPage() {
           danhGia={data.danhGiaCongTy.find(item => item.maHoSoUngTuyen === selected.id)}
           coLichPhongVan={data.lich.some(item => item.maHoSoUngTuyen === selected.id)}
           onClose={() => setSelected(null)}
-          onWithdraw={() => void withdraw()}
+          onWithdraw={openWithdraw}
           onReviewSubmitted={async () => { await data.reload() }}
         />
+      )}
+      {selected && withdrawOpen && (
+        <DetailDrawer
+          title="Rút hồ sơ ứng tuyển"
+          subtitle={selected.tinTuyenDung?.tieuDe ?? 'Thêm lý do nếu cần trước khi gửi'}
+          onClose={() => setWithdrawOpen(false)}
+          footer={(
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="secondary" onClick={() => setWithdrawOpen(false)}>Hủy</Button>
+              <Button variant="danger" onClick={() => void withdraw()}>Rút hồ sơ</Button>
+            </div>
+          )}
+        >
+          <Field label="Lý do rút hồ sơ">
+            <Textarea value={withdrawReason} onChange={event => setWithdrawReason(event.target.value)} placeholder="Ví dụ: thay đổi định hướng công việc..." />
+          </Field>
+        </DetailDrawer>
       )}
       <ConfirmDialogComponent />
     </Page>

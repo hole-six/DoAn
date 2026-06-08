@@ -67,18 +67,18 @@ export async function tinhCanhBaoQuanTri() {
 
   const canhBao: CanhBaoQuanTri[] = []
   if (tinQuaHanDuyet > 0) {
-    canhBao.push(taoCanhBao({ id: 'tin-qua-han-duyet', loai: 'error', tieu: `${tinQuaHanDuyet} tin cho duyet qua 24 gio`, moTa: `Tong cong ${tinChoDuyet} tin dang cho duyet.`, lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 100 }))
+    canhBao.push(taoCanhBao({ id: 'tin-qua-han-duyet', loai: 'error', tieu: `${tinQuaHanDuyet} tin chờ duyệt quá 24 giờ`, moTa: `Tổng cộng ${tinChoDuyet} tin đang chờ duyệt.`, lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 100 }))
   } else if (tinChoDuyet > 0) {
-    canhBao.push(taoCanhBao({ id: 'tin-cho-duyet', loai: 'warning', tieu: `${tinChoDuyet} tin dang cho duyet`, moTa: 'Co tin tuyen dung moi can kiem tra.', lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 70 }))
+    canhBao.push(taoCanhBao({ id: 'tin-cho-duyet', loai: 'warning', tieu: `${tinChoDuyet} tin đang chờ duyệt`, moTa: 'Có tin tuyển dụng mới cần kiểm tra.', lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 70 }))
   }
   if (congTyQuaHanDuyet > 0) {
-    canhBao.push(taoCanhBao({ id: 'cong-ty-qua-han-duyet', loai: 'error', tieu: `${congTyQuaHanDuyet} cong ty cho xac thuc qua 24 gio`, moTa: `Tong cong ${congTyChoDuyet} ho so cong ty dang cho xac thuc.`, lienKet: '/quan-tri/cong-ty', mucDo: 95 }))
+    canhBao.push(taoCanhBao({ id: 'cong-ty-qua-han-duyet', loai: 'error', tieu: `${congTyQuaHanDuyet} công ty chờ xác thực quá 24 giờ`, moTa: `Tổng cộng ${congTyChoDuyet} hồ sơ công ty đang chờ xác thực.`, lienKet: '/quan-tri/cong-ty', mucDo: 95 }))
   } else if (congTyChoDuyet > 0) {
-    canhBao.push(taoCanhBao({ id: 'cong-ty-cho-duyet', loai: 'warning', tieu: `${congTyChoDuyet} cong ty cho xac thuc`, moTa: 'Co ho so nha tuyen dung moi can xac minh.', lienKet: '/quan-tri/cong-ty', mucDo: 65 }))
+    canhBao.push(taoCanhBao({ id: 'cong-ty-cho-duyet', loai: 'warning', tieu: `${congTyChoDuyet} công ty chờ xác thực`, moTa: 'Có hồ sơ nhà tuyển dụng mới cần xác minh.', lienKet: '/quan-tri/cong-ty', mucDo: 65 }))
   }
-  if (tinSapHetHan > 0) canhBao.push(taoCanhBao({ id: 'tin-sap-het-han', loai: 'warning', tieu: `${tinSapHetHan} tin sap het han trong 7 ngay`, moTa: 'Nen nhac nha tuyen dung gia han hoac dong tin.', lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 55 }))
-  if (hoSoUngTuyenMoi > 30) canhBao.push(taoCanhBao({ id: 'ung-tuyen-tang-dot-bien', loai: 'warning', tieu: `${hoSoUngTuyenMoi} ho so ung tuyen moi trong 24 gio`, moTa: 'Luong ung tuyen tang cao.', lienKet: '/quan-tri/analytics', mucDo: 50 }))
-  if (taiKhoanBiKhoa > 0) canhBao.push(taoCanhBao({ id: 'tai-khoan-bi-khoa', loai: 'warning', tieu: `${taiKhoanBiKhoa} tai khoan dang bi khoa hoac tam khoa`, moTa: 'Kiem tra danh sach tai khoan bi khoa.', lienKet: '/quan-tri/nguoi-dung', mucDo: 45 }))
+  if (tinSapHetHan > 0) canhBao.push(taoCanhBao({ id: 'tin-sap-het-han', loai: 'warning', tieu: `${tinSapHetHan} tin sắp hết hạn trong 7 ngày`, moTa: 'Nên nhắc nhà tuyển dụng gia hạn hoặc đóng tin.', lienKet: '/quan-tri/tin-tuyen-dung', mucDo: 55 }))
+  if (hoSoUngTuyenMoi > 30) canhBao.push(taoCanhBao({ id: 'ung-tuyen-tang-dot-bien', loai: 'warning', tieu: `${hoSoUngTuyenMoi} hồ sơ ứng tuyển mới trong 24 giờ`, moTa: 'Lượng ứng tuyển tăng cao.', lienKet: '/quan-tri/analytics', mucDo: 50 }))
+  if (taiKhoanBiKhoa > 0) canhBao.push(taoCanhBao({ id: 'tai-khoan-bi-khoa', loai: 'warning', tieu: `${taiKhoanBiKhoa} tài khoản đang bị khóa hoặc tạm khóa`, moTa: 'Kiểm tra danh sách tài khoản bị khóa.', lienKet: '/quan-tri/nguoi-dung', mucDo: 45 }))
 
   snapshot = {
     canhBao: canhBao.sort((a, b) => b.mucDo - a.mucDo),
@@ -101,7 +101,7 @@ export function khoiDongCronCanhBaoQuanTri() {
     try {
       await tinhCanhBaoQuanTri()
     } catch (error) {
-      console.error('Tinh canh bao quan tri that bai:', error)
+      console.error('Tính cảnh báo quản trị thất bại:', error)
     } finally {
       dangChay = false
     }

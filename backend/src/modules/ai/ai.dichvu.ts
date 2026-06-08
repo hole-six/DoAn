@@ -550,7 +550,7 @@ function goiYTuMatch(ketQua: MatchResult[], tinDangMo: any[]): ChatJobSuggestion
 export const dichVuAi = {
   async layGoiY(nguoiDung: NguoiDungHienTai) {
     const ungVienRaw = await prisma.ungVien.findUnique({ where: { maNguoiDung: nguoiDung.id } })
-    if (!ungVienRaw) throw new LoiUngDung('Khong tim thay ho so ung vien', 404, 'CANDIDATE_PROFILE_NOT_FOUND')
+    if (!ungVienRaw) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404, 'CANDIDATE_PROFILE_NOT_FOUND')
     const ungVien = coId(ungVienRaw) as any
     const [cv, ganNhat] = await Promise.all([
       layCvChinh(ungVien),

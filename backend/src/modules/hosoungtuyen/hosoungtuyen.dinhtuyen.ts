@@ -28,7 +28,7 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau: any, _phanHoi: any, tiepT
   if (vaiTro === 'ung_vien') {
     const ungVien = await UngVien.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
     if (!ungVien || String(ungVien.id) !== String(hoSo.maUngVien)) {
-      throw new LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN')
+      throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ ứng tuyển này', 403, 'FORBIDDEN')
     }
   }
 
@@ -36,7 +36,7 @@ async function kiemTraQuyenCapNhatHoSoUngTuyen(yeuCau: any, _phanHoi: any, tiepT
     const congTy = await NhaTuyenDung.findUnique({ where: { maNguoiDung: nguoiDung.id }, select: { id: true } })
     const tin = await TinTuyenDung.findUnique({ where: { id: hoSo.maTinTuyenDung }, select: { maNhaTuyenDung: true } })
     if (!congTy || !tin || String(tin.maNhaTuyenDung) !== String(congTy.id)) {
-      throw new LoiUngDung('Ban khong co quyen cap nhat ho so ung tuyen nay', 403, 'FORBIDDEN')
+      throw new LoiUngDung('Bạn không có quyền cập nhật hồ sơ ứng tuyển này', 403, 'FORBIDDEN')
     }
   }
 

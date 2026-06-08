@@ -26,7 +26,7 @@ const taiLogo = multer({
 export const dinhTuyenNhaTuyenDung = Router()
 
 dinhTuyenNhaTuyenDung.post('/upload-logo', taiLogo.single('logo'), (yeuCau, phanHoi) => {
-  if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: 'Chua co file logo' })
+  if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: 'Chưa có file logo' })
   const duongDan = `/uploads/${yeuCau.file.filename}`
   const gocUrl = `${yeuCau.protocol}://${yeuCau.get('host')}`
   return phanHoi.status(201).json({ duLieu: { duongDan, url: `${gocUrl}${duongDan}` } })
