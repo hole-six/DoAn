@@ -51,14 +51,14 @@ export function ErrorState({ message }: { message?: string }) {
 
 export function Drawer({ title, onClose, children, footer }: { title: string; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-[300] bg-slate-950/45 backdrop-blur-sm" onClick={onClose}>
-      <aside className="ml-auto flex h-dvh w-full max-w-[760px] flex-col bg-white shadow-2xl" onClick={event => event.stopPropagation()}>
+    <div className="ntd-shared-drawer fixed inset-0 z-[300] bg-slate-950/45 backdrop-blur-sm" onClick={onClose}>
+      <aside className="ntd-shared-drawer-card ml-auto flex h-dvh w-full max-w-[760px] flex-col bg-white shadow-2xl" onClick={event => event.stopPropagation()}>
         <header className="flex min-h-16 items-center justify-between border-b border-slate-200 px-4">
           <h2 className="min-w-0 truncate text-lg font-black text-slate-950">{title}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>Đóng</Button>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto p-4">{children}</div>
-        {footer && <footer className="border-t border-slate-200 bg-slate-50 p-4">{footer}</footer>}
+        {footer && <footer className="ntd-shared-drawer-footer border-t border-slate-200 bg-slate-50 p-4">{footer}</footer>}
       </aside>
     </div>
   )

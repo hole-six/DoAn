@@ -679,6 +679,11 @@
     justify-self: end;
   }
 
+  .company-real-page .result-toolbar::before {
+    content: none !important;
+    display: none !important;
+  }
+
   .company-real-page .company-real-grid {
     grid-template-columns: 1fr !important;
     gap: 14px !important;

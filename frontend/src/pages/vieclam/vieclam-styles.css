@@ -1140,6 +1140,12 @@
     grid-template-columns: 1fr !important;
   }
 
+  .jobs-real-page .result-toolbar::before,
+  .company-real-page .result-toolbar::before {
+    content: none !important;
+    display: none !important;
+  }
+
 }
 
 @media (max-width: 768px) {

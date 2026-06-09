@@ -913,11 +913,33 @@
   .dashboard-role-nhatuyendung .ntd-drawer-card {
     border-radius: 18px 18px 0 0 !important;
     max-height: calc(100dvh - 18px) !important;
-    padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
+    padding-bottom: calc(168px + env(safe-area-inset-bottom)) !important;
+    width: 100% !important;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-shared-drawer-card {
+    border-radius: 18px 18px 0 0 !important;
+    max-height: calc(100dvh - 18px) !important;
+    padding-bottom: calc(168px + env(safe-area-inset-bottom)) !important;
     width: 100% !important;
   }
 
   .dashboard-role-nhatuyendung .ntd-drawer {
+    align-items: end !important;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-drawer-card > footer,
+  .dashboard-role-nhatuyendung .ntd-modal-card > footer,
+  .dashboard-role-nhatuyendung .ntd-shared-drawer-footer {
+    background: #f8fafc !important;
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    left: 0 !important;
+    position: sticky !important;
+    right: 0 !important;
+    z-index: 3 !important;
+  }
+
+  .dashboard-role-nhatuyendung .ntd-shared-drawer {
     align-items: end !important;
   }
 }
