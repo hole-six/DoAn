@@ -153,7 +153,7 @@ exports.dichVuHoSoUngTuyen = {
                     await (0, thongbao_helper_js_1.thongBaoHoSoMoiUngTuyen)({
                         maNhaTuyenDung: maNguoiDungNhaTuyenDung,
                         tenUngVien: hoSoMoi.ungVien?.nguoiDung?.hoTen ?? 'Ứng viên',
-                        viTriUngTuyen: hoSoMoi.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen',
+                        viTriUngTuyen: hoSoMoi.tinTuyenDung?.tieuDe ?? 'Vị trí ứng tuyển',
                         maHoSoUngTuyen: hoSoMoi.id,
                         kinhNghiem: `${hoSoMoi.ungVien?.kinhNghiem ?? 0} nam kinh nghiem`,
                     });
@@ -166,14 +166,14 @@ exports.dichVuHoSoUngTuyen = {
         }
         catch (loi) {
             if (loi?.code === 'P2002')
-                throw new loiungdung_js_1.LoiUngDung('Ban da ung tuyen tin nay', 409);
+                throw new loiungdung_js_1.LoiUngDung('Bạn đã ứng tuyển tin này', 409);
             throw loi;
         }
     },
     async capNhat(ma, duLieu) {
         const truocKhiCapNhat = await layDayDu({ id: ma });
         if (!truocKhiCapNhat)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để cập nhật', 404);
         await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
         const ketQuaChuanHoa = await this.layTheoMa(ma);
         try {
@@ -181,15 +181,15 @@ exports.dichVuHoSoUngTuyen = {
             const trangThaiMoi = String(ketQuaChuanHoa.trangThai ?? '');
             const maNguoiDungUngVien = ketQuaChuanHoa.ungVien?.nguoiDung?.id;
             const tenCongTy = ketQuaChuanHoa.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? 'Cong ty';
-            const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen';
+            const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vị trí ứng tuyển';
             if (trangThaiCu !== 'da_xem' && trangThaiMoi === 'da_xem' && maNguoiDungUngVien) {
                 await (0, thongbao_helper_js_1.thongBaoHoSoDuocXem)({ maUngVien: maNguoiDungUngVien, tenCongTy, viTriUngTuyen, maHoSoUngTuyen: ketQuaChuanHoa.id });
             }
             if (trangThaiCu !== trangThaiMoi && ['dat', 'tu_choi'].includes(trangThaiMoi) && maNguoiDungUngVien) {
                 await (0, thongbao_helper_js_1.thongBaoHeThong)({
                     maNguoiDung: maNguoiDungUngVien,
-                    tieuDe: trangThaiMoi === 'dat' ? 'Ho so ung tuyen da dat' : 'Ho so ung tuyen bi tu choi',
-                    noiDung: `${tenCongTy} đã cập nhật kết quả hồ sơ ung tuyen vi tri ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Đạt' : 'Từ chối'}.`,
+                    tieuDe: trangThaiMoi === 'dat' ? 'Hồ sơ ứng tuyển đã đạt' : 'Hồ sơ ứng tuyển bị từ chối',
+                    noiDung: `${tenCongTy} đã cập nhật kết quả hồ sơ ứng tuyển vị trí ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Đạt' : 'Từ chối'}.`,
                     lienKet: '/ung-vien/ung-tuyen',
                     mucDoUuTien: 'cao',
                 });
@@ -203,7 +203,7 @@ exports.dichVuHoSoUngTuyen = {
     async xoa(ma) {
         const hienTai = await layDayDu({ id: ma });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để xóa', 404);
         await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.delete({ where: { id: ma } });
         return chuanHoaUngTuyen(hienTai);
     },

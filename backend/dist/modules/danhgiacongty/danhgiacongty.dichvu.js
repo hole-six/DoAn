@@ -124,14 +124,14 @@ exports.dichVuDanhGiaCongTy = {
     async capNhat(ma, duLieu) {
         const hienTai = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findUnique({ where: { id: ma }, select: { id: true } });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty để cập nhật', 404);
         await danhgiacongty_mohinh_js_1.DanhGiaCongTy.update({ where: { id: ma }, data: duLieu });
         return this.layTheoMa(ma);
     },
     async xoa(ma) {
         const ketQua = await layDanhGiaDayDu({ id: ma });
         if (!ketQua)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty để xóa', 404);
         await danhgiacongty_mohinh_js_1.DanhGiaCongTy.delete({ where: { id: ma } });
         return chuanHoaDanhGia(ketQua);
     },

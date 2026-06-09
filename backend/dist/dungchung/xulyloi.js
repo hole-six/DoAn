@@ -7,19 +7,19 @@ const xuLyLoi = (loi, _yeuCau, phanHoi, _tiepTheo) => {
     if (loi instanceof zod_1.ZodError) {
         return phanHoi.status(422).json({
             code: 'VALIDATION_ERROR',
-            message: 'Du lieu khong hop le',
-            thongBao: 'Du lieu khong hop le',
+            message: 'Dữ liệu không hợp lệ',
+            thongBao: 'Dữ liệu không hợp lệ',
             fieldErrors: loi.flatten().fieldErrors,
             loi: loi.flatten().fieldErrors,
-            actionHint: 'Kiem tra lai du lieu da nhap va thu lai',
+            actionHint: 'Kiểm tra lại dữ liệu đã nhập và thử lại',
         });
     }
     if (typeof loi === 'object' && loi && 'code' in loi && (loi.code === 11000 || loi.code === 'P2002')) {
         return phanHoi.status(409).json({
             code: 'DUPLICATE_KEY',
-            message: 'Du lieu da ton tai',
-            thongBao: 'Du lieu da ton tai',
-            actionHint: 'Kiem tra lai gia tri trung lap',
+            message: 'Dữ liệu đã tồn tại',
+            thongBao: 'Dữ liệu đã tồn tại',
+            actionHint: 'Kiểm tra lại giá trị trùng lặp',
         });
     }
     if (typeof loi === 'object' && loi && 'code' in loi && loi.code === 'P2025') {
@@ -33,9 +33,9 @@ const xuLyLoi = (loi, _yeuCau, phanHoi, _tiepTheo) => {
     if (typeof loi === 'object' && loi && 'type' in loi && loi.type === 'entity.too.large') {
         return phanHoi.status(413).json({
             code: 'REQUEST_ENTITY_TOO_LARGE',
-            message: 'Du lieu gui len qua lon',
-            thongBao: 'Du lieu gui len qua lon. Hay upload file rieng thay vi luu truc tiep vao form.',
-            actionHint: 'Tai file bang chuc nang upload truoc khi bam luu',
+            message: 'Dữ liệu gửi lên quá lớn',
+            thongBao: 'Dữ liệu gửi lên quá lớn. Hãy upload file riêng thay vì lưu trực tiếp vào form.',
+            actionHint: 'Tải file bằng chức năng upload trước khi bấm lưu',
         });
     }
     if (typeof loi === 'object' && loi && 'code' in loi && loi.code === 'LIMIT_FILE_SIZE') {

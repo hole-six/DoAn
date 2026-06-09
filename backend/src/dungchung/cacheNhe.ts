@@ -30,7 +30,9 @@ export function xoaCacheGet() {
 
 export function cacheGetNgan(ttlMs = DEFAULT_TTL_MS): RequestHandler {
   return (yeuCau, phanHoi, tiepTheo) => {
-    if (yeuCau.method !== 'GET' || ttlMs <= 0) {
+    const coXacThuc = Boolean(String(yeuCau.headers.authorization ?? '').trim())
+    if (yeuCau.method !== 'GET' || ttlMs <= 0 || coXacThuc) {
+      if (coXacThuc) phanHoi.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
       tiepTheo()
       return
     }

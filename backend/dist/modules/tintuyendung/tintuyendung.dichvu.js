@@ -151,7 +151,7 @@ exports.dichVuTinTuyenDung = {
         const duLieu = duLieuNhan;
         const hienTai = await layDayDu({ id: ma });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng để cập nhật', 404);
         const { kyNang, ...tinData } = duLieu;
         const duLieuCapNhat = {
             ...tinData,
@@ -196,7 +196,7 @@ exports.dichVuTinTuyenDung = {
     async xoa(ma) {
         const hienTai = await layDayDu({ id: ma });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng để xóa', 404);
         await tintuyendung_mohinh_js_1.TinTuyenDung.delete({ where: { id: ma } });
         return chuanHoaTin((0, prismaHelper_js_1.coId)(hienTai));
     },

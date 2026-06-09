@@ -99,6 +99,7 @@ export async function lamMoiPhienDangNhap() {
   dangLamMoiPhien = (async () => {
     const res = await fetch(`${API_URL}/xacthuc/lam-moi-token`, {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
     })
@@ -151,6 +152,7 @@ export async function apiCoXacThuc(path: string, options: RequestInit = {}, thuL
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
+    cache: 'no-store',
     headers: { ...headerCoXacThuc(), ...(options.headers ?? {}) },
   })
   const data = docBodyJson(await res.text())
@@ -179,6 +181,7 @@ export async function apiUploadCoXacThuc(path: string, formData: FormData, optio
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     method: options.method ?? 'POST',
+    cache: 'no-store',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {}),

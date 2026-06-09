@@ -47,7 +47,7 @@ exports.dieuKhienThongBao = {
         const hienTai = await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: ma, maNguoiDung }, select: { id: true } });
         const duLieu = hienTai ? (0, prismaHelper_js_1.coId)(await thongbao_mohinh_js_1.ThongBao.update({ where: { id: ma }, data: payload })) : null;
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de cap nhat', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo để cập nhật', 404, 'NOT_FOUND');
         phanHoi.json({ duLieu });
     }),
     xoa: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
@@ -55,7 +55,7 @@ exports.dieuKhienThongBao = {
         const ma = String(yeuCau.params.ma ?? '');
         const duLieu = await thongbao_mohinh_js_1.ThongBao.findFirst({ where: { id: ma, maNguoiDung } });
         if (!duLieu)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo de xoa', 404, 'NOT_FOUND');
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy thông báo để xóa', 404, 'NOT_FOUND');
         await thongbao_mohinh_js_1.ThongBao.delete({ where: { id: ma } });
         phanHoi.status(204).send();
     }),

@@ -41,7 +41,7 @@ exports.dichVuNguoiDung = {
         const duLieu = duLieuNhan;
         const email = duLieu.email?.toLowerCase().trim();
         if (!email || !duLieu.matKhau || !duLieu.hoTen) {
-            throw new loiungdung_js_1.LoiUngDung('Thieu thong tin tao nguoi dung', 422);
+            throw new loiungdung_js_1.LoiUngDung('Thiếu thông tin tạo người dùng', 422);
         }
         const daTonTai = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { email }, select: { id: true } });
         if (daTonTai)
@@ -72,7 +72,7 @@ exports.dichVuNguoiDung = {
             delete duLieuCapNhat.matKhau;
         const hienTai = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: ma }, select: { id: true } });
         if (!hienTai)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng de cap nhat', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng để cập nhật', 404);
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.update({
             where: { id: ma },
             data: (0, prismaHelper_js_1.boUndefined)(await bamMatKhauNeuCo(duLieuCapNhat)),
@@ -82,7 +82,7 @@ exports.dichVuNguoiDung = {
     async xoa(ma) {
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: ma } });
         if (!nguoiDung)
-            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng de xoa', 404);
+            throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng để xóa', 404);
         if (nguoiDung.vaiTro === 'admin') {
             const soAdmin = await nguoidung_mohinh_js_1.NguoiDung.count({ where: { vaiTro: 'admin' } });
             if (soAdmin <= 1)

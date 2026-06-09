@@ -10,13 +10,13 @@ async function ketNoiDuLieu() {
     for (let lan = 1; lan <= 8; lan += 1) {
         try {
             await prisma_js_1.prisma.$connect();
-            console.log('Da ket noi PostgreSQL');
+            console.log('Đã kết nối PostgreSQL');
             return;
         }
         catch (error) {
             loiCuoi = error;
             const thoiGianCho = Math.min(lan * 2000, 10000);
-            console.warn(`Ket noi PostgreSQL that bai lan ${lan}/8, thu lai sau ${thoiGianCho}ms`);
+            console.warn(`Kết nối PostgreSQL thất bại lần ${lan}/8, thử lại sau ${thoiGianCho}ms`);
             if (lan < 8)
                 await ngu(thoiGianCho);
         }

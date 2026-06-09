@@ -86,7 +86,7 @@ function khoiTaoSocket(httpServer) {
         socket.join(`role:${nguoiDung.vaiTro}`);
         // Gửi thông báo kết nối thành công
         socket.emit('connected', {
-            message: 'Ket noi thanh cong',
+            message: 'Kết nối thành công',
             userId,
             role: nguoiDung.vaiTro,
         });

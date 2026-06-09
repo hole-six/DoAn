@@ -26,7 +26,7 @@ function taoDichVuCoBan(moHinh) {
         async layTheoMa(ma) {
             const duLieu = await moHinh.findUnique({ where: { id: ma } });
             if (!duLieu) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu', 404);
             }
             return (0, prismaHelper_js_1.coId)(duLieu);
         },
@@ -36,14 +36,14 @@ function taoDichVuCoBan(moHinh) {
         async capNhat(ma, duLieu) {
             const hienTai = await moHinh.findUnique({ where: { id: ma }, select: { id: true } });
             if (!hienTai) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de cap nhat', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu để cập nhật', 404);
             }
             return (0, prismaHelper_js_1.coId)(await moHinh.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) }));
         },
         async xoa(ma) {
             const ketQua = await moHinh.findUnique({ where: { id: ma } });
             if (!ketQua) {
-                throw new loiungdung_js_1.LoiUngDung('Khong tim thay du lieu de xoa', 404);
+                throw new loiungdung_js_1.LoiUngDung('Không tìm thấy dữ liệu để xóa', 404);
             }
             await moHinh.delete({ where: { id: ma } });
             return (0, prismaHelper_js_1.coId)(ketQua);
