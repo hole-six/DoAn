@@ -5,9 +5,10 @@ import timJobBg from '../../assets/timjob.png'
 import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
-import { apiCoXacThuc, layNguoiDung } from '../../lib/auth'
+import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
 import { normalizeSkills } from '../../lib/skillDisplay'
+import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
 
 type ViecLamItem = {
@@ -80,7 +81,7 @@ export default function TimKiemViecLam() {
   const [viecLam, setViecLam] = useState<ViecLamItem[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [loi, setLoi] = useState('')
-  const [savedIds, setSavedIds] = useState<string[]>(() => JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]'))
+  const [savedIds, setSavedIds] = useState<string[]>([])
   const [loaiDangChon, setLoaiDangChon] = useState<string[]>([])
   const [kyNangDangChon, setKyNangDangChon] = useState<string[]>([])
   const [capBacDangChon, setCapBacDangChon] = useState<string[]>([])
@@ -211,21 +212,29 @@ export default function TimKiemViecLam() {
   }
 
   const toggleSave = async (id: string) => {
-    const isSaved = savedIds.includes(id)
-    const next = isSaved ? savedIds.filter(item => item !== id) : [...savedIds, id]
     const nguoiDung = layNguoiDung()
-    setSavedIds(next)
-
-    if (nguoiDung?.vaiTro === 'ung_vien') {
-      try {
-        await apiCoXacThuc(`/viec-lam-da-luu/${id}`, { method: isSaved ? 'DELETE' : 'POST' })
-      } catch {
-        setSavedIds(savedIds)
-      }
+    if (!nguoiDung) {
+      toast.info('Bạn cần đăng nhập tài khoản ứng viên để lưu việc làm.')
+      navigate(`/dang-nhap?redirect=${encodeURIComponent('/viec-lam')}&notice=save_candidate_only`)
       return
     }
 
-    localStorage.setItem('itjob_saved_jobs', JSON.stringify(next))
+    if (nguoiDung.vaiTro !== 'ung_vien') {
+      toast.warning('Chỉ tài khoản ứng viên mới dùng được chức năng lưu việc làm.')
+      navigate(duongDanTheoVaiTro[nguoiDung.vaiTro])
+      return
+    }
+
+    const isSaved = savedIds.includes(id)
+    const next = isSaved ? savedIds.filter(item => item !== id) : [...savedIds, id]
+    setSavedIds(next)
+    try {
+      await apiCoXacThuc(`/viec-lam-da-luu/${id}`, { method: isSaved ? 'DELETE' : 'POST' })
+      toast.success(isSaved ? 'Đã bỏ lưu việc làm.' : 'Đã lưu việc làm.')
+    } catch {
+      setSavedIds(savedIds)
+      toast.error('Không lưu được việc làm. Vui lòng thử lại.')
+    }
   }
 
   const jobMatches = (
@@ -354,6 +363,20 @@ export default function TimKiemViecLam() {
             <label>
               <Search size={18} />
               <input value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} onFocus={() => setSearchActive(true)} onKeyDown={e => { if (e.key === 'Enter') submitSearch() }} placeholder="Chức danh, kỹ năng, công ty..." />
+              {tuKhoa && (
+                <button
+                  type="button"
+                  className="search-clear-button"
+                  aria-label="Xóa từ khóa tìm kiếm"
+                  onClick={() => {
+                    setTuKhoa('')
+                    setSearchActive(false)
+                    setSearchParams({})
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              )}
             </label>
             <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm việc</button>
             {searchActive && (

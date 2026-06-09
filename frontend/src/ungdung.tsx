@@ -188,6 +188,16 @@ function HeroTrangChu() {
               onFocus={() => setSearchActive(true)}
               onKeyDown={e => { if (e.key === 'Enter') timKiem() }}
             />
+            {tuKhoa && (
+              <button
+                type="button"
+                className="search-clear-button"
+                aria-label="Xóa từ khóa tìm kiếm"
+                onClick={() => setTuKhoa('')}
+              >
+                <X size={16} />
+              </button>
+            )}
           </label>
           <button className="primary-button large" onClick={timKiem}>
             <Search size={18} />

@@ -363,11 +363,21 @@ export default function DanhSachCongTy() {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="Tên công ty, lĩnh vực, địa điểm..."
+                placeholder="T?n c?ng ty, l?nh v?c, ??a ?i?m..."
                 value={tuKhoa}
                 onChange={e => setTuKhoa(e.target.value)}
                 onFocus={() => setSearchActive(true)}
               />
+              {tuKhoa && (
+                <button
+                  type="button"
+                  className="search-clear-button"
+                  aria-label="X?a t? kh?a t?m ki?m"
+                  onClick={() => setTuKhoa('')}
+                >
+                  <X size={16} />
+                </button>
+              )}
             </label>
             <button className="primary-button" onClick={() => setSearchActive(false)}><Search size={17} /> Tìm kiếm</button>
             {searchActive && (

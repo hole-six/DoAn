@@ -1535,6 +1535,7 @@
   gap: 14px;
   min-height: 64px;
   padding: 0 24px;
+  position: relative;
 }
 
 .trangchu-search-input svg {
@@ -1549,6 +1550,7 @@
   font-size: 17px;
   font-weight: 600;
   outline: 0;
+  padding-right: 38px;
   width: 100%;
 }
 
@@ -1559,6 +1561,28 @@
 
 .trangchu-search-input:focus-within {
   background: rgba(37, 99, 235, 0.02);
+}
+
+.search-clear-button {
+  align-items: center;
+  background: #f1f5f9;
+  border: 0;
+  border-radius: 999px;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+}
+
+.search-clear-button:hover {
+  background: #e2e8f0;
+  color: #0f172a;
 }
 
 .trangchu-khop-timkiem label {
