@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { useChat } from '../../../contexts/ChatContext'
 import { formatDateTime } from '../../../lib/format'
+import { imageUrl } from '../../../lib/format'
 import { interviewResultLabel, interviewStatusLabel, toneForInterviewStatus } from '../../../lib/statusLabels'
 import type { LichPhongVan } from '../../../types/recruitment'
 import { Badge, Drawer } from '../shared/UngVienAtoms'
@@ -61,7 +62,7 @@ export function ItvDetail({ item, onClose, onConfirm, onReschedule }: { item: Li
       <div className="grid gap-4">
         <section className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[76px_minmax(0,1fr)]">
           <span className="grid h-16 w-16 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-            {company?.logo ? <img src={company.logo} alt={company.tenCongTy ?? 'Logo công ty'} className="h-full w-full object-contain p-2" /> : <Building2 className="text-slate-400" size={26} />}
+            {company?.logo ? <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo công ty'} className="h-full w-full object-contain p-2" /> : <Building2 className="text-slate-400" size={26} />}
           </span>
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-sky-700">{company?.tenCongTy ?? 'Nhà tuyển dụng'}</p>

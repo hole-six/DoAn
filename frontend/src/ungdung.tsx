@@ -24,7 +24,7 @@ import { ChatProvider } from './contexts/ChatContext'
 import { ThongBaoProvider } from './contexts/ThongBaoContext'
 import { ThongBaoToastContainer } from './components/ThongBaoCenter'
 import { layAccessToken } from './lib/auth'
-import { API_URL } from './lib/env'
+import { API_URL, taoUrlTaiNguyen } from './lib/env'
 import { EmployerRecruitmentGate } from './pages/nhatuyendung/shared/EmployerRecruitmentGate'
 import {
   homeAiQuickPrompts,
@@ -74,7 +74,7 @@ function useTrangChuData() {
               id: job.id,
               tieuDe: job.tieuDe,
               congTy: job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng',
-              logo: job.nhaTuyenDung?.logo || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
+              logo: taoUrlTaiNguyen(job.nhaTuyenDung?.logo) || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
               diaDiem: job.diaChi ?? 'Đà Nẵng',
               luong: job.luongMin || job.luongMax ? `${job.luongMin?.toLocaleString('vi-VN') ?? '?'} - ${job.luongMax?.toLocaleString('vi-VN') ?? '?'} VND` : 'Thỏa thuận',
               loaiViec: job.loaiHinh ?? 'toan_thoi_gian',
@@ -89,7 +89,7 @@ function useTrangChuData() {
             .map((company: any) => ({
               id: company.id,
               ten: company.tenCongTy,
-              logo: company.logo || 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80',
+              logo: taoUrlTaiNguyen(company.logo) || 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80',
               logoBg: '#ffffff',
               diaDiem: company.diaChi ?? 'Đà Nẵng',
               soViec: jobsByCompany[company.id] ?? 0,

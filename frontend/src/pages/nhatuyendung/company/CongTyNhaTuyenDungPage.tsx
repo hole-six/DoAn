@@ -71,21 +71,21 @@ export default function CongTyNhaTuyenDungPage() {
   const logoObjectUrlRef = useRef('')
   const gateParam = new URLSearchParams(window.location.search).get('gate')
   const gate = getEmployerGate(data.company)
+  const dirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(savedForm), [form, savedForm])
 
   useEffect(() => {
+    if (dirty) return
     if (logoObjectUrlRef.current) URL.revokeObjectURL(logoObjectUrlRef.current)
     const next = companyToForm(data.company)
     setForm(next)
     setSavedForm(next)
     setErrors({})
     setLogoPreview('')
-  }, [data.company])
+  }, [data.company, dirty])
 
   useEffect(() => () => {
     if (logoObjectUrlRef.current) URL.revokeObjectURL(logoObjectUrlRef.current)
   }, [])
-
-  const dirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(savedForm), [form, savedForm])
 
   const update = <K extends keyof CompanyForm>(key: K, value: CompanyForm[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -115,6 +115,7 @@ export default function CongTyNhaTuyenDungPage() {
       setErrors(prev => ({ ...prev, logo: undefined }))
     } catch (err) {
       update('logo', previousLogo)
+      setLogoPreview('')
       setErrors(prev => ({ ...prev, logo: err instanceof Error ? err.message : 'Upload logo thất bại.' }))
     } finally {
       setUploading(false)
@@ -158,12 +159,13 @@ export default function CongTyNhaTuyenDungPage() {
       setSavedForm(normalized)
       data.updateCompany(savedCompany)
       setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
-      phatCapNhatCongTyNhaTuyenDung()
       if (logoObjectUrlRef.current) {
         URL.revokeObjectURL(logoObjectUrlRef.current)
         logoObjectUrlRef.current = ''
       }
       setLogoPreview('')
+      await data.reload()
+      phatCapNhatCongTyNhaTuyenDung()
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Không lưu được hồ sơ công ty.' })
     } finally {

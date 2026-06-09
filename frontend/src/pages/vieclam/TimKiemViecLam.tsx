@@ -6,7 +6,7 @@ import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
-import { API_URL } from '../../lib/env'
+import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import { normalizeSkills } from '../../lib/skillDisplay'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -140,7 +140,7 @@ export default function TimKiemViecLam() {
             id: job.id,
             tieuDe: job.tieuDe,
             congTy: job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng',
-            logo: job.nhaTuyenDung?.logo || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
+            logo: taoUrlTaiNguyen(job.nhaTuyenDung?.logo) || 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT',
             anhDaiDien: job.anhDaiDien,
             diaDiem: job.diaChi ?? 'Đà Nẵng',
             luong: formatLuong(job.luongMin, job.luongMax),

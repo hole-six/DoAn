@@ -6,6 +6,7 @@ import { DetailDrawer } from '../../../components/DetailDrawer'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDateTime } from '../../../lib/format'
+import { imageUrl } from '../../../lib/format'
 import { interviewStatusLabel, toneForInterviewStatus } from '../../../lib/statusLabels'
 import { toast } from '../../../lib/toast'
 import type { LichPhongVan } from '../../../types/recruitment'
@@ -48,9 +49,9 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
       onClick={onOpen}
       className={`grid w-full min-w-0 gap-4 rounded-2xl border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md lg:grid-cols-[64px_minmax(0,1fr)_auto] ${active ? 'border-sky-400 ring-4 ring-sky-100' : 'border-slate-200'}`}
     >
-      <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
         {company?.logo ? (
-          <img src={company.logo} alt={company.tenCongTy ?? 'Logo công ty'} className="h-full w-full object-contain p-2" />
+          <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo công ty'} className="h-full w-full object-contain p-2" />
         ) : (
           <Building2 size={24} className="text-slate-400" />
         )}

@@ -173,7 +173,7 @@ export default function ChiTietViecLam() {
   const yeuCau = tachDong(viec?.yeuCau)
   const quyenLoi = tachDong(viec?.quyenLoi)
   const tenCongTy = congTy?.tenCongTy ?? viec?.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng'
-  const logo = congTy?.logo ?? viec?.nhaTuyenDung?.logo ?? logoDuPhong
+  const logo = imageUrl(congTy?.logo ?? viec?.nhaTuyenDung?.logo ?? logoDuPhong)
   const shareUrl = typeof window !== 'undefined' && viec ? `${window.location.origin}/viec-lam/${viec.id}` : ''
   const shareText = viec ? `${viec.tieuDe} tại ${tenCongTy}` : 'Việc làm ITJob'
 
