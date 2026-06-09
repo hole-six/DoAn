@@ -913,6 +913,7 @@
   .dashboard-role-nhatuyendung .ntd-drawer-card {
     border-radius: 18px 18px 0 0 !important;
     max-height: calc(100dvh - 18px) !important;
+    padding-bottom: calc(112px + env(safe-area-inset-bottom)) !important;
     width: 100% !important;
   }
 
