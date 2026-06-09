@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Save, UploadCloud, X } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiUploadCoXacThuc } from '../../../lib/auth'
+import { capNhatPhienBanTaiNguyen, xoaPhienBanTaiNguyen } from '../../../lib/env'
 import { imageUrl } from '../../../lib/format'
 import type { KyNang, TinTuyenDung } from '../../../types/recruitment'
 import { Drawer } from '../shared/NtdAtoms'
@@ -73,7 +74,9 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
     setUploading(true)
     try {
       const data = await apiUploadCoXacThuc('/tintuyendung/upload-anh', formData)
-      setJob(current => ({ ...current, anhDaiDien: data.duongDan ?? data.url }))
+      const nextImage = data.duongDan ?? data.url
+      capNhatPhienBanTaiNguyen(nextImage)
+      setJob(current => ({ ...current, anhDaiDien: nextImage }))
       setErrors({})
     } catch (error) {
       setErrors({ form: error instanceof Error ? error.message : 'Không upload được ảnh tin' })
@@ -117,7 +120,7 @@ export function JobModal({ initial, companyId, skills, onClose, onSubmit }: { in
         {job.anhDaiDien && (
           <div className="mt-3 overflow-hidden rounded-xl border border-slate-200">
             <img src={imageUrl(job.anhDaiDien)} alt="Banner tin tuyển dụng" className="h-36 w-full object-cover" />
-            <button type="button" className="flex min-h-10 w-full items-center justify-center gap-2 border-t border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50" onClick={() => setJob(current => ({ ...current, anhDaiDien: '' }))}>
+            <button type="button" className="flex min-h-10 w-full items-center justify-center gap-2 border-t border-slate-200 text-sm font-black text-slate-600 hover:bg-slate-50" onClick={() => setJob(current => { xoaPhienBanTaiNguyen(current.anhDaiDien); return { ...current, anhDaiDien: '' } })}>
               <X size={16} /> Xóa ảnh
             </button>
           </div>

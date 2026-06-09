@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Building2, RefreshCw, Save, Upload, X } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../../lib/auth'
+import { capNhatPhienBanTaiNguyen, xoaPhienBanTaiNguyen } from '../../../lib/env'
 import { phatCapNhatCongTyNhaTuyenDung } from '../../../lib/employerCompanySync'
 import { getEmployerGate } from '../../../lib/employerGate'
 import { imageUrl } from '../../../lib/format'
@@ -65,7 +66,6 @@ export default function CongTyNhaTuyenDungPage() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [savedAt, setSavedAt] = useState('')
-  const [logoVersion, setLogoVersion] = useState(0)
   const [logoPreview, setLogoPreview] = useState('')
   const gateParam = new URLSearchParams(window.location.search).get('gate')
   const gate = getEmployerGate(data.company)
@@ -97,9 +97,9 @@ export default function CongTyNhaTuyenDungPage() {
     try {
       const res = await apiUploadCoXacThuc('/nhatuyendung/upload-logo', body)
       const nextLogo = res.duongDan ?? res.url ?? ''
+      capNhatPhienBanTaiNguyen(nextLogo)
       if (!nextLogo) throw new Error('Upload logo không trả về đường dẫn.')
       update('logo', nextLogo)
-      setLogoVersion(prev => prev + 1)
       await apiCoXacThuc(`/nhatuyendung/${data.company?.id}`, {
         method: 'PATCH',
         body: JSON.stringify({ logo: nextLogo }),
@@ -140,7 +140,6 @@ export default function CongTyNhaTuyenDungPage() {
       setForm(companyToForm(savedCompany))
       data.updateCompany(savedCompany)
       setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
-      setLogoVersion(prev => prev + 1)
       phatCapNhatCongTyNhaTuyenDung()
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Không lưu được hồ sơ công ty.' })
@@ -176,7 +175,7 @@ export default function CongTyNhaTuyenDungPage() {
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <img
                   className="h-32 w-32 rounded-2xl border border-slate-200 bg-white object-cover"
-                  src={logoPreview || (form.logo ? `${imageUrl(form.logo)}${imageUrl(form.logo).includes('?') ? '&' : '?'}v=${logoVersion}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT')}
+                  src={logoPreview || (form.logo ? `${imageUrl(form.logo)}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT')}
                   alt={form.tenCongTy || 'Logo công ty'}
                 />
                 <div className="mt-4">
@@ -206,7 +205,7 @@ export default function CongTyNhaTuyenDungPage() {
                   Upload logo
                 </Button>
                 {form.logo && (
-                  <Button type="button" variant="ghost" icon={<X size={16} />} onClick={() => update('logo', '')}>
+                  <Button type="button" variant="ghost" icon={<X size={16} />} onClick={() => { xoaPhienBanTaiNguyen(form.logo); update('logo', '') }}>
                     Xóa logo
                   </Button>
                 )}

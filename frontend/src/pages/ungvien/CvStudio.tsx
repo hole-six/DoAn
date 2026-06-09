@@ -4,6 +4,7 @@ import { flushSync } from 'react-dom'
 import { Brain, Download, Eye, FileUp, ImagePlus, Plus, Save, Sparkles, Trash2, X } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../lib/auth'
+import { capNhatPhienBanTaiNguyen, taoUrlTaiNguyen, xoaPhienBanTaiNguyen } from '../../lib/env'
 import { toast } from '../../lib/toast'
 
 type CvItem = { tieuDe?: string; donVi?: string; thoiGian?: string; moTa?: string }
@@ -279,8 +280,9 @@ async function taiLenTaiSanCv(path: string, tenTruong: string, file: File) {
   const formData = new FormData()
   formData.append(tenTruong, file)
   const ketQua = await apiUploadCoXacThuc(path, formData)
-  const url = ketQua.url || ketQua.duongDan
+  const url = ketQua.duongDan || ketQua.url
   if (!url) throw new Error('Upload khong tra ve duong dan file')
+  capNhatPhienBanTaiNguyen(url)
   return url
 }
 
@@ -288,8 +290,9 @@ async function taiLenFileCv(file: File) {
   const formData = new FormData()
   formData.append('tep', file)
   const ketQua = await apiUploadCoXacThuc('/hosonangluc/upload-file', formData)
-  const url = ketQua.url || ketQua.duongDan
+  const url = ketQua.duongDan || ketQua.url
   if (!url) throw new Error('Upload không trả về đường dẫn file')
+  capNhatPhienBanTaiNguyen(url)
   return {
     url,
     fileCvText: ketQua.fileCvText ?? '',
@@ -556,7 +559,7 @@ function Preview({ cv }: { cv: CvData; data: any }) {
         <section className="cv-profile-row" style={{ gridTemplateColumns: cleanCv.anhDaiDien ? 'minmax(0, 2fr) minmax(0, 3fr)' : '1fr' }}>
           {cleanCv.anhDaiDien && (
             <div className="cv-photo-wrap">
-              <img className="cv-photo-img" src={cleanCv.anhDaiDien} alt={hoTen || 'Candidate'} />
+              <img className="cv-photo-img" src={taoUrlTaiNguyen(cleanCv.anhDaiDien)} alt={hoTen || 'Candidate'} />
             </div>
           )}
           {personalRows.length > 0 && (
@@ -768,6 +771,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   }
 
   function xoaAnhCv() {
+    xoaPhienBanTaiNguyen(cv.anhDaiDien)
     capNhatCv(value => ({ ...value, anhDaiDien: undefined }))
   }
 
@@ -1203,9 +1207,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
                   {item.cvChinh && <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-black text-emerald-700">CV chính</span>}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" className={smallBtn} disabled={!item.fileCvData} onClick={() => item.fileCvData && window.open(item.fileCvData, '_blank', 'noopener,noreferrer')}><Eye size={14} /> Xem PDF</button>
+                  <button type="button" className={smallBtn} disabled={!item.fileCvData} onClick={() => item.fileCvData && window.open(taoUrlTaiNguyen(item.fileCvData), '_blank', 'noopener,noreferrer')}><Eye size={14} /> Xem PDF</button>
                   {item.fileCvData && (
-                    <a className={smallBtn} href={item.fileCvData} download={item.fileCvTen || 'cv.pdf'}>
+                    <a className={smallBtn} href={taoUrlTaiNguyen(item.fileCvData)} download={item.fileCvTen || 'cv.pdf'}>
                       <Download size={14} /> Tải PDF
                     </a>
                   )}
@@ -1234,7 +1238,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
             <div className="mb-4 grid gap-3 md:grid-cols-[132px_minmax(0,1fr)]">
               <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
                 <div className="grid aspect-[5/6] place-items-center bg-white text-xs font-black text-slate-400">
-                  {cv.anhDaiDien ? <img src={cv.anhDaiDien} alt="Ảnh CV" className="h-full w-full object-cover" /> : 'Ảnh CV'}
+                  {cv.anhDaiDien ? <img src={taoUrlTaiNguyen(cv.anhDaiDien)} alt="Ảnh CV" className="h-full w-full object-cover" /> : 'Ảnh CV'}
                 </div>
                 <button type="button" disabled={dangTaiAnhCv} className="flex min-h-10 w-full items-center justify-center gap-2 border-t border-slate-200 text-xs font-black text-[#0b5c91] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => document.getElementById('cv-photo-upload')?.click()}>
                   <ImagePlus size={14} /> {dangTaiAnhCv ? 'Đang upload...' : cv.anhDaiDien ? 'Đổi ảnh' : 'Upload ảnh'}

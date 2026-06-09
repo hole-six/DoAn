@@ -2,7 +2,7 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Building2, Clock, Copy, DollarSign, FileText, Globe, MapPin, MessageCircle, Share2, UploadCloud, Users, X } from 'lucide-react'
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
-import { API_URL } from '../../lib/env'
+import { API_URL, capNhatPhienBanTaiNguyen } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -91,8 +91,9 @@ async function uploadFileCv(file: File) {
   const formData = new FormData()
   formData.append('tep', file)
   const ketQua = await apiUploadCoXacThuc('/hosonangluc/upload-file', formData)
-  const url = ketQua.url || ketQua.duongDan
+  const url = ketQua.duongDan || ketQua.url
   if (!url) throw new Error('Upload khong tra ve duong dan file')
+  capNhatPhienBanTaiNguyen(url)
   return {
     url,
     fileCvText: ketQua.fileCvText ?? '',

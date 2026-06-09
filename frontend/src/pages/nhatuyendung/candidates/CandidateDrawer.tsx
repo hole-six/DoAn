@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Download, ExternalLink, FileText, MessageCircle, ThumbsDown } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
+import { taoUrlTaiNguyen } from '../../../lib/env'
 import { formatDateTime, imageUrl } from '../../../lib/format'
 import { employerApplicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
 import type { HoSoNangLuc, HoSoUngTuyen } from '../../../types/recruitment'
@@ -110,9 +111,7 @@ function CvSection({ title, items }: { title: string; items: string[] }) {
 function resolveCvFileUrl(cv?: HoSoNangLuc) {
   const candidate = String(cv?.fileCvData ?? cv?.fileCvPath ?? '').trim()
   if (!candidate) return ''
-  if (/^https?:\/\//i.test(candidate) || candidate.startsWith('data:')) return candidate
-  if (candidate.startsWith('/')) return `${window.location.origin}${candidate}`
-  return `${window.location.origin}/${candidate}`
+  return taoUrlTaiNguyen(candidate)
 }
 
 function PdfCvViewer({ cv }: { cv: HoSoNangLuc }) {

@@ -4,7 +4,7 @@ import { clsx } from 'clsx'
 import { Bell, Briefcase, Calendar, CheckCircle, Edit3, Eye, ImagePlus, Plus, Save, Trash2, Users, XCircle } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
 import { layAccessToken } from '../../lib/auth'
-import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { API_URL, capNhatPhienBanTaiNguyen, taoUrlTaiNguyen } from '../../lib/env'
 import { phatCapNhatCongTyNhaTuyenDung } from '../../lib/employerCompanySync'
 
 const LOCKED_JOB_STATUSES = new Set(['dang_mo', 'tam_dong', 'het_han'])
@@ -552,7 +552,6 @@ export function CongTyNhaTuyenDungPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
-  const [logoVersion, setLogoVersion] = useState(0)
 
   useEffect(() => {
     if (data.company) setForm({ ...data.company })
@@ -588,8 +587,8 @@ export function CongTyNhaTuyenDungPage() {
       if (!res.ok) throw new Error(response.thongBao ?? 'Upload logo th?t b?i')
       const nextLogo = response.duLieu?.duongDan ?? response.duLieu?.url
       if (!nextLogo) throw new Error('Upload logo kh?ng tr? v? ???ng d?n')
+      capNhatPhienBanTaiNguyen(nextLogo)
       setForm((prev: any) => ({ ...prev, logo: nextLogo }))
-      setLogoVersion(prev => prev + 1)
       if (form?.id) {
         await api(`/nhatuyendung/${form.id}`, { method: 'PATCH', body: JSON.stringify({ logo: nextLogo }) })
         await data.reload()
@@ -615,7 +614,7 @@ export function CongTyNhaTuyenDungPage() {
               {logoPreview ? (
                 <img src={logoPreview} alt="" />
               ) : form.logo ? (
-                <img src={`${imageUrl(form.logo)}${imageUrl(form.logo).includes('?') ? '&' : '?'}v=${logoVersion}`} alt="" />
+                <img src={`${imageUrl(form.logo)}`} alt="" />
               ) : (
                 <span>Logo</span>
               )}

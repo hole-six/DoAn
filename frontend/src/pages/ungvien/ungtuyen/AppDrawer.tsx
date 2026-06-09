@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { useChat } from '../../../contexts/ChatContext'
 import { apiCoXacThuc } from '../../../lib/auth'
+import { taoUrlTaiNguyen } from '../../../lib/env'
 import { formatDateTime } from '../../../lib/format'
 import { applicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
 import { toast } from '../../../lib/toast'
@@ -201,10 +202,10 @@ export function AppDrawer({
               <div className="mt-3 flex flex-wrap gap-2">
                 {hoSo.fileCvData ? (
                   <>
-                    <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />} onClick={() => window.open(String(hoSo.fileCvData), '_blank', 'noopener,noreferrer')}>
+                    <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />} onClick={() => window.open(taoUrlTaiNguyen(String(hoSo.fileCvData)), '_blank', 'noopener,noreferrer')}>
                       Xem PDF
                     </Button>
-                    <a className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-sm font-black text-slate-800" href={String(hoSo.fileCvData)} download={hoSo.fileCvTen || 'cv.pdf'}>
+                    <a className="inline-flex min-h-9 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-sm font-black text-slate-800" href={taoUrlTaiNguyen(String(hoSo.fileCvData))} download={hoSo.fileCvTen || 'cv.pdf'}>
                       <Download size={14} /> Tải PDF
                     </a>
                   </>
