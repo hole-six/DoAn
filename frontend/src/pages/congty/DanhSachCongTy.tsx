@@ -363,7 +363,7 @@ export default function DanhSachCongTy() {
               <Search size={18} />
               <input
                 type="text"
-                placeholder="T?n c?ng ty, l?nh v?c, ??a ?i?m..."
+                placeholder="Tên công ty, lĩnh vực, địa điểm..."
                 value={tuKhoa}
                 onChange={e => setTuKhoa(e.target.value)}
                 onFocus={() => setSearchActive(true)}
@@ -372,7 +372,7 @@ export default function DanhSachCongTy() {
                 <button
                   type="button"
                   className="search-clear-button"
-                  aria-label="X?a t? kh?a t?m ki?m"
+                  aria-label="Xóa từ khóa tìm kiếm"
                   onClick={() => setTuKhoa('')}
                 >
                   <X size={16} />
