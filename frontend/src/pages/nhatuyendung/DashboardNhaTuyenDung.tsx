@@ -5,6 +5,7 @@ import { Bell, Briefcase, Calendar, CheckCircle, Edit3, Eye, ImagePlus, Plus, Sa
 import { useConfirm } from '../../components/ConfirmDialog'
 import { layAccessToken } from '../../lib/auth'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { phatCapNhatCongTyNhaTuyenDung } from '../../lib/employerCompanySync'
 
 const LOCKED_JOB_STATUSES = new Set(['dang_mo', 'tam_dong', 'het_han'])
 
@@ -550,10 +551,28 @@ export function CongTyNhaTuyenDungPage() {
   const [form, setForm] = useState<any>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
-  useEffect(() => { if (data.company) setForm({ ...data.company }) }, [data.company?.id])
-  const save = async (e: FormEvent) => { e.preventDefault(); setError(''); await api(`/nhatuyendung/${form.id}`, { method: 'PATCH', body: JSON.stringify(form) }); await data.reload() }
+  const [logoPreview, setLogoPreview] = useState('')
+  const [logoVersion, setLogoVersion] = useState(0)
+
+  useEffect(() => {
+    if (data.company) setForm({ ...data.company })
+  }, [data.company?.id])
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault()
+    setError('')
+    await api(`/nhatuyendung/${form.id}`, { method: 'PATCH', body: JSON.stringify(form) })
+    await data.reload()
+  }
+
   const uploadLogo = async (file?: File) => {
     if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setError('Ch? nh?n file ?nh')
+      return
+    }
+    const previewUrl = URL.createObjectURL(file)
+    setLogoPreview(previewUrl)
     try {
       setUploading(true)
       setError('')
@@ -565,17 +584,63 @@ export function CongTyNhaTuyenDungPage() {
         body,
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.thongBao ?? 'Upload logo thất bại')
-      setForm((prev: any) => ({ ...prev, logo: data.duLieu?.duongDan ?? data.duLieu?.url }))
+      const response = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(response.thongBao ?? 'Upload logo th?t b?i')
+      const nextLogo = response.duLieu?.duongDan ?? response.duLieu?.url
+      if (!nextLogo) throw new Error('Upload logo kh?ng tr? v? ???ng d?n')
+      setForm((prev: any) => ({ ...prev, logo: nextLogo }))
+      setLogoVersion(prev => prev + 1)
+      if (form?.id) {
+        await api(`/nhatuyendung/${form.id}`, { method: 'PATCH', body: JSON.stringify({ logo: nextLogo }) })
+        await data.reload()
+      }
+      phatCapNhatCongTyNhaTuyenDung()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload logo thất bại')
+      setError(err instanceof Error ? err.message : 'Upload logo th?t b?i')
     } finally {
+      setLogoPreview('')
       setUploading(false)
     }
   }
-  if (data.loading || !form) return <Page title="Thông tin công ty" desc="Đang tải..."><div className="ntd-panel">Đang tải...</div></Page>
-  return <Page title="Thông tin công ty" desc="Cập nhật hồ sơ công ty, logo, mô tả, quy mô và website."><ErrorBox message={error || data.error} /><form className="ntd-panel ntd-form" onSubmit={save}><Field label="Logo công ty" wide><div className="ntd-logo-upload"><div className="ntd-logo-preview">{form.logo ? <img src={imageUrl(form.logo)} alt="" /> : <span>Logo</span>}</div><div><label className="ntd-upload-button"><ImagePlus size={16} /> {uploading ? 'Đang upload...' : 'Upload ảnh'}<input type="file" accept="image/*" disabled={uploading} onChange={e => uploadLogo(e.target.files?.[0])} /></label><p>Hỗ trợ JPG, PNG, WebP, SVG. Tối đa 3MB.</p></div></div></Field><Field label="Tên công ty"><input value={form.tenCongTy ?? ''} onChange={e => setForm({ ...form, tenCongTy: e.target.value })} /></Field><Field label="Mã số thuế"><input value={form.maSoThue ?? ''} onChange={e => setForm({ ...form, maSoThue: e.target.value })} /></Field><Field label="Địa chỉ"><input value={form.diaChi ?? ''} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field><Field label="Website"><input value={form.website ?? ''} onChange={e => setForm({ ...form, website: e.target.value })} /></Field><Field label="Logo URL"><input value={form.logo ?? ''} onChange={e => setForm({ ...form, logo: e.target.value })} /></Field><Field label="Quy mô"><input type="number" value={form.quyMo ?? 0} onChange={e => setForm({ ...form, quyMo: Number(e.target.value) })} /></Field><Field label="Ngành"><input value={form.nganh ?? ''} onChange={e => setForm({ ...form, nganh: e.target.value })} /></Field><Field label="Mô tả" wide><textarea value={form.moTa ?? ''} onChange={e => setForm({ ...form, moTa: e.target.value })} /></Field><div className="ntd-form-actions"><button className="primary-button"><Save size={16} /> Lưu công ty</button></div></form></Page>
+
+  if (data.loading || !form) return <Page title="Th?ng tin c?ng ty" desc="?ang t?i..."><div className="ntd-panel">?ang t?i...</div></Page>
+
+  return (
+    <Page title="Th?ng tin c?ng ty" desc="C?p nh?t h? s? c?ng ty, logo, m? t?, quy m? v? website.">
+      <ErrorBox message={error || data.error} />
+      <form className="ntd-panel ntd-form" onSubmit={save}>
+        <Field label="Logo c?ng ty" wide>
+          <div className="ntd-logo-upload">
+            <div className="ntd-logo-preview">
+              {logoPreview ? (
+                <img src={logoPreview} alt="" />
+              ) : form.logo ? (
+                <img src={`${imageUrl(form.logo)}${imageUrl(form.logo).includes('?') ? '&' : '?'}v=${logoVersion}`} alt="" />
+              ) : (
+                <span>Logo</span>
+              )}
+            </div>
+            <div>
+              <label className="ntd-upload-button">
+                <ImagePlus size={16} /> {uploading ? '?ang upload...' : 'Upload ?nh'}
+                <input type="file" accept="image/*" disabled={uploading} onChange={e => void uploadLogo(e.target.files?.[0])} />
+              </label>
+              <p>H? tr? JPG, PNG, WebP, SVG. T?i ?a 3MB.</p>
+            </div>
+          </div>
+        </Field>
+        <Field label="T?n c?ng ty"><input value={form.tenCongTy ?? ''} onChange={e => setForm({ ...form, tenCongTy: e.target.value })} /></Field>
+        <Field label="M? s? thu?"><input value={form.maSoThue ?? ''} onChange={e => setForm({ ...form, maSoThue: e.target.value })} /></Field>
+        <Field label="??a ch?"><input value={form.diaChi ?? ''} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field>
+        <Field label="Website"><input value={form.website ?? ''} onChange={e => setForm({ ...form, website: e.target.value })} /></Field>
+        <Field label="Logo URL"><input value={form.logo ?? ''} onChange={e => setForm({ ...form, logo: e.target.value })} /></Field>
+        <Field label="Quy m?"><input type="number" value={form.quyMo ?? 0} onChange={e => setForm({ ...form, quyMo: Number(e.target.value) })} /></Field>
+        <Field label="Ng?nh"><input value={form.nganh ?? ''} onChange={e => setForm({ ...form, nganh: e.target.value })} /></Field>
+        <Field label="M? t?" wide><textarea value={form.moTa ?? ''} onChange={e => setForm({ ...form, moTa: e.target.value })} /></Field>
+        <div className="ntd-form-actions"><button className="primary-button"><Save size={16} /> L?u c?ng ty</button></div>
+      </form>
+    </Page>
+  )
 }
 
 export function AnalyticsNhaTuyenDungPage() {

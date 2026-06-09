@@ -66,6 +66,7 @@ export default function CongTyNhaTuyenDungPage() {
   const [uploading, setUploading] = useState(false)
   const [savedAt, setSavedAt] = useState('')
   const [logoVersion, setLogoVersion] = useState(0)
+  const [logoPreview, setLogoPreview] = useState('')
   const gateParam = new URLSearchParams(window.location.search).get('gate')
   const gate = getEmployerGate(data.company)
 
@@ -87,16 +88,30 @@ export default function CongTyNhaTuyenDungPage() {
       setErrors(prev => ({ ...prev, logo: 'Chỉ nhận file ảnh.' }))
       return
     }
+    const previousLogo = form.logo
+    const previewUrl = URL.createObjectURL(file)
+    setLogoPreview(previewUrl)
     const body = new FormData()
     body.append('logo', file)
     setUploading(true)
     try {
       const res = await apiUploadCoXacThuc('/nhatuyendung/upload-logo', body)
-      update('logo', res.duongDan ?? res.url ?? '')
+      const nextLogo = res.duongDan ?? res.url ?? ''
+      if (!nextLogo) throw new Error('Upload logo không trả về đường dẫn.')
+      update('logo', nextLogo)
       setLogoVersion(prev => prev + 1)
+      await apiCoXacThuc(`/nhatuyendung/${data.company?.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ logo: nextLogo }),
+      })
+      setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
+      phatCapNhatCongTyNhaTuyenDung()
     } catch (err) {
+      update('logo', previousLogo)
+      setLogoPreview('')
       setErrors(prev => ({ ...prev, logo: err instanceof Error ? err.message : 'Upload logo thất bại.' }))
     } finally {
+      setLogoPreview('')
       setUploading(false)
     }
   }
@@ -161,7 +176,7 @@ export default function CongTyNhaTuyenDungPage() {
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <img
                   className="h-32 w-32 rounded-2xl border border-slate-200 bg-white object-cover"
-                  src={form.logo ? `${imageUrl(form.logo)}${imageUrl(form.logo).includes('?') ? '&' : '?'}v=${logoVersion}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT'}
+                  src={logoPreview || (form.logo ? `${imageUrl(form.logo)}${imageUrl(form.logo).includes('?') ? '&' : '?'}v=${logoVersion}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT')}
                   alt={form.tenCongTy || 'Logo công ty'}
                 />
                 <div className="mt-4">
