@@ -71,7 +71,6 @@ function chuanHoaUngTuyen(taiLieu) {
                 diaChi: duLieu.maUngVien.diaChi,
                 mucLuongMongMuon: duLieu.maUngVien.mucLuongMongMuon,
                 tomTat: duLieu.maUngVien.tomTat,
-                portfolio: duLieu.maUngVien.portfolio ?? [],
                 nguoiDung: duLieu.maUngVien.maNguoiDung?._id
                     ? {
                         id: String(duLieu.maUngVien.maNguoiDung._id),

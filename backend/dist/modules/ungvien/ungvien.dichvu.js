@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuUngVien = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
-const dongboQuanHe_js_1 = require("../../dungchung/dongboQuanHe.js");
+const prisma_js_1 = require("../../cauhinh/prisma.js");
 const ungvien_mohinh_js_1 = require("./ungvien.mohinh.js");
 function chuanHoaUngVien(taiLieu) {
     const duLieu = taiLieu ?? {};
@@ -28,30 +28,50 @@ function chuanHoaUngVien(taiLieu) {
         kinhNghiem: duLieu.kinhNghiem,
         viTriMongMuon: duLieu.viTriMongMuon,
         mucLuongMongMuon: duLieu.mucLuongMongMuon,
-        kyNang: (duLieu.kyNang ?? []).map((muc) => ({
-            maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
-            tenKyNang: muc.maKyNang?.tenKyNang,
-            loaiKyNang: muc.maKyNang?.loaiKyNang,
-            mucDo: muc.mucDo,
+        // ✅ Lấy từ bảng quan hệ UngVienKyNang
+        kyNang: (duLieu.kyNangLienKet ?? []).map((lienKet) => ({
+            maKyNang: String(lienKet.kyNang?.id ?? lienKet.maKyNang),
+            tenKyNang: lienKet.kyNang?.tenKyNang,
+            loaiKyNang: lienKet.kyNang?.loaiKyNang,
+            mucDo: lienKet.mucDo,
+            soNamKinhNghiem: lienKet.soNamKinhNghiem,
         })),
-        portfolio: duLieu.portfolio ?? [],
         ngayTao: duLieu.ngayTao,
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
 async function layDayDu(where, many = false) {
-    // ✅ TỐI ƯU: Chỉ query 1 lần, không cần ganNguoiDungChoUngVien & ganKyNangJson
+    // ✅ Query với include để lấy relations
     const rows = many
         ? await ungvien_mohinh_js_1.UngVien.findMany({
             where,
             orderBy: { ngayTao: 'desc' },
             take: 200,
-            // Không cần include vì NguoiDung & KyNang không phải relation trực tiếp trong Prisma
-            // Data đã được lưu trong JSON
+            include: {
+                kyNangLienKet: {
+                    include: {
+                        kyNang: {
+                            select: { id: true, tenKyNang: true, loaiKyNang: true }
+                        }
+                    }
+                }
+            }
         })
-        : await ungvien_mohinh_js_1.UngVien.findMany({ where, take: 1 });
-    // ✅ Chỉ hydrate nếu thực sự cần thiết (optimize bằng cách cache)
-    const hydrated = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)(rows));
+        : await ungvien_mohinh_js_1.UngVien.findMany({
+            where,
+            take: 1,
+            include: {
+                kyNangLienKet: {
+                    include: {
+                        kyNang: {
+                            select: { id: true, tenKyNang: true, loaiKyNang: true }
+                        }
+                    }
+                }
+            }
+        });
+    // Hydrate NguoiDung
+    const hydrated = await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)(rows);
     return many ? hydrated : hydrated[0];
 }
 exports.dichVuUngVien = {
@@ -72,19 +92,48 @@ exports.dichVuUngVien = {
         return chuanHoaUngVien(duLieu);
     },
     async damBaoHoSoTheoNguoiDung(maNguoiDung) {
-        const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({ where: { maNguoiDung } });
+        const hienTai = await ungvien_mohinh_js_1.UngVien.findUnique({
+            where: { maNguoiDung },
+            include: {
+                kyNangLienKet: {
+                    include: {
+                        kyNang: {
+                            select: { id: true, tenKyNang: true, loaiKyNang: true }
+                        }
+                    }
+                }
+            }
+        });
         if (hienTai) {
-            const [dayDu] = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([hienTai]));
+            const [dayDu] = await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([hienTai]);
             return chuanHoaUngVien(dayDu);
         }
-        const daTao = await ungvien_mohinh_js_1.UngVien.create({ data: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } });
-        const [dayDu] = await (0, prismaHelper_js_1.ganKyNangJson)(await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([daTao]));
+        const daTao = await ungvien_mohinh_js_1.UngVien.create({ data: { maNguoiDung, kinhNghiem: 0 } });
+        const [dayDu] = await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)([daTao]);
         return chuanHoaUngVien(dayDu);
     },
     async taoMoi(duLieu) {
         const payload = duLieu;
-        const ketQua = await ungvien_mohinh_js_1.UngVien.create({ data: (0, prismaHelper_js_1.boUndefined)(payload) });
-        await (0, dongboQuanHe_js_1.dongBoKyNangUngVien)(String(ketQua.id), payload.kyNang);
+        const { kyNang, ...ungVienData } = payload;
+        // Tạo ứng viên
+        const ketQua = await ungvien_mohinh_js_1.UngVien.create({ data: (0, prismaHelper_js_1.boUndefined)(ungVienData) });
+        // Tạo kỹ năng nếu có
+        if (Array.isArray(kyNang) && kyNang.length > 0) {
+            const kyNangData = kyNang
+                .map(item => ({
+                maUngVien: ketQua.id,
+                maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+                mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+                soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
+            }))
+                .filter(item => item.maKyNang);
+            if (kyNangData.length > 0) {
+                await prisma_js_1.prisma.ungVienKyNang.createMany({
+                    data: kyNangData,
+                    skipDuplicates: true
+                });
+            }
+        }
         return this.layTheoMa(String(ketQua.id));
     },
     async capNhat(ma, duLieu, maNguoiDungHienTai) {
@@ -95,8 +144,31 @@ exports.dichVuUngVien = {
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền cập nhật hồ sơ này', 403);
         }
         const payload = duLieu;
-        await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(payload) });
-        await (0, dongboQuanHe_js_1.dongBoKyNangUngVien)(ma, payload.kyNang);
+        const { kyNang, ...ungVienData } = payload;
+        // Cập nhật ứng viên
+        await ungvien_mohinh_js_1.UngVien.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(ungVienData) });
+        // Cập nhật kỹ năng nếu có
+        if (kyNang !== undefined) {
+            // Xóa kỹ năng cũ
+            await prisma_js_1.prisma.ungVienKyNang.deleteMany({ where: { maUngVien: ma } });
+            // Thêm kỹ năng mới
+            if (Array.isArray(kyNang) && kyNang.length > 0) {
+                const kyNangData = kyNang
+                    .map(item => ({
+                    maUngVien: ma,
+                    maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+                    mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+                    soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
+                }))
+                    .filter(item => item.maKyNang);
+                if (kyNangData.length > 0) {
+                    await prisma_js_1.prisma.ungVienKyNang.createMany({
+                        data: kyNangData,
+                        skipDuplicates: true
+                    });
+                }
+            }
+        }
         return this.layTheoMa(ma);
     },
     async xoa(ma, maNguoiDungHienTai) {

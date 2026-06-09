@@ -1,6 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import { boUndefined, coId, ganKyNangVaCongTyChoTin } from '../../dungchung/prismaHelper.js'
-import { dongBoKyNangTinTuyenDung } from '../../dungchung/dongboQuanHe.js'
+import { boUndefined, coId, ganCongTyChoTin } from '../../dungchung/prismaHelper.js'
+import { prisma } from '../../cauhinh/prisma.js'
 import { layLimit, locVaXepHangTheoTuKhoa } from '../../dungchung/timkiem.js'
 import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
@@ -54,11 +54,14 @@ function chuanHoaTin(taiLieu: any) {
     luotXem: duLieu.luotXem,
     trangThai: duLieu.trangThai,
     ngayDang: duLieu.ngayDang,
-    kyNang: (duLieu.kyNang ?? []).map((muc: any) => ({
-      maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
-      tenKyNang: muc.maKyNang?.tenKyNang,
-      loaiKyNang: muc.maKyNang?.loaiKyNang,
-      batBuoc: muc.batBuoc,
+    // ✅ Lấy từ bảng quan hệ TinTuyenDungKyNang
+    kyNang: (duLieu.kyNangLienKet ?? []).map((lienKet: any) => ({
+      maKyNang: String(lienKet.kyNang?.id ?? lienKet.maKyNang),
+      tenKyNang: lienKet.kyNang?.tenKyNang,
+      loaiKyNang: lienKet.kyNang?.loaiKyNang,
+      batBuoc: lienKet.batBuoc,
+      mucDo: lienKet.mucDo,
+      trongSo: lienKet.trongSo,
     })),
     ngayTao: duLieu.ngayTao,
     ngayCapNhat: duLieu.ngayCapNhat,
@@ -67,9 +70,34 @@ function chuanHoaTin(taiLieu: any) {
 
 async function layDayDu(where: any, many = false) {
   const rows = many
-    ? await TinTuyenDung.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 300 })
-    : await TinTuyenDung.findMany({ where, take: 1 })
-  const hydrated = await ganKyNangVaCongTyChoTin(rows as any[])
+    ? await TinTuyenDung.findMany({ 
+        where, 
+        orderBy: { ngayTao: 'desc' }, 
+        take: 300,
+        include: {
+          kyNangLienKet: {
+            include: {
+              kyNang: {
+                select: { id: true, tenKyNang: true, loaiKyNang: true }
+              }
+            }
+          }
+        }
+      })
+    : await TinTuyenDung.findMany({ 
+        where, 
+        take: 1,
+        include: {
+          kyNangLienKet: {
+            include: {
+              kyNang: {
+                select: { id: true, tenKyNang: true, loaiKyNang: true }
+              }
+            }
+          }
+        }
+      })
+  const hydrated = await ganCongTyChoTin(rows as any[])
   return many ? hydrated : hydrated[0]
 }
 
@@ -96,8 +124,31 @@ export const dichVuTinTuyenDung = {
 
   async taoMoi(duLieu: unknown) {
     const payload = duLieu as Record<string, any>
-    const ketQua = await TinTuyenDung.create({ data: boUndefined(payload) as any })
-    await dongBoKyNangTinTuyenDung(String(ketQua.id), payload.kyNang)
+    const { kyNang, ...tinData } = payload
+    
+    // Tạo tin tuyển dụng
+    const ketQua = await TinTuyenDung.create({ data: boUndefined(tinData) as any })
+    
+    // Tạo kỹ năng nếu có
+    if (Array.isArray(kyNang) && kyNang.length > 0) {
+      const kyNangData = kyNang
+        .map(item => ({
+          maTinTuyenDung: ketQua.id,
+          maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+          batBuoc: Boolean(item?.batBuoc),
+          mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+          trongSo: item?.trongSo != null ? Number(item.trongSo) : (item?.batBuoc ? 1 : 0.5),
+        }))
+        .filter(item => item.maKyNang)
+      
+      if (kyNangData.length > 0) {
+        await prisma.tinTuyenDungKyNang.createMany({ 
+          data: kyNangData,
+          skipDuplicates: true 
+        })
+      }
+    }
+    
     const dayDu = await layDayDu({ id: ketQua.id }) as any
     if (dayDu?.trangThai === 'cho_duyet') await guiThongBaoAdminTinCanDuyet(dayDu)
     return chuanHoaTin(dayDu)
@@ -108,12 +159,41 @@ export const dichVuTinTuyenDung = {
     const hienTai = await layDayDu({ id: ma }) as any
     if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
 
+    const { kyNang, ...tinData } = duLieu
     const duLieuCapNhat = {
-      ...duLieu,
-      ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
+      ...tinData,
+      ...(tinData.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
     }
+    
+    // Cập nhật tin tuyển dụng
     await TinTuyenDung.update({ where: { id: ma }, data: boUndefined(duLieuCapNhat) as any })
-    await dongBoKyNangTinTuyenDung(ma, duLieu.kyNang)
+    
+    // Cập nhật kỹ năng nếu có
+    if (kyNang !== undefined) {
+      // Xóa kỹ năng cũ
+      await prisma.tinTuyenDungKyNang.deleteMany({ where: { maTinTuyenDung: ma } })
+      
+      // Thêm kỹ năng mới
+      if (Array.isArray(kyNang) && kyNang.length > 0) {
+        const kyNangData = kyNang
+          .map(item => ({
+            maTinTuyenDung: ma,
+            maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+            batBuoc: Boolean(item?.batBuoc),
+            mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+            trongSo: item?.trongSo != null ? Number(item.trongSo) : (item?.batBuoc ? 1 : 0.5),
+          }))
+          .filter(item => item.maKyNang)
+        
+        if (kyNangData.length > 0) {
+          await prisma.tinTuyenDungKyNang.createMany({ 
+            data: kyNangData,
+            skipDuplicates: true 
+          })
+        }
+      }
+    }
+    
     const ketQua = await layDayDu({ id: ma }) as any
 
     if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {

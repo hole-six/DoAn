@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from './cauhinh/prisma.js'
-import { dongBoTatCaKyNangTuJson } from './dungchung/dongboQuanHe.js'
 
 const matKhauMau = '123456'
 const emailAdmin = 'admin@ef.vn'
@@ -177,6 +176,33 @@ function layKyNang(kyNang: Awaited<ReturnType<typeof gieoKyNang>>, ten: string, 
   return { maKyNang: item?.id, batBuoc, mucDo: batBuoc ? 4 : 3 }
 }
 
+async function taoKyNangUngVien(maUngVien: string, danhSach: Array<{ maKyNang?: string; mucDo?: number }>) {
+  const rows = danhSach
+    .filter(item => item.maKyNang)
+    .map(item => ({
+      maUngVien,
+      maKyNang: String(item.maKyNang),
+      mucDo: item.mucDo ?? null,
+      soNamKinhNghiem: null,
+    }))
+  if (!rows.length) return
+  await prisma.ungVienKyNang.createMany({ data: rows, skipDuplicates: true })
+}
+
+async function taoKyNangTin(maTinTuyenDung: string, danhSach: Array<{ maKyNang?: string; batBuoc?: boolean; mucDo?: number }>) {
+  const rows = danhSach
+    .filter(item => item.maKyNang)
+    .map(item => ({
+      maTinTuyenDung,
+      maKyNang: String(item.maKyNang),
+      batBuoc: Boolean(item.batBuoc),
+      mucDo: item.mucDo ?? null,
+      trongSo: item.batBuoc ? 1 : 0.5,
+    }))
+  if (!rows.length) return
+  await prisma.tinTuyenDungKyNang.createMany({ data: rows, skipDuplicates: true })
+}
+
 async function xoaDuLieuCu() {
   await prisma.tinNhan.deleteMany()
   await prisma.cuocTroChuyen.deleteMany()
@@ -280,14 +306,44 @@ async function main() {
           kinhNghiem: item.kinhNghiem,
           viTriMongMuon: item.viTriMongMuon,
           mucLuongMongMuon: 20000000 + index * 1500000,
-          kyNang: [
-            layKyNang(kyNang, index % 2 === 0 ? 'React' : 'Node.js'),
-            layKyNang(kyNang, index % 2 === 0 ? 'TypeScript' : 'PostgreSQL'),
-            layKyNang(kyNang, index % 3 === 0 ? 'Docker' : 'UI/UX', false),
+          // Skills moved to ung_vien_ky_nang after create.
+          // ✅ Portfolio removed - không còn field này
+        },
+      }),
+    ),
+  )
+
+  await Promise.all(
+    candidateProfiles.map((ungVien, index) =>
+      taoKyNangUngVien(ungVien.id, [
+        layKyNang(kyNang, index % 2 === 0 ? 'React' : 'Node.js'),
+        layKyNang(kyNang, index % 2 === 0 ? 'TypeScript' : 'PostgreSQL'),
+        layKyNang(kyNang, index % 3 === 0 ? 'Docker' : 'UI/UX', false),
+      ]),
+    ),
+  )
+
+  const candidateCvs = await Promise.all(
+    danhSachUngVien.map((item, index) =>
+      prisma.hoSoNangLuc.create({
+        data: {
+          maUngVien: candidateProfiles[index].id,
+          tieuDe: `${item.hoTenHienThi} - CV chính`,
+          hoTenHienThi: item.hoTenHienThi,
+          chucDanh: item.chucDanh,
+          soDienThoai: item.soDienThoai,
+          emailLienHe: item.email,
+          portfolioUrl: `https://portfolio.example.com/${item.email.split('@')[0]}`,
+          tomTatKinhNghiem: [item.tomTat],
+          kyNangMem: ['Giao tiếp', 'Làm việc nhóm', 'Chủ động'],
+          kyNangLapTrinh: [
+            { nhom: item.viTriMongMuon, kyNang: index % 2 === 0 ? ['React', 'TypeScript'] : ['Node.js', 'PostgreSQL'] },
           ],
-          portfolio: [
-            { ten: `${item.chucDanh} Portfolio`, url: 'https://effortit.site', moTa: 'Bộ sản phẩm demo tự seed.' },
-          ],
+          hocVan: [{ truong: 'Đại học CNTT', chuyenNganh: 'Công nghệ thông tin' }],
+          kinhNghiemLam: [{ congTy: 'Effort Lab', vaiTro: item.chucDanh, moTa: item.tomTat }],
+          duAnChiTiet: [{ tenDuAn: 'Effort Platform', vaiTro: item.chucDanh }],
+          cvChinh: true,
+          congKhai: true,
         },
       }),
     ),
@@ -338,21 +394,23 @@ async function main() {
           quyenLoi: 'Lương tốt, môi trường đỉnh cao, cơ hội làm việc với sản phẩm toàn cầu.',
           trangThai: index < 8 ? 'dang_mo' : 'cho_duyet',
           ngayDang: new Date(),
-          kyNang: template.skills.map((ten, skillIndex) => layKyNang(kyNang, ten, skillIndex < 3)),
         },
       }))
+      await taoKyNangTin(jobs[jobs.length - 1].id, template.skills.map((ten, skillIndex) => layKyNang(kyNang, ten, skillIndex < 3)))
     }
   }
-  await dongBoTatCaKyNangTuJson()
+  
+  // ✅ Không cần đồng bộ JSON nữa - data đã được lưu trực tiếp vào bảng quan hệ
+  console.log('✅ Skills already synced to relational tables')
 
   const specialJob = jobs[0]
-  const specialCv = candidateProfiles[0]
+  const specialCv = candidateCvs[0]
 
   const applications = []
   for (let i = 0; i < 8; i++) {
     const candidate = candidateProfiles[i]
     const job = jobs[i]
-    const cv = i % 2 === 0 ? specialCv : candidateProfiles[(i + 1) % candidateProfiles.length]
+    const cv = i % 2 === 0 ? specialCv : candidateCvs[(i + 1) % candidateCvs.length]
     const hoSo = await prisma.hoSoUngTuyen.create({
       data: {
         maUngVien: candidate.id,
@@ -440,7 +498,7 @@ async function main() {
 
   await prisma.goiYViecLam.create({
     data: {
-      maUngVien: ungVienUsers[0].id,
+      maUngVien: candidateProfiles[0].id,
       maHoSoNangLuc: specialCv.id,
       trangThai: 'hoan_thanh',
       nguon: 'seed',

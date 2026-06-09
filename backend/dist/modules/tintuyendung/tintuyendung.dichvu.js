@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuTinTuyenDung = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
-const dongboQuanHe_js_1 = require("../../dungchung/dongboQuanHe.js");
+const prisma_js_1 = require("../../cauhinh/prisma.js");
 const timkiem_js_1 = require("../../dungchung/timkiem.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
@@ -54,11 +54,14 @@ function chuanHoaTin(taiLieu) {
         luotXem: duLieu.luotXem,
         trangThai: duLieu.trangThai,
         ngayDang: duLieu.ngayDang,
-        kyNang: (duLieu.kyNang ?? []).map((muc) => ({
-            maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
-            tenKyNang: muc.maKyNang?.tenKyNang,
-            loaiKyNang: muc.maKyNang?.loaiKyNang,
-            batBuoc: muc.batBuoc,
+        // ✅ Lấy từ bảng quan hệ TinTuyenDungKyNang
+        kyNang: (duLieu.kyNangLienKet ?? []).map((lienKet) => ({
+            maKyNang: String(lienKet.kyNang?.id ?? lienKet.maKyNang),
+            tenKyNang: lienKet.kyNang?.tenKyNang,
+            loaiKyNang: lienKet.kyNang?.loaiKyNang,
+            batBuoc: lienKet.batBuoc,
+            mucDo: lienKet.mucDo,
+            trongSo: lienKet.trongSo,
         })),
         ngayTao: duLieu.ngayTao,
         ngayCapNhat: duLieu.ngayCapNhat,
@@ -66,9 +69,34 @@ function chuanHoaTin(taiLieu) {
 }
 async function layDayDu(where, many = false) {
     const rows = many
-        ? await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 300 })
-        : await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({ where, take: 1 });
-    const hydrated = await (0, prismaHelper_js_1.ganKyNangVaCongTyChoTin)(rows);
+        ? await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({
+            where,
+            orderBy: { ngayTao: 'desc' },
+            take: 300,
+            include: {
+                kyNangLienKet: {
+                    include: {
+                        kyNang: {
+                            select: { id: true, tenKyNang: true, loaiKyNang: true }
+                        }
+                    }
+                }
+            }
+        })
+        : await tintuyendung_mohinh_js_1.TinTuyenDung.findMany({
+            where,
+            take: 1,
+            include: {
+                kyNangLienKet: {
+                    include: {
+                        kyNang: {
+                            select: { id: true, tenKyNang: true, loaiKyNang: true }
+                        }
+                    }
+                }
+            }
+        });
+    const hydrated = await (0, prismaHelper_js_1.ganCongTyChoTin)(rows);
     return many ? hydrated : hydrated[0];
 }
 exports.dichVuTinTuyenDung = {
@@ -93,8 +121,27 @@ exports.dichVuTinTuyenDung = {
     },
     async taoMoi(duLieu) {
         const payload = duLieu;
-        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(payload) });
-        await (0, dongboQuanHe_js_1.dongBoKyNangTinTuyenDung)(String(ketQua.id), payload.kyNang);
+        const { kyNang, ...tinData } = payload;
+        // Tạo tin tuyển dụng
+        const ketQua = await tintuyendung_mohinh_js_1.TinTuyenDung.create({ data: (0, prismaHelper_js_1.boUndefined)(tinData) });
+        // Tạo kỹ năng nếu có
+        if (Array.isArray(kyNang) && kyNang.length > 0) {
+            const kyNangData = kyNang
+                .map(item => ({
+                maTinTuyenDung: ketQua.id,
+                maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+                batBuoc: Boolean(item?.batBuoc),
+                mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+                trongSo: item?.trongSo != null ? Number(item.trongSo) : (item?.batBuoc ? 1 : 0.5),
+            }))
+                .filter(item => item.maKyNang);
+            if (kyNangData.length > 0) {
+                await prisma_js_1.prisma.tinTuyenDungKyNang.createMany({
+                    data: kyNangData,
+                    skipDuplicates: true
+                });
+            }
+        }
         const dayDu = await layDayDu({ id: ketQua.id });
         if (dayDu?.trangThai === 'cho_duyet')
             await guiThongBaoAdminTinCanDuyet(dayDu);
@@ -105,12 +152,36 @@ exports.dichVuTinTuyenDung = {
         const hienTai = await layDayDu({ id: ma });
         if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404);
+        const { kyNang, ...tinData } = duLieu;
         const duLieuCapNhat = {
-            ...duLieu,
-            ...(duLieu.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
+            ...tinData,
+            ...(tinData.trangThai === 'dang_mo' ? { ngayDang: new Date() } : {}),
         };
+        // Cập nhật tin tuyển dụng
         await tintuyendung_mohinh_js_1.TinTuyenDung.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieuCapNhat) });
-        await (0, dongboQuanHe_js_1.dongBoKyNangTinTuyenDung)(ma, duLieu.kyNang);
+        // Cập nhật kỹ năng nếu có
+        if (kyNang !== undefined) {
+            // Xóa kỹ năng cũ
+            await prisma_js_1.prisma.tinTuyenDungKyNang.deleteMany({ where: { maTinTuyenDung: ma } });
+            // Thêm kỹ năng mới
+            if (Array.isArray(kyNang) && kyNang.length > 0) {
+                const kyNangData = kyNang
+                    .map(item => ({
+                    maTinTuyenDung: ma,
+                    maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+                    batBuoc: Boolean(item?.batBuoc),
+                    mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+                    trongSo: item?.trongSo != null ? Number(item.trongSo) : (item?.batBuoc ? 1 : 0.5),
+                }))
+                    .filter(item => item.maKyNang);
+                if (kyNangData.length > 0) {
+                    await prisma_js_1.prisma.tinTuyenDungKyNang.createMany({
+                        data: kyNangData,
+                        skipDuplicates: true
+                    });
+                }
+            }
+        }
         const ketQua = await layDayDu({ id: ma });
         if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
             await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetTin)({

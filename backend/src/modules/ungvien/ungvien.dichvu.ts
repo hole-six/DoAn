@@ -1,6 +1,6 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import { boUndefined, coId, ganKyNangJson, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
-import { dongBoKyNangUngVien } from '../../dungchung/dongboQuanHe.js'
+import { boUndefined, coId, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
+import { prisma } from '../../cauhinh/prisma.js'
 import { UngVien } from './ungvien.mohinh.js'
 
 function chuanHoaUngVien(taiLieu: any) {
@@ -26,32 +26,52 @@ function chuanHoaUngVien(taiLieu: any) {
     kinhNghiem: duLieu.kinhNghiem,
     viTriMongMuon: duLieu.viTriMongMuon,
     mucLuongMongMuon: duLieu.mucLuongMongMuon,
-    kyNang: (duLieu.kyNang ?? []).map((muc: any) => ({
-      maKyNang: muc.maKyNang?._id ? String(muc.maKyNang._id) : String(muc.maKyNang),
-      tenKyNang: muc.maKyNang?.tenKyNang,
-      loaiKyNang: muc.maKyNang?.loaiKyNang,
-      mucDo: muc.mucDo,
+    // ✅ Lấy từ bảng quan hệ UngVienKyNang
+    kyNang: (duLieu.kyNangLienKet ?? []).map((lienKet: any) => ({
+      maKyNang: String(lienKet.kyNang?.id ?? lienKet.maKyNang),
+      tenKyNang: lienKet.kyNang?.tenKyNang,
+      loaiKyNang: lienKet.kyNang?.loaiKyNang,
+      mucDo: lienKet.mucDo,
+      soNamKinhNghiem: lienKet.soNamKinhNghiem,
     })),
-    portfolio: duLieu.portfolio ?? [],
     ngayTao: duLieu.ngayTao,
     ngayCapNhat: duLieu.ngayCapNhat,
   }
 }
 
 async function layDayDu(where: any, many = false) {
-  // ✅ TỐI ƯU: Chỉ query 1 lần, không cần ganNguoiDungChoUngVien & ganKyNangJson
+  // ✅ Query với include để lấy relations
   const rows = many
     ? await UngVien.findMany({ 
         where, 
         orderBy: { ngayTao: 'desc' }, 
         take: 200,
-        // Không cần include vì NguoiDung & KyNang không phải relation trực tiếp trong Prisma
-        // Data đã được lưu trong JSON
+        include: {
+          kyNangLienKet: {
+            include: {
+              kyNang: {
+                select: { id: true, tenKyNang: true, loaiKyNang: true }
+              }
+            }
+          }
+        }
       })
-    : await UngVien.findMany({ where, take: 1 })
+    : await UngVien.findMany({ 
+        where, 
+        take: 1,
+        include: {
+          kyNangLienKet: {
+            include: {
+              kyNang: {
+                select: { id: true, tenKyNang: true, loaiKyNang: true }
+              }
+            }
+          }
+        }
+      })
   
-  // ✅ Chỉ hydrate nếu thực sự cần thiết (optimize bằng cách cache)
-  const hydrated = await ganKyNangJson(await ganNguoiDungChoUngVien(rows as any[]))
+  // Hydrate NguoiDung
+  const hydrated = await ganNguoiDungChoUngVien(rows as any[])
   return many ? hydrated : hydrated[0]
 }
 
@@ -74,20 +94,53 @@ export const dichVuUngVien = {
   },
 
   async damBaoHoSoTheoNguoiDung(maNguoiDung: string) {
-    const hienTai = await UngVien.findUnique({ where: { maNguoiDung } })
+    const hienTai = await UngVien.findUnique({ 
+      where: { maNguoiDung },
+      include: {
+        kyNangLienKet: {
+          include: {
+            kyNang: {
+              select: { id: true, tenKyNang: true, loaiKyNang: true }
+            }
+          }
+        }
+      }
+    })
     if (hienTai) {
-      const [dayDu] = await ganKyNangJson(await ganNguoiDungChoUngVien([hienTai] as any[]))
+      const [dayDu] = await ganNguoiDungChoUngVien([hienTai] as any[])
       return chuanHoaUngVien(dayDu)
     }
-    const daTao = await UngVien.create({ data: { maNguoiDung, kinhNghiem: 0, kyNang: [], portfolio: [] } })
-    const [dayDu] = await ganKyNangJson(await ganNguoiDungChoUngVien([daTao] as any[]))
+    const daTao = await UngVien.create({ data: { maNguoiDung, kinhNghiem: 0 } })
+    const [dayDu] = await ganNguoiDungChoUngVien([daTao] as any[])
     return chuanHoaUngVien(dayDu)
   },
 
   async taoMoi(duLieu: unknown) {
     const payload = duLieu as Record<string, any>
-    const ketQua = await UngVien.create({ data: boUndefined(payload) as any })
-    await dongBoKyNangUngVien(String(ketQua.id), payload.kyNang)
+    const { kyNang, ...ungVienData } = payload
+    
+    // Tạo ứng viên
+    const ketQua = await UngVien.create({ data: boUndefined(ungVienData) as any })
+    
+    // Tạo kỹ năng nếu có
+    if (Array.isArray(kyNang) && kyNang.length > 0) {
+      const kyNangData = kyNang
+        .map(item => ({
+          maUngVien: ketQua.id,
+          maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+          mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+          soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
+        }))
+        .filter(item => item.maKyNang)
+      
+      if (kyNangData.length > 0) {
+        await prisma.ungVienKyNang.createMany({ 
+          data: kyNangData,
+          skipDuplicates: true 
+        })
+      }
+    }
+    
     return this.layTheoMa(String(ketQua.id))
   },
 
@@ -100,8 +153,36 @@ export const dichVuUngVien = {
     }
 
     const payload = duLieu as Record<string, any>
-    await UngVien.update({ where: { id: ma }, data: boUndefined(payload) as any })
-    await dongBoKyNangUngVien(ma, payload.kyNang)
+    const { kyNang, ...ungVienData } = payload
+    
+    // Cập nhật ứng viên
+    await UngVien.update({ where: { id: ma }, data: boUndefined(ungVienData) as any })
+    
+    // Cập nhật kỹ năng nếu có
+    if (kyNang !== undefined) {
+      // Xóa kỹ năng cũ
+      await prisma.ungVienKyNang.deleteMany({ where: { maUngVien: ma } })
+      
+      // Thêm kỹ năng mới
+      if (Array.isArray(kyNang) && kyNang.length > 0) {
+        const kyNangData = kyNang
+          .map(item => ({
+            maUngVien: ma,
+            maKyNang: String(item?.maKyNang?.id ?? item?.maKyNang),
+            mucDo: item?.mucDo != null ? Number(item.mucDo) : null,
+            soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
+          }))
+          .filter(item => item.maKyNang)
+        
+        if (kyNangData.length > 0) {
+          await prisma.ungVienKyNang.createMany({ 
+            data: kyNangData,
+            skipDuplicates: true 
+          })
+        }
+      }
+    }
+    
     return this.layTheoMa(ma)
   },
 

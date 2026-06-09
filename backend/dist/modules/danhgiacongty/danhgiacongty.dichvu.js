@@ -62,15 +62,17 @@ async function layUngVienCuaNguoiDung(nguoiDung) {
         throw new loiungdung_js_1.LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước khi đánh giá công ty', 422, 'CANDIDATE_PROFILE_REQUIRED');
     return (0, prismaHelper_js_1.coId)(ungVien);
 }
-async function damBaoDaDuocMoiPhongVan(hoSo) {
-    if (String(hoSo.trangThai ?? '') === 'moi_phong_van')
-        return;
-    const [lichPhongVan, lichSuMoiPhongVan] = await Promise.all([
-        prisma_js_1.prisma.lichPhongVan.findFirst({ where: { maHoSoUngTuyen: id(hoSo) }, select: { id: true } }),
-        prisma_js_1.prisma.lichSuHoSoUngTuyen.findFirst({ where: { maHoSoUngTuyen: id(hoSo), trangThaiMoi: 'moi_phong_van' }, select: { id: true } }),
-    ]);
-    if (!lichPhongVan && !lichSuMoiPhongVan) {
-        throw new loiungdung_js_1.LoiUngDung('Bạn chỉ có thể đánh giá công ty sau khi được mời phỏng vấn.', 409, 'REVIEW_REQUIRES_INTERVIEW_INVITE');
+async function damBaoDaCoKetQuaPhongVan(hoSo) {
+    const lichPhongVan = await prisma_js_1.prisma.lichPhongVan.findFirst({
+        where: {
+            maHoSoUngTuyen: id(hoSo),
+            trangThai: 'hoan_thanh',
+            ketQua: { in: ['dat', 'khong_dat'] },
+        },
+        select: { id: true },
+    });
+    if (!lichPhongVan) {
+        throw new loiungdung_js_1.LoiUngDung('Bạn chỉ có thể đánh giá công ty sau khi phỏng vấn hoàn tất và đã có kết quả.', 409, 'REVIEW_REQUIRES_INTERVIEW_RESULT');
     }
 }
 async function layDanhGiaDayDu(where, many = false) {
@@ -107,7 +109,7 @@ exports.dichVuDanhGiaCongTy = {
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND');
         if (id(hoSo.maUngVien) !== id(ungVien))
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền đánh giá từ hồ sơ ứng tuyển này', 403, 'FORBIDDEN');
-        await damBaoDaDuocMoiPhongVan(hoSo);
+        await damBaoDaCoKetQuaPhongVan(hoSo);
         const maNhaTuyenDung = id(hoSo.maTinTuyenDung?.maNhaTuyenDung);
         if (!maNhaTuyenDung)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy công ty của hồ sơ ứng tuyển', 404, 'COMPANY_NOT_FOUND');

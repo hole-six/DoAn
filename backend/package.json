@@ -11,7 +11,8 @@
     "prestart": "node scripts/don-port.cjs",
     "start": "node --dns-result-order=ipv4first dist/maychu.js",
     "seed": "node --dns-result-order=ipv4first ./node_modules/tsx/dist/cli.mjs src/gieodulieu.ts",
-    "sync:relations": "node --dns-result-order=ipv4first ./node_modules/tsx/dist/cli.mjs src/scripts/dongbo-quan-he.ts",
+    "sync:relations": "node --dns-result-order=ipv4first ./node_modules/tsx/dist/cli.mjs src/scripts/migrate-remove-json-fields.ts",
+    "migrate:remove-json-fields": "node --dns-result-order=ipv4first ./node_modules/tsx/dist/cli.mjs src/scripts/migrate-remove-json-fields.ts",
     "preprisma:generate": "node scripts/don-port.cjs",
     "prisma:generate": "node scripts/prisma-cli.cjs generate --schema prisma/schema.prisma",
     "db:push": "node scripts/prisma-cli.cjs db push --schema prisma/schema.prisma --skip-generate"

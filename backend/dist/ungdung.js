@@ -23,6 +23,7 @@ function taoUngDung() {
     ungDung.use('/uploads', express_1.default.static(node_path_1.default.join(process.cwd(), 'uploads'), {
         setHeaders: (phanHoi) => {
             phanHoi.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            phanHoi.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
         },
     }));
     ungDung.use('/api', apitong_js_1.apiTong);

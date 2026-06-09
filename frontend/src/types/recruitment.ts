@@ -34,7 +34,7 @@ export type UngVien = {
   diaChi?: string
   mucLuongMongMuon?: number
   tomTat?: string
-  portfolio?: unknown[]
+  kyNang?: Array<{ maKyNang?: string; tenKyNang?: string; loaiKyNang?: string; mucDo?: number; soNamKinhNghiem?: number }>
   nguoiDung?: NguoiDungRef
 }
 

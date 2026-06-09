@@ -39,8 +39,6 @@ model UngVien {
   kinhNghiem       Float           @default(0)
   viTriMongMuon    String?
   mucLuongMongMuon Float?
-  kyNang           Json            @default("[]")
-  portfolio        Json            @default("[]")
   ngayTao          DateTime        @default(now())
   ngayCapNhat      DateTime        @updatedAt
   kyNangLienKet    UngVienKyNang[]
@@ -118,7 +116,6 @@ model TinTuyenDung {
   luotXem          Int                  @default(0)
   trangThai        String               @default("cho_duyet")
   ngayDang         DateTime?
-  kyNang           Json                 @default("[]")
   ngayTao          DateTime             @default(now())
   ngayCapNhat      DateTime             @updatedAt
   kyNangLienKet    TinTuyenDungKyNang[]

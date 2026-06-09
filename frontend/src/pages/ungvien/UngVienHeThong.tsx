@@ -280,7 +280,8 @@ export default function DashboardUngVienMới() {
   const hoSoChinh = data.hoSo?.find((x: any) => x.cvChinh)
   const unread = data.thongBao?.filter((x: any) => !x.daDoc).length ?? 0
   const upcoming = (data.lich ?? []).filter((x: any) => new Date(x.thoiGianBatDau) >= new Date()).length
-  const complete = Math.min(100, 35 + (data.ungVien?.portfolio?.length ? 20 : 0) + (data.hoSo?.length ? 25 : 0) + (data.ungVien?.kyNang?.length ? 20 : 0))
+  const hasPortfolio = (data.hoSo ?? []).some((item: any) => Boolean(item?.portfolioUrl))
+  const complete = Math.min(100, 35 + (hasPortfolio ? 20 : 0) + (data.hoSo?.length ? 25 : 0) + (data.ungVien?.kyNang?.length ? 20 : 0))
   const tasks = [
     !hoSoChinh && { title: 'Đặt CV chính', desc: 'Cần có CV chính trước khi ứng tuyển nhanh.', href: '/ung-vien/ho-so' },
     unread > 0 && { title: `${unread} thông báo chưa đọc`, desc: 'Kiểm tra cập nhật từ hệ thống và nhà tuyển dụng.', href: '/ung-vien/thong-bao' },
@@ -352,26 +353,6 @@ export default function DashboardUngVienMới() {
 }
 
 // ─── HoSoUngVienPage ──────────────────────────────────────────────────────────
-
-function PortfolioEditor({ value, onChange }: { value: any[]; onChange: (v: any[]) => void }) {
-  const add = () => onChange([...value, { tenDuAn: '', lienKet: '', moTa: '', congNghe: [] }])
-  return (
-    <div className="space-y-3">
-      {value.map((p, i) => (
-        <div key={i} className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 p-3 md:grid-cols-3">
-          <input className={inputCls} placeholder="Tên dự án" value={p.tenDuAn} onChange={e => onChange(value.map((x, idx) => idx === i ? { ...x, tenDuAn: e.target.value } : x))} />
-          <input className={inputCls} placeholder="Link" value={p.lienKet} onChange={e => onChange(value.map((x, idx) => idx === i ? { ...x, lienKet: e.target.value } : x))} />
-          <div className="flex gap-2">
-            <input className={inputCls} placeholder="Công nghệ (phân tách bằng dấu phẩy)" value={(p.congNghe ?? []).join(', ')} onChange={e => onChange(value.map((x, idx) => idx === i ? { ...x, congNghe: e.target.value.split(',').map((v: string) => v.trim()).filter(Boolean) } : x))} />
-            <button type="button" onClick={() => onChange(value.filter((_, idx) => idx !== i))} className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-rose-200 text-rose-500 transition hover:bg-rose-50"><Trash2 size={15} /></button>
-          </div>
-          <textarea className={clsx(textareaCls, 'md:col-span-3')} placeholder="Mô tả" value={p.moTa} onChange={e => onChange(value.map((x, idx) => idx === i ? { ...x, moTa: e.target.value } : x))} />
-        </div>
-      ))}
-      <SecondaryBtn onClick={add}><Plus size={14} /> Thêm portfolio</SecondaryBtn>
-    </div>
-  )
-}
 
 const sectionLabel: Record<string, string> = { hocVan: 'Học vấn', kinhNghiemLam: 'Kinh nghiệm', chungChi: 'Chứng chỉ', duAn: 'Dự án' }
 
@@ -533,7 +514,6 @@ export function HoSoUngVienPage() {
           <Field label="Kinh nghiệm (năm)"><input className={inputCls} type="number" value={profile.kinhNghiem ?? 0} onChange={e => setProfile({ ...profile, kinhNghiem: Number(e.target.value) })} /></Field>
           <Field label="Luong mong muon (VND)"><input className={inputCls} type="number" value={profile.mucLuongMongMuon ?? 0} onChange={e => setProfile({ ...profile, mucLuongMongMuon: Number(e.target.value) })} /></Field>
           <Field label="Tom tat ban than" wide><textarea className={textareaCls} value={profile.tomTat ?? ''} onChange={e => setProfile({ ...profile, tomTat: e.target.value })} /></Field>
-          <Field label="Portfolio" wide><PortfolioEditor value={profile.portfolio ?? []} onChange={(portfolio: any[]) => setProfile({ ...profile, portfolio })} /></Field>
           <div className="flex justify-end md:col-span-2"><PrimaryBtn type="submit"><Save size={16} /> Lưu hồ sơ</PrimaryBtn></div>
         </form>
       </Panel>
