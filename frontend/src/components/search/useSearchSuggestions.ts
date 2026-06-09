@@ -9,6 +9,7 @@ export type SuggestionItem = {
   subtitle?: string
   meta?: string
   queryValue: string
+  href?: string
 }
 
 export type SuggestionGroups = {
@@ -126,7 +127,8 @@ export function useSearchSuggestions(params: {
             title: String(job.tieuDe ?? 'Tin tuyển dụng'),
             subtitle: String(job.nhaTuyenDung?.tenCongTy ?? 'Nhà tuyển dụng'),
             meta: String(job.diaChi ?? ''),
-            queryValue: [job.tieuDe, job.nhaTuyenDung?.tenCongTy, job.diaChi].filter(Boolean).join(' • '),
+            queryValue: String(job.tieuDe ?? ''),
+            href: job.id ? `/viec-lam/${job.id}` : undefined,
           })), keyword, 5),
           companies: rankSuggestions((companiesRes.duLieu ?? []).map((company: any) => ({
             id: String(company.id ?? company._id ?? company.tenCongTy),
@@ -134,7 +136,8 @@ export function useSearchSuggestions(params: {
             title: String(company.tenCongTy ?? 'Công ty'),
             subtitle: String(company.nganh ?? ''),
             meta: String(company.diaChi ?? ''),
-            queryValue: [company.tenCongTy, company.nganh, company.diaChi].filter(Boolean).join(' • '),
+            queryValue: String(company.tenCongTy ?? ''),
+            href: company.id ? `/cong-ty/${company.id}` : undefined,
           })), keyword, 4),
           skills: rankSuggestions((skillsRes.duLieu ?? []).map((skill: any) => ({
             id: String(skill.id ?? skill._id ?? skill.tenKyNang),
@@ -142,7 +145,8 @@ export function useSearchSuggestions(params: {
             title: String(skill.tenKyNang ?? 'Kỹ năng'),
             subtitle: String(skill.loaiKyNang ?? ''),
             meta: typeof skill.soLuongViecLam === 'number' ? `${skill.soLuongViecLam} việc làm` : '',
-            queryValue: [skill.tenKyNang, skill.loaiKyNang].filter(Boolean).join(' • '),
+            queryValue: String(skill.tenKyNang ?? ''),
+            href: skill.tenKyNang ? `/viec-lam?tuKhoa=${encodeURIComponent(String(skill.tenKyNang))}` : undefined,
           })), keyword, 6),
         })
 

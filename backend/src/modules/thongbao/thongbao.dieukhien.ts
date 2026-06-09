@@ -45,7 +45,7 @@ export const dieuKhienThongBao = {
     const ma = String(yeuCau.params.ma ?? '')
     const hienTai = await ThongBao.findFirst({ where: { id: ma, maNguoiDung }, select: { id: true } })
     const duLieu = hienTai ? coId(await ThongBao.update({ where: { id: ma }, data: payload })) : null
-    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo de cap nhat', 404, 'NOT_FOUND')
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo để cập nhật', 404, 'NOT_FOUND')
     phanHoi.json({ duLieu })
   }),
 
@@ -53,7 +53,7 @@ export const dieuKhienThongBao = {
     const maNguoiDung = maNguoiDungTuRequest(yeuCau as any)
     const ma = String(yeuCau.params.ma ?? '')
     const duLieu = await ThongBao.findFirst({ where: { id: ma, maNguoiDung } })
-    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo de xoa', 404, 'NOT_FOUND')
+    if (!duLieu) throw new LoiUngDung('Không tìm thấy thông báo để xóa', 404, 'NOT_FOUND')
     await ThongBao.delete({ where: { id: ma } })
     phanHoi.status(204).send()
   }),

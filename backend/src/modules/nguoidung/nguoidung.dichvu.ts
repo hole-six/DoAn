@@ -59,7 +59,7 @@ export const dichVuNguoiDung = {
     const duLieu = duLieuNhan as DuLieuCapNhatNguoiDung
     const email = duLieu.email?.toLowerCase().trim()
     if (!email || !duLieu.matKhau || !duLieu.hoTen) {
-      throw new LoiUngDung('Thieu thong tin tao nguoi dung', 422)
+      throw new LoiUngDung('Thiếu thông tin tạo người dùng', 422)
     }
 
     const daTonTai = await NguoiDung.findUnique({ where: { email }, select: { id: true } })
@@ -93,7 +93,7 @@ export const dichVuNguoiDung = {
     if (!duLieuCapNhat.matKhau) delete duLieuCapNhat.matKhau
 
     const hienTai = await NguoiDung.findUnique({ where: { id: ma }, select: { id: true } })
-    if (!hienTai) throw new LoiUngDung('Không tìm thấy người dùng de cap nhat', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy người dùng để cập nhật', 404)
 
     const nguoiDung = await NguoiDung.update({
       where: { id: ma },
@@ -105,7 +105,7 @@ export const dichVuNguoiDung = {
 
   async xoa(ma: string) {
     const nguoiDung = await NguoiDung.findUnique({ where: { id: ma } }) as DuLieuNguoiDung | null
-    if (!nguoiDung) throw new LoiUngDung('Không tìm thấy người dùng de xoa', 404)
+    if (!nguoiDung) throw new LoiUngDung('Không tìm thấy người dùng để xóa', 404)
 
     if (nguoiDung.vaiTro === 'admin') {
       const soAdmin = await NguoiDung.count({ where: { vaiTro: 'admin' } })

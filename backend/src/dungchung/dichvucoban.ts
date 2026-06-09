@@ -28,7 +28,7 @@ export function taoDichVuCoBan(moHinh: PrismaDelegateCoBan) {
     async layTheoMa(ma: string) {
       const duLieu = await moHinh.findUnique({ where: { id: ma } })
       if (!duLieu) {
-        throw new LoiUngDung('Khong tim thay du lieu', 404)
+        throw new LoiUngDung('Không tìm thấy dữ liệu', 404)
       }
       return coId(duLieu)
     },
@@ -40,7 +40,7 @@ export function taoDichVuCoBan(moHinh: PrismaDelegateCoBan) {
     async capNhat(ma: string, duLieu: unknown) {
       const hienTai = await moHinh.findUnique({ where: { id: ma }, select: { id: true } })
       if (!hienTai) {
-        throw new LoiUngDung('Khong tim thay du lieu de cap nhat', 404)
+        throw new LoiUngDung('Không tìm thấy dữ liệu để cập nhật', 404)
       }
       return coId(await moHinh.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) }))
     },
@@ -48,7 +48,7 @@ export function taoDichVuCoBan(moHinh: PrismaDelegateCoBan) {
     async xoa(ma: string) {
       const ketQua = await moHinh.findUnique({ where: { id: ma } })
       if (!ketQua) {
-        throw new LoiUngDung('Khong tim thay du lieu de xoa', 404)
+        throw new LoiUngDung('Không tìm thấy dữ liệu để xóa', 404)
       }
       await moHinh.delete({ where: { id: ma } })
       return coId(ketQua)

@@ -107,7 +107,7 @@ export function khoiTaoSocket(httpServer: HttpServer): SocketIOServer {
 
     // Gửi thông báo kết nối thành công
     socket.emit('connected', {
-      message: 'Ket noi thanh cong',
+      message: 'Kết nối thành công',
       userId,
       role: nguoiDung.vaiTro,
     })

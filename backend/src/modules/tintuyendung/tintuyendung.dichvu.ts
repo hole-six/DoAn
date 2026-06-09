@@ -157,7 +157,7 @@ export const dichVuTinTuyenDung = {
   async capNhat(ma: string, duLieuNhan: unknown) {
     const duLieu = duLieuNhan as Record<string, any>
     const hienTai = await layDayDu({ id: ma }) as any
-    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de cap nhat', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng để cập nhật', 404)
 
     const { kyNang, ...tinData } = duLieu
     const duLieuCapNhat = {
@@ -209,7 +209,7 @@ export const dichVuTinTuyenDung = {
 
   async xoa(ma: string) {
     const hienTai = await layDayDu({ id: ma }) as any
-    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng de xoa', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy tin tuyển dụng để xóa', 404)
     await TinTuyenDung.delete({ where: { id: ma } })
     return chuanHoaTin(coId(hienTai))
   },

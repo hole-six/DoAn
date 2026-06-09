@@ -128,8 +128,8 @@ function HeroTrangChu() {
   const chonGoiY = (item: SuggestionItem) => {
     setTuKhoa(item.queryValue)
     setSearchActive(false)
-    if (item.type === 'company') {
-      navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+    if (item.href) {
+      navigate(item.href)
       return
     }
     navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
@@ -194,7 +194,13 @@ function HeroTrangChu() {
             Tìm kiếm
           </button>
           {searchActive && (
-            <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+            <SearchSuggestionPanel
+              groups={groups}
+              loading={loading}
+              query={tuKhoa}
+              onSelect={chonGoiY}
+              onClearQuery={() => setTuKhoa('')}
+            />
           )}
         </div>
 

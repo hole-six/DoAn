@@ -6,6 +6,7 @@ type Props = {
   loading: boolean
   query: string
   onSelect: (item: SuggestionItem) => void
+  onClearQuery?: () => void
 }
 
 function Group(props: {
@@ -22,11 +23,12 @@ function Group(props: {
           type="button"
           className="search-suggest-item"
           key={`${item.type}-${item.id}`}
+          aria-label={`Mở ${item.title}`}
           onClick={() => props.onSelect(item)}
         >
           <strong>{item.title}</strong>
           {(item.subtitle || item.meta) && (
-            <span>{[item.subtitle, item.meta].filter(Boolean).join(' · ')}</span>
+            <span>{[item.subtitle, item.meta].filter(Boolean).join(' Â· ')}</span>
           )}
         </button>
       ))}
@@ -34,7 +36,7 @@ function Group(props: {
   )
 }
 
-export default function SearchSuggestionPanel({ groups, loading, query, onSelect }: Props) {
+export default function SearchSuggestionPanel({ groups, loading, query, onSelect, onClearQuery }: Props) {
   const keyword = query.trim()
   if (!keyword) return null
 
@@ -54,6 +56,14 @@ export default function SearchSuggestionPanel({ groups, loading, query, onSelect
       <Group title="Việc làm" items={groups.jobs} onSelect={onSelect} />
       <Group title="Công ty" items={groups.companies} onSelect={onSelect} />
       <Group title="Kỹ năng" items={groups.skills} onSelect={onSelect} />
+      <div className="search-suggest-footer">
+        <span>Nhấn gợi ý để mở nhanh</span>
+        {onClearQuery && (
+          <button type="button" className="search-suggest-clear" onClick={onClearQuery}>
+            Xóa từ khóa
+          </button>
+        )}
+      </div>
     </div>
   )
 }

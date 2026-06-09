@@ -182,8 +182,8 @@ export default function TimKiemViecLam() {
   const chonGoiY = (item: SuggestionItem) => {
     setTuKhoa(item.queryValue)
     setSearchActive(false)
-    if (item.type === 'company') {
-      navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+    if (item.href) {
+      navigate(item.href)
       return
     }
     navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
@@ -293,11 +293,50 @@ export default function TimKiemViecLam() {
     }
   }, [viecLam, tuKhoa, loaiDangChon, kyNangDangChon, capBacDangChon, loaiHinhDangChon])
 
+  const boLocDangChon = useMemo(() => {
+    const items: Array<{ key: string; label: string; onRemove: () => void }> = []
+    if (tuKhoa.trim()) {
+      items.push({
+        key: `keyword-${tuKhoa}`,
+        label: `Từ khóa: ${tuKhoa.trim()}`,
+        onRemove: () => {
+          setTuKhoa('')
+          setSearchParams({})
+        },
+      })
+    }
+    loaiDangChon.forEach(value => items.push({
+      key: `loai-${value}`,
+      label: `Danh mục: ${nhanLoaiKyNang[value] ?? value}`,
+      onRemove: () => setLoaiDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    kyNangDangChon.forEach(value => {
+      const skill = viecLam.flatMap(job => job.kyNang).find(item => item.id === value)
+      items.push({
+        key: `skill-${value}`,
+        label: `Kỹ năng: ${skill?.ten ?? value}`,
+        onRemove: () => setKyNangDangChon(prev => prev.filter(item => item !== value)),
+      })
+    })
+    capBacDangChon.forEach(value => items.push({
+      key: `level-${value}`,
+      label: `Cấp bậc: ${value}`,
+      onRemove: () => setCapBacDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    loaiHinhDangChon.forEach(value => items.push({
+      key: `type-${value}`,
+      label: `Hình thức: ${value}`,
+      onRemove: () => setLoaiHinhDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    return items
+  }, [capBacDangChon, kyNangDangChon, loaiDangChon, loaiHinhDangChon, searchParams, tuKhoa, viecLam])
+
   const resetBoLoc = () => {
     setLoaiDangChon([])
     setKyNangDangChon([])
     setCapBacDangChon([])
     setLoaiHinhDangChon([])
+    setTuKhoa('')
     setSearchParams({})
   }
 
@@ -318,7 +357,13 @@ export default function TimKiemViecLam() {
             </label>
             <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm việc</button>
             {searchActive && (
-              <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+              <SearchSuggestionPanel
+                groups={groups}
+                loading={loading}
+                query={tuKhoa}
+                onSelect={chonGoiY}
+                onClearQuery={() => setTuKhoa('')}
+              />
             )}
           </div>
           {searchActive && (loading || hasAny) && (
@@ -422,6 +467,22 @@ export default function TimKiemViecLam() {
               Bộ lọc
             </button>
           </div>
+          {boLocDangChon.length > 0 && (
+            <div className="filter-summary">
+              <div className="filter-summary-head">
+                <strong>Bộ lọc đang chọn</strong>
+                <button type="button" className="filter-summary-clear" onClick={resetBoLoc}>Xóa nhanh</button>
+              </div>
+              <div className="filter-summary-chips">
+                {boLocDangChon.map(item => (
+                  <button key={item.key} type="button" className="filter-summary-chip" onClick={item.onRemove}>
+                    <span>{item.label}</span>
+                    <X size={14} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {loi && <div className="jobs-real-error">{loi}</div>}
           {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>}
           {ketQua.length > 0 && (

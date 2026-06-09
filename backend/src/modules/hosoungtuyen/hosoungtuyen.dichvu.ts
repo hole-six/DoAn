@@ -154,7 +154,7 @@ export const dichVuHoSoUngTuyen = {
           await thongBaoHoSoMoiUngTuyen({
             maNhaTuyenDung: maNguoiDungNhaTuyenDung,
             tenUngVien: hoSoMoi.ungVien?.nguoiDung?.hoTen ?? 'Ứng viên',
-            viTriUngTuyen: hoSoMoi.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen',
+            viTriUngTuyen: hoSoMoi.tinTuyenDung?.tieuDe ?? 'Vị trí ứng tuyển',
             maHoSoUngTuyen: hoSoMoi.id,
             kinhNghiem: `${hoSoMoi.ungVien?.kinhNghiem ?? 0} nam kinh nghiem`,
           })
@@ -164,13 +164,13 @@ export const dichVuHoSoUngTuyen = {
       }
       return hoSoMoi
     } catch (loi: any) {
-      if (loi?.code === 'P2002') throw new LoiUngDung('Ban da ung tuyen tin nay', 409)
+      if (loi?.code === 'P2002') throw new LoiUngDung('Bạn đã ứng tuyển tin này', 409)
       throw loi
     }
   },
   async capNhat(ma: string, duLieu: unknown) {
     const truocKhiCapNhat = await layDayDu({ id: ma }) as any
-    if (!truocKhiCapNhat) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de cap nhat', 404)
+    if (!truocKhiCapNhat) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để cập nhật', 404)
     await HoSoUngTuyen.update({ where: { id: ma }, data: boUndefined(duLieu as Record<string, any>) as any })
     const ketQuaChuanHoa = await this.layTheoMa(ma)
 
@@ -179,15 +179,15 @@ export const dichVuHoSoUngTuyen = {
       const trangThaiMoi = String(ketQuaChuanHoa.trangThai ?? '')
       const maNguoiDungUngVien = ketQuaChuanHoa.ungVien?.nguoiDung?.id
       const tenCongTy = ketQuaChuanHoa.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? 'Cong ty'
-      const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vi tri ung tuyen'
+      const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vị trí ứng tuyển'
       if (trangThaiCu !== 'da_xem' && trangThaiMoi === 'da_xem' && maNguoiDungUngVien) {
         await thongBaoHoSoDuocXem({ maUngVien: maNguoiDungUngVien, tenCongTy, viTriUngTuyen, maHoSoUngTuyen: ketQuaChuanHoa.id })
       }
       if (trangThaiCu !== trangThaiMoi && ['dat', 'tu_choi'].includes(trangThaiMoi) && maNguoiDungUngVien) {
         await thongBaoHeThong({
           maNguoiDung: maNguoiDungUngVien,
-          tieuDe: trangThaiMoi === 'dat' ? 'Ho so ung tuyen da dat' : 'Ho so ung tuyen bi tu choi',
-          noiDung: `${tenCongTy} đã cập nhật kết quả hồ sơ ung tuyen vi tri ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Đạt' : 'Từ chối'}.`,
+          tieuDe: trangThaiMoi === 'dat' ? 'Hồ sơ ứng tuyển đã đạt' : 'Hồ sơ ứng tuyển bị từ chối',
+          noiDung: `${tenCongTy} đã cập nhật kết quả hồ sơ ứng tuyển vị trí ${viTriUngTuyen}: ${trangThaiMoi === 'dat' ? 'Đạt' : 'Từ chối'}.`,
           lienKet: '/ung-vien/ung-tuyen',
           mucDoUuTien: 'cao',
         })
@@ -199,7 +199,7 @@ export const dichVuHoSoUngTuyen = {
   },
   async xoa(ma: string) {
     const hienTai = await layDayDu({ id: ma }) as any
-    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển de xoa', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để xóa', 404)
     await HoSoUngTuyen.delete({ where: { id: ma } })
     return chuanHoaUngTuyen(hienTai)
   },

@@ -131,14 +131,14 @@ export const dichVuDanhGiaCongTy = {
 
   async capNhat(ma: string, duLieu: unknown) {
     const hienTai = await DanhGiaCongTy.findUnique({ where: { id: ma }, select: { id: true } })
-    if (!hienTai) throw new LoiUngDung('Không tìm thấy đánh giá công ty de cap nhat', 404)
+    if (!hienTai) throw new LoiUngDung('Không tìm thấy đánh giá công ty để cập nhật', 404)
     await DanhGiaCongTy.update({ where: { id: ma }, data: duLieu as any })
     return this.layTheoMa(ma)
   },
 
   async xoa(ma: string) {
     const ketQua = await layDanhGiaDayDu({ id: ma }) as any
-    if (!ketQua) throw new LoiUngDung('Không tìm thấy đánh giá công ty de xoa', 404)
+    if (!ketQua) throw new LoiUngDung('Không tìm thấy đánh giá công ty để xóa', 404)
     await DanhGiaCongTy.delete({ where: { id: ma } })
     return chuanHoaDanhGia(ketQua)
   },

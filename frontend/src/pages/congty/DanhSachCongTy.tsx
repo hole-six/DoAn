@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, X, Zap } from 'lucide-react'
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
 import Pagination from '../../components/Pagination'
@@ -130,6 +130,7 @@ function hienThiTiengViet(value?: string, fallback = '') {
 
 export default function DanhSachCongTy() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [tuKhoa, setTuKhoa] = useState('')
   const [quyMoDangChon, setQuyMoDangChon] = useState<string[]>([])
   const [linhVucDangChon, setLinhVucDangChon] = useState<string[]>([])
@@ -152,6 +153,10 @@ export default function DanhSachCongTy() {
     active: searchActive,
     apiUrl: API_URL,
   })
+
+  useEffect(() => {
+    setTuKhoa(searchParams.get('tuKhoa') ?? '')
+  }, [searchParams])
 
   useEffect(() => {
     let active = true
@@ -249,6 +254,48 @@ export default function DanhSachCongTy() {
     }
   }, [companies, stats])
 
+  const boLocDangChon = useMemo(() => {
+    const items: Array<{ key: string; label: string; onRemove: () => void }> = []
+    if (tuKhoa.trim()) {
+      items.push({
+        key: `keyword-${tuKhoa}`,
+        label: `Từ khóa: ${tuKhoa.trim()}`,
+        onRemove: () => setTuKhoa(''),
+      })
+    }
+    quyMoDangChon.forEach(value => items.push({
+      key: `size-${value}`,
+      label: `Quy mô: ${quyMoLabels[value] ?? value}`,
+      onRemove: () => setQuyMoDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    linhVucDangChon.forEach(value => items.push({
+      key: `field-${value}`,
+      label: `Lĩnh vực: ${hienThiTiengViet(value)}`,
+      onRemove: () => setLinhVucDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    loaiKyNangDangChon.forEach(value => items.push({
+      key: `skilltype-${value}`,
+      label: `Danh mục kỹ năng: ${nhanLoaiKyNang[value] ?? value}`,
+      onRemove: () => setLoaiKyNangDangChon(prev => prev.filter(item => item !== value)),
+    }))
+    kyNangDangChon.forEach(value => {
+      const skill = stats.skillMap.get(value)
+      items.push({
+        key: `skill-${value}`,
+        label: `Kỹ năng: ${skill?.ten ?? value}`,
+        onRemove: () => setKyNangDangChon(prev => prev.filter(item => item !== value)),
+      })
+    })
+    if (danhGiaToiThieu) {
+      items.push({
+        key: `rating-${danhGiaToiThieu}`,
+        label: `Đánh giá: ${danhGiaToiThieu}+ sao`,
+        onRemove: () => setDanhGiaToiThieu(0),
+      })
+    }
+    return items
+  }, [danhGiaToiThieu, kyNangDangChon, linhVucDangChon, loaiKyNangDangChon, quyMoDangChon, stats.skillMap, tuKhoa])
+
   const ketQua = companies.filter(c => {
     const keyword = normalize(tuKhoa)
     const ratingStat = stats.reviewMap.get(c.id)
@@ -296,9 +343,11 @@ export default function DanhSachCongTy() {
   const chonGoiY = (item: SuggestionItem) => {
     setTuKhoa(item.queryValue)
     setSearchActive(false)
-    if (item.type !== 'company') {
-      navigate(`/viec-lam?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+    if (item.href) {
+      navigate(item.href)
+      return
     }
+    navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
   }
 
   return (
@@ -322,7 +371,13 @@ export default function DanhSachCongTy() {
             </label>
             <button className="primary-button" onClick={() => setSearchActive(false)}><Search size={17} /> Tìm kiếm</button>
             {searchActive && (
-              <SearchSuggestionPanel groups={groups} loading={loading} query={tuKhoa} onSelect={chonGoiY} />
+              <SearchSuggestionPanel
+                groups={groups}
+                loading={loading}
+                query={tuKhoa}
+                onSelect={chonGoiY}
+                onClearQuery={() => setTuKhoa('')}
+              />
             )}
           </div>
           {searchActive && (loading || hasAny) && (
@@ -410,6 +465,22 @@ export default function DanhSachCongTy() {
               <option value="nhieu_viec">Nhiều việc làm</option>
             </select>
           </div>
+          {boLocDangChon.length > 0 && (
+            <div className="filter-summary">
+              <div className="filter-summary-head">
+                <strong>Bộ lọc đang chọn</strong>
+                <button type="button" className="filter-summary-clear" onClick={xoaBoLoc}>Xóa nhanh</button>
+              </div>
+              <div className="filter-summary-chips">
+                {boLocDangChon.map(item => (
+                  <button key={item.key} type="button" className="filter-summary-chip" onClick={item.onRemove}>
+                    <span>{item.label}</span>
+                    <X size={14} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {loi && <div className="jobs-real-error">{loi}</div>}
           {ketQua.length > 0 && (
             <Pagination

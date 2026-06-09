@@ -109,7 +109,7 @@ async function syncTinTuyenDungKyNang() {
     synced += 1
   }
 
-  console.log(`Synced ${synced} tin tuyen dung, skipped ${skipped}`)
+  console.log(`✅ Synced ${synced} tin tuyển dụng, skipped ${skipped} empty`)
 }
 
 async function verifyDataIntegrity() {
