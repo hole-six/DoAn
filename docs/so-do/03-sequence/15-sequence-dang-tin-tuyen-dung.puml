@@ -27,6 +27,7 @@ control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
 entity "Entity: NhaTuyenDung" as E1
 entity "Entity: DanhMucKyNang" as E2
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 entity "Entity: ThongBao" as E3
 
 Actor -> UI : 1. Nhấn Đăng tin tuyển dụng
@@ -46,10 +47,11 @@ alt Dữ liệu hợp lệ
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Lưu kỹ năng và gửi thông báo cho admin
-  Controller --> Form : 10. Thông báo tin đã gửi duyệt
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
+  Controller -> TinTuyenDungKyNang : 9. Lưu kỹ năng bắt buộc/trọng số của tin
+  Controller -> E3 : 10. Gửi thông báo cho admin
+  Controller --> Form : 11. Thông báo tin đã gửi duyệt
+  Form --> UI : 12. Cập nhật giao diện
+  UI --> Actor : 13. Hiển thị kết quả thành công
 else Dữ liệu không hợp lệ
   Controller --> Form : 10. Thông báo công ty chưa được duyệt hoặc dữ liệu lỗi
   Form --> UI : 11. Hiển thị lỗi tại màn hình

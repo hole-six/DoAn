@@ -27,6 +27,7 @@ control "Controller: HoSoUngTuyenController" as Controller
 entity "Entity: HoSoUngTuyen" as MainEntity
 entity "Entity: TinTuyenDung" as E1
 entity "Entity: LichPhongVan" as E2
+entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
 
 Actor -> UI : 1. Mở trang hồ sơ ứng tuyển
 activate UI
@@ -54,6 +55,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> LichSuHoSoUngTuyen : Lấy timeline trạng thái của hồ sơ
 deactivate Controller
 deactivate Form
 deactivate UI

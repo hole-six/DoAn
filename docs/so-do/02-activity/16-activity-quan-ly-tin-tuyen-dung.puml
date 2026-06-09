@@ -53,5 +53,6 @@ if (Có quyền quản lý tin?) then (Có)
 else (Không)
   :Hiển thị thông báo công ty chưa được duyệt hoặc không có quyền;
 endif
+:Khi sửa kỹ năng thì đồng bộ TinTuyenDungKyNang;
 stop
 @enduml

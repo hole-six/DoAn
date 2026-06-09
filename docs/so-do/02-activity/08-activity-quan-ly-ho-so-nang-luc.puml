@@ -73,5 +73,6 @@ else (Xóa)
     :Đóng hộp xác nhận;
   endif
 endif
+:Nếu hồ sơ/CV có kỹ năng ứng viên thì đồng bộ UngVienKyNang;
 stop
 @enduml

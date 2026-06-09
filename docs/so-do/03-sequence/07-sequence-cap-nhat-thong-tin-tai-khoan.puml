@@ -26,6 +26,7 @@ boundary "UI: form-cap-nhat-tai-khoan" as Form
 control "Controller: NguoiDungController" as Controller
 entity "Entity: NguoiDung" as MainEntity
 entity "Entity: ThongBao" as E1
+entity "Entity: UngVienKyNang" as UngVienKyNang
 
 Actor -> UI : 1. Mở trang cài đặt tài khoản
 activate UI
@@ -53,6 +54,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> UngVienKyNang : Đồng bộ kỹ năng ứng viên nếu có thay đổi
 deactivate Controller
 deactivate Form
 deactivate UI

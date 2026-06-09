@@ -27,6 +27,7 @@ control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
 entity "Entity: NhaTuyenDung" as E1
 entity "Entity: DanhMucKyNang" as E2
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 entity "Entity: DanhGiaCongTy" as E3
 
 Actor -> UI : 1. Mở một tin tuyển dụng
@@ -55,6 +56,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> TinTuyenDungKyNang : Lấy kỹ năng của tin theo bảng liên kết
 deactivate Controller
 deactivate Form
 deactivate UI

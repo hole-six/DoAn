@@ -49,4 +49,6 @@ E1 -down[hidden]-> E2
 E2 -down[hidden]-> E3
 E3 -down[hidden]-> E4
 E4 -down[hidden]-> E5
+entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
+Controller -right-> LichSuHoSoUngTuyen
 @enduml

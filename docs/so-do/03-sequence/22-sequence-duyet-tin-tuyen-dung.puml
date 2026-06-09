@@ -25,6 +25,7 @@ boundary "UI: quan-tri-tin-tuyen-dung" as UI
 boundary "UI: form-duyet-tin" as Form
 control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 entity "Entity: NhaTuyenDung" as E1
 entity "Entity: ThongBao" as E2
 
@@ -54,6 +55,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> TinTuyenDungKyNang : Lấy kỹ năng của tin khi xem/duyệt
 deactivate Controller
 deactivate Form
 deactivate UI

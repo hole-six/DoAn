@@ -49,5 +49,6 @@ if (Hồ sơ thuộc công ty?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không có quyền mời phỏng vấn;
 endif
+:Ghi lịch sử hồ sơ ứng tuyển với trạng thái "moi_phong_van";
 stop
 @enduml

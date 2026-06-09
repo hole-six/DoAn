@@ -27,6 +27,7 @@ control "Controller: HoSoNangLucController" as Controller
 entity "Entity: HoSoNangLuc" as MainEntity
 entity "Entity: UngVien" as E1
 entity "Entity: FileUpload" as E2
+entity "Entity: UngVienKyNang" as UngVienKyNang
 
 Actor -> UI : 1. Mở hồ sơ năng lực
 activate UI
@@ -55,6 +56,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 12. Hiển thị lỗi tại màn hình
   UI --> Actor : 13. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> UngVienKyNang : Đồng bộ kỹ năng ứng viên khi hồ sơ có kỹ năng
 deactivate Controller
 deactivate Form
 deactivate UI

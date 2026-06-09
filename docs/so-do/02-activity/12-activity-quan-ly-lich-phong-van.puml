@@ -45,5 +45,6 @@ if (Có lịch phỏng vấn?) then (Có)
 else (Không)
   :Hiển thị trạng thái chưa có lịch phỏng vấn;
 endif
+:Nếu có nhận xét/điểm phỏng vấn thì lưu DanhGiaPhongVan;
 stop
 @enduml

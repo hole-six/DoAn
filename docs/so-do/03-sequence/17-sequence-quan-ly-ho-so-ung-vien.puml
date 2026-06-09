@@ -29,6 +29,7 @@ entity "Entity: UngVien" as UngVien
 entity "Entity: TinTuyenDung" as TinTuyenDung
 entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: LichPhongVan" as LichPhongVan
+entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
 entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Mở pipeline ứng viên
@@ -51,20 +52,22 @@ alt Đánh dấu đã xem hoặc đánh giá
   Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
   Controller -> NhaTuyenDung : 12. Kiểm tra nhà tuyển dụng hiện tại
   Controller -> HoSoUngTuyen : 13. Cập nhật trạng thái nghiệp vụ
-  Controller -> ThongBao : 14. Báo ứng viên khi cần
-  Controller --> Form : 15. Trả hồ sơ đã cập nhật
+  Controller -> LichSuHoSoUngTuyen : 14. Ghi lịch sử trạng thái hồ sơ
+  Controller -> ThongBao : 15. Báo ứng viên khi cần
+  Controller --> Form : 16. Trả hồ sơ đã cập nhật
 else Mời phỏng vấn
   Actor -> Form : 9. Chọn lên lịch phỏng vấn
   Form -> Controller : 10. POST /hosoungtuyen/:ma/moi-phong-van
   activate Controller
   Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
   Controller -> LichPhongVan : 12. Tạo lịch phỏng vấn
-  Controller -> ThongBao : 13. Báo ứng viên
-  Controller --> Form : 14. Trả lịch mới
+  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử trạng thái "moi_phong_van"
+  Controller -> ThongBao : 14. Báo ứng viên
+  Controller --> Form : 15. Trả lịch mới
 end
 
-Form --> UI : 16. Cập nhật pipeline
-UI --> Actor : 17. Hiển thị kết quả thao tác
+Form --> UI : 17. Cập nhật pipeline
+UI --> Actor : 18. Hiển thị kết quả thao tác
 deactivate Controller
 deactivate Form
 deactivate UI

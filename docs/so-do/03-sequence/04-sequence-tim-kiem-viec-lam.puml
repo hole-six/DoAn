@@ -26,6 +26,7 @@ boundary "UI: bo-loc-viec-lam" as Form
 control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
 entity "Entity: DanhMucKyNang" as E1
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 entity "Entity: NhaTuyenDung" as E2
 
 Actor -> UI : 1. Truy cập trang việc làm
@@ -54,6 +55,7 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> TinTuyenDungKyNang : Lấy liên kết kỹ năng của tin phù hợp
 deactivate Controller
 deactivate Form
 deactivate UI

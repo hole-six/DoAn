@@ -34,4 +34,6 @@ UI <--> Form
 Form <--> Controller
 Controller <--> MainEntity
 Controller <--> E1
+entity "UngVienKyNang" as UngVienKyNang
+Controller -right-> UngVienKyNang
 @enduml

@@ -62,5 +62,9 @@ export function useEmployerData() {
     })
   }, [])
 
-  return { ...state, reload: load }
+  const updateCompany = (company?: NhaTuyenDung) => {
+    setState(prev => ({ ...prev, company }))
+  }
+
+  return { ...state, reload: load, updateCompany }
 }

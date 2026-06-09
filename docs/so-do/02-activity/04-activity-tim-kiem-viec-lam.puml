@@ -60,5 +60,6 @@ else (Không)
   :Hiển thị trạng thái không có việc phù hợp;
   :Gợi ý đổi từ khóa hoặc bộ lọc;
 endif
+:Hệ thống lọc kỹ năng tin qua TinTuyenDungKyNang và DanhMucKyNang;
 stop
 @enduml

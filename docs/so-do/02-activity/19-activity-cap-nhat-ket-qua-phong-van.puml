@@ -40,5 +40,6 @@ if (Lịch thuộc công ty?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không có quyền cập nhật lịch;
 endif
+:Lưu DanhGiaPhongVan nếu có điểm/nhận xét và ghi LichSuHoSoUngTuyen;
 stop
 @enduml

@@ -37,5 +37,6 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không tải được danh mục kỹ năng;
 endif
+:Kiểm tra ràng buộc UngVienKyNang và TinTuyenDungKyNang trước khi xóa kỹ năng;
 stop
 @enduml

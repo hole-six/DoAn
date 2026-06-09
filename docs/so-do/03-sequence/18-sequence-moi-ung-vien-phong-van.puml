@@ -26,6 +26,7 @@ boundary "UI: form-moi-phong-van" as Form
 control "Controller: HoSoUngTuyenController" as Controller
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
 entity "Entity: LichPhongVan" as LichPhongVan
+entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
 entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: TinTuyenDung" as TinTuyenDung
 entity "Entity: ThongBao" as ThongBao
@@ -47,10 +48,11 @@ alt Hợp lệ
   LichPhongVan --> Controller : 10. Trả lịch mới
   Controller -> HoSoUngTuyen : 11. Cập nhật trạng thái moi_phong_van
   HoSoUngTuyen --> Controller : 12. Trả hồ sơ đã cập nhật
-  Controller -> ThongBao : 13. Báo ứng viên có lịch phỏng vấn
-  Controller --> Form : 14. Trả lịch phỏng vấn
-  Form --> UI : 15. Cập nhật pipeline và lịch
-  UI --> Actor : 16. Hiển thị mời phỏng vấn thành công
+  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử hồ sơ ứng tuyển với trạng thái "moi_phong_van"
+  Controller -> ThongBao : 14. Báo ứng viên có lịch phỏng vấn
+  Controller --> Form : 15. Trả lịch phỏng vấn
+  Form --> UI : 16. Cập nhật pipeline và lịch
+  UI --> Actor : 17. Hiển thị mời phỏng vấn thành công
 else Không hợp lệ
   Controller --> Form : 14. Trả lỗi quyền, hồ sơ hoặc thời gian
   Form --> UI : 15. Hiển thị lỗi

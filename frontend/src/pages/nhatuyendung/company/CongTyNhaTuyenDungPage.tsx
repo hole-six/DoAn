@@ -123,10 +123,10 @@ export default function CongTyNhaTuyenDungPage() {
         }),
       })
       setForm(companyToForm(savedCompany))
+      data.updateCompany(savedCompany)
       setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
       setLogoVersion(prev => prev + 1)
       phatCapNhatCongTyNhaTuyenDung()
-      await data.reload()
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Không lưu được hồ sơ công ty.' })
     } finally {

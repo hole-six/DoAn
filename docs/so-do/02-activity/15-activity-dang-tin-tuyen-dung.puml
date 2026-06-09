@@ -50,5 +50,6 @@ if (Công ty đã được duyệt?) then (Đúng)
 else (Sai)
   :Hiển thị yêu cầu cập nhật hoặc chờ duyệt hồ sơ công ty;
 endif
+:Lưu kỹ năng tin vào TinTuyenDungKyNang liên kết DanhMucKyNang;
 stop
 @enduml

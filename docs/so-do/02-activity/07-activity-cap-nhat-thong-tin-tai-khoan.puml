@@ -56,5 +56,6 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Yêu cầu đăng nhập lại;
 endif
+:Nếu cập nhật kỹ năng ứng viên thì đồng bộ UngVienKyNang;
 stop
 @enduml

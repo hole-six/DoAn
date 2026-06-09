@@ -29,6 +29,9 @@ entity "Entity: NguoiDung" as NguoiDung
 entity "Entity: TinTuyenDung" as TinTuyenDung
 entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
+entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
+entity "Entity: DanhGiaPhongVan" as DanhGiaPhongVan
 
 Actor -> UI : 1. Mở dashboard quản trị
 activate UI
@@ -45,6 +48,9 @@ NhaTuyenDung --> Controller : 9. Trả dữ liệu công ty
 Controller -> HoSoUngTuyen : 10. Lấy danh sách hồ sơ ứng tuyển
 HoSoUngTuyen --> Controller : 11. Trả dữ liệu hồ sơ
 Controller --> Form : 12. Trả dữ liệu dashboard
+Controller -> LichSuHoSoUngTuyen : Tổng hợp biến động trạng thái hồ sơ
+Controller -> TinTuyenDungKyNang : Tổng hợp nhu cầu kỹ năng từ tin tuyển dụng
+Controller -> DanhGiaPhongVan : Tổng hợp đánh giá phỏng vấn nếu cần
 deactivate Controller
 
 Form -> AlertController : 13. GET /canhbaoquantri

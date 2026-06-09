@@ -39,7 +39,7 @@ if (Có quyền xem hồ sơ?) then (Có)
     :Gửi ThôngBáo hồ sơ đã được xem cho ứng viên;
   elseif (Chuyển xét duyệt?) then (Xét duyệt)
     :Gọi chức năng đánh giá hồ sơ ứng tuyển với trạng thái đang xét duyệt;
-    :Ghi LịchSửHồSơỨngTuyển;
+    :Ghi lịch sử hồ sơ ứng tuyển;
   elseif (Từ chối sàng lọc?) then (Từ chối)
     :Nhập lý do từ chối sàng lọc;
     :Gọi chức năng đánh giá hồ sơ ứng tuyển với trạng thái từ chối;
@@ -55,5 +55,6 @@ if (Có quyền xem hồ sơ?) then (Có)
 else (Không)
   :Hiển thị thông báo không có quyền xem hồ sơ;
 endif
+:Mỗi lần đổi trạng thái đều ghi LichSuHoSoUngTuyen;
 stop
 @enduml

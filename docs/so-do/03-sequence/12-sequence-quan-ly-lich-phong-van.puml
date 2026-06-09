@@ -26,6 +26,7 @@ boundary "UI: form-phan-hoi-lich" as Form
 control "Controller: LichPhongVanController" as Controller
 entity "Entity: LichPhongVan" as LichPhongVan
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
+entity "Entity: DanhGiaPhongVan" as DanhGiaPhongVan
 entity "Entity: UngVien" as UngVien
 entity "Entity: ThongBao" as ThongBao
 
@@ -37,6 +38,7 @@ Controller -> LichPhongVan : 3. Lấy lịch của ứng viên hiện tại
 Controller -> HoSoUngTuyen : 4. Populate hồ sơ ứng tuyển
 Controller -> UngVien : 5. Kiểm tra hồ sơ thuộc ứng viên
 Controller --> Form : 6. Trả danh sách lịch
+Controller -> DanhGiaPhongVan : Lấy hoặc lưu nhận xét phỏng vấn nếu có
 deactivate Controller
 UI -> Form : 7. Hiển thị lịch và nút phản hồi
 activate Form

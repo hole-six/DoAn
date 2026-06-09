@@ -103,7 +103,7 @@ function ReviewSection({
         </div>
       ) : (
         <p className="mt-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3 text-sm font-bold leading-6 text-slate-500">
-          Bạn có thể đánh giá công ty sau khi được mời phỏng vấn.
+          Bạn có thể đánh giá công ty sau khi buổi phỏng vấn hoàn tất và đã có kết quả.
         </p>
       )}
     </section>
@@ -113,14 +113,14 @@ function ReviewSection({
 export function AppDrawer({
   item,
   danhGia,
-  coLichPhongVan,
+  coKetQuaPhongVan,
   onClose,
   onWithdraw,
   onReviewSubmitted,
 }: {
   item: HoSoUngTuyen
   danhGia?: DanhGiaCongTy
-  coLichPhongVan: boolean
+  coKetQuaPhongVan: boolean
   onClose: () => void
   onWithdraw: () => void
   onReviewSubmitted: () => Promise<void> | void
@@ -133,7 +133,7 @@ export function AppDrawer({
     ?? (item.tinTuyenDung?.nhaTuyenDung as any)?.nguoiDung?.id
     ?? (item.tinTuyenDung?.nhaTuyenDung as any)?.nguoiDung?._id
   const canChat = TRANG_THAI_DUOC_CHAT.includes(item.trangThai) && Boolean(employerUserId)
-  const duDieuKienDanhGia = item.trangThai === 'moi_phong_van' || coLichPhongVan || Boolean(danhGia)
+  const duDieuKienDanhGia = coKetQuaPhongVan || Boolean(danhGia)
   const hoSo = item.hoSoNangLuc
   const laPdfUpload = hoSo?.loaiHoSo === 'file_upload' || Boolean(hoSo?.fileCvData)
 

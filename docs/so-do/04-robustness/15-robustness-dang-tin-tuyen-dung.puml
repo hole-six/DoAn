@@ -43,4 +43,6 @@ Controller -right-> E3
 MainEntity -down[hidden]-> E1
 E1 -down[hidden]-> E2
 E2 -down[hidden]-> E3
+entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
+Controller -right-> TinTuyenDungKyNang
 @enduml

@@ -48,5 +48,6 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không tải được dữ liệu;
 endif
+:Khi xem/duyệt tin vẫn đọc kỹ năng qua TinTuyenDungKyNang;
 stop
 @enduml

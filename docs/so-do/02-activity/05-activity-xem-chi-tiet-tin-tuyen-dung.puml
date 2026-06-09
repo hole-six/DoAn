@@ -47,5 +47,6 @@ if (Tin tồn tại?) then (Có)
 else (Không)
   :Hiển thị thông báo không tìm thấy tin tuyển dụng;
 endif
+:Hệ thống lấy kỹ năng của tin qua TinTuyenDungKyNang và DanhMucKyNang;
 stop
 @enduml

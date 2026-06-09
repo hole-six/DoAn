@@ -70,7 +70,11 @@ export default function UngTuyenPage() {
         <AppDrawer
           item={selected}
           danhGia={data.danhGiaCongTy.find(item => item.maHoSoUngTuyen === selected.id)}
-          coLichPhongVan={data.lich.some(item => item.maHoSoUngTuyen === selected.id)}
+          coKetQuaPhongVan={data.lich.some(item => (
+            item.maHoSoUngTuyen === selected.id
+            && item.trangThai === 'hoan_thanh'
+            && ['dat', 'khong_dat'].includes(String(item.ketQua ?? ''))
+          ))}
           onClose={() => setSelected(null)}
           onWithdraw={openWithdraw}
           onReviewSubmitted={async () => { await data.reload() }}

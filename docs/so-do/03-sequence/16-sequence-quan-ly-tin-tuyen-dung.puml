@@ -27,6 +27,7 @@ control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
 entity "Entity: NhaTuyenDung" as E1
 entity "Entity: DanhMucKyNang" as E2
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 
 Actor -> UI : 1. Mở trang quản lý tin
 activate UI
@@ -45,7 +46,7 @@ alt Dữ liệu hợp lệ
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Cập nhật kỹ năng liên quan nếu có
+  Controller -> TinTuyenDungKyNang : 9. Đồng bộ kỹ năng liên quan nếu có
   Controller --> Form : 10. Trả danh sách tin mới
   Form --> UI : 11. Cập nhật giao diện
   UI --> Actor : 12. Hiển thị kết quả thành công

@@ -65,14 +65,17 @@ async function layUngVienCuaNguoiDung(nguoiDung: NguoiDungHienTai) {
   return coId(ungVien) as any
 }
 
-async function damBaoDaDuocMoiPhongVan(hoSo: any) {
-  if (String(hoSo.trangThai ?? '') === 'moi_phong_van') return
-  const [lichPhongVan, lichSuMoiPhongVan] = await Promise.all([
-    prisma.lichPhongVan.findFirst({ where: { maHoSoUngTuyen: id(hoSo) }, select: { id: true } }),
-    prisma.lichSuHoSoUngTuyen.findFirst({ where: { maHoSoUngTuyen: id(hoSo), trangThaiMoi: 'moi_phong_van' }, select: { id: true } }),
-  ])
-  if (!lichPhongVan && !lichSuMoiPhongVan) {
-    throw new LoiUngDung('Bạn chỉ có thể đánh giá công ty sau khi được mời phỏng vấn.', 409, 'REVIEW_REQUIRES_INTERVIEW_INVITE')
+async function damBaoDaCoKetQuaPhongVan(hoSo: any) {
+  const lichPhongVan = await prisma.lichPhongVan.findFirst({
+    where: {
+      maHoSoUngTuyen: id(hoSo),
+      trangThai: 'hoan_thanh',
+      ketQua: { in: ['dat', 'khong_dat'] },
+    },
+    select: { id: true },
+  })
+  if (!lichPhongVan) {
+    throw new LoiUngDung('Bạn chỉ có thể đánh giá công ty sau khi phỏng vấn hoàn tất và đã có kết quả.', 409, 'REVIEW_REQUIRES_INTERVIEW_RESULT')
   }
 }
 
@@ -112,7 +115,7 @@ export const dichVuDanhGiaCongTy = {
     const hoSo = await layHoSoUngTuyenDayDuNoiBo(maHoSoUngTuyen)
     if (!hoSo) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND')
     if (id(hoSo.maUngVien) !== id(ungVien)) throw new LoiUngDung('Bạn không có quyền đánh giá từ hồ sơ ứng tuyển này', 403, 'FORBIDDEN')
-    await damBaoDaDuocMoiPhongVan(hoSo)
+    await damBaoDaCoKetQuaPhongVan(hoSo)
 
     const maNhaTuyenDung = id(hoSo.maTinTuyenDung?.maNhaTuyenDung)
     if (!maNhaTuyenDung) throw new LoiUngDung('Không tìm thấy công ty của hồ sơ ứng tuyển', 404, 'COMPANY_NOT_FOUND')

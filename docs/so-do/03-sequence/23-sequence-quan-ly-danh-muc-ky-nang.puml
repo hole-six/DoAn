@@ -27,6 +27,8 @@ control "Controller: DanhMucKyNangController" as Controller
 entity "Entity: DanhMucKyNang" as MainEntity
 entity "Entity: TinTuyenDung" as E1
 entity "Entity: UngVien" as E2
+entity "Entity: UngVienKyNang" as UngVienKyNang
+entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 
 Actor -> UI : 1. Mở trang danh mục kỹ năng
 activate UI
@@ -54,6 +56,8 @@ else Dữ liệu không hợp lệ
   Form --> UI : 11. Hiển thị lỗi tại màn hình
   UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
 end
+Controller -> UngVienKyNang : Kiểm tra kỹ năng đang được ứng viên sử dụng
+Controller -> TinTuyenDungKyNang : Kiểm tra kỹ năng đang được tin sử dụng
 deactivate Controller
 deactivate Form
 deactivate UI
