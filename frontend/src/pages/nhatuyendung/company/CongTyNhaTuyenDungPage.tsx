@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Building2, RefreshCw, Save, Upload, X } from 'lucide-react'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../../lib/auth'
-import { capNhatPhienBanTaiNguyen, xoaPhienBanTaiNguyen } from '../../../lib/env'
+import { capNhatPhienBanTaiNguyen } from '../../../lib/env'
 import { phatCapNhatCongTyNhaTuyenDung } from '../../../lib/employerCompanySync'
 import { getEmployerGate } from '../../../lib/employerGate'
 import { imageUrl } from '../../../lib/format'
@@ -13,7 +13,7 @@ import { useEmployerData } from '../shared/useEmployerData'
 type CompanyForm = Pick<NhaTuyenDung, 'tenCongTy' | 'maSoThue' | 'nganh' | 'quyMo' | 'website' | 'diaChi' | 'moTa' | 'logo'>
 type CompanyErrors = Partial<Record<keyof CompanyForm | 'form', string>>
 
-const initialForm: CompanyForm = {
+const emptyForm: CompanyForm = {
   tenCongTy: '',
   maSoThue: '',
   nganh: '',
@@ -37,7 +37,7 @@ function companyToForm(company?: NhaTuyenDung): CompanyForm {
   }
 }
 
-function validateCompany(form: CompanyForm): CompanyErrors {
+function validate(form: CompanyForm): CompanyErrors {
   const errors: CompanyErrors = {}
   if (form.tenCongTy.trim().length < 2) errors.tenCongTy = 'Tên công ty phải có ít nhất 2 ký tự.'
   if (form.maSoThue && !/^[0-9A-Za-z-]{6,20}$/.test(form.maSoThue.trim())) errors.maSoThue = 'Mã số thuế không hợp lệ.'
@@ -61,21 +61,31 @@ function FieldError({ message }: { message?: string }) {
 
 export default function CongTyNhaTuyenDungPage() {
   const data = useEmployerData()
-  const [form, setForm] = useState<CompanyForm>(initialForm)
+  const [form, setForm] = useState<CompanyForm>(emptyForm)
+  const [savedForm, setSavedForm] = useState<CompanyForm>(emptyForm)
   const [errors, setErrors] = useState<CompanyErrors>({})
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [savedAt, setSavedAt] = useState('')
   const [logoPreview, setLogoPreview] = useState('')
+  const logoObjectUrlRef = useRef('')
   const gateParam = new URLSearchParams(window.location.search).get('gate')
   const gate = getEmployerGate(data.company)
 
   useEffect(() => {
-    setForm(companyToForm(data.company))
+    if (logoObjectUrlRef.current) URL.revokeObjectURL(logoObjectUrlRef.current)
+    const next = companyToForm(data.company)
+    setForm(next)
+    setSavedForm(next)
     setErrors({})
+    setLogoPreview('')
   }, [data.company])
 
-  const dirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(companyToForm(data.company)), [form, data.company])
+  useEffect(() => () => {
+    if (logoObjectUrlRef.current) URL.revokeObjectURL(logoObjectUrlRef.current)
+  }, [])
+
+  const dirty = useMemo(() => JSON.stringify(form) !== JSON.stringify(savedForm), [form, savedForm])
 
   const update = <K extends keyof CompanyForm>(key: K, value: CompanyForm[K]) => {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -89,64 +99,79 @@ export default function CongTyNhaTuyenDungPage() {
       return
     }
     const previousLogo = form.logo
+    if (logoObjectUrlRef.current) URL.revokeObjectURL(logoObjectUrlRef.current)
     const previewUrl = URL.createObjectURL(file)
+    logoObjectUrlRef.current = previewUrl
     setLogoPreview(previewUrl)
-    const body = new FormData()
-    body.append('logo', file)
     setUploading(true)
     try {
+      const body = new FormData()
+      body.append('logo', file)
       const res = await apiUploadCoXacThuc('/nhatuyendung/upload-logo', body)
       const nextLogo = res.duongDan ?? res.url ?? ''
-      capNhatPhienBanTaiNguyen(nextLogo)
       if (!nextLogo) throw new Error('Upload logo không trả về đường dẫn.')
+      capNhatPhienBanTaiNguyen(nextLogo)
       update('logo', nextLogo)
-      await apiCoXacThuc(`/nhatuyendung/${data.company?.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ logo: nextLogo }),
-      })
-      setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
-      phatCapNhatCongTyNhaTuyenDung()
+      setErrors(prev => ({ ...prev, logo: undefined }))
     } catch (err) {
       update('logo', previousLogo)
-      setLogoPreview('')
       setErrors(prev => ({ ...prev, logo: err instanceof Error ? err.message : 'Upload logo thất bại.' }))
     } finally {
-      setLogoPreview('')
       setUploading(false)
     }
   }
 
+  const resetForm = () => {
+    if (logoObjectUrlRef.current) {
+      URL.revokeObjectURL(logoObjectUrlRef.current)
+      logoObjectUrlRef.current = ''
+    }
+    setForm(savedForm)
+    setErrors({})
+    setLogoPreview('')
+  }
+
   const save = async () => {
     if (!data.company?.id) return
-    const nextErrors = validateCompany(form)
+    const nextErrors = validate(form)
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) return
+
     setSaving(true)
     try {
+      const payload: Record<string, unknown> = {
+        tenCongTy: form.tenCongTy.trim(),
+        maSoThue: form.maSoThue?.trim() || undefined,
+        nganh: form.nganh?.trim() || undefined,
+        quyMo: form.quyMo ? Number(form.quyMo) : undefined,
+        website: form.website?.trim() || undefined,
+        diaChi: form.diaChi?.trim() || undefined,
+        moTa: form.moTa?.trim() || undefined,
+        logo: form.logo || undefined,
+      }
       const savedCompany = await apiCoXacThuc(`/nhatuyendung/${data.company.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({
-          ...form,
-          tenCongTy: form.tenCongTy.trim(),
-          maSoThue: form.maSoThue?.trim() || undefined,
-          nganh: form.nganh?.trim() || undefined,
-          quyMo: form.quyMo ? Number(form.quyMo) : undefined,
-          website: form.website?.trim() || undefined,
-          diaChi: form.diaChi?.trim() || undefined,
-          moTa: form.moTa?.trim() || undefined,
-          logo: form.logo || undefined,
-        }),
+        body: JSON.stringify(payload),
       })
-      setForm(companyToForm(savedCompany))
+      const normalized = companyToForm(savedCompany)
+      setForm(normalized)
+      setSavedForm(normalized)
       data.updateCompany(savedCompany)
       setSavedAt(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }))
       phatCapNhatCongTyNhaTuyenDung()
+      if (logoObjectUrlRef.current) {
+        URL.revokeObjectURL(logoObjectUrlRef.current)
+        logoObjectUrlRef.current = ''
+      }
+      setLogoPreview('')
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Không lưu được hồ sơ công ty.' })
     } finally {
       setSaving(false)
     }
   }
+
+  const previewLogo = logoPreview || (form.logo ? `${imageUrl(form.logo)}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT')
 
   return (
     <Page
@@ -173,11 +198,7 @@ export default function CongTyNhaTuyenDungPage() {
           <Panel className="h-fit">
             <div className="grid gap-4">
               <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <img
-                  className="h-32 w-32 rounded-2xl border border-slate-200 bg-white object-cover"
-                  src={logoPreview || (form.logo ? `${imageUrl(form.logo)}` : 'https://placehold.co/256x256/eaf2ff/075985?text=IT')}
-                  alt={form.tenCongTy || 'Logo công ty'}
-                />
+                <img className="h-32 w-32 rounded-2xl border border-slate-200 bg-white object-cover" src={previewLogo} alt={form.tenCongTy || 'Logo công ty'} />
                 <div className="mt-4">
                   <h2 className="text-2xl font-black text-slate-950">{form.tenCongTy || 'Tên công ty'}</h2>
                   <p className="mt-1 text-sm font-bold text-slate-500">{form.nganh || 'Ngành nghề'} · {form.diaChi || 'Địa chỉ'}</p>
@@ -205,7 +226,10 @@ export default function CongTyNhaTuyenDungPage() {
                   Upload logo
                 </Button>
                 {form.logo && (
-                  <Button type="button" variant="ghost" icon={<X size={16} />} onClick={() => { xoaPhienBanTaiNguyen(form.logo); update('logo', '') }}>
+                  <Button type="button" variant="ghost" icon={<X size={16} />} onClick={() => {
+                    update('logo', '')
+                    setLogoPreview('')
+                  }}>
                     Xóa logo
                   </Button>
                 )}
@@ -257,7 +281,7 @@ export default function CongTyNhaTuyenDungPage() {
               <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
                 <p className="text-sm font-bold text-slate-500"><Building2 size={15} className="mr-1 inline" /> Thông tin này được dùng trên trang công ty và tin tuyển dụng.</p>
                 <ButtonGroup>
-                  <Button type="button" onClick={() => setForm(companyToForm(data.company))} disabled={!dirty || saving}>Hoàn tác</Button>
+                  <Button type="button" onClick={resetForm} disabled={!dirty || saving}>Hoàn tác</Button>
                   <Button type="button" variant="primary" loading={saving} icon={<Save size={16} />} onClick={() => void save()} disabled={!dirty}>
                     Lưu hồ sơ
                   </Button>
