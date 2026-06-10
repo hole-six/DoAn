@@ -3,9 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
-top to bottom direction
+skinparam nodesep 50
+skinparam ranksep 80
+left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -25,18 +25,15 @@ skinparam entity {
 
 actor "Quản trị viên\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
 together {
   boundary "quan-tri-dashboard" as UI
 }
 
-' ── Lớp control (xử lý) ──
 together {
-  control "thong-ke-quan-tri" as Controller
-  control "canh-bao-quan-tri" as AlertController
+  control "thong-ke-quan-tri" as StatsCtrl
+  control "canh-bao-quan-tri" as AlertCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
 together {
   entity "NguoiDung" as NguoiDung
   entity "TinTuyenDung" as TinTuyenDung
@@ -44,22 +41,18 @@ together {
   entity "HoSoUngTuyen" as HoSoUngTuyen
 }
 
-' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
 
-' ── boundary ↔ control ──
-UI <--> Controller
-UI <--> AlertController
+UI <--> StatsCtrl
+UI <--> AlertCtrl
 
-' ── control thống kê đọc 4 danh sách ──
-Controller <--> NguoiDung
-Controller <--> TinTuyenDung
-Controller <--> NhaTuyenDung
-Controller <--> HoSoUngTuyen
+StatsCtrl <--> NguoiDung
+StatsCtrl <--> TinTuyenDung
+StatsCtrl <--> NhaTuyenDung
+StatsCtrl <--> HoSoUngTuyen
 
-' ── control cảnh báo đếm 4 nguồn ──
-AlertController <--> TinTuyenDung
-AlertController <--> NhaTuyenDung
-AlertController <--> HoSoUngTuyen
-AlertController <--> NguoiDung
+AlertCtrl <--> TinTuyenDung
+AlertCtrl <--> NhaTuyenDung
+AlertCtrl <--> HoSoUngTuyen
+AlertCtrl <--> NguoiDung
 @enduml

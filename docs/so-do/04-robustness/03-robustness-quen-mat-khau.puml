@@ -3,8 +3,8 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
+skinparam nodesep 50
+skinparam ranksep 80
 top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
@@ -25,7 +25,6 @@ skinparam entity {
 
 actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
 together {
   boundary "quen-mat-khau" as UI
   boundary "form-quen-mat-khau" as Form
@@ -33,39 +32,25 @@ together {
   boundary "form-dat-lai-mat-khau" as ResetForm
 }
 
-' ── Lớp control (xử lý) ──
 together {
   control "quen-mat-khau" as Controller
   control "gui-email" as MailCtrl
   control "dat-lai-mat-khau" as ResetCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
 together {
   entity "NguoiDung" as NguoiDung
 }
 
-' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
 Actor <--> ResetUI
 
-' ── boundary ↔ boundary / control ──
 UI <--> Form
 ResetUI <--> ResetForm
 Form <--> Controller
 ResetForm <--> ResetCtrl
 
-' ── control ↔ control / entity ──
-Controller <--> NguoiDung
 Controller <--> MailCtrl
+Controller <--> NguoiDung
 ResetCtrl <--> NguoiDung
-
-note bottom of Controller
-  Pha yêu cầu: lưu maDatLaiMatKhauHash +
-  maDatLaiMatKhauHetHan (30 phút) rồi gửi email.
-end note
-note bottom of ResetCtrl
-  Pha đặt lại: kiểm tra token còn hạn, băm mật khẩu
-  mới, xóa maDatLaiMatKhauHash/HetHan.
-end note
 @enduml

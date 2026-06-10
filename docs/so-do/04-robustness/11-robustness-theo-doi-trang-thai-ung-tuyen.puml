@@ -3,8 +3,8 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
+skinparam nodesep 50
+skinparam ranksep 80
 top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
@@ -25,19 +25,21 @@ skinparam entity {
 
 actor "Ứng viên\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
+' ── Lớp boundary ──
+' bo-loc-trang-thai nằm trong trang ho-so-ung-tuyen, không phải entry point riêng
 together {
   boundary "ho-so-ung-tuyen" as UI
-  boundary "bo-loc-trang-thai" as Form
+  boundary "bo-loc-trang-thai" as FilterForm
+  boundary "section-lich-phong-van" as LichSection
 }
 
-' ── Lớp control (xử lý) ──
+' ── Lớp control ──
 together {
   control "theo-doi-trang-thai-ung-tuyen" as Controller
-  control "lich-phong-van" as LichCtrl
+  control "xem-lich-phong-van" as LichCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
+' ── Lớp entity ──
 together {
   entity "HoSoUngTuyen" as HoSoUngTuyen
   entity "UngVien" as UngVien
@@ -47,21 +49,26 @@ together {
   entity "LichPhongVan" as LichPhongVan
 }
 
-' ── Quan hệ actor ↔ boundary ──
+' Actor vào trang chính
 Actor <--> UI
 
-' ── boundary ↔ boundary / control ──
-UI <--> Form
-Form <--> Controller
-Form <--> LichCtrl
+' Các thành phần con nằm trong trang
+UI <--> FilterForm
+UI <--> LichSection
 
-' ── control ↔ entity ──
+' Bộ lọc gọi controller chính để lọc danh sách
+FilterForm <--> Controller
+
+' Section lịch phỏng vấn có controller riêng
+LichSection <--> LichCtrl
+
+' Controller chính đọc dữ liệu hồ sơ ứng tuyển
 Controller <--> HoSoUngTuyen
 Controller <--> UngVien
 Controller <--> TinTuyenDung
 Controller <--> NhaTuyenDung
 Controller <--> HoSoNangLuc
-LichCtrl <--> LichPhongVan
 
-note bottom of Controller : GET /hosoungtuyen (chỉ yêu cầu đăng nhập) trả tất cả hồ sơ\nLọc theo chủ sở hữu (maUngVien) thực hiện ở phía client\nLịch phỏng vấn lấy từ endpoint /lichphongvan riêng
+' Controller lịch phỏng vấn
+LichCtrl <--> LichPhongVan
 @enduml

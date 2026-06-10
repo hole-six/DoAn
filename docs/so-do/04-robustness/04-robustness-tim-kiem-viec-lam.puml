@@ -3,9 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
-top to bottom direction
+skinparam nodesep 50
+skinparam ranksep 80
+left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -25,24 +25,21 @@ skinparam entity {
 
 actor "Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
+' ── Lớp boundary ──
 together {
   boundary "viec-lam" as UI
-  boundary "bo-loc-viec-lam" as Form
+  boundary "bo-loc-viec-lam" as FilterForm
   boundary "goi-y-tim-kiem" as Suggest
-  boundary "tro-ly-ai" as AiBox
   boundary "trang-viec-da-luu" as SavedPage
 }
 
-' ── Lớp control (xử lý) ──
+' ── Lớp control ──
 together {
   control "tim-kiem-viec-lam" as Controller
-  control "goi-y-tim-kiem" as SuggestCtrl
-  control "tro-ly-ai" as AiCtrl
   control "viec-lam-da-luu" as SavedCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
+' ── Lớp entity ──
 together {
   entity "TinTuyenDung" as TinTuyenDung
   entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
@@ -51,27 +48,26 @@ together {
   entity "ViecLamDaLuu" as ViecLamDaLuu
 }
 
-' ── Quan hệ actor ↔ boundary ──
+' Actor vào trang chính
 Actor <--> UI
-Actor <--> Form
 
-' ── boundary ↔ boundary / control ──
-UI <--> Controller
+' Trang chính chứa các boundary con
+UI <--> FilterForm
+UI <--> Suggest
 UI <--> SavedPage
-Form <--> Suggest
-Form <--> AiBox
-Suggest <--> SuggestCtrl
-AiBox <--> AiCtrl
+
+' Tất cả boundary tìm kiếm đều qua Controller chính
+FilterForm <--> Controller
+Suggest <--> Controller
 SavedPage <--> SavedCtrl
 
-' ── control ↔ entity ──
+' Controller tìm kiếm đọc dữ liệu
 Controller <--> TinTuyenDung
 Controller <--> TinTuyenDungKyNang
 Controller <--> DanhMucKyNang
 Controller <--> NhaTuyenDung
-SuggestCtrl <--> TinTuyenDung
-SuggestCtrl <--> DanhMucKyNang
-SuggestCtrl <--> NhaTuyenDung
+
+' Controller việc đã lưu
 SavedCtrl <--> ViecLamDaLuu
 SavedCtrl <--> TinTuyenDung
 @enduml

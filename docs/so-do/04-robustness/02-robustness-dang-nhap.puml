@@ -3,9 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
-top to bottom direction
+skinparam nodesep 50
+skinparam ranksep 80
+left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -25,43 +25,31 @@ skinparam entity {
 
 actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
 together {
   boundary "dang-nhap" as UI
   boundary "form-dang-nhap" as Form
   boundary "nut-dang-nhap-google" as GoogleBtn
 }
 
-' ── Lớp control (xử lý) ──
 together {
   control "dang-nhap" as Controller
   control "dang-nhap-google" as GoogleCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
 together {
   entity "NguoiDung" as NguoiDung
   entity "UngVien" as UngVien
 }
 
-' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
 
-' ── boundary ↔ boundary / control ──
 UI <--> Form
 UI <--> GoogleBtn
 Form <--> Controller
 GoogleBtn <--> GoogleCtrl
 
-' ── control ↔ entity ──
 Controller <--> NguoiDung
 Controller <--> UngVien
 GoogleCtrl <--> NguoiDung
 GoogleCtrl <--> UngVien
-
-note bottom of GoogleCtrl
-  Đăng nhập Google: tạo hoặc lấy NguoiDung theo
-  email Google; nếu là ứng viên thì đảm bảo hồ sơ
-  UngVien tồn tại (damBaoHoSoTheoNguoiDung).
-end note
 @enduml

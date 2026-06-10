@@ -3,9 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-skinparam nodesep 45
-skinparam ranksep 70
-top to bottom direction
+skinparam nodesep 50
+skinparam ranksep 80
+left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -25,20 +25,23 @@ skinparam entity {
 
 actor "Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
 
-' ── Lớp boundary (màn hình) ──
+' ── Lớp boundary ──
+' chi-tiet-cong-ty là trang chính, 3 section con nằm trong trang
 together {
   boundary "chi-tiet-cong-ty" as UI
-  boundary "khung-thong-tin-cong-ty" as Form
+  boundary "section-thong-tin-cong-ty" as InfoSection
+  boundary "section-danh-sach-tin" as TinSection
+  boundary "section-danh-gia" as ReviewSection
 }
 
-' ── Lớp control (xử lý) ──
+' ── Lớp control ──
 together {
   control "xem-chi-tiet-cong-ty" as Controller
   control "danh-sach-tin-cong-ty" as TinCtrl
   control "danh-gia-cong-ty" as DanhGiaCtrl
 }
 
-' ── Lớp entity (dữ liệu) ──
+' ── Lớp entity ──
 together {
   entity "NhaTuyenDung" as NhaTuyenDung
   entity "NguoiDung" as NguoiDung
@@ -46,18 +49,26 @@ together {
   entity "DanhGiaCongTy" as DanhGiaCongTy
 }
 
-' ── Quan hệ actor ↔ boundary ──
+' Actor vào trang chính
 Actor <--> UI
 
-' ── boundary ↔ boundary / control ──
-UI <--> Form
-Form <--> Controller
-Form <--> TinCtrl
-Form <--> DanhGiaCtrl
+' Trang chứa các section con
+UI <--> InfoSection
+UI <--> TinSection
+UI <--> ReviewSection
 
-' ── control ↔ entity ──
+' Mỗi section nối controller tương ứng
+InfoSection <--> Controller
+TinSection <--> TinCtrl
+ReviewSection <--> DanhGiaCtrl
+
+' Controller đọc dữ liệu
 Controller <--> NhaTuyenDung
 Controller <--> NguoiDung
 TinCtrl <--> TinTuyenDung
 DanhGiaCtrl <--> DanhGiaCongTy
+
+NhaTuyenDung -[hidden]right-> NguoiDung
+NguoiDung -[hidden]right-> TinTuyenDung
+TinTuyenDung -[hidden]right-> DanhGiaCongTy
 @enduml

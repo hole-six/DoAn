@@ -1,17 +1,15 @@
 @startuml
-left to right direction
-
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
 skinparam nodesep 50
 skinparam ranksep 80
+left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
 skinparam rectangleBorderColor #333333
-
 skinparam boundary {
   BackgroundColor White
   BorderColor #333333
@@ -32,7 +30,9 @@ together {
   boundary "form-dang-ky" as Form
 }
 
-control "dang-ky-tai-khoan" as Controller
+together {
+  control "dang-ky-tai-khoan" as Controller
+}
 
 together {
   entity "NguoiDung" as NguoiDung
@@ -50,9 +50,7 @@ Controller <--> UngVien
 Controller <--> NhaTuyenDung
 Controller <--> ThongBao
 
-' Ép entity nằm thành một cột dọc bên phải
-NguoiDung -[hidden]down-> UngVien
-UngVien -[hidden]down-> NhaTuyenDung
-NhaTuyenDung -[hidden]down-> ThongBao
-
+NguoiDung -[hidden]right-> UngVien
+UngVien -[hidden]right-> NhaTuyenDung
+NhaTuyenDung -[hidden]right-> ThongBao
 @enduml
