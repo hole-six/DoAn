@@ -10,36 +10,48 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
+
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở trang lịch phỏng vấn nhà tuyển dụng;
-:Hệ thống tải LịchPhỏngVấn và HồSơỨngTuyển liên quan;
-:Chọn lịch cần cập nhật kết quả;
-if (Lịch thuộc công ty?) then (Đúng)
-  if (Trạng thái có thể cập nhật kết quả?) then (Có)
-    if (Chọn kết quả?) then (Đạt)
-      :Nhấn nút "Đạt";
-      :Nhập ghi chú kết quả nếu có;
-      :Nhấn nút "Cập nhật";
-      :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả đạt;
-      :Hệ thống cập nhật HồSơỨngTuyển thành đạt;
-      :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
-      :Hiển thị cập nhật thành công;
-    else (Không đạt)
-      :Nhấn nút "Không đạt";
-      :Nhập ghi chú kết quả nếu có;
-      :Nhấn nút "Cập nhật";
-      :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả không đạt;
-      :Hệ thống cập nhật HồSơỨngTuyển thành từ chối;
-      :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
-      :Hiển thị cập nhật thành công;
-    endif
-  else (Không)
-    :Hiển thị thông báo lịch chưa thể cập nhật kết quả;
+:Hệ thống tải LịchPhỏngVấn và HồSơỨngTuyển thuộc công ty;
+  fork
+    :Nhập từ khóa tìm theo tên ứng viên hoặc vị trí tin;
+  fork again
+    :Lọc theo trạng thái lịch;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
+  :Chọn lịch cần cập nhật kết quả;
+
+if (Trạng thái có thể cập nhật kết quả?) then (Có)
+  if (Chọn kết quả?) then (Đạt)
+    :Nhấn nút "Đạt";
+    :Nhập ghi chú kết quả nếu có;
+    :Nhấn nút "Cập nhật";
+    :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả đạt;
+    :Hệ thống cập nhật HồSơỨngTuyển thành đạt;
+    :Ghi LichSuHoSoUngTuyen cho kết quả đạt;
+    :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
+    :Hiển thị cập nhật thành công;
+
+  else (Không đạt)
+    :Nhấn nút "Không đạt";
+    :Nhập ghi chú kết quả nếu có;
+    :Nhấn nút "Cập nhật";
+    :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả không đạt;
+    :Hệ thống cập nhật HồSơỨngTuyển thành từ chối;
+    :Ghi LichSuHoSoUngTuyen cho kết quả không đạt;
+    :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
+    :Hiển thị cập nhật thành công;
   endif
-else (Sai)
-  :Hiển thị thông báo không có quyền cập nhật lịch;
+
+else (Không)
+  :Hiển thị thông báo lịch không thể cập nhật kết quả;
 endif
-:Lưu DanhGiaPhongVan nếu có điểm/nhận xét và ghi LichSuHoSoUngTuyen;
+
+else (Không)
+  :Hiển thị thông báo lịch không thể cập nhật kết quả;
+endif
+
 stop
 @enduml

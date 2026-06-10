@@ -16,6 +16,12 @@ start
 :Hệ thống tải LịchPhỏngVấn theo HồSơỨngTuyển của ứng viên;
 if (Có lịch phỏng vấn?) then (Có)
   :Hiển thị danh sách lịch và trạng thái;
+  fork
+    :Nhập từ khóa tìm theo tên ứng viên hoặc vị trí tin;
+  fork again
+    :Lọc theo trạng thái lịch;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
   :Chọn một lịch phỏng vấn;
   :Hệ thống hiển thị chi tiết thời gian, hình thức, địa chỉ và link họp;
   if (Trạng thái lịch?) then (Đã lên lịch)
@@ -27,14 +33,14 @@ if (Có lịch phỏng vấn?) then (Có)
     else (Đổi lịch)
       :Nhấn nút "Yêu cầu đổi lịch";
       :Nhập lý do hoặc thời gian mong muốn;
-      :Hệ thống cập nhật LịchPhỏngVấn thành đổi lịch;
+      :Hệ thống cập nhật LịchPhỏngVấn thành doi_lich;
       :Gửi ThôngBáo cho nhà tuyển dụng;
       :Hiển thị đã gửi yêu cầu đổi lịch;
     endif
   elseif (Trạng thái đã xác nhận?) then (Đã xác nhận)
     if (Muốn yêu cầu đổi lịch?) then (Có)
       :Nhập lý do đổi lịch;
-      :Hệ thống cập nhật LịchPhỏngVấn thành đổi lịch;
+      :Hệ thống cập nhật LịchPhỏngVấn thành doi_lich;
       :Gửi ThôngBáo cho nhà tuyển dụng;
     else (Không)
       :Tiếp tục xem lịch;
@@ -45,6 +51,5 @@ if (Có lịch phỏng vấn?) then (Có)
 else (Không)
   :Hiển thị trạng thái chưa có lịch phỏng vấn;
 endif
-:Nếu có nhận xét/điểm phỏng vấn thì lưu DanhGiaPhongVan;
 stop
 @enduml
