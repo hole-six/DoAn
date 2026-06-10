@@ -1,0 +1,78 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+hide circle
+left to right direction
+title ERD mức 1 - Tổng quan quan hệ CSDL PostgreSQL EffortIT
+
+package "Tài khoản" {
+  entity "NguoiDung" as NguoiDung
+  entity "UngVien" as UngVien
+  entity "NhaTuyenDung" as NhaTuyenDung
+}
+
+package "Kỹ năng và tuyển dụng" {
+  entity "DanhMucKyNang" as DanhMucKyNang
+  entity "UngVienKyNang" as UngVienKyNang
+  entity "TinTuyenDung" as TinTuyenDung
+  entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
+  entity "ViecLamDaLuu" as ViecLamDaLuu
+}
+
+package "Hồ sơ và ứng tuyển" {
+  entity "HoSoNangLuc" as HoSoNangLuc
+  entity "HoSoUngTuyen" as HoSoUngTuyen
+  entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
+  entity "LichPhongVan" as LichPhongVan
+}
+
+package "Đánh giá và thông báo" {
+  entity "DanhGiaCongTy" as DanhGiaCongTy
+  entity "DanhGiaPhongVan" as DanhGiaPhongVan
+  entity "ThongBao" as ThongBao
+}
+
+package "Giao tiếp và gợi ý" {
+  entity "CuocTroChuyen" as CuocTroChuyen
+  entity "TinNhan" as TinNhan
+  entity "GoiYViecLam" as GoiYViecLam
+}
+
+NguoiDung ||--o| UngVien : "mở hồ sơ ứng viên"
+NguoiDung ||--o| NhaTuyenDung : "mở hồ sơ công ty"
+NguoiDung ||--o{ ThongBao : "nhận"
+NguoiDung ||--o{ ViecLamDaLuu : "lưu việc"
+NguoiDung ||--o{ LichSuHoSoUngTuyen : "ghi nhận thao tác"
+NguoiDung ||--o{ DanhGiaPhongVan : "đánh giá phỏng vấn"
+
+UngVien ||--o{ HoSoNangLuc : "tạo CV"
+UngVien ||--o{ HoSoUngTuyen : "nộp hồ sơ"
+UngVien ||--o{ UngVienKyNang : "có kỹ năng"
+UngVien ||--o{ DanhGiaCongTy : "viết đánh giá"
+UngVien ||--o{ GoiYViecLam : "nhận gợi ý"
+
+NhaTuyenDung ||--o{ TinTuyenDung : "đăng tin"
+NhaTuyenDung ||--o{ DanhGiaCongTy : "được đánh giá"
+
+DanhMucKyNang ||--o{ UngVienKyNang : "chuẩn hóa kỹ năng ứng viên"
+DanhMucKyNang ||--o{ TinTuyenDungKyNang : "chuẩn hóa kỹ năng tin"
+TinTuyenDung ||--o{ TinTuyenDungKyNang : "yêu cầu kỹ năng"
+TinTuyenDung ||--o{ HoSoUngTuyen : "nhận ứng tuyển"
+TinTuyenDung ||--o{ ViecLamDaLuu : "được lưu"
+TinTuyenDung ||--o{ CuocTroChuyen : "ngữ cảnh chat"
+
+HoSoNangLuc ||--o{ HoSoUngTuyen : "được dùng nộp"
+HoSoNangLuc ||--o{ GoiYViecLam : "đầu vào gợi ý"
+HoSoUngTuyen ||--o{ LichSuHoSoUngTuyen : "có lịch sử"
+HoSoUngTuyen ||--o| LichPhongVan : "có lịch phỏng vấn"
+HoSoUngTuyen ||--o| DanhGiaCongTy : "liên quan đánh giá"
+HoSoUngTuyen ||--o{ CuocTroChuyen : "ngữ cảnh chat"
+
+LichPhongVan ||--o{ DanhGiaPhongVan : "có đánh giá"
+CuocTroChuyen ||--o{ TinNhan : "chứa"
+TinNhan ||--o{ TinNhan : "trả lời"
+@enduml

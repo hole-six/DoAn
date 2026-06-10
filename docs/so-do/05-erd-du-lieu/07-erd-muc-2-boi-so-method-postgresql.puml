@@ -1,0 +1,498 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 10
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+hide circle
+left to right direction
+title ERD mức 2 - Bảng, bội số và phương thức theo sequence PostgreSQL EffortIT
+
+entity "NguoiDung" as NguoiDung {
+  +id : UUID
+  +email : VARCHAR
+  +matKhau : VARCHAR
+  +hoTen : VARCHAR
+  +soDienThoai : VARCHAR
+  +vaiTro : VARCHAR
+  +trangThai : VARCHAR
+  +maDatLaiMatKhauHash : VARCHAR
+  +maDatLaiMatKhauHetHan : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll()
+  +getById(maNguoiDung)
+  +create(data)
+  +update(maNguoiDung, data)
+  +delete(maNguoiDung)
+  +login(email, matKhau)
+  +loginGoogle(credential)
+  +forgotPassword(email)
+  +resetPassword(token, matKhauMoi)
+  +countLockedAccounts()
+}
+
+entity "UngVien" as UngVien {
+  +id : UUID
+  +maNguoiDung : UUID
+  +ngaySinh : TIMESTAMP
+  +gioiTinh : VARCHAR
+  +diaChi : VARCHAR
+  +anhDaiDien : VARCHAR
+  +tomTat : TEXT
+  +kinhNghiem : DECIMAL
+  +viTriMongMuon : VARCHAR
+  +mucLuongMongMuon : DECIMAL
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll()
+  +getById(maUngVien)
+  +getByUser(maNguoiDung)
+  +createDefaultProfile(maNguoiDung)
+  +updateProfile(maUngVien, data)
+  +deleteProfile(maUngVien)
+  +syncSkills(maUngVien, danhSachKyNang)
+  +populateCandidate(maUngVien)
+}
+
+entity "NhaTuyenDung" as NhaTuyenDung {
+  +id : UUID
+  +maNguoiDung : UUID
+  +tenCongTy : VARCHAR
+  +maSoThue : VARCHAR
+  +moTa : TEXT
+  +diaChi : VARCHAR
+  +website : VARCHAR
+  +logo : VARCHAR
+  +quyMo : INTEGER
+  +nganh : VARCHAR
+  +trangThaiDuyet : VARCHAR
+  +lyDoTuChoi : TEXT
+  +ngayDuyet : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll()
+  +getById(maNhaTuyenDung)
+  +getByUser(maNguoiDung)
+  +createCompany(data)
+  +updateCompany(maNhaTuyenDung, data)
+  +deleteCompany(maNhaTuyenDung)
+  +approveCompany(maNhaTuyenDung)
+  +rejectCompany(maNhaTuyenDung, lyDo)
+  +countPendingCompanies()
+}
+
+entity "DanhMucKyNang" as DanhMucKyNang {
+  +id : UUID
+  +tenKyNang : VARCHAR
+  +loaiKyNang : VARCHAR
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll()
+  +getById(maKyNang)
+  +createSkill(data)
+  +updateSkill(maKyNang, data)
+  +deleteSkill(maKyNang)
+  +mergeSkill(maNguon, maDich)
+  +checkSkillInUse(maKyNang)
+}
+
+entity "UngVienKyNang" as UngVienKyNang {
+  +maUngVien : UUID
+  +maKyNang : UUID
+  +mucDo : INTEGER
+  +soNamKinhNghiem : DECIMAL
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +findByCandidate(maUngVien)
+  +syncByCandidate(maUngVien, danhSachKyNang)
+  +deleteByCandidate(maUngVien)
+  +checkSkillUsed(maKyNang)
+}
+
+entity "TinTuyenDung" as TinTuyenDung {
+  +id : UUID
+  +maNhaTuyenDung : UUID
+  +tieuDe : VARCHAR
+  +yeuCauKinhNghiem : VARCHAR
+  +diaChi : VARCHAR
+  +luongMin : DECIMAL
+  +luongMax : DECIMAL
+  +loaiHinh : VARCHAR
+  +capBac : VARCHAR
+  +anhDaiDien : VARCHAR
+  +hanNop : TIMESTAMP
+  +soLuong : INTEGER
+  +moTa : TEXT
+  +yeuCau : TEXT
+  +quyenLoi : TEXT
+  +luotXem : INTEGER
+  +trangThai : VARCHAR
+  +ngayDang : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +searchJobs(filter)
+  +getAll()
+  +getById(maTin)
+  +getDetail(maTin)
+  +createJob(data)
+  +updateJob(maTin, data)
+  +deleteJob(maTin)
+  +approveJob(maTin)
+  +rejectJob(maTin, lyDo)
+  +reopenJob(maTin)
+  +closeJob(maTin)
+  +countJobAlerts()
+}
+
+entity "TinTuyenDungKyNang" as TinTuyenDungKyNang {
+  +maTinTuyenDung : UUID
+  +maKyNang : UUID
+  +batBuoc : BOOLEAN
+  +mucDo : INTEGER
+  +trongSo : DECIMAL
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +findByJob(maTin)
+  +syncByJob(maTin, danhSachKyNang)
+  +deleteByJob(maTin)
+  +checkSkillUsed(maKyNang)
+  +aggregateSkillDemand(filter)
+}
+
+entity "HoSoNangLuc" as HoSoNangLuc {
+  +id : UUID
+  +maUngVien : UUID
+  +tieuDe : VARCHAR
+  +hocVan : JSONB
+  +kinhNghiemLam : JSONB
+  +chungChi : JSONB
+  +duAn : JSONB
+  +hoTenHienThi : VARCHAR
+  +chucDanh : VARCHAR
+  +soDienThoai : VARCHAR
+  +emailLienHe : VARCHAR
+  +fileCvData : TEXT
+  +fileCvText : TEXT
+  +loaiHoSo : VARCHAR
+  +cvChinh : BOOLEAN
+  +congKhai : BOOLEAN
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getByCandidate(maUngVien)
+  +getById(maHoSoNangLuc)
+  +createCv(data)
+  +updateCv(maHoSoNangLuc, data)
+  +deleteCv(maHoSoNangLuc)
+  +setMainCv(maHoSoNangLuc)
+  +uploadAvatar(file)
+  +uploadCvFile(file)
+  +extractPdfText(file)
+}
+
+entity "HoSoUngTuyen" as HoSoUngTuyen {
+  +id : UUID
+  +maUngVien : UUID
+  +maTinTuyenDung : UUID
+  +maHoSoNangLuc : UUID
+  +thuXinViec : TEXT
+  +diemKhopKyNang : DECIMAL
+  +trangThai : VARCHAR
+  +ngayNop : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +apply(maTin, maHoSoNangLuc)
+  +quickApply(maTin)
+  +getAll(filter)
+  +getById(maHoSoUngTuyen)
+  +markViewed(maHoSoUngTuyen)
+  +evaluate(maHoSoUngTuyen, trangThai)
+  +updateStatus(maHoSoUngTuyen, trangThai)
+  +withdraw(maHoSoUngTuyen)
+  +scheduleInterview(maHoSoUngTuyen, data)
+}
+
+entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen {
+  +id : UUID
+  +maHoSoUngTuyen : UUID
+  +trangThaiCu : VARCHAR
+  +trangThaiMoi : VARCHAR
+  +ghiChu : TEXT
+  +maNguoiDung : UUID
+  +thoiGian : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +createHistory(maHoSoUngTuyen, trangThaiMoi)
+  +getByApplication(maHoSoUngTuyen)
+  +aggregateStatusChanges(filter)
+}
+
+entity "LichPhongVan" as LichPhongVan {
+  +id : UUID
+  +maHoSoUngTuyen : UUID
+  +thoiGianBatDau : TIMESTAMP
+  +thoiGianKetThuc : TIMESTAMP
+  +diaChi : VARCHAR
+  +hinhThuc : VARCHAR
+  +linkHop : VARCHAR
+  +ghiChu : TEXT
+  +trangThai : VARCHAR
+  +ketQua : VARCHAR
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll(filter)
+  +getById(maLichPhongVan)
+  +createSchedule(data)
+  +updateSchedule(maLichPhongVan, data)
+  +deleteSchedule(maLichPhongVan)
+  +confirm(maLichPhongVan)
+  +requestReschedule(maLichPhongVan, data)
+  +complete(maLichPhongVan, ketQua)
+  +cancel(maLichPhongVan)
+}
+
+entity "DanhGiaCongTy" as DanhGiaCongTy {
+  +id : UUID
+  +maUngVien : UUID
+  +maNhaTuyenDung : UUID
+  +maHoSoUngTuyen : UUID
+  +diem : INTEGER
+  +noiDung : TEXT
+  +anDanh : BOOLEAN
+  +daDuyet : BOOLEAN
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll(filter)
+  +getById(maDanhGia)
+  +createReview(data)
+  +createFromApplication(maHoSoUngTuyen, data)
+  +updateReview(maDanhGia, data)
+  +deleteReview(maDanhGia)
+  +approveReview(maDanhGia)
+  +rejectReview(maDanhGia)
+}
+
+entity "DanhGiaPhongVan" as DanhGiaPhongVan {
+  +id : UUID
+  +maLichPhongVan : UUID
+  +maNguoiDung : UUID
+  +vaiTroNguoiDanhGia : VARCHAR
+  +diem : INTEGER
+  +noiDung : TEXT
+  +ketQuaDeXuat : VARCHAR
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +createInterviewReview(data)
+  +getByInterview(maLichPhongVan)
+  +aggregateInterviewReview(filter)
+}
+
+entity "ThongBao" as ThongBao {
+  +id : UUID
+  +maNguoiDung : UUID
+  +loai : VARCHAR
+  +tieuDe : VARCHAR
+  +noiDung : TEXT
+  +lienKet : VARCHAR
+  +maHoSoUngTuyen : UUID
+  +maLichPhongVan : UUID
+  +maTinTuyenDung : UUID
+  +daDoc : BOOLEAN
+  +daGui : BOOLEAN
+  +mucDoUuTien : VARCHAR
+  +hanhDong : JSONB
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getAll(maNguoiDung)
+  +getById(maThongBao)
+  +createNotification(data)
+  +markAsRead(maThongBao)
+  +markAllAsRead(maNguoiDung)
+  +countUnread(maNguoiDung)
+  +deleteNotification(maThongBao)
+}
+
+entity "ViecLamDaLuu" as ViecLamDaLuu {
+  +id : UUID
+  +maNguoiDung : UUID
+  +maTinTuyenDung : UUID
+  +ngayLuu : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getSavedJobs(maNguoiDung)
+  +saveJob(maNguoiDung, maTin)
+  +unsaveJob(maNguoiDung, maTin)
+  +toggleSaveJob(maNguoiDung, maTin)
+  +getSaveStatus(maNguoiDung, maTin)
+}
+
+entity "CuocTroChuyen" as CuocTroChuyen {
+  +id : UUID
+  +nguoiThamGia : JSONB
+  +loai : VARCHAR
+  +tenNhom : VARCHAR
+  +maHoSoUngTuyen : UUID
+  +maTinTuyenDung : UUID
+  +tinNhanCuoiCung : JSONB
+  +soChuaDoc : JSONB
+  +daLuuTru : BOOLEAN
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getConversations(maNguoiDung)
+  +getById(maCuocTroChuyen)
+  +findOrCreateConversation(params)
+  +markConversationRead(maCuocTroChuyen)
+  +updateConversationContext(params)
+  +joinCommunityGroup(maNhom)
+}
+
+entity "TinNhan" as TinNhan {
+  +id : UUID
+  +maCuocTroChuyenId : UUID
+  +nguoiGui : UUID
+  +loai : VARCHAR
+  +noiDung : TEXT
+  +tepDinhKem : JSONB
+  +traloiTinNhan : UUID
+  +daDuocDocBoi : JSONB
+  +phanUng : JSONB
+  +daXoa : BOOLEAN
+  +daChinhSua : BOOLEAN
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getMessages(maCuocTroChuyen)
+  +sendMessage(data)
+  +deleteMessage(maTinNhan)
+  +addReaction(maTinNhan, emoji)
+  +markMessageRead(maTinNhan)
+}
+
+entity "GoiYViecLam" as GoiYViecLam {
+  +id : UUID
+  +maUngVien : UUID
+  +maHoSoNangLuc : UUID
+  +ketQua : JSONB
+  +trangThai : VARCHAR
+  +loi : TEXT
+  +nguon : VARCHAR
+  +lanQuet : TIMESTAMP
+  +ngayTao : TIMESTAMP
+  +ngayCapNhat : TIMESTAMP
+  --
+  +getLatestSuggestion(maUngVien)
+  +runSuggestionNow(maUngVien, maHoSoNangLuc)
+  +saveSuggestionResult(data)
+  +runSuggestionCrawler()
+  +sendSuggestionEmail(maUngVien)
+}
+
+enum "VaiTroNguoiDungEnum" as VaiTroNguoiDungEnum <<enumeration>> {
+  UNG_VIEN
+  NHA_TUYEN_DUNG
+  ADMIN
+}
+
+enum "TrangThaiTinTuyenDungEnum" as TrangThaiTinTuyenDungEnum <<enumeration>> {
+  NHAP
+  CHO_DUYET
+  DANG_MO
+  TAM_DONG
+  HET_HAN
+  TU_CHOI
+}
+
+enum "TrangThaiHoSoUngTuyenEnum" as TrangThaiHoSoUngTuyenEnum <<enumeration>> {
+  DA_NOP
+  DA_XEM
+  DANG_XET_DUYET
+  MOI_PHONG_VAN
+  DAT
+  TU_CHOI
+  DA_RUT
+}
+
+enum "TrangThaiLichPhongVanEnum" as TrangThaiLichPhongVanEnum <<enumeration>> {
+  DA_LEN_LICH
+  DA_XAC_NHAN
+  DOI_LICH
+  HOAN_THANH
+  DA_HUY
+}
+
+enum "LoaiHoSoEnum" as LoaiHoSoEnum <<enumeration>> {
+  BUILDER
+  FILE_UPLOAD
+}
+
+enum "LoaiTinNhanEnum" as LoaiTinNhanEnum <<enumeration>> {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+NguoiDung "1..1" -- "0..1" UngVien : maNguoiDung
+NguoiDung "1..1" -- "0..1" NhaTuyenDung : maNguoiDung
+NguoiDung "1..1" -- "0..*" ThongBao : maNguoiDung
+NguoiDung "1..1" -- "0..*" ViecLamDaLuu : maNguoiDung
+NguoiDung "0..1" -- "0..*" LichSuHoSoUngTuyen : maNguoiDung
+NguoiDung "1..1" -- "0..*" DanhGiaPhongVan : maNguoiDung
+NguoiDung "1..1" -- "0..*" TinNhan : nguoiGui
+
+UngVien "1..1" -- "0..*" UngVienKyNang : maUngVien
+DanhMucKyNang "1..1" -- "0..*" UngVienKyNang : maKyNang
+NhaTuyenDung "1..1" -- "0..*" TinTuyenDung : maNhaTuyenDung
+TinTuyenDung "1..1" -- "0..*" TinTuyenDungKyNang : maTinTuyenDung
+DanhMucKyNang "1..1" -- "0..*" TinTuyenDungKyNang : maKyNang
+
+UngVien "1..1" -- "0..*" HoSoNangLuc : maUngVien
+UngVien "1..1" -- "0..*" HoSoUngTuyen : maUngVien
+TinTuyenDung "1..1" -- "0..*" HoSoUngTuyen : maTinTuyenDung
+HoSoNangLuc "0..1" -- "0..*" HoSoUngTuyen : maHoSoNangLuc
+HoSoUngTuyen "1..1" -- "0..*" LichSuHoSoUngTuyen : maHoSoUngTuyen
+HoSoUngTuyen "1..1" -- "0..1" LichPhongVan : maHoSoUngTuyen
+
+UngVien "1..1" -- "0..*" DanhGiaCongTy : maUngVien
+NhaTuyenDung "1..1" -- "0..*" DanhGiaCongTy : maNhaTuyenDung
+HoSoUngTuyen "0..1" -- "0..1" DanhGiaCongTy : maHoSoUngTuyen
+LichPhongVan "1..1" -- "0..*" DanhGiaPhongVan : maLichPhongVan
+
+TinTuyenDung "1..1" -- "0..*" ViecLamDaLuu : maTinTuyenDung
+HoSoUngTuyen "0..1" -- "0..*" ThongBao : maHoSoUngTuyen
+LichPhongVan "0..1" -- "0..*" ThongBao : maLichPhongVan
+TinTuyenDung "0..1" -- "0..*" ThongBao : maTinTuyenDung
+
+HoSoUngTuyen "0..1" -- "0..*" CuocTroChuyen : maHoSoUngTuyen
+TinTuyenDung "0..1" -- "0..*" CuocTroChuyen : maTinTuyenDung
+CuocTroChuyen "1..1" -- "0..*" TinNhan : maCuocTroChuyenId
+TinNhan "0..1" -- "0..*" TinNhan : traloiTinNhan
+
+UngVien "1..1" -- "0..*" GoiYViecLam : maUngVien
+HoSoNangLuc "0..1" -- "0..*" GoiYViecLam : maHoSoNangLuc
+
+NguoiDung ..> VaiTroNguoiDungEnum : vaiTro
+TinTuyenDung ..> TrangThaiTinTuyenDungEnum : trangThai
+HoSoUngTuyen ..> TrangThaiHoSoUngTuyenEnum : trangThai
+LichPhongVan ..> TrangThaiLichPhongVanEnum : trangThai
+HoSoNangLuc ..> LoaiHoSoEnum : loaiHoSo
+TinNhan ..> LoaiTinNhanEnum : loai
+@enduml

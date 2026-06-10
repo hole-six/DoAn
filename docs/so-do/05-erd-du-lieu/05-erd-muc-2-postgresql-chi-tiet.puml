@@ -1,0 +1,374 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 10
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+hide circle
+left to right direction
+title ERD mức 2 - Chi tiết bảng và khóa CSDL PostgreSQL EffortIT
+
+package "Tài khoản và vai trò" {
+  entity "nguoi_dung\nNguoiDung" as NguoiDung {
+    * id : UUID <<PK>>
+    --
+    email : VARCHAR <<UNIQUE>>
+    matKhau : VARCHAR
+    hoTen : VARCHAR
+    soDienThoai : VARCHAR
+    vaiTro : VARCHAR
+    trangThai : VARCHAR
+    maDatLaiMatKhauHash : VARCHAR
+    maDatLaiMatKhauHetHan : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "ung_vien\nUngVien" as UngVien {
+    * id : UUID <<PK>>
+    --
+    maNguoiDung : UUID <<FK, UNIQUE>>
+    ngaySinh : TIMESTAMP
+    gioiTinh : VARCHAR
+    diaChi : VARCHAR
+    anhDaiDien : VARCHAR
+    tomTat : TEXT
+    kinhNghiem : DECIMAL
+    viTriMongMuon : VARCHAR
+    mucLuongMongMuon : DECIMAL
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "nha_tuyen_dung\nNhaTuyenDung" as NhaTuyenDung {
+    * id : UUID <<PK>>
+    --
+    maNguoiDung : UUID <<FK, UNIQUE>>
+    tenCongTy : VARCHAR
+    maSoThue : VARCHAR
+    moTa : TEXT
+    diaChi : VARCHAR
+    website : VARCHAR
+    logo : VARCHAR
+    quyMo : INTEGER
+    nganh : VARCHAR
+    trangThaiDuyet : VARCHAR
+    lyDoTuChoi : TEXT
+    ngayDuyet : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+}
+
+package "Kỹ năng và tuyển dụng" {
+  entity "danh_muc_ky_nang\nDanhMucKyNang" as DanhMucKyNang {
+    * id : UUID <<PK>>
+    --
+    tenKyNang : VARCHAR <<UNIQUE>>
+    loaiKyNang : VARCHAR
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "ung_vien_ky_nang\nUngVienKyNang" as UngVienKyNang {
+    * maUngVien : UUID <<PK, FK>>
+    * maKyNang : UUID <<PK, FK>>
+    --
+    mucDo : INTEGER
+    soNamKinhNghiem : DECIMAL
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "tin_tuyen_dung\nTinTuyenDung" as TinTuyenDung {
+    * id : UUID <<PK>>
+    --
+    maNhaTuyenDung : UUID <<FK>>
+    tieuDe : VARCHAR
+    yeuCauKinhNghiem : VARCHAR
+    diaChi : VARCHAR
+    luongMin : DECIMAL
+    luongMax : DECIMAL
+    loaiHinh : VARCHAR
+    capBac : VARCHAR
+    anhDaiDien : VARCHAR
+    hanNop : TIMESTAMP
+    soLuong : INTEGER
+    moTa : TEXT
+    yeuCau : TEXT
+    quyenLoi : TEXT
+    luotXem : INTEGER
+    trangThai : VARCHAR
+    ngayDang : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "tin_tuyen_dung_ky_nang\nTinTuyenDungKyNang" as TinTuyenDungKyNang {
+    * maTinTuyenDung : UUID <<PK, FK>>
+    * maKyNang : UUID <<PK, FK>>
+    --
+    batBuoc : BOOLEAN
+    mucDo : INTEGER
+    trongSo : DECIMAL
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "viec_lam_da_luu\nViecLamDaLuu" as ViecLamDaLuu {
+    * id : UUID <<PK>>
+    --
+    maNguoiDung : UUID <<FK>>
+    maTinTuyenDung : UUID <<FK>>
+    ngayLuu : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+    UNIQUE(maNguoiDung, maTinTuyenDung)
+  }
+}
+
+package "Hồ sơ, ứng tuyển và phỏng vấn" {
+  entity "ho_so_nang_luc\nHoSoNangLuc" as HoSoNangLuc {
+    * id : UUID <<PK>>
+    --
+    maUngVien : UUID <<FK>>
+    tieuDe : VARCHAR
+    hocVan : JSONB
+    kinhNghiemLam : JSONB
+    chungChi : JSONB
+    duAn : JSONB
+    hoTenHienThi : VARCHAR
+    chucDanh : VARCHAR
+    soDienThoai : VARCHAR
+    emailLienHe : VARCHAR
+    facebook : VARCHAR
+    github : VARCHAR
+    portfolioUrl : VARCHAR
+    diaDiem : VARCHAR
+    tomTatKinhNghiem : JSONB
+    kyNangMem : JSONB
+    kyNangLapTrinh : JSONB
+    baiVietKyThuat : JSONB
+    duAnChiTiet : JSONB
+    fileCvTen : VARCHAR
+    fileCvLoai : VARCHAR
+    fileCvData : TEXT
+    fileCvText : TEXT
+    fileCvPath : VARCHAR
+    fileCvTextStatus : VARCHAR
+    fileCvTextError : TEXT
+    loaiHoSo : VARCHAR
+    anhDaiDien : VARCHAR
+    templateCv : VARCHAR
+    mauChinh : VARCHAR
+    mauPhu : VARCHAR
+    font : VARCHAR
+    markdownGoc : TEXT
+    ghiChuAi : TEXT
+    cvChinh : BOOLEAN
+    congKhai : BOOLEAN
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "ho_so_ung_tuyen\nHoSoUngTuyen" as HoSoUngTuyen {
+    * id : UUID <<PK>>
+    --
+    maUngVien : UUID <<FK>>
+    maTinTuyenDung : UUID <<FK>>
+    maHoSoNangLuc : UUID <<FK, NULL>>
+    thuXinViec : TEXT
+    diemKhopKyNang : DECIMAL
+    trangThai : VARCHAR
+    ngayNop : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+    UNIQUE(maUngVien, maTinTuyenDung)
+  }
+
+  entity "lich_su_ho_so_ung_tuyen\nLichSuHoSoUngTuyen" as LichSuHoSoUngTuyen {
+    * id : UUID <<PK>>
+    --
+    maHoSoUngTuyen : UUID <<FK>>
+    trangThaiCu : VARCHAR
+    trangThaiMoi : VARCHAR
+    ghiChu : TEXT
+    maNguoiDung : UUID <<FK, NULL>>
+    thoiGian : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "lich_phong_van\nLichPhongVan" as LichPhongVan {
+    * id : UUID <<PK>>
+    --
+    maHoSoUngTuyen : UUID <<FK, UNIQUE>>
+    thoiGianBatDau : TIMESTAMP
+    thoiGianKetThuc : TIMESTAMP
+    diaChi : VARCHAR
+    hinhThuc : VARCHAR
+    linkHop : VARCHAR
+    ghiChu : TEXT
+    trangThai : VARCHAR
+    ketQua : VARCHAR
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+}
+
+package "Đánh giá, thông báo và giao tiếp" {
+  entity "danh_gia_cong_ty\nDanhGiaCongTy" as DanhGiaCongTy {
+    * id : UUID <<PK>>
+    --
+    maUngVien : UUID <<FK>>
+    maNhaTuyenDung : UUID <<FK>>
+    maHoSoUngTuyen : UUID <<FK, UNIQUE, NULL>>
+    diem : INTEGER
+    noiDung : TEXT
+    anDanh : BOOLEAN
+    daDuyet : BOOLEAN
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "danh_gia_phong_van\nDanhGiaPhongVan" as DanhGiaPhongVan {
+    * id : UUID <<PK>>
+    --
+    maLichPhongVan : UUID <<FK>>
+    maNguoiDung : UUID <<FK>>
+    vaiTroNguoiDanhGia : VARCHAR
+    diem : INTEGER
+    noiDung : TEXT
+    ketQuaDeXuat : VARCHAR
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "thong_bao\nThongBao" as ThongBao {
+    * id : UUID <<PK>>
+    --
+    maNguoiDung : UUID <<FK>>
+    loai : VARCHAR
+    tieuDe : VARCHAR
+    noiDung : TEXT
+    lienKet : VARCHAR
+    maHoSoUngTuyen : UUID <<FK, NULL>>
+    maLichPhongVan : UUID <<FK, NULL>>
+    maTinTuyenDung : UUID <<FK, NULL>>
+    daDoc : BOOLEAN
+    daGui : BOOLEAN
+    mucDoUuTien : VARCHAR
+    hanhDong : JSONB
+    icon : VARCHAR
+    mauSac : VARCHAR
+    hetHan : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "cuoc_tro_chuyen\nCuocTroChuyen" as CuocTroChuyen {
+    * id : UUID <<PK>>
+    --
+    nguoiThamGia : JSONB
+    loai : VARCHAR
+    tenNhom : VARCHAR
+    moTaNhom : TEXT
+    anhNhom : VARCHAR
+    quanTriNhom : JSONB
+    maHoSoUngTuyen : UUID <<FK, NULL>>
+    maTinTuyenDung : UUID <<FK, NULL>>
+    maHoSoUngTuyenGanNhat : UUID <<FK, NULL>>
+    maTinTuyenDungGanNhat : UUID <<FK, NULL>>
+    contextSummary : JSONB
+    tinNhanCuoiCung : JSONB
+    soChuaDoc : JSONB
+    daLuuTru : BOOLEAN
+    thoiGianLuuTru : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "tin_nhan\nTinNhan" as TinNhan {
+    * id : UUID <<PK>>
+    --
+    maCuocTroChuyenId : UUID <<FK>>
+    nguoiGui : UUID <<FK>>
+    loai : VARCHAR
+    noiDung : TEXT
+    tepDinhKem : JSONB
+    traloiTinNhan : UUID <<FK, NULL>>
+    daDuocDocBoi : JSONB
+    phanUng : JSONB
+    daXoa : BOOLEAN
+    daChinhSua : BOOLEAN
+    thoiGianChinhSua : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+
+  entity "goi_y_viec_lam\nGoiYViecLam" as GoiYViecLam {
+    * id : UUID <<PK>>
+    --
+    maUngVien : UUID <<FK>>
+    maHoSoNangLuc : UUID <<FK, NULL>>
+    ketQua : JSONB
+    trangThai : VARCHAR
+    loi : TEXT
+    nguon : VARCHAR
+    lanQuet : TIMESTAMP
+    ngayTao : TIMESTAMP
+    ngayCapNhat : TIMESTAMP
+  }
+}
+
+NguoiDung ||--o| UngVien : maNguoiDung
+NguoiDung ||--o| NhaTuyenDung : maNguoiDung
+NguoiDung ||--o{ ViecLamDaLuu : maNguoiDung
+NguoiDung ||--o{ ThongBao : maNguoiDung
+NguoiDung ||--o{ LichSuHoSoUngTuyen : maNguoiDung
+NguoiDung ||--o{ DanhGiaPhongVan : maNguoiDung
+NguoiDung ||--o{ TinNhan : nguoiGui
+
+UngVien ||--o{ UngVienKyNang : maUngVien
+DanhMucKyNang ||--o{ UngVienKyNang : maKyNang
+NhaTuyenDung ||--o{ TinTuyenDung : maNhaTuyenDung
+TinTuyenDung ||--o{ TinTuyenDungKyNang : maTinTuyenDung
+DanhMucKyNang ||--o{ TinTuyenDungKyNang : maKyNang
+
+UngVien ||--o{ HoSoNangLuc : maUngVien
+UngVien ||--o{ HoSoUngTuyen : maUngVien
+TinTuyenDung ||--o{ HoSoUngTuyen : maTinTuyenDung
+HoSoNangLuc ||--o{ HoSoUngTuyen : maHoSoNangLuc
+HoSoUngTuyen ||--o{ LichSuHoSoUngTuyen : maHoSoUngTuyen
+HoSoUngTuyen ||--o| LichPhongVan : maHoSoUngTuyen
+
+UngVien ||--o{ DanhGiaCongTy : maUngVien
+NhaTuyenDung ||--o{ DanhGiaCongTy : maNhaTuyenDung
+HoSoUngTuyen ||--o| DanhGiaCongTy : maHoSoUngTuyen
+LichPhongVan ||--o{ DanhGiaPhongVan : maLichPhongVan
+
+TinTuyenDung ||--o{ ViecLamDaLuu : maTinTuyenDung
+HoSoUngTuyen ||--o{ ThongBao : maHoSoUngTuyen
+LichPhongVan ||--o{ ThongBao : maLichPhongVan
+TinTuyenDung ||--o{ ThongBao : maTinTuyenDung
+
+HoSoUngTuyen ||--o{ CuocTroChuyen : maHoSoUngTuyen
+TinTuyenDung ||--o{ CuocTroChuyen : maTinTuyenDung
+CuocTroChuyen ||--o{ TinNhan : maCuocTroChuyenId
+TinNhan ||--o{ TinNhan : traloiTinNhan
+
+UngVien ||--o{ GoiYViecLam : maUngVien
+HoSoNangLuc ||--o{ GoiYViecLam : maHoSoNangLuc
+
+note bottom of UngVien
+  Kỹ năng ứng viên đã được tách sang UngVienKyNang,
+  không còn lưu JSON trực tiếp trong bảng ung_vien.
+end note
+
+note bottom of TinTuyenDung
+  Kỹ năng yêu cầu của tin đã được tách sang TinTuyenDungKyNang,
+  không còn lưu JSON trực tiếp trong bảng tin_tuyen_dung.
+end note
+@enduml

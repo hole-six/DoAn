@@ -1,0 +1,317 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam titleFontName "Segoe UI"
+skinparam defaultFontSize 11
+skinparam titleFontSize 18
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+hide circle
+left to right direction
+title ERD mức 1 - Bội số quan hệ PostgreSQL EffortIT
+
+entity "NguoiDung" as NguoiDung {
+  * id : UUID
+  --
+  email : VARCHAR
+  vaiTro : VARCHAR
+  trangThai : VARCHAR
+}
+
+entity "UngVien" as UngVien {
+  * id : UUID
+  --
+  maNguoiDung : UUID
+  viTriMongMuon : VARCHAR
+  kinhNghiem : DECIMAL
+}
+
+entity "NhaTuyenDung" as NhaTuyenDung {
+  * id : UUID
+  --
+  maNguoiDung : UUID
+  tenCongTy : VARCHAR
+  trangThaiDuyet : VARCHAR
+}
+
+entity "DanhMucKyNang" as DanhMucKyNang {
+  * id : UUID
+  --
+  tenKyNang : VARCHAR
+  loaiKyNang : VARCHAR
+}
+
+entity "UngVienKyNang" as UngVienKyNang {
+  * maUngVien : UUID
+  * maKyNang : UUID
+  --
+  mucDo : INTEGER
+  soNamKinhNghiem : DECIMAL
+}
+
+entity "TinTuyenDung" as TinTuyenDung {
+  * id : UUID
+  --
+  maNhaTuyenDung : UUID
+  tieuDe : VARCHAR
+  trangThai : VARCHAR
+}
+
+entity "TinTuyenDungKyNang" as TinTuyenDungKyNang {
+  * maTinTuyenDung : UUID
+  * maKyNang : UUID
+  --
+  batBuoc : BOOLEAN
+  mucDo : INTEGER
+  trongSo : DECIMAL
+}
+
+entity "HoSoNangLuc" as HoSoNangLuc {
+  * id : UUID
+  --
+  maUngVien : UUID
+  tieuDe : VARCHAR
+  loaiHoSo : VARCHAR
+  cvChinh : BOOLEAN
+}
+
+entity "HoSoUngTuyen" as HoSoUngTuyen {
+  * id : UUID
+  --
+  maUngVien : UUID
+  maTinTuyenDung : UUID
+  maHoSoNangLuc : UUID
+  trangThai : VARCHAR
+}
+
+entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen {
+  * id : UUID
+  --
+  maHoSoUngTuyen : UUID
+  maNguoiDung : UUID
+  trangThaiMoi : VARCHAR
+}
+
+entity "LichPhongVan" as LichPhongVan {
+  * id : UUID
+  --
+  maHoSoUngTuyen : UUID
+  thoiGianBatDau : TIMESTAMP
+  trangThai : VARCHAR
+}
+
+entity "DanhGiaCongTy" as DanhGiaCongTy {
+  * id : UUID
+  --
+  maUngVien : UUID
+  maNhaTuyenDung : UUID
+  maHoSoUngTuyen : UUID
+  diem : INTEGER
+}
+
+entity "DanhGiaPhongVan" as DanhGiaPhongVan {
+  * id : UUID
+  --
+  maLichPhongVan : UUID
+  maNguoiDung : UUID
+  diem : INTEGER
+}
+
+entity "ThongBao" as ThongBao {
+  * id : UUID
+  --
+  maNguoiDung : UUID
+  maHoSoUngTuyen : UUID
+  maLichPhongVan : UUID
+  maTinTuyenDung : UUID
+}
+
+entity "ViecLamDaLuu" as ViecLamDaLuu {
+  * id : UUID
+  --
+  maNguoiDung : UUID
+  maTinTuyenDung : UUID
+}
+
+entity "CuocTroChuyen" as CuocTroChuyen {
+  * id : UUID
+  --
+  maHoSoUngTuyen : UUID
+  maTinTuyenDung : UUID
+}
+
+entity "TinNhan" as TinNhan {
+  * id : UUID
+  --
+  maCuocTroChuyenId : UUID
+  nguoiGui : UUID
+  traloiTinNhan : UUID
+}
+
+entity "GoiYViecLam" as GoiYViecLam {
+  * id : UUID
+  --
+  maUngVien : UUID
+  maHoSoNangLuc : UUID
+}
+
+enum "VaiTroNguoiDungEnum" as VaiTroNguoiDungEnum <<enumeration>> {
+  UNG_VIEN
+  NHA_TUYEN_DUNG
+  ADMIN
+}
+
+enum "TrangThaiTaiKhoanEnum" as TrangThaiTaiKhoanEnum <<enumeration>> {
+  HOAT_DONG
+  TAM_KHOA
+  BI_KHOA
+}
+
+enum "GioiTinhEnum" as GioiTinhEnum <<enumeration>> {
+  NAM
+  NU
+  KHAC
+}
+
+enum "TrangThaiDuyetEnum" as TrangThaiDuyetEnum <<enumeration>> {
+  CHO_DUYET
+  DA_DUYET
+  TU_CHOI
+}
+
+enum "LoaiHinhLamViecEnum" as LoaiHinhLamViecEnum <<enumeration>> {
+  TOAN_THOI_GIAN
+  BAN_THOI_GIAN
+  THUC_TAP
+  TU_XA
+  HYBRID
+}
+
+enum "CapBacEnum" as CapBacEnum <<enumeration>> {
+  INTERN
+  FRESHER
+  JUNIOR
+  MIDDLE
+  SENIOR
+  LEAD
+}
+
+enum "TrangThaiTinTuyenDungEnum" as TrangThaiTinTuyenDungEnum <<enumeration>> {
+  NHAP
+  CHO_DUYET
+  DANG_MO
+  TAM_DONG
+  HET_HAN
+  TU_CHOI
+}
+
+enum "LoaiHoSoEnum" as LoaiHoSoEnum <<enumeration>> {
+  BUILDER
+  FILE_UPLOAD
+}
+
+enum "TrangThaiHoSoUngTuyenEnum" as TrangThaiHoSoUngTuyenEnum <<enumeration>> {
+  DA_NOP
+  DA_XEM
+  DANG_XET_DUYET
+  MOI_PHONG_VAN
+  DAT
+  TU_CHOI
+  DA_RUT
+}
+
+enum "HinhThucPhongVanEnum" as HinhThucPhongVanEnum <<enumeration>> {
+  ONLINE
+  OFFLINE
+}
+
+enum "TrangThaiLichPhongVanEnum" as TrangThaiLichPhongVanEnum <<enumeration>> {
+  DA_LEN_LICH
+  DA_XAC_NHAN
+  DOI_LICH
+  HOAN_THANH
+  DA_HUY
+}
+
+enum "KetQuaPhongVanEnum" as KetQuaPhongVanEnum <<enumeration>> {
+  CHO_KET_QUA
+  DAT
+  KHONG_DAT
+}
+
+enum "MucDoUuTienThongBaoEnum" as MucDoUuTienThongBaoEnum <<enumeration>> {
+  THAP
+  TRUNG_BINH
+  CAO
+}
+
+enum "LoaiTinNhanEnum" as LoaiTinNhanEnum <<enumeration>> {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum "TrangThaiGoiYViecLamEnum" as TrangThaiGoiYViecLamEnum <<enumeration>> {
+  DANG_XU_LY
+  HOAN_THANH
+  THAT_BAI
+}
+
+NguoiDung "1..1" -- "0..1" UngVien : sở hữu
+NguoiDung "1..1" -- "0..1" NhaTuyenDung : sở hữu
+NguoiDung "1..1" -- "0..*" ThongBao : nhận
+NguoiDung "1..1" -- "0..*" ViecLamDaLuu : lưu
+NguoiDung "0..1" -- "0..*" LichSuHoSoUngTuyen : thực hiện
+NguoiDung "1..1" -- "0..*" DanhGiaPhongVan : đánh giá
+NguoiDung "1..1" -- "0..*" TinNhan : gửi
+
+UngVien "1..1" -- "0..*" HoSoNangLuc : tạo
+UngVien "1..1" -- "0..*" HoSoUngTuyen : nộp
+UngVien "1..1" -- "0..*" UngVienKyNang : có
+UngVien "1..1" -- "0..*" DanhGiaCongTy : viết
+UngVien "1..1" -- "0..*" GoiYViecLam : nhận
+
+DanhMucKyNang "1..1" -- "0..*" UngVienKyNang : phân loại
+DanhMucKyNang "1..1" -- "0..*" TinTuyenDungKyNang : phân loại
+
+NhaTuyenDung "1..1" -- "0..*" TinTuyenDung : đăng
+NhaTuyenDung "1..1" -- "0..*" DanhGiaCongTy : được đánh giá
+
+TinTuyenDung "1..1" -- "0..*" TinTuyenDungKyNang : yêu cầu
+TinTuyenDung "1..1" -- "0..*" HoSoUngTuyen : nhận
+TinTuyenDung "1..1" -- "0..*" ViecLamDaLuu : được lưu
+TinTuyenDung "0..1" -- "0..*" ThongBao : liên quan
+TinTuyenDung "0..1" -- "0..*" CuocTroChuyen : ngữ cảnh
+
+HoSoNangLuc "0..1" -- "0..*" HoSoUngTuyen : dùng để nộp
+HoSoNangLuc "0..1" -- "0..*" GoiYViecLam : đầu vào
+
+HoSoUngTuyen "1..1" -- "0..*" LichSuHoSoUngTuyen : có lịch sử
+HoSoUngTuyen "1..1" -- "0..1" LichPhongVan : có lịch
+HoSoUngTuyen "0..1" -- "0..1" DanhGiaCongTy : liên quan
+HoSoUngTuyen "0..1" -- "0..*" ThongBao : liên quan
+HoSoUngTuyen "0..1" -- "0..*" CuocTroChuyen : ngữ cảnh
+
+LichPhongVan "0..1" -- "0..*" ThongBao : liên quan
+LichPhongVan "1..1" -- "0..*" DanhGiaPhongVan : có
+
+CuocTroChuyen "1..1" -- "0..*" TinNhan : chứa
+TinNhan "0..1" -- "0..*" TinNhan : trả lời
+
+NguoiDung ..> VaiTroNguoiDungEnum : vaiTro
+NguoiDung ..> TrangThaiTaiKhoanEnum : trangThai
+UngVien ..> GioiTinhEnum : gioiTinh
+NhaTuyenDung ..> TrangThaiDuyetEnum : trangThaiDuyet
+TinTuyenDung ..> LoaiHinhLamViecEnum : loaiHinh
+TinTuyenDung ..> CapBacEnum : capBac
+TinTuyenDung ..> TrangThaiTinTuyenDungEnum : trangThai
+HoSoNangLuc ..> LoaiHoSoEnum : loaiHoSo
+HoSoUngTuyen ..> TrangThaiHoSoUngTuyenEnum : trangThai
+LichPhongVan ..> HinhThucPhongVanEnum : hinhThuc
+LichPhongVan ..> TrangThaiLichPhongVanEnum : trangThai
+LichPhongVan ..> KetQuaPhongVanEnum : ketQua
+ThongBao ..> MucDoUuTienThongBaoEnum : mucDoUuTien
+TinNhan ..> LoaiTinNhanEnum : loai
+GoiYViecLam ..> TrangThaiGoiYViecLamEnum : trangThai
+@enduml

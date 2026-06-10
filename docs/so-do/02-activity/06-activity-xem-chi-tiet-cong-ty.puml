@@ -11,9 +11,15 @@ skinparam activity {
   BarColor #111111
 }
 start
-:Khách vãng lai hoặc ứng viên chọn một công ty;
-:Hệ thống tải NhàTuyểnDụng theo mã;
-if (Công ty tồn tại?) then (Có)
+:Khách vãng lai hoặc ứng viên mở trang chi tiết công ty;
+:Nguồn mở trang có thể là chọn từ danh sách/gợi ý hoặc URL /cong-ty/{ma};
+if (Có mã công ty hợp lệ?) then (Có)
+  :Hệ thống tải NhàTuyểnDụng theo mã;
+else (Không)
+  :Hiển thị thông báo liên kết công ty không hợp lệ;
+  stop
+endif
+if (Tìm thấy công ty?) then (Có)
   fork
     :Tải danh sách TinTuyểnDụng của công ty;
   fork again
@@ -26,7 +32,10 @@ if (Công ty tồn tại?) then (Có)
   elseif (Chọn đánh giá?) then (Đánh giá)
     :Xem danh sách đánh giá đã được duyệt;
   else (Bài viết)
-    :Hiển thị trạng thái chưa có bài viết;
+    :Hiển thị các bài đăng tuyển dụng đang mở của công ty;
+    if (Không có tin đang mở?) then (Đúng)
+      :Hiển thị trạng thái chưa có bài đăng tuyển dụng;
+    endif
   endif
   if (Chọn một tin tuyển dụng?) then (Có)
     :Mở chi tiết TinTuyểnDụng;
@@ -35,6 +44,7 @@ if (Công ty tồn tại?) then (Có)
   endif
 else (Không)
   :Hiển thị thông báo không tìm thấy công ty;
+
 endif
 stop
 @enduml

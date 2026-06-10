@@ -169,7 +169,7 @@ export default function HoSoCongTy() {
             {[
               { key: 'gioi-thieu', label: 'Giới thiệu' },
               { key: 'danh-gia', label: `Đánh giá ${danhGia.length}` },
-              { key: 'bai-viet', label: 'Bài viết 0' },
+              { key: 'bai-viet', label: `Bài viết ${tinTuyenDung.length}` },
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)} style={{ padding: '12px 20px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: tab === t.key ? '#e11d48' : '#6b7280', borderBottom: tab === t.key ? '2px solid #e11d48' : '2px solid transparent', marginBottom: -1 }}>
                 {t.label}
@@ -244,7 +244,22 @@ export default function HoSoCongTy() {
             </div>
           )}
 
-          {tab === 'bai-viet' && <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}><p style={{ color: '#9ca3af', textAlign: 'center', padding: '40px 0' }}>Chưa có bài viết nào.</p></div>}
+          {tab === 'bai-viet' && (
+            <div style={{ background: '#fff', borderRadius: 8, padding: 24 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, color: '#0b1c30' }}>Bài đăng tuyển dụng</h2>
+              <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>
+                Các tin tuyển dụng đang mở của {congTy.tenCongTy}
+              </p>
+              <div style={{ borderTop: '1px solid #f0f0f0', marginTop: 12 }}>
+                {tinTuyenDung.map(tin => <CardViecLam key={tin.id} tin={tin} congTy={congTy} />)}
+              </div>
+              {tinTuyenDung.length === 0 && (
+                <p style={{ color: '#9ca3af', textAlign: 'center', padding: '40px 0' }}>
+                  Công ty chưa có bài đăng tuyển dụng đang mở.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="company-profile-sidebar" style={{ position: 'sticky', top: 90 }}>
