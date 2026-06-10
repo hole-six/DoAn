@@ -14,27 +14,26 @@ start
 :Ứng viên đăng nhập;
 :Mở trang hồ sơ ứng tuyển;
 fork
-  :Hệ thống tải HồSơỨngTuyển của ứng viên;
+  :Hệ thống tải toàn bộ HồSơỨngTuyển rồi lọc theo ứng viên ở client;
 fork again
-  :Hệ thống tải TinTuyểnDụng liên quan;
+  :Hệ thống tải TinTuyểnDụng và NhàTuyểnDụng liên quan;
 fork again
-  :Hệ thống tải LịchPhỏngVấn liên quan;
+  :Hệ thống tải LịchPhỏngVấn riêng rồi ghép theo hồ sơ ứng tuyển;
 end fork
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách hồ sơ ứng tuyển;
   fork
+    :Nhập từ khóa tìm theo vị trí hoặc công ty;
+  fork again
     :Chọn bộ lọc trạng thái;
-  fork again
-    :Nhập từ khóa vị trí hoặc công ty;
-  fork again
-    :Sắp xếp theo ngày nộp;
   end fork
+  :Hệ thống lọc động danh sách phía client;
   if (Chọn một hồ sơ?) then (Có)
     :Mở chi tiết HồSơỨngTuyển;
     if (Trạng thái cho phép rút?) then (Có)
       if (Nhấn "Rút hồ sơ"?) then (Có)
         :Nhập lý do nếu có;
-        :Hệ thống cập nhật trạng thái da_rut;
+        :Hệ thống cập nhật trạng thái sang đã rút;
         :Hiển thị thông báo rút hồ sơ thành công;
       else (Không)
         :Tiếp tục xem chi tiết;
@@ -48,6 +47,5 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không tải được hồ sơ ứng tuyển;
 endif
-:Hệ thống đọc LichSuHoSoUngTuyen để hiển thị timeline trạng thái;
 stop
 @enduml

@@ -52,19 +52,19 @@ Controller -> TinTuyenDung : 10. Kiểm tra tin đang mở
 Controller -> HoSoNangLuc : 11. Kiểm tra CV thuộc ứng viên
 
 alt Hợp lệ
-  Controller -> HoSoUngTuyen : 12. Tạo hồ sơ ứng tuyển
+  Controller -> HoSoUngTuyen : 12. Tạo hồ sơ ứng tuyển (trạng thái da_nop)
   HoSoUngTuyen --> Controller : 13. Trả hồ sơ ứng tuyển
-  Controller -> ThongBao : 14. Báo nhà tuyển dụng có hồ sơ mới
-  Controller --> Form : 15. Trả ứng tuyển thành công
-  Form --> UI : 16. Cập nhật trạng thái đã ứng tuyển
-  UI --> Actor : 17. Hiển thị ứng tuyển thành công
+  Controller -> LichSuHoSoUngTuyen : 14. Ghi lịch sử trạng thái "da_nop"
+  Controller -> ThongBao : 15. Báo nhà tuyển dụng có hồ sơ mới
+  Controller --> Form : 16. Trả ứng tuyển thành công
+  Form --> UI : 17. Cập nhật trạng thái đã ứng tuyển
+  UI --> Actor : 18. Hiển thị ứng tuyển thành công
 else Không hợp lệ
-  Controller --> Form : 15. Trả lỗi đã ứng tuyển, thiếu CV hoặc tin không mở
-  Form --> UI : 16. Hiển thị lỗi
-  UI --> Actor : 17. Yêu cầu kiểm tra lại
+  Controller --> Form : 16. Trả lỗi đã ứng tuyển, thiếu CV hoặc tin không mở
+  Form --> UI : 17. Hiển thị lỗi
+  UI --> Actor : 18. Yêu cầu kiểm tra lại
 end
 
-Controller -> LichSuHoSoUngTuyen : Ghi lịch sử trạng thái "da_nop"
 deactivate Controller
 deactivate Form
 deactivate UI

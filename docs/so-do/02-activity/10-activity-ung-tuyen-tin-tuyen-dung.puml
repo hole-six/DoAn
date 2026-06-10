@@ -42,7 +42,7 @@ if (Tin đang mở?) then (Đúng)
         :Hệ thống kiểm tra CV hợp lệ;
         if (Có HồSơNăngLực hợp lệ?) then (Có)
           :Tạo HồSơỨngTuyển trạng thái đã nộp;
-          :Ghi lịch sử hồ sơ ứng tuyển;
+          :Ghi LichSửHồSơỨngTuyển trạng thái da_nop;
           :Gửi ThôngBáo hồ sơ mới cho nhà tuyển dụng;
           :Hiển thị ứng tuyển thành công;
         else (Không)
@@ -57,6 +57,5 @@ if (Tin đang mở?) then (Đúng)
 else (Sai)
   :Hiển thị lỗi tin đã đóng, hết hạn hoặc không khả dụng;
 endif
-:Tạo LichSuHoSoUngTuyen ghi trạng thái da_nop;
 stop
 @enduml

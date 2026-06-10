@@ -208,7 +208,6 @@ async function xoaDuLieuCu() {
   await prisma.cuocTroChuyen.deleteMany()
   await prisma.goiYViecLam.deleteMany()
   await prisma.thongBao.deleteMany()
-  await prisma.danhGiaPhongVan.deleteMany()
   await prisma.lichPhongVan.deleteMany()
   await prisma.lichSuHoSoUngTuyen.deleteMany()
   await prisma.danhGiaCongTy.deleteMany()

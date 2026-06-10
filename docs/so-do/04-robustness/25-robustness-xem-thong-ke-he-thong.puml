@@ -2,8 +2,10 @@
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
-skinparam linetype polyline
-left to right direction
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 70
+top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -22,31 +24,42 @@ skinparam entity {
 }
 
 actor "Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "quan-tri-dashboard" as UI
-boundary "bo-loc-thong-ke" as Form
-control "xem-thong-ke-he-thong" as Controller
 
-entity "NguoiDung" as MainEntity
-entity "NhaTuyenDung" as E1
-entity "TinTuyenDung" as E2
-entity "HoSoUngTuyen" as E3
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "quan-tri-dashboard" as UI
+}
 
-Actor -right-> UI
-UI -right-> Form
-Form -right-> Controller
+' ── Lớp control (xử lý) ──
+together {
+  control "thong-ke-quan-tri" as Controller
+  control "canh-bao-quan-tri" as AlertController
+}
 
-Controller -right-> MainEntity
-Controller -right-> E1
-Controller -right-> E2
-Controller -right-> E3
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "NguoiDung" as NguoiDung
+  entity "TinTuyenDung" as TinTuyenDung
+  entity "NhaTuyenDung" as NhaTuyenDung
+  entity "HoSoUngTuyen" as HoSoUngTuyen
+}
 
-MainEntity -down[hidden]-> E1
-E1 -down[hidden]-> E2
-E2 -down[hidden]-> E3
-entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
-entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
-entity "DanhGiaPhongVan" as DanhGiaPhongVan
-Controller -right-> LichSuHoSoUngTuyen
-Controller -right-> TinTuyenDungKyNang
-Controller -right-> DanhGiaPhongVan
+' ── Quan hệ actor ↔ boundary ──
+Actor <--> UI
+
+' ── boundary ↔ control ──
+UI <--> Controller
+UI <--> AlertController
+
+' ── control thống kê đọc 4 danh sách ──
+Controller <--> NguoiDung
+Controller <--> TinTuyenDung
+Controller <--> NhaTuyenDung
+Controller <--> HoSoUngTuyen
+
+' ── control cảnh báo đếm 4 nguồn ──
+AlertController <--> TinTuyenDung
+AlertController <--> NhaTuyenDung
+AlertController <--> HoSoUngTuyen
+AlertController <--> NguoiDung
 @enduml

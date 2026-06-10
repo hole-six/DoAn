@@ -27,48 +27,55 @@ control "Controller: HoSoUngTuyenController" as Controller
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
 entity "Entity: UngVien" as UngVien
 entity "Entity: TinTuyenDung" as TinTuyenDung
-entity "Entity: NhaTuyenDung" as NhaTuyenDung
-entity "Entity: LichPhongVan" as LichPhongVan
+entity "Entity: HoSoNangLuc" as HoSoNangLuc
 entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
 entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Mở pipeline ứng viên
 activate UI
-UI -> Form : 2. Hiển thị hồ sơ ứng tuyển
-activate Form
-Form -> Controller : 3. GET /hosoungtuyen
+UI -> Controller : 2. GET /hosoungtuyen
 activate Controller
-Controller -> HoSoUngTuyen : 4. Lấy hồ sơ thuộc tin của công ty
-HoSoUngTuyen --> Controller : 5. Trả danh sách hồ sơ
-Controller -> UngVien : 6. Populate thông tin ứng viên
-Controller -> TinTuyenDung : 7. Populate tin tuyển dụng
-Controller --> Form : 8. Trả dữ liệu pipeline
+Controller -> HoSoUngTuyen : 3. Lấy hồ sơ thuộc tin của công ty
+HoSoUngTuyen --> Controller : 4. Trả danh sách hồ sơ
+Controller -> UngVien : 5. Populate thông tin ứng viên
+Controller -> TinTuyenDung : 6. Populate tin tuyển dụng
+Controller -> HoSoNangLuc : 7. Populate hồ sơ năng lực / CV
+Controller --> UI : 8. Trả dữ liệu pipeline
 deactivate Controller
+UI -> Form : 9. Mở khung chi tiết ứng viên
 
-alt Đánh dấu đã xem hoặc đánh giá
-  Actor -> Form : 9. Chọn xem, đưa vào xét duyệt hoặc từ chối
-  Form -> Controller : 10. POST /hosoungtuyen/:ma/xem hoặc /:ma/danh-gia
+alt Đánh dấu đã xem
+  Actor -> Form : 10. Chọn xem hồ sơ
+  Form -> Controller : 11. POST /hosoungtuyen/:ma/xem
   activate Controller
-  Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
-  Controller -> NhaTuyenDung : 12. Kiểm tra nhà tuyển dụng hiện tại
-  Controller -> HoSoUngTuyen : 13. Cập nhật trạng thái nghiệp vụ
-  Controller -> LichSuHoSoUngTuyen : 14. Ghi lịch sử trạng thái hồ sơ
-  Controller -> ThongBao : 15. Báo ứng viên khi cần
-  Controller --> Form : 16. Trả hồ sơ đã cập nhật
+  Controller -> HoSoUngTuyen : 12. Cập nhật trạng thái da_nop -> da_xem
+  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử trạng thái hồ sơ
+  Controller -> ThongBao : 14. Báo ứng viên hồ sơ đã được xem
+  Controller --> Form : 15. Trả hồ sơ đã cập nhật
+  deactivate Controller
+else Đánh giá hồ sơ (xét duyệt / từ chối)
+  Actor -> Form : 10. Đưa vào xét duyệt hoặc từ chối sàng lọc
+  Form -> Controller : 11. POST /hosoungtuyen/:ma/danh-gia
+  activate Controller
+  Controller -> HoSoUngTuyen : 12. Cập nhật trạng thái dang_xet_duyet / tu_choi
+  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử trạng thái hồ sơ
+  Controller -> ThongBao : 14. Báo ứng viên kết quả sàng lọc
+  Controller --> Form : 15. Trả hồ sơ đã cập nhật
+  deactivate Controller
 else Mời phỏng vấn
-  Actor -> Form : 9. Chọn lên lịch phỏng vấn
-  Form -> Controller : 10. POST /hosoungtuyen/:ma/moi-phong-van
+  Actor -> Form : 10. Chọn lên lịch phỏng vấn
+  Form -> Controller : 11. POST /hosoungtuyen/:ma/moi-phong-van
   activate Controller
-  Controller -> HoSoUngTuyen : 11. Kiểm tra hồ sơ thuộc công ty
-  Controller -> LichPhongVan : 12. Tạo lịch phỏng vấn
-  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử trạng thái "moi_phong_van"
-  Controller -> ThongBao : 14. Báo ứng viên
-  Controller --> Form : 15. Trả lịch mới
+  Controller -> HoSoUngTuyen : 12. Cập nhật trạng thái moi_phong_van
+  Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử "moi_phong_van"
+  Controller -> ThongBao : 14. Báo ứng viên lời mời phỏng vấn
+  note right of Controller : Chi tiết lịch phỏng vấn xem Sơ đồ 18
+  Controller --> Form : 15. Trả kết quả mời phỏng vấn
+  deactivate Controller
 end
 
-Form --> UI : 17. Cập nhật pipeline
-UI --> Actor : 18. Hiển thị kết quả thao tác
-deactivate Controller
+Form --> UI : 16. Tải lại pipeline
+UI --> Actor : 17. Hiển thị kết quả thao tác
 deactivate Form
 deactivate UI
 @enduml

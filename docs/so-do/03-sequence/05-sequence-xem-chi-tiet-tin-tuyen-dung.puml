@@ -25,38 +25,34 @@ boundary "UI: chi-tiet-viec-lam" as UI
 boundary "UI: khung-thao-tac-viec-lam" as Form
 control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: DanhMucKyNang" as E2
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
-entity "Entity: DanhGiaCongTy" as E3
+entity "Entity: DanhMucKyNang" as DanhMucKyNang
 
 Actor -> UI : 1. Mở một tin tuyển dụng
 activate UI
 UI -> Form : 2. Hiển thị khung-thao-tac-viec-lam
 activate Form
 Actor -> Form : 3. Xem mô tả, yêu cầu và quyền lợi
-Form -> Controller : 4. layChiTietTin(maTin)
+Form -> Controller : 4. GET /tintuyendung/:ma (public)
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra tin có tồn tại và được phép hiển thị
+Controller -> MainEntity : 5. Tìm tin tuyển dụng theo mã
 activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
+MainEntity --> Controller : 6. return tin (hoặc rỗng)
 deactivate MainEntity
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Lấy chi tiết tin tuyển dụng
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Lấy thông tin công ty và kỹ năng
-  Controller --> Form : 10. Hiển thị chi tiết tin
+alt Tin tồn tại
+  Controller -> NhaTuyenDung : 7. Gắn thông tin nhà tuyển dụng cho tin
+  Controller -> TinTuyenDungKyNang : 8. Lấy liên kết kỹ năng của tin
+  TinTuyenDungKyNang -> DanhMucKyNang : 9. Lấy tên và loại kỹ năng
+  Controller --> Form : 10. Trả chi tiết tin kèm công ty và kỹ năng
   Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo tin không tồn tại hoặc đã đóng
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  UI --> Actor : 12. Hiển thị chi tiết tin tuyển dụng
+else Không tìm thấy (404)
+  Controller --> Form : 10. Trả lỗi 404 Không tìm thấy tin tuyển dụng
+  Form --> UI : 11. Hiển thị thông báo không tìm thấy tin
+  UI --> Actor : 12. Báo tin không tồn tại
 end
-Controller -> TinTuyenDungKyNang : Lấy kỹ năng của tin theo bảng liên kết
 deactivate Controller
 deactivate Form
 deactivate UI

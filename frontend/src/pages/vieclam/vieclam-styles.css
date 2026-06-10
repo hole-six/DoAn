@@ -828,6 +828,11 @@
 
 .jobs-real-heading {
   margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .jobs-real-heading h2 {
@@ -841,6 +846,53 @@
   color: #6b7280;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.jobs-real-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.jobs-saved-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid #c7d6ea;
+  background: #ffffff;
+  padding: 9px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1d4ed8;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.jobs-saved-toggle:hover {
+  border-color: #2563eb;
+  background: #eff5ff;
+}
+
+.jobs-saved-toggle.active {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(29, 78, 216, 0.24);
+}
+
+.jobs-saved-link {
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748b;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.jobs-saved-link:hover {
+  color: #1d4ed8;
 }
 
 .jobs-real-card {
@@ -1539,6 +1591,20 @@
 
   .jobs-real-page .jobs-real-heading .jobs-mobile-filter-trigger {
     justify-self: end;
+  }
+
+  .jobs-real-page .jobs-real-heading-actions {
+    justify-self: end;
+    justify-content: flex-end;
+  }
+
+  .jobs-real-page .jobs-saved-toggle {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .jobs-real-page .jobs-saved-link {
+    display: none;
   }
 
   .jobs-real-page .jobs-real-card {

@@ -3,7 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-left to right direction
+skinparam nodesep 45
+skinparam ranksep 70
+top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -22,20 +24,54 @@ skinparam entity {
 }
 
 actor "Khách vãng lai / Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "viec-lam" as UI
-boundary "bo-loc-viec-lam" as Form
-control "tim-kiem-viec-lam" as Controller
 
-entity "TinTuyenDung" as MainEntity
-entity "NhaTuyenDung" as E1
-entity "DanhMucKyNang" as E2
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "viec-lam" as UI
+  boundary "bo-loc-viec-lam" as Form
+  boundary "goi-y-tim-kiem" as Suggest
+  boundary "tro-ly-ai" as AiBox
+  boundary "trang-viec-da-luu" as SavedPage
+}
 
+' ── Lớp control (xử lý) ──
+together {
+  control "tim-kiem-viec-lam" as Controller
+  control "goi-y-tim-kiem" as SuggestCtrl
+  control "tro-ly-ai" as AiCtrl
+  control "viec-lam-da-luu" as SavedCtrl
+}
+
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "TinTuyenDung" as TinTuyenDung
+  entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
+  entity "DanhMucKyNang" as DanhMucKyNang
+  entity "NhaTuyenDung" as NhaTuyenDung
+  entity "ViecLamDaLuu" as ViecLamDaLuu
+}
+
+' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
-UI <--> Form
-Form <--> Controller
-Controller <--> MainEntity
-Controller <--> E1
-Controller <--> E2
-entity "TinTuyenDungKyNang" as TinTuyenDungKyNang
-Controller -right-> TinTuyenDungKyNang
+Actor <--> Form
+
+' ── boundary ↔ boundary / control ──
+UI <--> Controller
+UI <--> SavedPage
+Form <--> Suggest
+Form <--> AiBox
+Suggest <--> SuggestCtrl
+AiBox <--> AiCtrl
+SavedPage <--> SavedCtrl
+
+' ── control ↔ entity ──
+Controller <--> TinTuyenDung
+Controller <--> TinTuyenDungKyNang
+Controller <--> DanhMucKyNang
+Controller <--> NhaTuyenDung
+SuggestCtrl <--> TinTuyenDung
+SuggestCtrl <--> DanhMucKyNang
+SuggestCtrl <--> NhaTuyenDung
+SavedCtrl <--> ViecLamDaLuu
+SavedCtrl <--> TinTuyenDung
 @enduml

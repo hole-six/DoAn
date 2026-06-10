@@ -2,7 +2,6 @@
 import { dinhTuyenAi } from '../modules/ai/ai.dinhtuyen.js'
 import { dinhTuyenCanhBaoQuanTri } from '../modules/canhbaoquantri/canhbaoquantri.dinhtuyen.js'
 import { dinhTuyenDanhGiaCongTy } from '../modules/danhgiacongty/danhgiacongty.dinhtuyen.js'
-import { dinhTuyenDanhGiaPhongVan } from '../modules/danhgiaphongvan/danhgiaphongvan.dinhtuyen.js'
 import { dinhTuyenDanhMucKyNang } from '../modules/danhmuckynang/danhmuckynang.dinhtuyen.js'
 import { dinhTuyenDeploy } from '../modules/deploy/deploy.dinhtuyen.js'
 import { dinhTuyenHoSoNangLuc } from '../modules/hosonangluc/hosonangluc.dinhtuyen.js'
@@ -42,7 +41,6 @@ apiTong.use('/lichphongvan', dinhTuyenLichPhongVan)
 apiTong.use('/thongbao', dinhTuyenThongBao)
 apiTong.use('/tinnhan', dinhTuyenTinNhan)
 apiTong.use('/danhgiacongty', dinhTuyenDanhGiaCongTy)
-apiTong.use('/danhgiaphongvan', dinhTuyenDanhGiaPhongVan)
 apiTong.use('/ai', dinhTuyenAi)
 apiTong.use('/deploy', dinhTuyenDeploy)
 

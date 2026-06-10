@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { CalendarCheck, Edit3, MessageCircle } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { CalendarCheck, Edit3, MessageCircle, Search, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { DetailDrawer } from '../../../components/DetailDrawer'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { useChat } from '../../../contexts/ChatContext'
 import { apiCoXacThuc } from '../../../lib/auth'
@@ -13,6 +14,8 @@ import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
 import { ScheduleModal } from './ScheduleModal'
 import { Field, Textarea } from '../../quantrivien/shared/AdminFormControls'
+
+const inputCls = 'min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
 
 const TRANG_THAI_LICH_DUOC_CHAT = ['da_len_lich', 'da_xac_nhan', 'doi_lich']
 
@@ -34,6 +37,21 @@ export default function LichPhongVanNhaTuyenDungPage() {
   const [chatError, setChatError] = useState('')
   const navigate = useNavigate()
   const { moChatVoiNguoiDung } = useChat()
+  const [tuKhoa, setTuKhoa] = useState('')
+  const [locTrangThai, setLocTrangThai] = useState('')
+
+  const danhSachHienThi = useMemo(() => {
+    const kw = tuKhoa.trim().toLowerCase()
+    return data.interviews.filter(item => {
+      const khopKw = !kw
+        || (item.hoSoUngTuyen?.ungVien?.nguoiDung?.hoTen ?? '').toLowerCase().includes(kw)
+        || (item.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? '').toLowerCase().includes(kw)
+      const khopTrangThai = !locTrangThai || item.trangThai === locTrangThai
+      return khopKw && khopTrangThai
+    })
+  }, [data.interviews, tuKhoa, locTrangThai])
+
+  const phanTrang = usePhanTrang(danhSachHienThi)
 
   const openChat = async (item: LichPhongVan) => {
     const userId = candidateUserId(item)
@@ -78,8 +96,26 @@ export default function LichPhongVanNhaTuyenDungPage() {
     <Page title="Lịch phỏng vấn" desc="Quản lý lịch, đổi lịch khi ứng viên yêu cầu và cập nhật kết quả sau buổi phỏng vấn.">
       <ErrorState message={data.error || chatError} />
       <Panel>
+        <div className="mb-3 grid gap-2 sm:flex sm:items-center">
+          <label className="flex min-h-10 flex-1 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-400 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+            <Search size={15} />
+            <input
+              className="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+              placeholder="Tìm tên ứng viên, vị trí..."
+              value={tuKhoa}
+              onChange={e => setTuKhoa(e.target.value)}
+            />
+            {tuKhoa && <button type="button" onClick={() => setTuKhoa('')}><X size={14} /></button>}
+          </label>
+          <select className={`${inputCls} sm:w-48`} value={locTrangThai} onChange={e => setLocTrangThai(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {Object.entries(interviewStatusLabel).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
         <div className="ntd-list grid gap-2">
-          {data.interviews.length ? data.interviews.map(item => {
+          {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => {
             const userId = candidateUserId(item)
             return (
               <article key={item.id} className="ntd-list-card grid cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-sky-200 lg:grid-cols-[minmax(0,1fr)_auto]" onClick={() => setSelected(item)}>
@@ -105,8 +141,9 @@ export default function LichPhongVanNhaTuyenDungPage() {
                 </div>
               </article>
             )
-          }) : <EmptyState>Chưa có lịch phỏng vấn.</EmptyState>}
+          }) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có lịch phù hợp bộ lọc.' : 'Chưa có lịch phỏng vấn.'}</EmptyState>}
         </div>
+        <PhanTrang {...phanTrang} donVi="lịch" className="mt-4" />
       </Panel>
 
       {selected && (

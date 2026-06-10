@@ -2,8 +2,10 @@
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
-skinparam linetype polyline
-left to right direction
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 70
+top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -22,30 +24,40 @@ skinparam entity {
 }
 
 actor "Nhà tuyển dụng\n(from Usecase Diagram)" as Actor
-boundary "pipeline-ung-vien" as UI
-boundary "form-moi-phong-van" as Form
-control "moi-ung-vien-phong-van" as Controller
 
-entity "LichPhongVan" as MainEntity
-entity "HoSoUngTuyen" as E1
-entity "UngVien" as E2
-entity "TinTuyenDung" as E3
-entity "ThongBao" as E4
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "pipeline-ung-vien" as UI
+  boundary "form-moi-phong-van" as Form
+}
 
-Actor -right-> UI
-UI -right-> Form
-Form -right-> Controller
+' ── Lớp control (xử lý) ──
+together {
+  control "moi-ung-vien-phong-van" as Controller
+}
 
-Controller -right-> MainEntity
-Controller -right-> E1
-Controller -right-> E2
-Controller -right-> E3
-Controller -right-> E4
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "LichPhongVan" as LichPhongVan
+  entity "HoSoUngTuyen" as HoSoUngTuyen
+  entity "UngVien" as UngVien
+  entity "TinTuyenDung" as TinTuyenDung
+  entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
+  entity "ThongBao" as ThongBao
+}
 
-MainEntity -down[hidden]-> E1
-E1 -down[hidden]-> E2
-E2 -down[hidden]-> E3
-E3 -down[hidden]-> E4
-entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
-Controller -right-> LichSuHoSoUngTuyen
+' ── Quan hệ actor ↔ boundary ──
+Actor <--> UI
+
+' ── boundary ↔ boundary / control ──
+UI <--> Form
+Form <--> Controller
+
+' ── control ↔ entity ──
+Controller <--> HoSoUngTuyen
+Controller <--> TinTuyenDung
+Controller <--> UngVien
+Controller <--> LichPhongVan
+Controller <--> LichSuHoSoUngTuyen
+Controller <--> ThongBao
 @enduml

@@ -24,37 +24,51 @@ actor "Actor: Khách vãng lai / Ứng viên" as Actor
 boundary "UI: chi-tiet-cong-ty" as UI
 boundary "UI: khung-thong-tin-cong-ty" as Form
 control "Controller: NhaTuyenDungController" as Controller
+control "Controller: TinTuyenDungController" as TinController
+control "Controller: DanhGiaCongTyController" as DanhGiaController
 entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: DanhGiaCongTy" as E2
+entity "Entity: NguoiDung" as NguoiDung
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: DanhGiaCongTy" as DanhGiaCongTy
 
 Actor -> UI : 1. Mở trang chi tiết công ty
 activate UI
 UI -> Form : 2. Hiển thị khung-thong-tin-cong-ty
 activate Form
-Actor -> Form : 3. Xem hồ sơ, đánh giá và tin đang mở
-Form -> Controller : 4. layChiTietCongTy(maCongTy)
+Actor -> Form : 3. Xem hồ sơ, tin đang mở và đánh giá
+
+Form -> Controller : 4. GET /nhatuyendung/:ma (public)
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra công ty đã được duyệt
+Controller -> MainEntity : 5. Tìm công ty theo mã
 activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
+MainEntity --> Controller : 6. return công ty (hoặc rỗng)
 deactivate MainEntity
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Lấy hồ sơ công ty
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Lấy tin tuyển dụng và đánh giá liên quan
-  Controller --> Form : 10. Hiển thị chi tiết công ty
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo công ty không tồn tại hoặc chưa được duyệt
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+alt Công ty tồn tại
+  Controller -> NguoiDung : 7. Gắn thông tin người dùng cho công ty (ganNguoiDungChoCongTy)
+  Controller --> Form : 8. Trả hồ sơ công ty
+  deactivate Controller
+
+  Form -> TinController : 9. GET /tintuyendung
+  activate TinController
+  TinController -> TinTuyenDung : 10. Lấy danh sách tin tuyển dụng
+  TinController --> Form : 11. Trả tin; client lọc theo công ty và trạng thái dang_mo
+  deactivate TinController
+
+  Form -> DanhGiaController : 12. GET /danhgiacongty
+  activate DanhGiaController
+  DanhGiaController -> DanhGiaCongTy : 13. Lấy danh sách đánh giá
+  DanhGiaController --> Form : 14. Trả đánh giá; client lọc theo công ty và daDuyet
+  deactivate DanhGiaController
+
+  Form --> UI : 15. Cập nhật giao diện
+  UI --> Actor : 16. Hiển thị chi tiết công ty, tin đang mở và điểm đánh giá
+else Không tìm thấy (404)
+  Controller --> Form : 8. Trả lỗi 404 không tìm thấy công ty
+  deactivate Controller
+  Form --> UI : 15. Hiển thị thông báo không tìm thấy công ty
+  UI --> Actor : 16. Báo công ty không tồn tại
 end
-deactivate Controller
 deactivate Form
 deactivate UI
 @enduml

@@ -24,39 +24,79 @@ actor "Actor: Khách vãng lai / Ứng viên" as Actor
 boundary "UI: viec-lam" as UI
 boundary "UI: bo-loc-viec-lam" as Form
 control "Controller: TinTuyenDungController" as Controller
+control "Controller: GoiYTimKiemController" as Suggest
+control "Controller: AiController" as Ai
+control "Controller: ViecLamDaLuuController" as Saved
 entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: DanhMucKyNang" as E1
 entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
+entity "Entity: DanhMucKyNang" as E1
 entity "Entity: NhaTuyenDung" as E2
+entity "Entity: ViecLamDaLuu" as E3
 
 Actor -> UI : 1. Truy cập trang việc làm
 activate UI
-UI -> Form : 2. Hiển thị bo-loc-viec-lam
-activate Form
-Actor -> Form : 3. Nhập từ khóa và chọn bộ lọc
-Form -> Controller : 4. timKiemTinTuyenDung(filter)
+UI -> Controller : 2. GET /tintuyendung (tải toàn bộ tin)
 activate Controller
-Controller -> MainEntity : 5. Chuẩn hóa từ khóa, kỹ năng, địa điểm
+Controller -> MainEntity : 3. Lấy tin, join kỹ năng và công ty
 activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
+Controller -> TinTuyenDungKyNang : 4. Lấy liên kết kỹ năng của tin
+Controller -> E1 : 5. Lấy tên kỹ năng theo danh mục
+Controller -> E2 : 6. Lấy thông tin nhà tuyển dụng
+MainEntity --> Controller : 7. return danh sách tin
 deactivate MainEntity
-
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Tìm tin đang mở phù hợp
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Lấy kỹ năng và công ty liên quan
-  Controller --> Form : 10. Trả danh sách việc làm
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo không tìm thấy dữ liệu phù hợp
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
-end
-Controller -> TinTuyenDungKyNang : Lấy liên kết kỹ năng của tin phù hợp
+Controller --> UI : 8. Trả danh sách tin
 deactivate Controller
+UI -> UI : 9. Chỉ giữ tin đang mở, chuẩn hóa kỹ năng
+
+alt Ứng viên đã đăng nhập
+  UI -> Saved : 10. GET /viec-lam-da-luu
+  activate Saved
+  Saved -> E3 : 11. Lấy việc đã lưu của ứng viên
+  Saved --> UI : 12. return mã tin đã lưu
+  deactivate Saved
+  UI -> UI : 13. Đánh dấu tin đã lưu, hiển thị nút "Việc đã lưu"
+end
+
+Actor -> Form : 14. Nhập từ khóa và chọn bộ lọc
+activate Form
+opt Đang gõ từ khóa
+  Form -> Suggest : 15. GET gợi ý tin / công ty / kỹ năng (?tuKhoa)
+  activate Suggest
+  Suggest --> Form : 16. Trả gợi ý tìm kiếm
+  deactivate Suggest
+end
+Form -> UI : 17. Lọc động phía client (từ khóa, kỹ năng, cấp bậc, hình thức)
+opt Bật "Chỉ hiện việc đã lưu"
+  UI -> UI : 18. Lọc thêm theo danh sách ViecLamDaLuu
+end
 deactivate Form
+
+opt Hỏi trợ lý AI
+  Actor -> Form : 19. Gửi câu hỏi tìm việc
+  Form -> Ai : 20. POST /ai/chatbot
+  activate Ai
+  Ai --> Form : 21. Trả câu trả lời gợi ý
+  deactivate Ai
+end
+
+alt Có kết quả
+  UI --> Actor : 22. Hiển thị danh sách việc làm theo phân trang
+  opt Lưu hoặc bỏ lưu một tin
+    alt Là ứng viên đã đăng nhập
+      UI -> Saved : 23. POST | DELETE /viec-lam-da-luu/{id}
+      activate Saved
+      Saved -> E3 : 24. Thêm hoặc xóa việc đã lưu
+      Saved --> UI : 25. Cập nhật trạng thái đã lưu
+      deactivate Saved
+    else Khách vãng lai hoặc vai trò khác
+      UI --> Actor : 23. Chuyển hướng sang trang đăng nhập
+    end
+  end
+  opt Mở trang quản lý việc đã lưu
+    UI --> Actor : 26. Điều hướng tới trang "Việc đã lưu"
+  end
+else Không có kết quả
+  UI --> Actor : 22. Hiển thị trạng thái không có việc phù hợp và gợi ý đổi bộ lọc
+end
 deactivate UI
 @enduml

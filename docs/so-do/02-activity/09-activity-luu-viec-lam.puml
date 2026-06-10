@@ -11,48 +11,26 @@ skinparam activity {
   BarColor #111111
 }
 start
-:Người dùng mở danh sách hoặc chi tiết việc làm;
-:Chọn một TinTuyểnDụng;
-if (Thao tác ở trang chi tiết?) then (Có)
-  if (Đã đăng nhập ứng viên?) then (Có)
-    :Nhấn nút "Lưu" hoặc "Đã lưu";
-    :Hệ thống gọi ViệcLàmĐãLưu theo NgườiDùng và TinTuyểnDụng;
-    if (TinTuyểnDụng tồn tại?) then (Có)
-      if (Đã lưu?) then (Có)
-        :Xóa ViệcLàmĐãLưu;
-        :Cập nhật nút thành chưa lưu;
-        :Hiển thị thông báo đã bỏ lưu;
-      else (Chưa)
-        :Tạo ViệcLàmĐãLưu;
-        :Cập nhật nút thành đã lưu;
-        :Hiển thị thông báo đã lưu việc làm;
-      endif
-    else (Không)
-      :Hiển thị thông báo tin không tồn tại;
+:Người dùng nhấn biểu tượng lưu trên trang tìm kiếm việc làm
+hoặc trang chi tiết tin tuyển dụng;
+if (Đã đăng nhập?) then (Có)
+  if (Là tài khoản ứng viên?) then (Có)
+    if (Tin đã được lưu trước đó?) then (Có)
+      :Hệ thống xóa TinTuyenDung khỏi ViecLamDaLuu;
+      :Cập nhật biểu tượng về trạng thái chưa lưu;
+      :Hiển thị thông báo đã bỏ lưu việc làm;
+    else (Chưa)
+      :Hệ thống lưu TinTuyenDung vào ViecLamDaLuu;
+      :Cập nhật biểu tượng về trạng thái đã lưu;
+      :Hiển thị thông báo đã lưu việc làm;
     endif
-  else (Không)
-    :Điều hướng tới trang đăng nhập với thông báo cần tài khoản ứng viên;
+  else (Nhà tuyển dụng hoặc quản trị viên)
+    :Hiển thị cảnh báo chỉ tài khoản ứng viên mới lưu được;
+    :Điều hướng về trang chính của vai trò đó;
   endif
-else (Trang danh sách việc làm)
-  if (Đã đăng nhập ứng viên?) then (Có)
-    :Nhấn biểu tượng lưu;
-    :Hệ thống gọi ViệcLàmĐãLưu theo NgườiDùng và TinTuyểnDụng;
-    if (TinTuyểnDụng tồn tại?) then (Có)
-      if (Đã lưu?) then (Có)
-        :Xóa ViệcLàmĐãLưu;
-        :Cập nhật nút thành chưa lưu;
-      else (Chưa)
-        :Tạo ViệcLàmĐãLưu;
-        :Cập nhật nút thành đã lưu;
-      endif
-    else (Không)
-      :Hiển thị thông báo tin không tồn tại;
-    endif
-  else (Không)
-    :Nhấn biểu tượng lưu;
-    :Lưu tạm mã TinTuyểnDụng vào bộ nhớ trình duyệt;
-    :Cập nhật trạng thái nút lưu trên trình duyệt;
-  endif
+else (Chưa đăng nhập)
+  :Hiển thị thông báo yêu cầu đăng nhập bằng tài khoản ứng viên;
+  :Điều hướng tới trang đăng nhập;
 endif
 stop
 @enduml

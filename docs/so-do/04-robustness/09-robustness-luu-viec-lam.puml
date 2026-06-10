@@ -3,6 +3,8 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 70
 left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
@@ -22,18 +24,34 @@ skinparam entity {
 }
 
 actor "Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "chi-tiet-viec-lam" as UI
-boundary "nut-luu-viec-lam" as Form
-control "luu-viec-lam" as Controller
 
-entity "ViecLamDaLuu" as MainEntity
-entity "NguoiDung" as E1
-entity "TinTuyenDung" as E2
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "chi-tiet-viec-lam" as UI
+  boundary "nut-luu-viec-lam" as Form
+}
 
+' ── Lớp control (xử lý) ──
+together {
+  control "luu-viec-lam" as Controller
+}
+
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "ViecLamDaLuu" as ViecLamDaLuu
+  entity "NguoiDung" as NguoiDung
+  entity "TinTuyenDung" as TinTuyenDung
+}
+
+' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
+
+' ── boundary ↔ boundary / control ──
 UI <--> Form
 Form <--> Controller
-Controller <--> MainEntity
-Controller <--> E1
-Controller <--> E2
+
+' ── control ↔ entity ──
+Controller <--> ViecLamDaLuu
+Controller <--> NguoiDung
+Controller <--> TinTuyenDung
 @enduml

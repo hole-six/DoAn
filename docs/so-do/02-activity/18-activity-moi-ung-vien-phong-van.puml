@@ -10,45 +10,47 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
+
 start
 :Nhà tuyển dụng đăng nhập;
 :Mở luồng xử lý ứng viên;
 :Hệ thống tải HồSơỨngTuyển, ỨngViên và TinTuyểnDụng;
 :Chọn hồ sơ ứng viên cần mời phỏng vấn;
-if (Hồ sơ thuộc công ty?) then (Đúng)
-  if (Đã có LịchPhỏngVấn?) then (Có)
-    :Hiển thị thông báo hồ sơ đã có lịch phỏng vấn;
-  else (Chưa)
-    :Nhấn nút "Mời phỏng vấn";
-    fork
-      :Chọn ngày giờ bắt đầu;
-    fork again
-      :Chọn ngày giờ kết thúc;
-    fork again
-      :Chọn hình thức online hoặc offline;
-    fork again
-      :Nhập địa chỉ hoặc link họp;
-    fork again
-      :Nhập ghi chú cho ứng viên;
-    end fork
-    if (Muốn thoát?) then (Có)
-      :Nhấn nút "Đóng";
-    else (Không)
-      :Nhấn nút "Lưu lịch";
-      :Hệ thống kiểm tra thời gian và dữ liệu lịch;
-      if (Dữ liệu hợp lệ?) then (Đúng)
-        :Tạo LịchPhỏngVấn trạng thái đã lên lịch;
-        :Cập nhật HồSơỨngTuyển thành moi_phong_van;
-        :Gửi ThôngBáo mời phỏng vấn cho ứng viên;
-        :Hiển thị gửi lời mời thành công;
-      else (Sai)
-        :Hiển thị thông báo lỗi dữ liệu lịch;
-      endif
+
+if (Đã có LịchPhỏngVấn?) then (Có)
+  :Hiển thị thông báo hồ sơ đã có lịch phỏng vấn;
+else (Chưa)
+  :Nhấn nút "Mời phỏng vấn";
+
+  fork
+    :Chọn ngày giờ bắt đầu;
+  fork again
+    :Chọn ngày giờ kết thúc;
+  fork again
+    :Chọn hình thức online hoặc offline;
+  fork again
+    :Nhập địa chỉ hoặc link họp;
+  fork again
+    :Nhập ghi chú cho ứng viên;
+  end fork
+
+  if (Muốn thoát?) then (Có)
+    :Nhấn nút "Đóng";
+  else (Không)
+    :Nhấn nút "Lưu lịch";
+    :Hệ thống kiểm tra thời gian và dữ liệu lịch;
+
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo LịchPhỏngVấn trạng thái đã lên lịch;
+      :Cập nhật HồSơỨngTuyển thành moi_phong_van;
+      :Ghi lịch sử hồ sơ ứng tuyển;
+      :Gửi ThôngBáo mời phỏng vấn cho ứng viên;
+      :Hiển thị gửi lời mời thành công;
+    else (Sai)
+      :Hiển thị thông báo lỗi dữ liệu lịch;
     endif
   endif
-else (Sai)
-  :Hiển thị thông báo không có quyền mời phỏng vấn;
 endif
-:Ghi lịch sử hồ sơ ứng tuyển với trạng thái "moi_phong_van";
+
 stop
 @enduml

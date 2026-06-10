@@ -1,6 +1,7 @@
-﻿import { useEffect, useState } from 'react'
-import { Edit3, Eye, Plus, Power, Trash2 } from 'lucide-react'
+﻿import { useEffect, useMemo, useState } from 'react'
+import { Edit3, Eye, Plus, Power, Search, Trash2, X } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatDate, formatMoney } from '../../../lib/format'
@@ -11,11 +12,26 @@ import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/NtdAtoms'
 import { useEmployerData } from '../shared/useEmployerData'
 import { JobModal } from './JobModal'
 
+const inputCls = 'min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
+
 export default function QuanLyTinNhaTuyenDungPage() {
   const data = useEmployerData()
   const [editing, setEditing] = useState<Partial<TinTuyenDung> | null | undefined>(undefined)
   const congTyDaDuyet = data.company?.trangThaiDuyet === 'da_duyet'
   const { confirm, ConfirmDialogComponent } = useConfirm()
+  const [tuKhoa, setTuKhoa] = useState('')
+  const [locTrangThai, setLocTrangThai] = useState('')
+
+  const danhSachHienThi = useMemo(() => {
+    const kw = tuKhoa.trim().toLowerCase()
+    return data.jobs.filter(job => {
+      const khopKw = !kw || (job.tieuDe ?? '').toLowerCase().includes(kw) || (job.diaChi ?? '').toLowerCase().includes(kw)
+      const khopTrangThai = !locTrangThai || job.trangThai === locTrangThai
+      return khopKw && khopTrangThai
+    })
+  }, [data.jobs, tuKhoa, locTrangThai])
+
+  const phanTrang = usePhanTrang(danhSachHienThi)
 
   useEffect(() => {
     if (congTyDaDuyet && new URLSearchParams(window.location.search).get('new') === '1') setEditing(null)
@@ -79,8 +95,26 @@ export default function QuanLyTinNhaTuyenDungPage() {
         </div>
       )}
       <Panel>
+        <div className="mb-3 grid gap-2 sm:flex sm:items-center">
+          <label className="flex min-h-10 flex-1 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-400 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+            <Search size={15} />
+            <input
+              className="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+              placeholder="Tìm tiêu đề, địa chỉ..."
+              value={tuKhoa}
+              onChange={e => setTuKhoa(e.target.value)}
+            />
+            {tuKhoa && <button type="button" onClick={() => setTuKhoa('')}><X size={14} /></button>}
+          </label>
+          <select className={`${inputCls} sm:w-44`} value={locTrangThai} onChange={e => setLocTrangThai(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {Object.entries(jobStatusLabel).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
         <div className="ntd-list grid gap-3">
-          {data.jobs.length ? data.jobs.map(job => (
+          {danhSachHienThi.length ? phanTrang.danhSachTrang.map(job => (
             <article key={job.id} className="ntd-list-card grid gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:grid-cols-[minmax(0,1fr)_auto]">
               <div className="ntd-list-main min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
@@ -102,8 +136,9 @@ export default function QuanLyTinNhaTuyenDungPage() {
               </ButtonGroup>
               </div>
             </article>
-          )) : <EmptyState>Chưa có tin tuyển dụng.</EmptyState>}
+          )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có tin phù hợp bộ lọc.' : 'Chưa có tin tuyển dụng.'}</EmptyState>}
         </div>
+        <PhanTrang {...phanTrang} donVi="tin" className="mt-4" />
       </Panel>
       {editing !== undefined && <JobModal initial={editing ?? undefined} companyId={data.company?.id} skills={data.skills} onClose={() => setEditing(undefined)} onSubmit={save} />}
       <ConfirmDialogComponent />

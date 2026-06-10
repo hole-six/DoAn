@@ -16,6 +16,12 @@ start
 :Hệ thống tải danh sách NhàTuyểnDụng;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị công ty, ngành, trạng thái và ngày tạo;
+  fork
+    :Nhập từ khóa tìm theo tên công ty;
+  fork again
+    :Lọc theo trạng thái duyệt;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
   :Chọn một hồ sơ công ty;
   if (Chọn thao tác?) then (Duyệt)
     :Nhấn nút "Duyệt" hoặc "Duyệt lại";

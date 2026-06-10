@@ -1,10 +1,11 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Check, ExternalLink, Eye, Inbox, MessageCircle, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useThongBao } from '../contexts/ThongBaoContext'
 import { formatDateTime } from '../lib/format'
 import type { ThongBao } from '../types/recruitment'
 import { Button } from './ui/Button'
+import { PhanTrang, usePhanTrang } from './PhanTrang'
 
 type Props = {
   items: ThongBao[]
@@ -51,6 +52,12 @@ export function NotificationInbox({ items, onReload }: Props) {
     () => (filter === 'all' ? items : items.filter(item => (item.loai ?? 'he_thong') === filter)),
     [filter, items],
   )
+  const phanTrang = usePhanTrang(filteredItems)
+  const { setTrang } = phanTrang
+
+  useEffect(() => {
+    setTrang(1)
+  }, [filter, setTrang])
 
   const markRead = async (item: ThongBao) => {
     const id = notificationId(item)
@@ -142,7 +149,7 @@ export function NotificationInbox({ items, onReload }: Props) {
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
-            {filteredItems.map(item => {
+            {phanTrang.danhSachTrang.map(item => {
               const id = notificationId(item)
               return (
                 <article
@@ -181,6 +188,10 @@ export function NotificationInbox({ items, onReload }: Props) {
           </div>
         )}
       </div>
+
+      {filteredItems.length > 0 && (
+        <PhanTrang {...phanTrang} donVi="thông báo" />
+      )}
 
       {selected && (
         <div className="fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">

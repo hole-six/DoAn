@@ -16,6 +16,12 @@ start
 :Hệ thống tải TinTuyểnDụng và NhàTuyểnDụng liên quan;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách tin, công ty, trạng thái và hạn nộp;
+  fork
+    :Nhập từ khóa tìm theo tiêu đề tin hoặc công ty;
+  fork again
+    :Lọc theo trạng thái tin;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
   if (Chọn thao tác?) then (Xem chi tiết)
     :Mở ngăn chi tiết TinTuyểnDụng;
     :Xem tiêu đề, mô tả, yêu cầu, quyền lợi, kỹ năng và công ty đăng;
@@ -48,6 +54,5 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Hiển thị thông báo không tải được dữ liệu;
 endif
-:Khi xem/duyệt tin vẫn đọc kỹ năng qua TinTuyenDungKyNang;
 stop
 @enduml

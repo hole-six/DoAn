@@ -24,38 +24,40 @@ actor "Actor: Nhà tuyển dụng" as Actor
 boundary "UI: quan-ly-tin" as UI
 boundary "UI: form-dang-tin" as Form
 control "Controller: TinTuyenDungController" as Controller
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: DanhMucKyNang" as E2
 entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
-entity "Entity: ThongBao" as E3
+entity "Entity: DanhMucKyNang" as DanhMucKyNang
+entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Nhấn Đăng tin tuyển dụng
 activate UI
 UI -> Form : 2. Hiển thị form-dang-tin
 activate Form
-Actor -> Form : 3. Nhập tiêu đề, mô tả, kỹ năng, lương và hạn nộp
-Form -> Controller : 4. taoTinTuyenDung(request)
+Form -> DanhMucKyNang : 3. Tải danh mục kỹ năng để chọn
+Actor -> Form : 4. Nhập tiêu đề, mô tả, kỹ năng, lương và hạn nộp
+Form -> Controller : 5. POST /tintuyendung taoMoi(request)
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra công ty đã duyệt và dữ liệu tin
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+note over Controller : Middleware damBaoQuyenTaoTin\nkiểm công ty da_duyet + set trangThai 'cho_duyet'
+Controller -> NhaTuyenDung : 6. Lấy công ty theo người dùng, kiểm tra trạng thái duyệt
+activate NhaTuyenDung
+NhaTuyenDung --> Controller : 7. return công ty và trangThaiDuyet
+deactivate NhaTuyenDung
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Tạo tin tuyển dụng chờ duyệt
+alt Công ty đã duyệt và dữ liệu hợp lệ
+  Controller -> MainEntity : 8. Tạo tin tuyển dụng trạng thái cho_duyet
   activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  MainEntity --> Controller : 9. return tin đã tạo
   deactivate MainEntity
-  Controller -> TinTuyenDungKyNang : 9. Lưu kỹ năng bắt buộc/trọng số của tin
-  Controller -> E3 : 10. Gửi thông báo cho admin
-  Controller --> Form : 11. Thông báo tin đã gửi duyệt
-  Form --> UI : 12. Cập nhật giao diện
-  UI --> Actor : 13. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo công ty chưa được duyệt hoặc dữ liệu lỗi
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller -> TinTuyenDungKyNang : 10. createMany kỹ năng bắt buộc/trọng số (liên kết DanhMucKyNang)
+  Controller -> ThongBao : 11. Gửi thông báo cho admin duyệt tin
+  Controller --> Form : 12. Thông báo tin đã gửi duyệt
+  Form --> UI : 13. Cập nhật giao diện
+  UI --> Actor : 14. Hiển thị kết quả thành công
+else Công ty chưa duyệt hoặc dữ liệu không hợp lệ
+  Controller --> Form : 8. Thông báo công ty chưa được duyệt hoặc dữ liệu lỗi
+  Form --> UI : 9. Hiển thị lỗi tại màn hình
+  UI --> Actor : 10. Yêu cầu kiểm tra lại thông tin
 end
 deactivate Controller
 deactivate Form

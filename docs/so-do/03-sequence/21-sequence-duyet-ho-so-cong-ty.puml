@@ -25,27 +25,26 @@ boundary "UI: quan-tri-cong-ty" as UI
 boundary "UI: form-duyet-cong-ty" as Form
 control "Controller: NhaTuyenDungController" as Controller
 entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: NguoiDung" as E1
-entity "Entity: ThongBao" as E2
+entity "Entity: ThongBao" as E1
 
 Actor -> UI : 1. Mở danh sách công ty chờ duyệt
 activate UI
 UI -> Form : 2. Hiển thị form-duyet-cong-ty
 activate Form
 Actor -> Form : 3. Xem hồ sơ và chọn duyệt hoặc từ chối
-Form -> Controller : 4. duyetHoSoCongTy(request)
+Form -> Controller : 4. PATCH /nhatuyendung/:ma {trangThaiDuyet}
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra hồ sơ công ty và lý do từ chối nếu có
+Controller -> MainEntity : 5. Kiểm tra hồ sơ công ty hiện tại
 activate MainEntity
 MainEntity --> Controller : 6. return kết quả kiểm tra
 deactivate MainEntity
 
 alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Cập nhật trạng thái duyệt công ty
+  Controller -> MainEntity : 7. Cập nhật trạng thái duyệt công ty (lý do từ chối không bắt buộc)
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Gửi thông báo cho nhà tuyển dụng
+  Controller -> E1 : 9. Tạo ThôngBáo kết quả duyệt cho nhà tuyển dụng
   Controller --> Form : 10. Thông báo xử lý hồ sơ công ty thành công
   Form --> UI : 11. Cập nhật giao diện
   UI --> Actor : 12. Hiển thị kết quả thành công

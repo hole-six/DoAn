@@ -13,12 +13,13 @@ skinparam activity {
 start
 :Khách vãng lai hoặc ứng viên mở trang việc làm;
 :Hệ thống tải danh sách TinTuyểnDụng;
+:Hệ thống chỉ hiển thị tin có trạng thái đang mở;
 if (Người dùng là ứng viên đã đăng nhập?) then (Có)
   :Hệ thống tải ViệcLàmĐãLưu của ứng viên;
+  :Hiển thị nút "Việc đã lưu" và đánh dấu các tin đã lưu;
 else (Không)
-  :Dùng danh sách việc đã lưu trong trình duyệt nếu có;
+  :Không có việc đã lưu, ẩn nút "Việc đã lưu";
 endif
-:Hệ thống chỉ hiển thị tin có trạng thái đang mở;
 fork
   :Nhập từ khóa tìm kiếm;
 fork again
@@ -36,9 +37,14 @@ else (Không)
   :Nhấn nút "Tìm việc" hoặc hệ thống tự lọc;
 endif
 if (Muốn xóa bộ lọc?) then (Có)
-  :Đặt lại nhóm kỹ năng, kỹ năng, cấp bậc và hình thức;
+  :Đặt lại từ khóa, nhóm kỹ năng, kỹ năng, cấp bậc và hình thức;
 else (Không)
   :Giữ bộ lọc hiện tại;
+endif
+if (Ứng viên bật "Chỉ hiện việc đã lưu"?) then (Có)
+  :Lọc thêm theo danh sách ViệcLàmĐãLưu;
+else (Không)
+  :Hiển thị toàn bộ tin phù hợp;
 endif
 :Hệ thống lọc TinTuyểnDụng theo từ khóa và bộ lọc động;
 if (Người dùng hỏi trợ lý AI?) then (Có)
@@ -49,10 +55,16 @@ else (Không)
 endif
 if (Có kết quả?) then (Có)
   :Hiển thị danh sách việc làm theo phân trang;
-  if (Người dùng chọn một tin?) then (Có)
+  if (Người dùng thao tác trên kết quả?) then (Chọn tin)
     :Mở trang chi tiết TinTuyểnDụng;
-  elseif (Chọn lưu việc?) then (Lưu việc)
-    :Lưu hoặc bỏ lưu TinTuyểnDụng;
+  elseif (Lưu hoặc bỏ lưu việc?) then (Lưu/bỏ lưu)
+    if (Là ứng viên đã đăng nhập?) then (Có)
+      :Lưu hoặc bỏ lưu TinTuyểnDụng và cập nhật danh sách;
+    else (Không)
+      :Chuyển hướng sang trang đăng nhập;
+    endif
+  elseif (Mở trang quản lý việc đã lưu?) then (Ứng viên)
+    :Điều hướng tới trang "Việc đã lưu";
   else (Không)
     :Tiếp tục xem danh sách;
   endif
@@ -60,6 +72,5 @@ else (Không)
   :Hiển thị trạng thái không có việc phù hợp;
   :Gợi ý đổi từ khóa hoặc bộ lọc;
 endif
-:Hệ thống lọc kỹ năng tin qua TinTuyenDungKyNang và DanhMucKyNang;
 stop
 @enduml

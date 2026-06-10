@@ -22,54 +22,40 @@ title Sơ đồ Xem thống kê hệ thống
 
 actor "Actor: Quản trị viên" as Actor
 boundary "UI: quan-tri-dashboard" as UI
-boundary "UI: bang-thong-ke" as Form
-control "Controller: DashboardAdminController" as Controller
 control "Controller: CanhBaoQuanTriController" as AlertController
 entity "Entity: NguoiDung" as NguoiDung
 entity "Entity: TinTuyenDung" as TinTuyenDung
 entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
-entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
-entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
-entity "Entity: DanhGiaPhongVan" as DanhGiaPhongVan
 
 Actor -> UI : 1. Mở dashboard quản trị
 activate UI
-UI -> Form : 2. Hiển thị khung thống kê
-activate Form
-Form -> Controller : 3. GET /nguoidung, /tintuyendung, /nhatuyendung, /hosoungtuyen
-activate Controller
-Controller -> NguoiDung : 4. Lấy danh sách người dùng
-NguoiDung --> Controller : 5. Trả dữ liệu người dùng
-Controller -> TinTuyenDung : 6. Lấy danh sách tin tuyển dụng
-TinTuyenDung --> Controller : 7. Trả dữ liệu tin
-Controller -> NhaTuyenDung : 8. Lấy danh sách công ty
-NhaTuyenDung --> Controller : 9. Trả dữ liệu công ty
-Controller -> HoSoUngTuyen : 10. Lấy danh sách hồ sơ ứng tuyển
-HoSoUngTuyen --> Controller : 11. Trả dữ liệu hồ sơ
-Controller --> Form : 12. Trả dữ liệu dashboard
-Controller -> LichSuHoSoUngTuyen : Tổng hợp biến động trạng thái hồ sơ
-Controller -> TinTuyenDungKyNang : Tổng hợp nhu cầu kỹ năng từ tin tuyển dụng
-Controller -> DanhGiaPhongVan : Tổng hợp đánh giá phỏng vấn nếu cần
-deactivate Controller
 
-Form -> AlertController : 13. GET /canhbaoquantri
+note over UI : Dashboard gọi song song 4 danh sách rồi tổng hợp KPI ở client
+
+UI -> NguoiDung : 2. GET /nguoidung
+NguoiDung --> UI : 3. Trả danh sách người dùng
+UI -> TinTuyenDung : 4. GET /tintuyendung
+TinTuyenDung --> UI : 5. Trả danh sách tin tuyển dụng
+UI -> NhaTuyenDung : 6. GET /nhatuyendung
+NhaTuyenDung --> UI : 7. Trả danh sách công ty
+UI -> HoSoUngTuyen : 8. GET /hosoungtuyen
+HoSoUngTuyen --> UI : 9. Trả danh sách hồ sơ ứng tuyển
+
+UI -> AlertController : 10. GET /canhbaoquantri
 activate AlertController
-AlertController -> TinTuyenDung : 14. Đếm tin chờ duyệt, quá hạn, sắp hết hạn
-AlertController -> NhaTuyenDung : 15. Đếm công ty chờ duyệt, quá hạn
-AlertController -> HoSoUngTuyen : 16. Đếm hồ sơ ứng tuyển mới
-AlertController -> NguoiDung : 17. Đếm tài khoản bị khóa
-AlertController --> Form : 18. Trả cảnh báo và thống kê vận hành
+AlertController -> TinTuyenDung : 11. Đếm tin chờ duyệt, quá hạn, sắp hết hạn
+AlertController -> NhaTuyenDung : 12. Đếm công ty chờ duyệt, quá hạn
+AlertController -> HoSoUngTuyen : 13. Đếm hồ sơ ứng tuyển mới trong 24 giờ
+AlertController -> NguoiDung : 14. Đếm tài khoản bị khóa
+AlertController --> UI : 15. Trả cảnh báo và thống kê vận hành
 deactivate AlertController
 
 alt Tải dữ liệu thành công
-  Form --> UI : 19. Cập nhật KPI, tin chờ duyệt và cảnh báo
-  UI --> Actor : 20. Hiển thị dashboard quản trị
+  UI -> UI : 16. Tổng hợp KPI và lọc tin chờ duyệt (client)
+  UI --> Actor : 17. Hiển thị dashboard quản trị
 else Tải dữ liệu thất bại
-  Form --> UI : 19. Hiển thị lỗi không tải được dữ liệu
-  UI --> Actor : 20. Yêu cầu thử lại
+  UI --> Actor : 17. Hiển thị lỗi và cho phép thử lại
 end
-
-deactivate Form
 deactivate UI
 @enduml

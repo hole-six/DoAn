@@ -88,12 +88,15 @@ export default function TimKiemViecLam() {
   const [loaiHinhDangChon, setLoaiHinhDangChon] = useState<string[]>([])
   const [searchActive, setSearchActive] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [chiViecDaLuu, setChiViecDaLuu] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
   const [aiQuestion, setAiQuestion] = useState('')
   const [aiAnswer, setAiAnswer] = useState('')
   const [aiBusy, setAiBusy] = useState(false)
   const searchWrapRef = useRef<HTMLDivElement | null>(null)
+  const nguoiDungHienTai = layNguoiDung()
+  const laUngVien = nguoiDungHienTai?.vaiTro === 'ung_vien'
   const { groups, loading, hasAny } = useSearchSuggestions({
     query: tuKhoa,
     active: searchActive,
@@ -252,11 +255,11 @@ export default function TimKiemViecLam() {
       && (except === 'loaiHinh' || !loaiHinhDangChon.length || loaiHinhDangChon.includes(job.loai))
   }
 
-  const ketQua = viecLam.filter(job => jobMatches(job))
+  const ketQua = viecLam.filter(job => jobMatches(job) && (!chiViecDaLuu || savedIds.includes(job.id)))
 
   useEffect(() => {
     setPage(1)
-  }, [tuKhoa, loaiDangChon, kyNangDangChon, capBacDangChon, loaiHinhDangChon])
+  }, [tuKhoa, loaiDangChon, kyNangDangChon, capBacDangChon, loaiHinhDangChon, chiViecDaLuu])
 
   const tongTrang = Math.max(1, Math.ceil(ketQua.length / pageSize))
   const pageHienTai = Math.min(page, tongTrang)
@@ -485,10 +488,26 @@ export default function TimKiemViecLam() {
               <h2>{dangTai ? 'Đang tải việc làm' : `Tìm thấy ${ketQua.length} việc làm`}</h2>
               <p>Bộ lọc sinh động từ dữ liệu kỹ năng thật: chọn danh mục để thu hẹp kỹ năng, chọn nhiều kỹ năng để lọc việc giao nhau.</p>
             </div>
-            <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
-              <SlidersHorizontal size={18} />
-              Bộ lọc
-            </button>
+            <div className="jobs-real-heading-actions">
+              {laUngVien && (
+                <>
+                  <button
+                    type="button"
+                    className={`jobs-saved-toggle${chiViecDaLuu ? ' active' : ''}`}
+                    aria-pressed={chiViecDaLuu}
+                    onClick={() => setChiViecDaLuu(prev => !prev)}
+                  >
+                    <Bookmark size={16} fill={chiViecDaLuu ? '#2563eb' : 'none'} />
+                    Việc đã lưu{savedIds.length ? ` (${savedIds.length})` : ''}
+                  </button>
+                  <Link to="/ung-vien/viec-da-luu" className="jobs-saved-link">Mở trang quản lý</Link>
+                </>
+              )}
+              <button className="jobs-mobile-filter-trigger" type="button" onClick={() => setFilterOpen(true)}>
+                <SlidersHorizontal size={18} />
+                Bộ lọc
+              </button>
+            </div>
           </div>
           {boLocDangChon.length > 0 && (
             <div className="filter-summary">
@@ -507,7 +526,11 @@ export default function TimKiemViecLam() {
             </div>
           )}
           {loi && <div className="jobs-real-error">{loi}</div>}
-          {!dangTai && ketQua.length === 0 && <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>}
+          {!dangTai && ketQua.length === 0 && (
+            chiViecDaLuu
+              ? <div className="jobs-real-empty">Bạn chưa lưu việc làm nào đang mở. Nhấn biểu tượng <Bookmark size={14} style={{ verticalAlign: 'middle' }} /> trên mỗi tin để lưu, hoặc xem lại tại <Link to="/ung-vien/viec-da-luu">trang việc đã lưu</Link>.</div>
+              : <div className="jobs-real-empty">Không có việc làm phù hợp bộ lọc hiện tại.</div>
+          )}
           {ketQua.length > 0 && (
             <Pagination
               page={pageHienTai}

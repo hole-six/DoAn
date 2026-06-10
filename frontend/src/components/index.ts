@@ -20,6 +20,9 @@ export { Card, CardHeader, CardBody, CardFooter, KpiCard } from './Card'
 // Badges
 export { Badge, StatusBadge } from './Badge'
 
+// Pagination (dùng chung 3 vai trò)
+export { PhanTrang, usePhanTrang, KICH_THUOC_TRANG_MAC_DINH } from './PhanTrang'
+export type { KetQuaPhanTrang } from './PhanTrang'
 // Dashboard Shell
 export { default as DashboardShell } from './DashboardShell'
 export { default as BottomNav } from './BottomNav'

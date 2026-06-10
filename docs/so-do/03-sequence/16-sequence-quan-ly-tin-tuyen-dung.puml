@@ -25,37 +25,42 @@ boundary "UI: quan-ly-tin" as UI
 boundary "UI: form-sua-tin" as Form
 control "Controller: TinTuyenDungController" as Controller
 entity "Entity: TinTuyenDung" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: DanhMucKyNang" as E2
 entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 
 Actor -> UI : 1. Mở trang quản lý tin
 activate UI
 UI -> Form : 2. Hiển thị form-sua-tin
 activate Form
-Actor -> Form : 3. Tìm kiếm, sửa, đóng, mở hoặc xóa tin
-Form -> Controller : 4. capNhatTinTuyenDung(request)
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra tin thuộc công ty và trạng thái cho phép
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Actor -> Form : 3. Tìm kiếm, sửa, tạm đóng, mở lại hoặc xóa tin
+note over Controller : Middleware damBaoQuyenSuaXoaTin kiểm tin thuộc công ty;\nkhóa sửa nội dung tin đã duyệt (JOB_POST_LOCKED)
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Cập nhật trạng thái hoặc nội dung tin
+alt Sửa nội dung tin
+  Form -> Controller : 4. PATCH /tintuyendung/:ma capNhat(request)
+  activate Controller
+  Controller -> MainEntity : 5. Kiểm tra tin thuộc công ty và trạng thái cho phép sửa
   activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  MainEntity --> Controller : 6. return kết quả kiểm tra
   deactivate MainEntity
-  Controller -> TinTuyenDungKyNang : 9. Đồng bộ kỹ năng liên quan nếu có
-  Controller --> Form : 10. Trả danh sách tin mới
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo không có quyền hoặc trạng thái không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller -> MainEntity : 7. Cập nhật nội dung tin
+  Controller -> TinTuyenDungKyNang : 8. deleteMany rồi createMany đồng bộ kỹ năng
+  Controller --> Form : 9. Trả tin đã cập nhật
+  deactivate Controller
+else Tạm đóng / Mở lại
+  Form -> Controller : 4. POST /tintuyendung/:ma/tam-dong | /:ma/mo-lai
+  activate Controller
+  Controller -> MainEntity : 5. Cập nhật trạng thái tam_dong hoặc dang_mo
+  Controller --> Form : 6. Trả tin đã cập nhật
+  deactivate Controller
+else Xóa tin
+  Form -> Controller : 4. DELETE /tintuyendung/:ma
+  activate Controller
+  Controller -> MainEntity : 5. Xóa tin tuyển dụng
+  Controller --> Form : 6. Trả kết quả xóa
+  deactivate Controller
 end
-deactivate Controller
+
+Form --> UI : 10. Cập nhật danh sách tin
+UI --> Actor : 11. Hiển thị kết quả thao tác
 deactivate Form
 deactivate UI
 @enduml

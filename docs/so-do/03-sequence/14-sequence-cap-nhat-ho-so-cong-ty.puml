@@ -25,19 +25,19 @@ boundary "UI: thong-tin-cong-ty" as UI
 boundary "UI: form-ho-so-cong-ty" as Form
 control "Controller: NhaTuyenDungController" as Controller
 entity "Entity: NhaTuyenDung" as MainEntity
-entity "Entity: NguoiDung" as E1
-entity "Entity: ThongBao" as E2
+entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Mở trang thông tin công ty
 activate UI
 UI -> Form : 2. Hiển thị form-ho-so-cong-ty
 activate Form
 Actor -> Form : 3. Cập nhật mã số thuế, địa chỉ, logo, mô tả
-Form -> Controller : 4. capNhatHoSoCongTy(request)
+Form -> Controller : 4. PATCH /nhatuyendung/:ma capNhat(request)
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra quyền sở hữu và độ đầy đủ hồ sơ
+note over Controller : Route /nhatuyendung chỉ gắn người dùng nếu có\nController generic, không kiểm tra quyền sở hữu
+Controller -> MainEntity : 5. Lấy hồ sơ hiện tại (trangThaiCu)
 activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
+MainEntity --> Controller : 6. return hồ sơ và trạng thái duyệt
 deactivate MainEntity
 
 alt Dữ liệu hợp lệ
@@ -45,14 +45,17 @@ alt Dữ liệu hợp lệ
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Chuyển trạng thái chờ duyệt và báo admin
-  Controller --> Form : 10. Thông báo đã gửi hồ sơ chờ duyệt
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
+  opt trangThaiCu == 'tu_choi' và có cập nhật nội dung và trangThaiMoi != 'da_duyet'
+    Controller -> MainEntity : 9. Đặt lại trạng thái về cho_duyet
+    Controller -> ThongBao : 10. Gửi thông báo admin duyệt lại hồ sơ
+  end
+  Controller --> Form : 11. Thông báo cập nhật thành công
+  Form --> UI : 12. Cập nhật giao diện
+  UI --> Actor : 13. Hiển thị kết quả thành công
 else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo thiếu thông tin cần duyệt
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller --> Form : 11. Thông báo lỗi dữ liệu / trạng thái
+  Form --> UI : 12. Hiển thị lỗi tại màn hình
+  UI --> Actor : 13. Yêu cầu kiểm tra lại thông tin
 end
 deactivate Controller
 deactivate Form

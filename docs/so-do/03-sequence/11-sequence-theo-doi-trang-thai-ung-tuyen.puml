@@ -24,39 +24,47 @@ actor "Actor: Ứng viên" as Actor
 boundary "UI: ho-so-ung-tuyen" as UI
 boundary "UI: bo-loc-trang-thai" as Form
 control "Controller: HoSoUngTuyenController" as Controller
+control "Controller: LichPhongVanController" as LichController
 entity "Entity: HoSoUngTuyen" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: LichPhongVan" as E2
-entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
+entity "Entity: UngVien" as UngVien
+entity "Entity: TinTuyenDung" as TinTuyenDung
+entity "Entity: NhaTuyenDung" as NhaTuyenDung
+entity "Entity: HoSoNangLuc" as HoSoNangLuc
+entity "Entity: LichPhongVan" as LichPhongVan
 
 Actor -> UI : 1. Mở trang hồ sơ ứng tuyển
 activate UI
 UI -> Form : 2. Hiển thị bo-loc-trang-thai
 activate Form
-Actor -> Form : 3. Lọc hoặc xem chi tiết trạng thái
-Form -> Controller : 4. layDanhSachHoSoUngTuyen()
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra hồ sơ thuộc ứng viên
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Actor -> Form : 3. Lọc theo trạng thái hoặc xem chi tiết
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Lấy danh sách hồ sơ ứng tuyển
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller -> E1 : 9. Lấy tin tuyển dụng và lịch phỏng vấn liên quan
-  Controller --> Form : 10. Hiển thị trạng thái ứng tuyển
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo không tải được dữ liệu
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
-end
-Controller -> LichSuHoSoUngTuyen : Lấy timeline trạng thái của hồ sơ
+Form -> Controller : 4. GET /hosoungtuyen (chỉ yêu cầu đăng nhập)
+activate Controller
+Controller -> MainEntity : 5. Lấy toàn bộ hồ sơ ứng tuyển
+activate MainEntity
+MainEntity --> Controller : 6. return danh sách hồ sơ
+deactivate MainEntity
+Controller -> UngVien : 7. Hydrate ứng viên (kèm người dùng)
+Controller -> TinTuyenDung : 8. Hydrate tin tuyển dụng
+Controller -> NhaTuyenDung : 9. Hydrate nhà tuyển dụng của tin
+Controller -> HoSoNangLuc : 10. Hydrate CV đã nộp
+Controller --> Form : 11. Trả danh sách hồ sơ đã hydrate
 deactivate Controller
+
+Form -> LichController : 12. GET /lichphongvan (endpoint riêng)
+activate LichController
+LichController -> LichPhongVan : 13. Lấy danh sách lịch phỏng vấn
+LichController --> Form : 14. Trả lịch phỏng vấn
+deactivate LichController
+
+Form -> Form : 15. Lọc hồ sơ theo maUngVien và lọc lịch theo hồ sơ (phía client)
+Form --> UI : 16. Cập nhật danh sách và trạng thái ứng tuyển
+UI --> Actor : 17. Hiển thị trạng thái ứng tuyển kèm lịch phỏng vấn
 deactivate Form
 deactivate UI
+
+note over Form
+  Việc lọc theo chủ sở hữu (maUngVien) và theo trạng thái
+  được thực hiện ở phía client; không đọc LichSuHoSoUngTuyen.
+end note
 @enduml

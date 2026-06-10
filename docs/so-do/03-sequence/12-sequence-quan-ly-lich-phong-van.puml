@@ -22,25 +22,23 @@ title Sơ đồ Quản lý lịch phỏng vấn
 
 actor "Actor: Ứng viên" as Actor
 boundary "UI: lich-phong-van" as UI
-boundary "UI: form-phan-hoi-lich" as Form
+boundary "UI: chi-tiet-lich-phong-van" as Form
 control "Controller: LichPhongVanController" as Controller
 entity "Entity: LichPhongVan" as LichPhongVan
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
-entity "Entity: DanhGiaPhongVan" as DanhGiaPhongVan
 entity "Entity: UngVien" as UngVien
 entity "Entity: ThongBao" as ThongBao
 
 Actor -> UI : 1. Mở trang lịch phỏng vấn
 activate UI
-Form -> Controller : 2. GET /lichphongvan
+UI -> Controller : 2. GET /lichphongvan
 activate Controller
 Controller -> LichPhongVan : 3. Lấy lịch của ứng viên hiện tại
 Controller -> HoSoUngTuyen : 4. Populate hồ sơ ứng tuyển
 Controller -> UngVien : 5. Kiểm tra hồ sơ thuộc ứng viên
-Controller --> Form : 6. Trả danh sách lịch
-Controller -> DanhGiaPhongVan : Lấy hoặc lưu nhận xét phỏng vấn nếu có
+Controller --> UI : 6. Trả danh sách lịch
 deactivate Controller
-UI -> Form : 7. Hiển thị lịch và nút phản hồi
+UI -> Form : 7. Hiển thị chi tiết lịch và nút phản hồi
 activate Form
 
 alt Xác nhận lịch
@@ -54,14 +52,7 @@ else Yêu cầu đổi lịch
   Actor -> Form : 8. Nhập ghi chú đổi lịch
   Form -> Controller : 9. POST /lichphongvan/:ma/doi-lich
   activate Controller
-  Controller -> LichPhongVan : 10. Cập nhật trạng thái yeu_cau_doi_lich
-  Controller -> ThongBao : 11. Báo nhà tuyển dụng
-  Controller --> Form : 12. Trả lịch đã cập nhật
-else Hủy lịch
-  Actor -> Form : 8. Nhập lý do hủy
-  Form -> Controller : 9. POST /lichphongvan/:ma/huy
-  activate Controller
-  Controller -> LichPhongVan : 10. Cập nhật trạng thái da_huy
+  Controller -> LichPhongVan : 10. Cập nhật trạng thái doi_lich
   Controller -> ThongBao : 11. Báo nhà tuyển dụng
   Controller --> Form : 12. Trả lịch đã cập nhật
 end

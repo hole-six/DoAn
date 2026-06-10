@@ -11,43 +11,29 @@ skinparam activity {
   BarColor #111111
 }
 start
-:Người dùng đã đăng nhập mở trang hồ sơ hoặc cài đặt tài khoản;
+:Người dùng đã đăng nhập mở trang cài đặt tài khoản;
 :Hệ thống tải NgườiDùng hiện tại;
 if (Tải dữ liệu thành công?) then (Đúng)
-  if (Vai trò ứng viên?) then (Có)
-    :Hệ thống tải ỨngViên theo NgườiDùng;
-    fork
-      :Cập nhật họ tên;
-    fork again
-      :Cập nhật số điện thoại;
-    fork again
-      :Cập nhật ngày sinh, địa chỉ, vị trí mong muốn;
-    fork again
-      :Cập nhật kỹ năng và kinh nghiệm nếu có;
-    end fork
-  else (Nhà tuyển dụng hoặc quản trị viên)
-    fork
-      :Cập nhật họ tên;
-    fork again
-      :Cập nhật số điện thoại;
-    fork again
-      :Nhập mật khẩu mới nếu muốn đổi;
-    fork again
-      :Xem vai trò và trạng thái tài khoản;
-    end fork
-  endif
+  fork
+    :Cập nhật họ tên;
+  fork again
+    :Cập nhật số điện thoại;
+  fork again
+    :Nhập mật khẩu mới nếu muốn đổi;
+  end fork
   if (Muốn hủy?) then (Có)
     :Nhấn nút "Hủy" hoặc rời trang;
   else (Không)
-    :Nhấn nút "Cập nhật" hoặc "Lưu";
-    :Hệ thống kiểm tra dữ liệu tài khoản;
+    :Nhấn nút "Lưu";
+    :Gửi PATCH /nguoidung/:ma với họ tên, số điện thoại và mật khẩu (nếu có);
+    :Hệ thống kiểm tra dữ liệu hợp lệ;
     if (Dữ liệu hợp lệ?) then (Đúng)
-      :Cập nhật NgườiDùng;
-      if (Có thay đổi hồ sơ ứng viên?) then (Có)
-        :Cập nhật ỨngViên;
+      if (Có nhập mật khẩu mới?) then (Có)
+        :Băm mật khẩu mới;
       else (Không)
-        :Giữ nguyên dữ liệu hồ sơ vai trò;
+        :Bỏ qua trường mật khẩu;
       endif
+      :Cập nhật NgườiDùng;
       :Hiển thị thông báo cập nhật thành công;
     else (Sai)
       :Hiển thị thông báo lỗi;
@@ -56,6 +42,5 @@ if (Tải dữ liệu thành công?) then (Đúng)
 else (Sai)
   :Yêu cầu đăng nhập lại;
 endif
-:Nếu cập nhật kỹ năng ứng viên thì đồng bộ UngVienKyNang;
 stop
 @enduml

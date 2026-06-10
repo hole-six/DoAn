@@ -25,34 +25,31 @@ boundary "UI: quan-tri-review" as UI
 boundary "UI: form-duyet-review" as Form
 control "Controller: DanhGiaCongTyController" as Controller
 entity "Entity: DanhGiaCongTy" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: ThongBao" as E2
 
 Actor -> UI : 1. Mở danh sách đánh giá chờ duyệt
 activate UI
 UI -> Form : 2. Hiển thị form-duyet-review
 activate Form
-Actor -> Form : 3. Xem nội dung và chọn duyệt hoặc từ chối
-Form -> Controller : 4. duyetDanhGiaCongTy(request)
+Actor -> Form : 3. Xem nội dung và chọn duyệt
+Form -> Controller : 4. PATCH /danhgiacongty/:id {daDuyet:true}
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra nội dung đánh giá và công ty liên quan
+Controller -> MainEntity : 5. Kiểm tra đánh giá tồn tại
 activate MainEntity
 MainEntity --> Controller : 6. return kết quả kiểm tra
 deactivate MainEntity
 
 alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Cập nhật trạng thái đánh giá
+  Controller -> MainEntity : 7. Cập nhật daDuyet = true
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Cập nhật điểm hiển thị của công ty nếu duyệt
-  Controller --> Form : 10. Thông báo xử lý đánh giá thành công
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
+  Controller --> Form : 9. Thông báo xử lý đánh giá thành công
+  Form --> UI : 10. Cập nhật giao diện
+  UI --> Actor : 11. Hiển thị kết quả thành công
 else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo đánh giá không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller --> Form : 9. Thông báo đánh giá không hợp lệ
+  Form --> UI : 10. Hiển thị lỗi tại màn hình
+  UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
 end
 deactivate Controller
 deactivate Form

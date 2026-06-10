@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
-import { CheckCircle, RotateCcw, Search, Trash2, XCircle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { CheckCircle, RotateCcw, Search, Trash2, X, XCircle } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { DetailDrawer } from '../../../components/DetailDrawer'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { formatDate } from '../../../lib/format'
 import { toast } from '../../../lib/toast'
@@ -9,6 +10,8 @@ import { Badge } from '../../nhatuyendung/shared/NtdAtoms'
 import { adminApi } from '../shared/adminApi'
 import { AdminPage, AdminPanel, AdminTable, EmptyRow } from '../shared/AdminTable'
 import type { AdminCompany } from '../shared/adminTypes'
+
+const inputCls = 'min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
 
 const statusLabels: Record<string, string> = {
   cho_duyet: 'Chờ duyệt',
@@ -37,7 +40,20 @@ export default function QuanLyCongTyAdmin() {
   const [selected, setSelected] = useState<AdminCompany | null>(null)
   const [error, setError] = useState('')
   const [dangXuLy, setDangXuLy] = useState('')
+  const [tuKhoa, setTuKhoa] = useState('')
+  const [locTrangThai, setLocTrangThai] = useState('')
   const { confirm, ConfirmDialogComponent } = useConfirm()
+
+  const danhSachHienThi = useMemo(() => {
+    const kw = tuKhoa.trim().toLowerCase()
+    return items.filter(item => {
+      const khopKw = !kw || (item.tenCongTy ?? '').toLowerCase().includes(kw) || (item.nganh ?? '').toLowerCase().includes(kw)
+      const khopTrangThai = !locTrangThai || (item.trangThaiDuyet ?? 'cho_duyet') === locTrangThai
+      return khopKw && khopTrangThai
+    })
+  }, [items, tuKhoa, locTrangThai])
+
+  const phanTrang = usePhanTrang(danhSachHienThi)
 
   const load = async () => {
     try {
@@ -140,8 +156,19 @@ export default function QuanLyCongTyAdmin() {
     >
       {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-bold text-rose-700">{error}</div>}
       <AdminPanel>
+        <div className="mb-3 grid gap-2 sm:flex sm:items-center">
+          <label className="flex min-h-10 flex-1 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-400 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+            <Search size={15} />
+            <input className="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400" placeholder="Tìm tên công ty, ngành..." value={tuKhoa} onChange={e => setTuKhoa(e.target.value)} />
+            {tuKhoa && <button type="button" onClick={() => setTuKhoa('')}><X size={14} /></button>}
+          </label>
+          <select className={`${inputCls} sm:w-44`} value={locTrangThai} onChange={e => setLocTrangThai(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {Object.entries(statusLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
         <AdminTable heads={['Công ty', 'Ngành', 'Trạng thái', 'Ngày tạo', 'Thao tác']}>
-          {items.length ? items.map(item => {
+          {phanTrang.danhSachTrang.length ? phanTrang.danhSachTrang.map(item => {
             const trangThai = item.trangThaiDuyet ?? 'cho_duyet'
             return (
               <tr
@@ -161,6 +188,7 @@ export default function QuanLyCongTyAdmin() {
             )
           }) : <EmptyRow cols={5} />}
         </AdminTable>
+        <PhanTrang {...phanTrang} donVi="công ty" className="mt-4" />
       </AdminPanel>
 
       {selected && (

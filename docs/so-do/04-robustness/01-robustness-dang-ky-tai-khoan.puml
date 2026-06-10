@@ -1,13 +1,17 @@
 @startuml
+left to right direction
+
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
-skinparam linetype polyline
-left to right direction
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 80
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
 skinparam rectangleBorderColor #333333
+
 skinparam boundary {
   BackgroundColor White
   BorderColor #333333
@@ -22,25 +26,33 @@ skinparam entity {
 }
 
 actor "Khách vãng lai\n(from Usecase Diagram)" as Actor
-boundary "dang-ky" as UI
-boundary "form-dang-ky" as Form
+
+together {
+  boundary "dang-ky" as UI
+  boundary "form-dang-ky" as Form
+}
+
 control "dang-ky-tai-khoan" as Controller
 
-entity "NguoiDung" as NguoiDung
-entity "UngVien" as UngVien
-entity "NhaTuyenDung" as NhaTuyenDung
-entity "ThongBao" as ThongBao
+together {
+  entity "NguoiDung" as NguoiDung
+  entity "UngVien" as UngVien
+  entity "NhaTuyenDung" as NhaTuyenDung
+  entity "ThongBao" as ThongBao
+}
 
-Actor -right-> UI
-UI -right-> Form
-Form -right-> Controller
+Actor <--> UI
+UI <--> Form
+Form <--> Controller
 
-Controller -right-> NguoiDung
-Controller -right-> UngVien
-Controller -right-> NhaTuyenDung
-Controller -right-> ThongBao
+Controller <--> NguoiDung
+Controller <--> UngVien
+Controller <--> NhaTuyenDung
+Controller <--> ThongBao
 
-NguoiDung -down[hidden]-> UngVien
-UngVien -down[hidden]-> NhaTuyenDung
-NhaTuyenDung -down[hidden]-> ThongBao
+' Ép entity nằm thành một cột dọc bên phải
+NguoiDung -[hidden]down-> UngVien
+UngVien -[hidden]down-> NhaTuyenDung
+NhaTuyenDung -[hidden]down-> ThongBao
+
 @enduml

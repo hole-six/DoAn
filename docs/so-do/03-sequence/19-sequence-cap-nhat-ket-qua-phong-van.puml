@@ -27,7 +27,6 @@ control "Controller: LichPhongVanController" as Controller
 entity "Entity: LichPhongVan" as LichPhongVan
 entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
 entity "Entity: LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
-entity "Entity: DanhGiaPhongVan" as DanhGiaPhongVan
 entity "Entity: NhaTuyenDung" as NhaTuyenDung
 entity "Entity: TinTuyenDung" as TinTuyenDung
 entity "Entity: ThongBao" as ThongBao
@@ -47,16 +46,15 @@ Controller -> NhaTuyenDung : 9. Kiểm tra quyền công ty
 Controller -> TinTuyenDung : 10. Kiểm tra tin thuộc công ty
 
 alt Hợp lệ
-  Controller -> LichPhongVan : 11. Cập nhật trạng thái hoan_thanh và kết quả
+  Controller -> LichPhongVan : 11. Cập nhật trạng thái hoan_thanh và ketQua (dat/khong_dat)
   LichPhongVan --> Controller : 12. Trả lịch đã cập nhật
-  Controller -> HoSoUngTuyen : 13. Cập nhật trạng thái dat hoặc khong_dat
+  Controller -> HoSoUngTuyen : 13. Cập nhật hồ sơ thành 'dat' (đạt) hoặc 'tu_choi' (không đạt)
   HoSoUngTuyen --> Controller : 14. Trả hồ sơ đã cập nhật
   Controller -> LichSuHoSoUngTuyen : 15. Ghi lịch sử kết quả hồ sơ
-  Controller -> DanhGiaPhongVan : 16. Lưu điểm, nhận xét và kết quả đề xuất nếu có
-  Controller -> ThongBao : 17. Báo kết quả phỏng vấn cho ứng viên
-  Controller --> Form : 18. Trả kết quả cập nhật
-  Form --> UI : 19. Cập nhật danh sách lịch
-  UI --> Actor : 20. Hiển thị cập nhật thành công
+  Controller -> ThongBao : 16. Báo kết quả phỏng vấn cho ứng viên
+  Controller --> Form : 17. Trả kết quả cập nhật
+  Form --> UI : 18. Cập nhật danh sách lịch
+  UI --> Actor : 19. Hiển thị cập nhật thành công
 else Không hợp lệ
   Controller --> Form : 16. Trả lỗi quyền, trạng thái hoặc kết quả
   Form --> UI : 17. Hiển thị lỗi

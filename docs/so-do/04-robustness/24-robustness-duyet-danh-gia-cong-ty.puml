@@ -2,7 +2,9 @@
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
-skinparam linetype polyline
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 70
 left to right direction
 skinparam actorStyle stick
 skinparam roundcorner 8
@@ -22,25 +24,31 @@ skinparam entity {
 }
 
 actor "Quản trị viên\n(from Usecase Diagram)" as Actor
-boundary "quan-tri-review" as UI
-boundary "form-duyet-review" as Form
-control "duyet-danh-gia-cong-ty" as Controller
 
-entity "DanhGiaCongTy" as MainEntity
-entity "UngVien" as E1
-entity "NhaTuyenDung" as E2
-entity "HoSoUngTuyen" as E3
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "quan-tri-review" as UI
+  boundary "form-duyet-review" as Form
+}
 
-Actor -right-> UI
-UI -right-> Form
-Form -right-> Controller
+' ── Lớp control (xử lý) ──
+together {
+  control "duyet-danh-gia-cong-ty" as Controller
+}
 
-Controller -right-> MainEntity
-Controller -right-> E1
-Controller -right-> E2
-Controller -right-> E3
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "DanhGiaCongTy" as DanhGiaCongTy
+}
 
-MainEntity -down[hidden]-> E1
-E1 -down[hidden]-> E2
-E2 -down[hidden]-> E3
+' ── Quan hệ actor ↔ boundary ──
+Actor <--> UI
+
+' ── boundary ↔ boundary / control ──
+UI <--> Form
+UI <--> Controller
+Form <--> Controller
+
+' ── control ↔ entity ──
+Controller <--> DanhGiaCongTy
 @enduml

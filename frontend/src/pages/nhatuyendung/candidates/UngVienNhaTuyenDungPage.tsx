@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, MessageCircle, Search } from 'lucide-react'
+import { FileText, MessageCircle, Search, X } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { useChat } from '../../../contexts/ChatContext'
@@ -14,6 +15,7 @@ import { ScheduleModal } from '../interviews/ScheduleModal'
 import type { ScheduleValue } from '../interviews/ScheduleModal'
 import { CandidateDrawer } from './CandidateDrawer'
 
+const inputCls = 'min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
 const TRANG_THAI_CHAT = ['da_xem', 'dang_xet_duyet', 'moi_phong_van', 'dat'] as const
 
 export default function UngVienNhaTuyenDungPage() {
@@ -23,6 +25,21 @@ export default function UngVienNhaTuyenDungPage() {
   const [scheduling, setScheduling] = useState<HoSoUngTuyen | null>(null)
   const { moChatVoiNguoiDung } = useChat()
   const { confirm, ConfirmDialogComponent } = useConfirm()
+  const [tuKhoa, setTuKhoa] = useState('')
+  const [locTrangThai, setLocTrangThai] = useState('')
+
+  const danhSachHienThi = useMemo(() => {
+    const kw = tuKhoa.trim().toLowerCase()
+    return data.applications.filter(item => {
+      const khopKw = !kw
+        || (item.hoSoNangLuc?.hoTenHienThi ?? item.ungVien?.nguoiDung?.hoTen ?? '').toLowerCase().includes(kw)
+        || (item.tinTuyenDung?.tieuDe ?? '').toLowerCase().includes(kw)
+      const khopTrangThai = !locTrangThai || item.trangThai === locTrangThai
+      return khopKw && khopTrangThai
+    })
+  }, [data.applications, tuKhoa, locTrangThai])
+
+  const phanTrang = usePhanTrang(danhSachHienThi)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -130,12 +147,26 @@ export default function UngVienNhaTuyenDungPage() {
     <Page title="Pipeline ứng viên" desc="Xem hồ sơ, đánh giá CV, mời phỏng vấn hoặc từ chối theo đúng workflow.">
       <ErrorState message={data.error} />
       <Panel>
-        <div className="mb-3 flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-500">
-          <Search size={16} />
-          <span className="text-sm font-semibold">Danh sách hồ sơ ứng tuyển</span>
+        <div className="mb-3 grid gap-2 sm:flex sm:items-center">
+          <label className="flex min-h-10 flex-1 items-center gap-2 rounded-xl border border-slate-200 px-3 text-slate-400 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-100">
+            <Search size={15} />
+            <input
+              className="min-w-0 flex-1 border-0 bg-transparent text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+              placeholder="Tìm tên ứng viên, vị trí..."
+              value={tuKhoa}
+              onChange={e => setTuKhoa(e.target.value)}
+            />
+            {tuKhoa && <button type="button" onClick={() => setTuKhoa('')}><X size={14} /></button>}
+          </label>
+          <select className={`${inputCls} sm:w-48`} value={locTrangThai} onChange={e => setLocTrangThai(e.target.value)}>
+            <option value="">Tất cả trạng thái</option>
+            {Object.entries(employerApplicationStatusLabel).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
         </div>
         <div className="grid gap-2">
-          {data.applications.length ? data.applications.map(item => (
+          {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => (
             <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]" onClick={() => setSelected(item)}>
               <span className="min-w-0">
                 <strong className="block truncate text-sm font-black text-slate-950">{item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'}</strong>
@@ -151,8 +182,9 @@ export default function UngVienNhaTuyenDungPage() {
                 <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!item.ungVien?.nguoiDung?.id || !TRANG_THAI_CHAT.includes(item.trangThai as any)} onClick={() => void openChat(item)}>Chat</Button>
               </div>
             </article>
-          )) : <EmptyState>Bạn chưa ứng tuyển vị trí nào.</EmptyState>}
+          )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có hồ sơ phù hợp bộ lọc.' : 'Bạn chưa ứng tuyển vị trí nào.'}</EmptyState>}
         </div>
+        <PhanTrang {...phanTrang} donVi="hồ sơ" className="mt-4" />
       </Panel>
       {selected && (
         <CandidateDrawer

@@ -46,8 +46,7 @@ if (Phiên đăng nhập hợp lệ và vai trò quản trị viên?) then (Đú
     :Cho phép nhấn tải lại;
   endif
 else (Sai)
-  :Điều hướng tới trang đăng nhập hoặc báo không có quyền;
+  :Điều hướng tới trang đăng nhập và báo không có quyền;
 endif
-:Thống kê đọc HoSoUngTuyen, LichSuHoSoUngTuyen, TinTuyenDungKyNang và DanhGiaPhongVan khi cần;
 stop
 @enduml

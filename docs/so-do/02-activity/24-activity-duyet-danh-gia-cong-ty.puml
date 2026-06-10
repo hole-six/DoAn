@@ -1,0 +1,42 @@
+@startuml
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activity {
+  BackgroundColor White
+  BorderColor #222222
+  DiamondBackgroundColor White
+  DiamondBorderColor #222222
+  BarColor #111111
+}
+start
+:Quản trị viên đăng nhập;
+:Mở trang quản lý đánh giá công ty;
+:Hệ thống tải danh sách ĐánhGiáCôngTy;
+if (Tải dữ liệu thành công?) then (Đúng)
+  :Hiển thị nội dung, điểm, ngày tạo và trạng thái duyệt;
+  fork
+    :Nhập từ khóa tìm theo nội dung đánh giá;
+  fork again
+    :Lọc theo trạng thái duyệt;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
+  if (Chọn thao tác?) then (Duyệt)
+    :Chọn một đánh giá đang chờ duyệt;
+    :Nhấn nút "Duyệt";
+    :Hệ thống cập nhật ĐánhGiáCôngTy daDuyet = true;
+    :Hiển thị thông báo đã duyệt review;
+    :Tải lại danh sách đánh giá;
+  else (Xóa)
+    :Chọn đánh giá cần xóa;
+    :Xác nhận xóa đánh giá;
+    :Hệ thống xóa ĐánhGiáCôngTy;
+    :Hiển thị thông báo đã xóa review;
+    :Tải lại danh sách đánh giá;
+  endif
+else (Sai)
+  :Hiển thị thông báo không tải được danh sách đánh giá;
+endif
+stop
+@enduml

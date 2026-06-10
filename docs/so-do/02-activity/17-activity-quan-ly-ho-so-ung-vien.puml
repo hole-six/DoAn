@@ -19,11 +19,15 @@ fork again
   :Hệ thống tải TinTuyểnDụng;
 fork again
   :Hệ thống tải ỨngViên và HồSơNăngLực liên quan;
-fork again
-  :Hệ thống tải LịchPhỏngVấn nếu có;
 end fork
 if (Có quyền xem hồ sơ?) then (Có)
   :Hiển thị danh sách hồ sơ ứng tuyển;
+  fork
+    :Nhập từ khóa tìm theo tên ứng viên hoặc vị trí;
+  fork again
+    :Chọn bộ lọc trạng thái;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
   :Chọn một HồSơỨngTuyển;
   :Mở khung chi tiết ứng viên;
   fork
@@ -47,7 +51,7 @@ if (Có quyền xem hồ sơ?) then (Có)
   elseif (Mời phỏng vấn?) then (Mời phỏng vấn)
     :Mở form mời phỏng vấn;
   elseif (Cập nhật kết quả phỏng vấn?) then (Đạt/Không đạt)
-    :Gọi LichPhongVan/hoan-thanh để cập nhật kết quả;
+    :Hệ thống cập nhật kết quả LịchPhỏngVấn;
   else (Nhắn tin)
     :Mở cuộc trò chuyện với ứng viên nếu trạng thái cho phép;
   endif
@@ -55,6 +59,6 @@ if (Có quyền xem hồ sơ?) then (Có)
 else (Không)
   :Hiển thị thông báo không có quyền xem hồ sơ;
 endif
-:Mỗi lần đổi trạng thái đều ghi LichSuHoSoUngTuyen;
+:Mỗi lần đổi trạng thái đều ghi LịchSửHồSơỨngTuyển;
 stop
 @enduml

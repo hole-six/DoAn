@@ -21,39 +21,49 @@ skinparam sequence {
 title Sơ đồ Đánh giá công ty
 
 actor "Actor: Ứng viên" as Actor
-boundary "UI: chi-tiet-cong-ty" as UI
-boundary "UI: form-danh-gia-cong-ty" as Form
+boundary "UI: ho-so-ung-tuyen" as UI
+boundary "UI: drawer-chi-tiet-ung-tuyen" as Form
 control "Controller: DanhGiaCongTyController" as Controller
 entity "Entity: DanhGiaCongTy" as MainEntity
-entity "Entity: NhaTuyenDung" as E1
-entity "Entity: UngVien" as E2
-entity "Entity: ThongBao" as E3
+entity "Entity: HoSoUngTuyen" as E1
+entity "Entity: LichPhongVan" as E2
+entity "Entity: NhaTuyenDung" as E3
+entity "Entity: UngVien" as E4
 
-Actor -> UI : 1. Mở form đánh giá công ty
+Actor -> UI : 1. Mở trang hồ sơ ứng tuyển
 activate UI
-UI -> Form : 2. Hiển thị form-danh-gia-cong-ty
+UI -> Form : 2. Mở drawer chi tiết hồ sơ và mục đánh giá
 activate Form
-Actor -> Form : 3. Nhập điểm đánh giá và nội dung nhận xét
-Form -> Controller : 4. taoDanhGiaCongTy(request)
+Actor -> Form : 3. Nhập điểm, nội dung và chọn ẩn danh
+Form -> Controller : 4. POST /danhgiacongty/tu-ho-so/:maHoSoUngTuyen
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra quyền đánh giá và nội dung
+Controller -> E4 : 5. Xác định ứng viên hiện tại
+Controller -> E1 : 6. Kiểm tra hồ sơ ứng tuyển thuộc ứng viên
+activate E1
+E1 --> Controller : 7. return hồ sơ và nhà tuyển dụng
+deactivate E1
+Controller -> E2 : 8. Kiểm tra có lịch phỏng vấn hoan_thanh + ketQua (dat/khong_dat)
+activate E2
+E2 --> Controller : 9. return kết quả ràng buộc
+deactivate E2
+Controller -> MainEntity : 10. Kiểm tra trùng đánh giá theo hồ sơ
 activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
+MainEntity --> Controller : 11. return kết quả kiểm tra
 deactivate MainEntity
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Tạo đánh giá chờ duyệt
+alt Đủ điều kiện và chưa từng đánh giá
+  Controller -> E3 : 12. Lấy mã nhà tuyển dụng từ hồ sơ
+  Controller -> MainEntity : 13. Tạo đánh giá (daDuyet=false)
   activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  MainEntity --> Controller : 14. return đánh giá đã tạo
   deactivate MainEntity
-  Controller -> E1 : 9. Gửi thông báo cho quản trị viên
-  Controller --> Form : 10. Thông báo đánh giá đang chờ duyệt
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo nội dung đánh giá không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller --> Form : 15. Thông báo đánh giá đang chờ duyệt
+  Form --> UI : 16. Cập nhật giao diện
+  UI --> Actor : 17. Hiển thị kết quả thành công
+else Không đủ điều kiện hoặc đã đánh giá
+  Controller --> Form : 15. Thông báo lỗi (chưa có kết quả phỏng vấn / đã đánh giá)
+  Form --> UI : 16. Hiển thị lỗi tại drawer
+  UI --> Actor : 17. Yêu cầu kiểm tra lại
 end
 deactivate Controller
 deactivate Form

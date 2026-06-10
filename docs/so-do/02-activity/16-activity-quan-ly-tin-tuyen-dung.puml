@@ -22,6 +22,12 @@ fork again
 end fork
 if (Có quyền quản lý tin?) then (Có)
   :Hiển thị danh sách tin của công ty;
+  fork
+    :Nhập từ khóa tìm theo tiêu đề hoặc địa chỉ;
+  fork again
+    :Chọn bộ lọc trạng thái tin;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
   if (Chọn thao tác?) then (Sửa tin)
     :Chọn TinTuyểnDụng cần sửa;
     :Mở form sửa tin;
@@ -53,6 +59,6 @@ if (Có quyền quản lý tin?) then (Có)
 else (Không)
   :Hiển thị thông báo công ty chưa được duyệt hoặc không có quyền;
 endif
-:Khi sửa kỹ năng thì đồng bộ TinTuyenDungKyNang;
+:Khi sửa tin thì hệ thống đồng bộ kỹ năng liên kết;
 stop
 @enduml

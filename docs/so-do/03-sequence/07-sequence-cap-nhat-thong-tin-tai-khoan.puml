@@ -25,8 +25,6 @@ boundary "UI: cai-dat-tai-khoan" as UI
 boundary "UI: form-cap-nhat-tai-khoan" as Form
 control "Controller: NguoiDungController" as Controller
 entity "Entity: NguoiDung" as MainEntity
-entity "Entity: ThongBao" as E1
-entity "Entity: UngVienKyNang" as UngVienKyNang
 
 Actor -> UI : 1. Mở trang cài đặt tài khoản
 activate UI
@@ -35,26 +33,24 @@ activate Form
 Actor -> Form : 3. Chỉnh sửa họ tên, số điện thoại, mật khẩu
 Form -> Controller : 4. PATCH /nguoidung/:ma
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra quyền sở hữu và dữ liệu nhập
+Controller -> MainEntity : 5. Kiểm tra trùng email và dữ liệu nhập
 activate MainEntity
 MainEntity --> Controller : 6. return kết quả kiểm tra
 deactivate MainEntity
 
 alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Cập nhật thông tin tài khoản
+  Controller -> MainEntity : 7. Hash mật khẩu nếu có và cập nhật tài khoản
   activate MainEntity
   MainEntity --> Controller : 8. return dữ liệu đã cập nhật
   deactivate MainEntity
-  Controller -> E1 : 9. Ghi nhận thông báo bảo mật nếu cần
-  Controller --> Form : 10. Thông báo cập nhật thành công
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
+  Controller --> Form : 9. Thông báo cập nhật thành công
+  Form --> UI : 10. Cập nhật giao diện
+  UI --> Actor : 11. Hiển thị kết quả thành công
 else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo dữ liệu không hợp lệ
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller --> Form : 9. Thông báo dữ liệu không hợp lệ
+  Form --> UI : 10. Hiển thị lỗi tại màn hình
+  UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
 end
-Controller -> UngVienKyNang : Đồng bộ kỹ năng ứng viên nếu có thay đổi
 deactivate Controller
 deactivate Form
 deactivate UI

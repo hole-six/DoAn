@@ -20,7 +20,6 @@ model NguoiDung {
   ngayTao               DateTime             @default(now())
   ngayCapNhat           DateTime             @updatedAt
   lichSuHoSoUngTuyen    LichSuHoSoUngTuyen[]
-  danhGiaPhongVan       DanhGiaPhongVan[]
 
   @@index([vaiTro])
   @@index([trangThai])
@@ -259,7 +258,6 @@ model LichPhongVan {
   ngayTao         DateTime          @default(now())
   ngayCapNhat     DateTime          @updatedAt
   hoSoUngTuyen    HoSoUngTuyen      @relation(fields: [maHoSoUngTuyen], references: [id], onDelete: Cascade)
-  danhGiaPhongVan DanhGiaPhongVan[]
 
   @@index([thoiGianBatDau])
   @@index([trangThai])
@@ -287,25 +285,6 @@ model DanhGiaCongTy {
   @@index([daDuyet])
   @@index([ngayTao])
   @@map("danh_gia_cong_ty")
-}
-
-model DanhGiaPhongVan {
-  id                 String       @id @default(uuid()) @map("_id")
-  maLichPhongVan     String
-  maNguoiDung        String
-  vaiTroNguoiDanhGia String
-  diem               Int?
-  noiDung            String
-  ketQuaDeXuat       String?
-  ngayTao            DateTime     @default(now())
-  ngayCapNhat        DateTime     @updatedAt
-  lichPhongVan       LichPhongVan @relation(fields: [maLichPhongVan], references: [id], onDelete: Cascade)
-  nguoiDung          NguoiDung    @relation(fields: [maNguoiDung], references: [id], onDelete: Cascade)
-
-  @@index([maLichPhongVan])
-  @@index([maNguoiDung])
-  @@index([vaiTroNguoiDanhGia])
-  @@map("danh_gia_phong_van")
 }
 
 model ThongBao {

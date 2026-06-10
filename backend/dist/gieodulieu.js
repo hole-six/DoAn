@@ -205,7 +205,6 @@ async function xoaDuLieuCu() {
     await prisma_js_1.prisma.cuocTroChuyen.deleteMany();
     await prisma_js_1.prisma.goiYViecLam.deleteMany();
     await prisma_js_1.prisma.thongBao.deleteMany();
-    await prisma_js_1.prisma.danhGiaPhongVan.deleteMany();
     await prisma_js_1.prisma.lichPhongVan.deleteMany();
     await prisma_js_1.prisma.lichSuHoSoUngTuyen.deleteMany();
     await prisma_js_1.prisma.danhGiaCongTy.deleteMany();

@@ -3,7 +3,9 @@ skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
 skinparam linetype ortho
-left to right direction
+skinparam nodesep 45
+skinparam ranksep 70
+top to bottom direction
 skinparam actorStyle stick
 skinparam roundcorner 8
 skinparam ArrowColor #333333
@@ -22,20 +24,44 @@ skinparam entity {
 }
 
 actor "Ứng viên\n(from Usecase Diagram)" as Actor
-boundary "ho-so-ung-tuyen" as UI
-boundary "bo-loc-trang-thai" as Form
-control "theo-doi-trang-thai-ung-tuyen" as Controller
 
-entity "HoSoUngTuyen" as MainEntity
-entity "TinTuyenDung" as E1
-entity "LichPhongVan" as E2
+' ── Lớp boundary (màn hình) ──
+together {
+  boundary "ho-so-ung-tuyen" as UI
+  boundary "bo-loc-trang-thai" as Form
+}
 
+' ── Lớp control (xử lý) ──
+together {
+  control "theo-doi-trang-thai-ung-tuyen" as Controller
+  control "lich-phong-van" as LichCtrl
+}
+
+' ── Lớp entity (dữ liệu) ──
+together {
+  entity "HoSoUngTuyen" as HoSoUngTuyen
+  entity "UngVien" as UngVien
+  entity "TinTuyenDung" as TinTuyenDung
+  entity "NhaTuyenDung" as NhaTuyenDung
+  entity "HoSoNangLuc" as HoSoNangLuc
+  entity "LichPhongVan" as LichPhongVan
+}
+
+' ── Quan hệ actor ↔ boundary ──
 Actor <--> UI
+
+' ── boundary ↔ boundary / control ──
 UI <--> Form
 Form <--> Controller
-Controller <--> MainEntity
-Controller <--> E1
-Controller <--> E2
-entity "LichSuHoSoUngTuyen" as LichSuHoSoUngTuyen
-Controller -right-> LichSuHoSoUngTuyen
+Form <--> LichCtrl
+
+' ── control ↔ entity ──
+Controller <--> HoSoUngTuyen
+Controller <--> UngVien
+Controller <--> TinTuyenDung
+Controller <--> NhaTuyenDung
+Controller <--> HoSoNangLuc
+LichCtrl <--> LichPhongVan
+
+note bottom of Controller : GET /hosoungtuyen (chỉ yêu cầu đăng nhập) trả tất cả hồ sơ\nLọc theo chủ sở hữu (maUngVien) thực hiện ở phía client\nLịch phỏng vấn lấy từ endpoint /lichphongvan riêng
 @enduml

@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom'
 import { Briefcase, Search, Trash2 } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { formatMoney } from '../../../lib/format'
@@ -32,6 +33,7 @@ export default function ViecDaLuuPage() {
   const [dangTai, setDangTai] = useState(true)
   const [error, setError] = useState('')
   const { confirm, ConfirmDialogComponent } = useConfirm()
+  const phanTrang = usePhanTrang(items)
   const ctaClass = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#0a3659] bg-gradient-to-r from-[#0b5c91] via-[#0e629d] to-[#0a4c78] px-4 text-sm font-black !text-white shadow-[0_14px_30px_rgba(11,92,145,0.28)] transition hover:-translate-y-0.5 hover:from-[#0a4c78] hover:via-[#0b5c91] hover:to-[#08395f] hover:!text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-200'
 
   const load = useCallback(async () => {
@@ -94,7 +96,7 @@ export default function ViecDaLuuPage() {
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">Đang tải việc làm đã lưu...</div>
         ) : items.length ? (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {items.map(item => {
+            {phanTrang.danhSachTrang.map(item => {
               const job = item.tinTuyenDung
               const dangMo = job?.trangThai === 'dang_mo'
               return (
@@ -137,6 +139,7 @@ export default function ViecDaLuuPage() {
             </div>
           </EmptyState>
         )}
+        {!dangTai && items.length > 0 && <PhanTrang {...phanTrang} donVi="việc" className="mt-4" />}
       </Panel>
       <ConfirmDialogComponent />
     </Page>

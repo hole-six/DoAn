@@ -4,12 +4,11 @@ import { clsx } from 'clsx'
 import { Edit3, Plus, RefreshCw, Search, Trash2, UserCheck, Users, X } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
 import { useConfirm } from '../../components/ConfirmDialog'
+import { PhanTrang, usePhanTrang } from '../../components/PhanTrang'
 import { layAccessToken } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
 import { toast } from '../../lib/toast'
 import './admin-styles.css'
-
-const PAGE_SIZE = 6
 
 type VaiTro = 'ung_vien' | 'nha_tuyen_dung' | 'admin'
 type TrangThai = 'hoat_dong' | 'tam_khoa' | 'bi_khoa'
@@ -67,7 +66,6 @@ const primaryBtn = 'btn-primary'
 const subtleBtn = 'btn-subtle'
 const fieldClass = 'grid gap-1.5 text-[11px] font-black uppercase tracking-wide text-slate-600'
 const inputClass = 'min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-[#062a4d] focus:ring-4 focus:ring-[#062a4d]/10'
-const pageBtn = 'page-btn'
 
 function layHeader() {
   const token = layAccessToken()
@@ -94,7 +92,6 @@ export default function QuanLyNguoiDung() {
   const [dangLuu, setDangLuu] = useState(false)
   const [loi, setLoi] = useState('')
   const [form, setForm] = useState<FormNguoiDung | null>(null)
-  const [page, setPage] = useState(1)
   const { confirm, ConfirmDialogComponent } = useConfirm()
 
   const taiDuLieu = async () => {
@@ -130,14 +127,12 @@ export default function QuanLyNguoiDung() {
     })
   }, [danhSach, locTrangThai, locVaiTro, tuKhoa])
 
-  const danhSachTheoTrang = danhSachHienThi.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-  const totalPages = Math.max(1, Math.ceil(danhSachHienThi.length / PAGE_SIZE))
-  const start = danhSachHienThi.length ? (page - 1) * PAGE_SIZE + 1 : 0
-  const end = Math.min(page * PAGE_SIZE, danhSachHienThi.length)
+  const phanTrang = usePhanTrang(danhSachHienThi)
+  const { danhSachTrang: danhSachTheoTrang, setTrang } = phanTrang
 
   useEffect(() => {
-    setPage(1)
-  }, [locTrangThai, locVaiTro, tuKhoa])
+    setTrang(1)
+  }, [locTrangThai, locVaiTro, tuKhoa, setTrang])
 
   const thongKe = {
     tong: danhSach.length,
@@ -347,16 +342,7 @@ export default function QuanLyNguoiDung() {
           ))}
         </div>
 
-        <div className="grid w-full min-w-0 gap-2 text-sm font-extrabold text-slate-500 min-[421px]:flex min-[421px]:items-center min-[421px]:justify-between">
-          <span className="whitespace-nowrap">{start}-{end} / {danhSachHienThi.length}</span>
-          <div className="flex min-w-0 gap-1.5 overflow-x-auto pb-0.5 min-[421px]:justify-end">
-            <button className={pageBtn} disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>{'‹'}</button>
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((item) => (
-              <button key={item} className={clsx('page-btn', item === page && 'active')} onClick={() => setPage(item)}>{item}</button>
-            ))}
-            <button className={pageBtn} disabled={page >= totalPages} onClick={() => setPage((current) => current + 1)}>{'›'}</button>
-          </div>
-        </div>
+        <PhanTrang {...phanTrang} donVi="người dùng" />
       </div>
 
       {form && (

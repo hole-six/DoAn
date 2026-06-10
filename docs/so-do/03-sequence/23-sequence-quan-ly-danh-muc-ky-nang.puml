@@ -25,39 +25,29 @@ boundary "UI: quan-tri-ky-nang" as UI
 boundary "UI: form-ky-nang" as Form
 control "Controller: DanhMucKyNangController" as Controller
 entity "Entity: DanhMucKyNang" as MainEntity
-entity "Entity: TinTuyenDung" as E1
-entity "Entity: UngVien" as E2
-entity "Entity: UngVienKyNang" as UngVienKyNang
-entity "Entity: TinTuyenDungKyNang" as TinTuyenDungKyNang
 
 Actor -> UI : 1. Mở trang danh mục kỹ năng
 activate UI
 UI -> Form : 2. Hiển thị form-ky-nang
 activate Form
-Actor -> Form : 3. Thêm, sửa, xóa hoặc gộp kỹ năng
-Form -> Controller : 4. quanLyKyNang(request)
+Actor -> Form : 3. Thêm, sửa hoặc xóa kỹ năng
+Form -> Controller : 4. GET/POST/PATCH/DELETE /danhmuckynang
 activate Controller
-Controller -> MainEntity : 5. Kiểm tra tên kỹ năng, loại kỹ năng và ràng buộc sử dụng
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+Controller -> Controller : 5. Kiểm tra zod tenKyNang, loaiKyNang
 
 alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Cập nhật danh mục kỹ năng
+  Controller -> MainEntity : 6. Tạo, cập nhật hoặc xóa kỹ năng (CRUD thuần)
   activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
+  MainEntity --> Controller : 7. return dữ liệu đã xử lý
   deactivate MainEntity
-  Controller -> E1 : 9. Kiểm tra tin tuyển dụng và hồ sơ đang tham chiếu
-  Controller --> Form : 10. Trả danh mục kỹ năng mới
-  Form --> UI : 11. Cập nhật giao diện
-  UI --> Actor : 12. Hiển thị kết quả thành công
+  Controller --> Form : 8. Trả danh mục kỹ năng mới
+  Form --> UI : 9. Cập nhật giao diện
+  UI --> Actor : 10. Hiển thị kết quả thành công
 else Dữ liệu không hợp lệ
-  Controller --> Form : 10. Thông báo kỹ năng trùng hoặc đang được sử dụng
-  Form --> UI : 11. Hiển thị lỗi tại màn hình
-  UI --> Actor : 12. Yêu cầu kiểm tra lại thông tin
+  Controller --> Form : 8. Thông báo dữ liệu kỹ năng không hợp lệ
+  Form --> UI : 9. Hiển thị lỗi tại màn hình
+  UI --> Actor : 10. Yêu cầu kiểm tra lại thông tin
 end
-Controller -> UngVienKyNang : Kiểm tra kỹ năng đang được ứng viên sử dụng
-Controller -> TinTuyenDungKyNang : Kiểm tra kỹ năng đang được tin sử dụng
 deactivate Controller
 deactivate Form
 deactivate UI

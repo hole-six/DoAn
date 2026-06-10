@@ -16,27 +16,39 @@ start
 :Hệ thống tải DanhMụcKỹNăng;
 if (Tải dữ liệu thành công?) then (Đúng)
   :Hiển thị danh sách kỹ năng và loại kỹ năng;
-  if (Chọn thao tác?) then (Thêm mới)
-    :Nhấn nút "Thêm kỹ năng";
-    :Nhập tên kỹ năng bằng hộp thoại;
-    if (Có nhập tên kỹ năng?) then (Có)
-      :Hệ thống tạo DanhMụcKỹNăng với loại kỹ năng là khác;
-      :Hiển thị thông báo đã thêm kỹ năng;
+  fork
+    :Nhập từ khóa tìm theo tên kỹ năng;
+  fork again
+    :Lọc theo loại kỹ năng;
+  end fork
+  :Hệ thống lọc động danh sách phía client;
+  if (Chọn thao tác?) then (Thêm hoặc sửa)
+    :Mở form kỹ năng;
+    fork
+      :Nhập tên kỹ năng;
+    fork again
+      :Nhập loại kỹ năng;
+    fork again
+      :Nhập mô tả (tùy chọn);
+    end fork
+    :Nhấn nút "Lưu";
+    :Hệ thống kiểm tra zod tên kỹ năng và loại kỹ năng;
+    if (Dữ liệu hợp lệ?) then (Đúng)
+      :Tạo hoặc cập nhật DanhMụcKỹNăng (CRUD thuần);
+      :Hiển thị thông báo lưu thành công;
       :Tải lại danh sách kỹ năng;
-    else (Không)
-      :Hủy thao tác thêm;
+    else (Sai)
+      :Hiển thị thông báo dữ liệu không hợp lệ;
     endif
   else (Xóa)
     :Chọn kỹ năng cần xóa;
-    :Hiển thị cảnh báo kỹ năng đang được dùng có thể ảnh hưởng tin và CV;
     :Xác nhận xóa kỹ năng;
-    :Hệ thống xóa DanhMụcKỹNăng nếu được phép;
+    :Hệ thống xóa DanhMụcKỹNăng;
     :Hiển thị thông báo đã xóa;
     :Tải lại danh sách kỹ năng;
   endif
 else (Sai)
   :Hiển thị thông báo không tải được danh mục kỹ năng;
 endif
-:Kiểm tra ràng buộc UngVienKyNang và TinTuyenDungKyNang trước khi xóa kỹ năng;
 stop
 @enduml
