@@ -49,28 +49,55 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
     <button
       type="button"
       onClick={onOpen}
-      className={`grid w-full min-w-0 items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-200 hover:shadow-sm sm:grid-cols-[40px_minmax(0,1fr)_auto] ${active ? 'border-sky-400 bg-sky-50/50' : 'border-slate-200'}`}
+      className={`grid w-full min-w-0 gap-4 rounded-2xl border bg-white px-5 py-4 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center ${active ? 'border-sky-400 bg-sky-50/60 shadow-sky-100' : 'border-slate-200'}`}
     >
-      <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+      {/* Logo */}
+      <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
         {company?.logo ? (
-          <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1" />
+          <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1.5" />
         ) : (
-          <Building2 size={18} className="text-slate-400" />
+          <Building2 size={22} className="text-slate-400" />
         )}
       </span>
 
+      {/* Nội dung chính */}
       <span className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-sm font-black text-slate-950">{job?.tieuDe ?? 'Lịch phỏng vấn'}</span>
-          <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
+        {/* Tên công ty */}
+        <p className="text-xs font-black uppercase tracking-widest text-sky-700">
+          {company?.tenCongTy ?? 'Nhà tuyển dụng'}
+        </p>
+        {/* Tiêu đề vị trí */}
+        <p className="mt-0.5 truncate text-base font-black text-slate-950">
+          {job?.tieuDe ?? 'Lịch phỏng vấn'}
+        </p>
+        {/* Badge trạng thái */}
+        <div className="mt-1.5">
+          <Badge tone={toneForInterviewStatus(item.trangThai)}>
+            {interviewStatusLabel[item.trangThai] ?? item.trangThai}
+          </Badge>
         </div>
-        <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
-          <span className="inline-flex items-center gap-1"><CalendarDays size={12} className="shrink-0 text-sky-700" /> {dateOnly(item.thoiGianBatDau)}</span>
-          <span className="inline-flex items-center gap-1"><Clock size={12} className="shrink-0 text-sky-700" /> {timeRange(item)}</span>
-          <span className="inline-flex items-center gap-1"><MapPin size={12} className="shrink-0 text-sky-700" /> <span className="truncate">{diaDiem || 'Chưa cập nhật địa điểm/link'}</span></span>
+        {/* Meta info */}
+        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarDays size={13} className="shrink-0 text-sky-600" />
+            {dateOnly(item.thoiGianBatDau)}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Clock size={13} className="shrink-0 text-sky-600" />
+            {timeRange(item)}
+          </span>
+          {diaDiem && (
+            <span className="inline-flex max-w-[260px] items-center gap-1.5">
+              {item.hinhThuc === 'offline'
+                ? <MapPin size={13} className="shrink-0 text-sky-600" />
+                : <Monitor size={13} className="shrink-0 text-sky-600" />}
+              <span className="truncate">{diaDiem}</span>
+            </span>
+          )}
         </p>
       </span>
 
+      {/* Nút chi tiết */}
       <span className="hidden sm:flex">
         <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />}>Chi tiết</Button>
       </span>
@@ -202,10 +229,20 @@ export default function LichPhongVanPage() {
             ))}
           </select>
         </div>
-        {lichDaBoLoc.length ? (
-          <div className="grid gap-3">
-            {lichDaBoLoc.map(item => (
-              <InterviewCard key={idOf(item)} item={item} active={idOf(item) === queryLich || idOf(selected ?? {}) === idOf(item)} onOpen={() => setSelected(item)} />
+        {groups.length ? (
+          <div className="grid gap-6">
+            {groups.map(group => (
+              <div key={group.key}>
+                <div className="mb-3 flex items-center gap-3">
+                  <h3 className="text-sm font-black text-slate-700">{group.title}</h3>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black text-slate-500">{group.items.length}</span>
+                </div>
+                <div className="grid gap-3">
+                  {group.items.map(item => (
+                    <InterviewCard key={idOf(item)} item={item} active={idOf(item) === queryLich || idOf(selected ?? {}) === idOf(item)} onOpen={() => setSelected(item)} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (

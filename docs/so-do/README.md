@@ -24,3 +24,17 @@ Render bằng PlantUML extension trong VS Code hoặc lệnh:
 ```bash
 plantuml docs/so-do/**/*.puml
 ```
+
+Xuất PNG nét cao cho 3 nhóm `activity + sequence + robustness` và gom toàn bộ ảnh vào một thư mục:
+
+```bash
+node docs/export-png/render.mjs
+```
+
+Một số tuỳ chọn hữu ích:
+
+```bash
+node docs/export-png/render.mjs --out all-highres --dpi 300
+node docs/export-png/render.mjs --split
+node docs/export-png/render.mjs --include-usecase --include-erd
+```

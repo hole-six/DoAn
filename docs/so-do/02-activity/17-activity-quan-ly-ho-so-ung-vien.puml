@@ -10,55 +10,67 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
+
 start
+
 :Nhà tuyển dụng đăng nhập;
 :Mở trang luồng xử lý ứng viên;
+
 fork
-  :Hệ thống tải HồSơỨngTuyển của công ty;
+  :Hệ thống tải HoSoUngTuyen\ncủa công ty;
 fork again
-  :Hệ thống tải TinTuyểnDụng;
+  :Hệ thống tải TinTuyenDung\ncủa công ty;
 fork again
-  :Hệ thống tải ỨngViên và HồSơNăngLực liên quan;
+  :Hệ thống tải UngVien\nvà HoSoNangLuc liên quan;
 end fork
-if (Có quyền xem hồ sơ?) then (Có)
+
+if (Công ty có hồ sơ ứng tuyển nào không?) then (Có)
+
   :Hiển thị danh sách hồ sơ ứng tuyển;
+
   fork
-    :Nhập từ khóa tìm theo tên ứng viên hoặc vị trí;
+    :Nhập từ khóa tìm\ntheo tên ứng viên hoặc vị trí;
   fork again
     :Chọn bộ lọc trạng thái;
   end fork
+
   :Hệ thống lọc động danh sách phía client;
-  :Chọn một HồSơỨngTuyển;
+  :Chọn một HoSoUngTuyen;
   :Mở khung chi tiết ứng viên;
+
   fork
     :Xem tổng quan hồ sơ ứng tuyển;
   fork again
-    :Xem CV tạo trên hệ thống hoặc CV PDF đã nộp;
+    :Xem CV tạo trên hệ thống\nhoặc CV PDF đã nộp;
   fork again
     :Xem lịch sử trạng thái;
   end fork
+
   if (Chọn hành động?) then (Đánh dấu đã xem)
     :Gọi HoSoUngTuyen/xem;
-    :Cập nhật trạng thái từ đã nộp sang đã xem;
-    :Gửi ThôngBáo hồ sơ đã được xem cho ứng viên;
+    :Cập nhật trạng thái\ntừ đã nộp → đã xem;
+    :Gửi ThongBao hồ sơ\nđã được xem cho ứng viên;
   elseif (Chuyển xét duyệt?) then (Xét duyệt)
-    :Gọi chức năng đánh giá hồ sơ ứng tuyển với trạng thái đang xét duyệt;
-    :Ghi lịch sử hồ sơ ứng tuyển;
+    :Gọi đánh giá hồ sơ\nvới trạng thái đang xét duyệt;
+    :Ghi LichSuHoSoUngTuyen;
   elseif (Từ chối sàng lọc?) then (Từ chối)
-    :Nhập lý do từ chối sàng lọc;
-    :Gọi chức năng đánh giá hồ sơ ứng tuyển với trạng thái từ chối;
-    :Gửi ThôngBáo kết quả cho ứng viên;
+    :Nhập lý do từ chối;
+    :Gọi đánh giá hồ sơ\nvới trạng thái từ chối;
+    :Gửi ThongBao kết quả\ncho ứng viên;
   elseif (Mời phỏng vấn?) then (Mời phỏng vấn)
     :Mở form mời phỏng vấn;
-  elseif (Cập nhật kết quả phỏng vấn?) then (Đạt/Không đạt)
-    :Hệ thống cập nhật kết quả LịchPhỏngVấn;
+  elseif (Cập nhật kết quả phỏng vấn?) then (Đạt / Không đạt)
+    :Hệ thống cập nhật kết quả\nLichPhongVan;
   else (Nhắn tin)
-    :Mở cuộc trò chuyện với ứng viên nếu trạng thái cho phép;
+    :Mở cuộc trò chuyện với ứng viên\nnếu trạng thái cho phép;
   endif
+
   :Tải lại dữ liệu luồng xử lý ứng viên;
-else (Không)
-  :Hiển thị thông báo không có quyền xem hồ sơ;
+  :Mỗi lần đổi trạng thái\nđều ghi LichSuHoSoUngTuyen;
+
+else (Chưa có)
+  :Hiển thị trạng thái trống —\nChưa có ứng viên nào ứng tuyển;
 endif
-:Mỗi lần đổi trạng thái đều ghi LịchSửHồSơỨngTuyển;
+
 stop
 @enduml

@@ -32,7 +32,6 @@ activate UI
 UI -> Form : 2. Hiển thị form-sua-tin
 activate Form
 Actor -> Form : 3. Tìm kiếm, sửa, tạm đóng, mở lại hoặc xóa tin
-note over Controller : Middleware damBaoQuyenSuaXoaTin kiểm tin thuộc công ty;\nkhóa sửa nội dung tin đã duyệt (JOB_POST_LOCKED)
 
 alt Sửa nội dung tin
   Form -> Controller : 4. PATCH /tintuyendung/:ma capNhat(request)

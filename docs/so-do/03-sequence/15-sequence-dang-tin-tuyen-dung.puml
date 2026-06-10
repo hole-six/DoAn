@@ -38,7 +38,6 @@ Form -> DanhMucKyNang : 3. Tải danh mục kỹ năng để chọn
 Actor -> Form : 4. Nhập tiêu đề, mô tả, kỹ năng, lương và hạn nộp
 Form -> Controller : 5. POST /tintuyendung taoMoi(request)
 activate Controller
-note over Controller : Middleware damBaoQuyenTaoTin\nkiểm công ty da_duyet + set trangThai 'cho_duyet'
 Controller -> NhaTuyenDung : 6. Lấy công ty theo người dùng, kiểm tra trạng thái duyệt
 activate NhaTuyenDung
 NhaTuyenDung --> Controller : 7. return công ty và trangThaiDuyet

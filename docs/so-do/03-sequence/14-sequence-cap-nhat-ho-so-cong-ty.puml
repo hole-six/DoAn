@@ -34,7 +34,6 @@ activate Form
 Actor -> Form : 3. Cập nhật mã số thuế, địa chỉ, logo, mô tả
 Form -> Controller : 4. PATCH /nhatuyendung/:ma capNhat(request)
 activate Controller
-note over Controller : Route /nhatuyendung chỉ gắn người dùng nếu có\nController generic, không kiểm tra quyền sở hữu
 Controller -> MainEntity : 5. Lấy hồ sơ hiện tại (trangThaiCu)
 activate MainEntity
 MainEntity --> Controller : 6. return hồ sơ và trạng thái duyệt

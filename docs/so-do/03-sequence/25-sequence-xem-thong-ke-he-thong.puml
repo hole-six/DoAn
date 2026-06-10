@@ -31,8 +31,6 @@ entity "Entity: HoSoUngTuyen" as HoSoUngTuyen
 Actor -> UI : 1. Mở dashboard quản trị
 activate UI
 
-note over UI : Dashboard gọi song song 4 danh sách rồi tổng hợp KPI ở client
-
 UI -> NguoiDung : 2. GET /nguoidung
 NguoiDung --> UI : 3. Trả danh sách người dùng
 UI -> TinTuyenDung : 4. GET /tintuyendung

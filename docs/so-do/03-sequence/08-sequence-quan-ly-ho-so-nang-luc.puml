@@ -31,11 +31,6 @@ activate UI
 UI -> Form : 2. Mở cv-studio
 activate Form
 Actor -> Form : 3. Tạo, chỉnh sửa, upload hoặc chọn CV chính
-note over Form, Controller
-  Upload ảnh/CV gọi riêng:
-  POST /hosonangluc/upload-anh, POST /hosonangluc/upload-file;
-  file lưu ra đĩa qua multer, trả về đường dẫn (anhDaiDien, fileCvPath)
-end note
 Form -> Controller : 4. GET/POST/PATCH/DELETE /hosonangluc
 activate Controller
 Controller -> MainEntity : 5. Kiểm tra dữ liệu CV

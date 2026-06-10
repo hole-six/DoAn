@@ -62,9 +62,4 @@ Form --> UI : 16. Cập nhật danh sách và trạng thái ứng tuyển
 UI --> Actor : 17. Hiển thị trạng thái ứng tuyển kèm lịch phỏng vấn
 deactivate Form
 deactivate UI
-
-note over Form
-  Việc lọc theo chủ sở hữu (maUngVien) và theo trạng thái
-  được thực hiện ở phía client; không đọc LichSuHoSoUngTuyen.
-end note
 @enduml

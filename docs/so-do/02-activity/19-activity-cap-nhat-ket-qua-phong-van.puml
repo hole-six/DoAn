@@ -1,4 +1,4 @@
-@startuml
+﻿@startuml
 skinparam defaultFontName "Segoe UI"
 skinparam defaultFontSize 13
 skinparam shadowing false
@@ -12,45 +12,45 @@ skinparam activity {
 }
 
 start
+
 :Nhà tuyển dụng đăng nhập;
 :Mở trang lịch phỏng vấn nhà tuyển dụng;
-:Hệ thống tải LịchPhỏngVấn và HồSơỨngTuyển thuộc công ty;
-  fork
-    :Nhập từ khóa tìm theo tên ứng viên hoặc vị trí tin;
-  fork again
-    :Lọc theo trạng thái lịch;
-  end fork
-  :Hệ thống lọc động danh sách phía client;
-  :Chọn lịch cần cập nhật kết quả;
+:Hệ thống tải LichPhongVan và HoSoUngTuyen\nthuộc công ty;
+
+fork
+  :Nhập từ khóa tìm theo\ntên ứng viên hoặc vị trí tin;
+fork again
+  :Lọc theo trạng thái lịch;
+end fork
+
+:Hệ thống lọc động danh sách phía client;
+:Chọn lịch cần cập nhật kết quả;
 
 if (Trạng thái có thể cập nhật kết quả?) then (Có)
+
   if (Chọn kết quả?) then (Đạt)
     :Nhấn nút "Đạt";
     :Nhập ghi chú kết quả nếu có;
     :Nhấn nút "Cập nhật";
-    :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả đạt;
-    :Hệ thống cập nhật HồSơỨngTuyển thành đạt;
-    :Ghi LichSuHoSoUngTuyen cho kết quả đạt;
-    :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
+    :Hệ thống cập nhật LichPhongVan\nthành hoàn thành, kết quả đạt;
+    :Hệ thống cập nhật HoSoUngTuyen\nthành đạt;
+    :Ghi LichSuHoSoUngTuyen\ncho kết quả đạt;
+    :Gửi ThongBao kết quả\nphỏng vấn cho ứng viên;
     :Hiển thị cập nhật thành công;
 
   else (Không đạt)
     :Nhấn nút "Không đạt";
     :Nhập ghi chú kết quả nếu có;
     :Nhấn nút "Cập nhật";
-    :Hệ thống cập nhật LịchPhỏngVấn thành hoàn thành, kết quả không đạt;
-    :Hệ thống cập nhật HồSơỨngTuyển thành từ chối;
-    :Ghi LichSuHoSoUngTuyen cho kết quả không đạt;
-    :Gửi ThôngBáo kết quả phỏng vấn cho ứng viên;
+    :Hệ thống cập nhật LichPhongVan\nthành hoàn thành, kết quả không đạt;
+    :Hệ thống cập nhật HoSoUngTuyen\nthành từ chối;
+    :Ghi LichSuHoSoUngTuyen\ncho kết quả không đạt;
+    :Gửi ThongBao kết quả\nphỏng vấn cho ứng viên;
     :Hiển thị cập nhật thành công;
   endif
 
 else (Không)
-  :Hiển thị thông báo lịch không thể cập nhật kết quả;
-endif
-
-else (Không)
-  :Hiển thị thông báo lịch không thể cập nhật kết quả;
+  : Hệ thống vô hiệu hóa các nút ;
 endif
 
 stop

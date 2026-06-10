@@ -57,7 +57,4 @@ else Dữ liệu không hợp lệ
 end
 Controller -> TinTuyenDungKyNang : Đọc kèm kỹ năng của tin khi xem/duyệt (include)
 Controller -> E1 : Đọc công ty liên quan để lấy người nhận thông báo
-deactivate Controller
-deactivate Form
-deactivate UI
 @enduml

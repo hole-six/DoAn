@@ -69,7 +69,6 @@ else Mời phỏng vấn
   Controller -> HoSoUngTuyen : 12. Cập nhật trạng thái moi_phong_van
   Controller -> LichSuHoSoUngTuyen : 13. Ghi lịch sử "moi_phong_van"
   Controller -> ThongBao : 14. Báo ứng viên lời mời phỏng vấn
-  note right of Controller : Chi tiết lịch phỏng vấn xem Sơ đồ 18
   Controller --> Form : 15. Trả kết quả mời phỏng vấn
   deactivate Controller
 end
