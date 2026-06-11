@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Bookmark, Briefcase, Building2, Clock, Copy, DollarSign, FileText, Globe, MapPin, MessageCircle, Share2, UploadCloud, Users, X } from 'lucide-react'
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL, capNhatPhienBanTaiNguyen } from '../../lib/env'
@@ -104,6 +104,7 @@ async function uploadFileCv(file: File) {
 }
 
 export default function ChiTietViecLam() {
+  const navigate = useNavigate()
   const { id } = useParams()
   const [searchParams] = useSearchParams()
   const openedApplyRef = useRef(false)
@@ -237,13 +238,13 @@ export default function ChiTietViecLam() {
   const ungTuyenNgay = async () => {
     const nguoiDung = layNguoiDung()
     if (!nguoiDung) {
-      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`
+      navigate(`/dang-nhap?redirect=${encodeURIComponent(`${window.location.pathname}${window.location.search}`)}`)
       return
     }
 
     if (nguoiDung.vaiTro !== 'ung_vien') {
       setThongBaoUngTuyen('Chỉ tài khoản ứng viên mới được ứng tuyển. Bạn đang đăng nhập vai trò khác.')
-      window.setTimeout(() => { window.location.href = duongDanTheoVaiTro[nguoiDung.vaiTro] }, 900)
+      window.setTimeout(() => { navigate(duongDanTheoVaiTro[nguoiDung.vaiTro]) }, 900)
       return
     }
 
@@ -258,7 +259,7 @@ export default function ChiTietViecLam() {
       const ungVien = (ungVienList ?? []).find((item: any) => item.maNguoiDung === nguoiDung.id)
       if (!ungVien) {
         setThongBaoUngTuyen('Bạn cần hoàn thiện hồ sơ ứng viên trước khi ứng tuyển.')
-        window.setTimeout(() => { window.location.href = '/ung-vien/ho-so' }, 900)
+        window.setTimeout(() => { navigate('/ung-vien/ho-so') }, 900)
         return
       }
 
@@ -286,13 +287,13 @@ export default function ChiTietViecLam() {
     if (!viec) return
     const nguoiDung = layNguoiDung()
     if (!nguoiDung) {
-      window.location.href = `/dang-nhap?redirect=${encodeURIComponent(`/viec-lam/${viec.id}`)}&notice=save_candidate_only`
+      navigate(`/dang-nhap?redirect=${encodeURIComponent(`/viec-lam/${viec.id}`)}&notice=save_candidate_only`)
       return
     }
 
     if (nguoiDung.vaiTro !== 'ung_vien') {
       setThongBaoUngTuyen('Bạn cần đăng nhập bằng tài khoản ứng viên để lưu việc làm. Tài khoản hiện tại không thể dùng chức năng này.')
-      window.setTimeout(() => { window.location.href = duongDanTheoVaiTro[nguoiDung.vaiTro] }, 1200)
+      window.setTimeout(() => { navigate(duongDanTheoVaiTro[nguoiDung.vaiTro]) }, 1200)
       return
     }
 
@@ -594,3 +595,4 @@ export default function ChiTietViecLam() {
     </main>
   )
 }
+

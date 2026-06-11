@@ -102,6 +102,7 @@ export function ThongBaoProvider({ children }: { children: ReactNode }) {
   const nguoiDung = layNguoiDung()
   const token = layAccessToken()
   const pollTimerRef = useRef<number | null>(null)
+  const daTaiLanDauRef = useRef(false)
 
   useEffect(() => {
     const capNhat = () => setAuthTick(value => value + 1)
@@ -109,20 +110,26 @@ export function ThongBaoProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('itjob-auth-change', capNhat)
   }, [])
 
-  const taiThongBao = useCallback(async () => {
+  const taiThongBao = useCallback(async (options?: { background?: boolean }) => {
     const tok = layAccessToken()
     if (!tok) return
-    dispatch({ type: 'SET_DANG_TAI', payload: true })
+    const background = options?.background ?? false
+    if (!background || !daTaiLanDauRef.current) {
+      dispatch({ type: 'SET_DANG_TAI', payload: true })
+    }
     try {
       const res = await fetch(`${API_URL}/thongbao?limit=30&sort=-ngayTao`, {
         headers: { Authorization: `Bearer ${tok}` },
       })
       const data = await res.json()
       dispatch({ type: 'SET_DANH_SACH', payload: data.duLieu || [] })
+      daTaiLanDauRef.current = true
     } catch (err) {
       console.error('Loi tai thong bao:', err)
     } finally {
-      dispatch({ type: 'SET_DANG_TAI', payload: false })
+      if (!background || daTaiLanDauRef.current) {
+        dispatch({ type: 'SET_DANG_TAI', payload: false })
+      }
     }
   }, [])
 
@@ -144,7 +151,7 @@ export function ThongBaoProvider({ children }: { children: ReactNode }) {
     if (!token || !nguoiDung) return
 
     const lamMoiDuLieuThongBao = async () => {
-      await Promise.all([taiThongBao(), demChuaDoc()])
+      await Promise.all([taiThongBao({ background: true }), demChuaDoc()])
     }
 
     const xoaPolling = () => {
@@ -178,7 +185,7 @@ export function ThongBaoProvider({ children }: { children: ReactNode }) {
     }
 
     langNgheEvent('thong_bao_moi', xuLyThongBaoMoi)
-    void lamMoiDuLieuThongBao()
+    void Promise.all([taiThongBao(), demChuaDoc()])
     batDauPolling(kiemTraKetNoi() ? POLL_MS_KET_NOI : POLL_MS_MAT_KET_NOI)
 
     const boLangNgheKetNoi = langNgheTrangThaiKetNoi({

@@ -37,11 +37,18 @@ function sameId(left?: string, right?: string) {
 export function useUngVienData() {
   const [state, setState] = useState<UngVienState>(initialState)
   const reloadTimerRef = useRef<number | null>(null)
+  const daTaiLanDauRef = useRef(false)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (options?: { background?: boolean }) => {
     const current = layNguoiDung()
+    const background = options?.background ?? false
     try {
-      setState(prev => ({ ...prev, loading: true, error: '', current }))
+      setState(prev => ({
+        ...prev,
+        loading: background ? (daTaiLanDauRef.current ? prev.loading : true) : true,
+        error: background ? prev.error : '',
+        current,
+      }))
       const [ungVien, hoSoList, utList, lichList, danhGiaList, tbList, tinList, kyNangList] = await Promise.all([
         apiCoXacThuc('/ungvien/toi') as Promise<UngVien>,
         apiCoXacThuc('/hosonangluc') as Promise<HoSoNangLuc[]>,
@@ -58,6 +65,7 @@ export function useUngVienData() {
       const lich = lichList.filter(item => applicationIds.has(item.maHoSoUngTuyen))
       const danhGiaCongTy = danhGiaList.filter(item => item.maHoSoUngTuyen && applicationIds.has(item.maHoSoUngTuyen))
       const thongBao = tbList.filter(item => sameId(String(item.maNguoiDung), current?.id))
+      daTaiLanDauRef.current = true
       setState({ loading: false, error: '', current, ungVien, hoSo, ungTuyen, lich, danhGiaCongTy, thongBao, tinList, kyNangList })
     } catch (error) {
       setState(prev => ({
@@ -81,7 +89,7 @@ export function useUngVienData() {
       if (reloadTimerRef.current) window.clearTimeout(reloadTimerRef.current)
       reloadTimerRef.current = window.setTimeout(() => {
         reloadTimerRef.current = null
-        void load()
+        void load({ background: true })
       }, 250)
     }
 
@@ -106,5 +114,5 @@ export function useUngVienData() {
     }
   }, [load])
 
-  return { ...state, reload: load }
+  return { ...state, reload: () => load({ background: true }) }
 }

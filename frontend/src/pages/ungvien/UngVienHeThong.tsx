@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import {
   Bell, Briefcase, Calendar, CheckCircle, Edit3, ExternalLink,
@@ -117,7 +118,7 @@ function PanelHead({ title, to, action }: { title: string; to?: string; action?:
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
       <h2 className="text-base font-black text-slate-950">{title}</h2>
-      {action ?? (to && <a href={to} className="text-sm font-extrabold text-sky-700 hover:text-sky-800 transition-colors">Xem tất cả</a>)}
+      {action ?? (to && <Link to={to} className="text-sm font-extrabold text-sky-700 transition-colors hover:text-sky-800">Xem tất cả</Link>)}
     </div>
   )
 }
@@ -140,7 +141,7 @@ function Kpi({ icon: Icon, label, value }: { icon: any; label: string; value: nu
 
 function PrimaryBtn({ children, onClick, disabled, type = 'button', href, className }: any) {
   const cls = clsx('btn-primary-uv', className)
-  if (href) return <a href={href} className={cls}>{children}</a>
+  if (href) return <Link to={href} className={cls}>{children}</Link>
   return <button type={type} onClick={onClick} disabled={disabled} className={cls}>{children}</button>
 }
 function SecondaryBtn({ children, onClick, disabled, type = 'button', className }: any) {
@@ -262,13 +263,13 @@ function ItvRow({ item, onClick, active }: { item: any; onClick?: () => void; ac
 
 function CompactTask({ task }: { task: { title: string; desc: string; href: string } }) {
   return (
-    <a href={task.href} className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 transition hover:border-[#0b5c91]/25 hover:bg-[#eef8ff] no-underline">
+    <Link to={task.href} className="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 no-underline transition hover:border-[#0b5c91]/25 hover:bg-[#eef8ff]">
       <div className="min-w-0">
         <strong className="block truncate text-sm font-black text-slate-950">{task.title}</strong>
         <p className="mt-0.5 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{task.desc}</p>
       </div>
       <ExternalLink size={15} className="shrink-0 text-slate-400 transition group-hover:text-[#0b5c91]" />
-    </a>
+    </Link>
   )
 }
 
@@ -309,9 +310,9 @@ export default function DashboardUngVienMới() {
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <PrimaryBtn href="/ung-vien/ho-so" className="cyan">Cập nhật hồ sơ</PrimaryBtn>
-              <a href="/viec-lam" className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition hover:bg-white/20" style={{ color: '#ffffff' }}>
+              <Link to="/viec-lam" className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-extrabold text-white shadow-sm transition hover:bg-white/20" style={{ color: '#ffffff' }}>
                 Khám phá việc làm
-              </a>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col justify-center rounded-2xl border border-white/15 bg-white/15 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur">
@@ -573,6 +574,7 @@ function AppDrawer({ item, onClose }: { item: any; onClose: () => void }) {
 }
 
 export function UngTuyenPage() {
+  const navigate = useNavigate()
   const data = useUngVienData()
   const [tab, setTab] = useState<'applied' | 'jobs'>('applied')
   const [selected, setSelected] = useState<any>(null)
@@ -583,7 +585,7 @@ export function UngTuyenPage() {
   const jobs = data.tinList?.filter((x: any) => x.trangThai === 'dang_mo') ?? []
 
   const apply = async (job: any) => {
-    if (!mainCv) { location.href = '/ung-vien/ho-so'; return }
+    if (!mainCv) { navigate('/ung-vien/ho-so'); return }
     confirm(
       'Xác nhận ứng tuyển',
       `Gửi hồ sơ ứng tuyển vào vị trí "${job.tieuDe}"?`,
@@ -630,7 +632,7 @@ export function UngTuyenPage() {
         </Panel>
       ) : (
         <Panel>
-          <PanelHead title="Việc đang mở phù hợp" action={!mainCv && <a href="/ung-vien/ho-so" className="text-sm font-extrabold text-sky-700">Tạo CV chính</a>} />
+          <PanelHead title="Việc đang mở phù hợp" action={!mainCv && <Link to="/ung-vien/ho-so" className="text-sm font-extrabold text-sky-700">Tạo CV chính</Link>} />
           {jobs.length ? (
             <div className="space-y-2">
               {jobs.slice(0, 12).map((job: any) => (
@@ -879,6 +881,7 @@ export function ThongBaoUngVienPage() {
 // ─── ViecDaLuuPage ────────────────────────────────────────────────────────────
 
 export function ViecDaLuuPage() {
+  const navigate = useNavigate()
   const data = useUngVienData()
   const [saved, setSaved] = useState<string[]>(() => JSON.parse(localStorage.getItem('itjob_saved_jobs') ?? '[]'))
   const [query, setQuery] = useState('')
@@ -893,7 +896,7 @@ export function ViecDaLuuPage() {
   const jobs = (data.tinList ?? []).filter((job: any) => saved.includes(job.id)).filter((job: any) => `${job.tieuDe} ${job.nhaTuyenDung?.tenCongTy} ${job.diaChi}`.toLowerCase().includes(query.toLowerCase()))
 
   const apply = async (job: any) => {
-    if (!mainCv) { location.href = '/ung-vien/ho-so'; return }
+    if (!mainCv) { navigate('/ung-vien/ho-so'); return }
     try {
       await api('/hosoungtuyen', { method: 'POST', body: JSON.stringify({ maUngVien: data.ungVien.id, maTinTuyenDung: job.id, maHoSoNangLuc: mainCv.id, diemKhopKyNang: 70, thuXinViec: 'Tôi muốn ứng tuyển nhanh từ danh sách việc đã lưu.' }) })
       await data.reload(); setError('')
@@ -969,3 +972,4 @@ export function CaiDatUngVienPage() {
     </Page>
   )
 }
+

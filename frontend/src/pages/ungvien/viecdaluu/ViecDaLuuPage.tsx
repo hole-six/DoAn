@@ -1,5 +1,5 @@
 ﻿import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Briefcase, Search, Trash2 } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
@@ -29,6 +29,7 @@ type SavedJob = {
 }
 
 export default function ViecDaLuuPage() {
+  const navigate = useNavigate()
   const [items, setItems] = useState<SavedJob[]>([])
   const [dangTai, setDangTai] = useState(true)
   const [error, setError] = useState('')
@@ -114,7 +115,7 @@ export default function ViecDaLuuPage() {
                     {item.ngayLuu && <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">Lưu ngày {new Date(item.ngayLuu).toLocaleDateString('vi-VN')}</span>}
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">
-                    <Button variant="primary" icon={<Briefcase size={16} />} disabled={!job} onClick={() => { if (job) window.location.href = `/viec-lam/${job.id}` }}>
+                    <Button variant="primary" icon={<Briefcase size={16} />} disabled={!job} onClick={() => { if (job) navigate(`/viec-lam/${job.id}`) }}>
                       Xem việc
                     </Button>
                     <Button variant="danger" icon={<Trash2 size={16} />} onClick={() => void boLuu(item)}>
@@ -145,3 +146,4 @@ export default function ViecDaLuuPage() {
     </Page>
   )
 }
+

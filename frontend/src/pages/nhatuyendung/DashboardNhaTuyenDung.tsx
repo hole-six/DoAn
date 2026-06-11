@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent, MouseEvent, ReactNode } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { Bell, Briefcase, Calendar, CheckCircle, Edit3, Eye, ImagePlus, Plus, Save, Trash2, Users, XCircle } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
@@ -192,7 +193,7 @@ export default function DashboardNhaTuyenDung() {
   const upcoming = (data.interviews ?? []).filter((item: any) => new Date(item.thoiGianBatDau) >= new Date()).length
   const pending = (data.applications ?? []).filter((item: any) => ['da_nop', 'da_xem', 'dang_xet_duyet'].includes(item.trangThai))
 
-  return <Page title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'} desc="Quản lý tin tuyển dụng, pipeline ứng viên, lịch phỏng vấn và hồ sơ công ty." action={<a className="primary-button" href="/nha-tuyen-dung/tao-tin"><Plus size={16} /> Đăng tin mới</a>}>
+  return <Page title={data.company?.tenCongTy ?? 'Workspace nhà tuyển dụng'} desc="Quản lý tin tuyển dụng, pipeline ứng viên, lịch phỏng vấn và hồ sơ công ty." action={<Link className="primary-button" to="/nha-tuyen-dung/tao-tin"><Plus size={16} /> Đăng tin mới</Link>}>
     <ErrorBox message={data.error} />
     <section className="ntd-company-strip">
       <img src={imageUrl(data.company?.logo) || 'https://placehold.co/120x120/0b1c30/ffffff?text=IT'} alt="" />
@@ -211,11 +212,11 @@ export default function DashboardNhaTuyenDung() {
         {pending.length ? pending.slice(0, 5).map((item: any) => <ApplicationRow key={item.id} item={item} />) : <Empty>Không có hồ sơ chờ xử lý.</Empty>}
       </section>
       <section className="ntd-panel">
-        <PanelHead title="Tin tuyển dụng" action={<a href="/nha-tuyen-dung/quan-ly-tin">Quản lý</a>} />
+        <PanelHead title="Tin tuyển dụng" action={<Link to="/nha-tuyen-dung/quan-ly-tin">Quản lý</Link>} />
         {(data.jobs ?? []).length ? (data.jobs ?? []).slice(0, 5).map((job: any) => <JobRow key={job.id} job={job} />) : <Empty>Chưa có tin tuyển dụng.</Empty>}
       </section>
       <section className="ntd-panel">
-        <PanelHead title="Lịch phỏng vấn" action={<a href="/nha-tuyen-dung/lich-phong-van">Xem lịch</a>} />
+        <PanelHead title="Lịch phỏng vấn" action={<Link to="/nha-tuyen-dung/lich-phong-van">Xem lịch</Link>} />
         {(data.interviews ?? []).length ? (data.interviews ?? []).slice(0, 5).map((item: any) => <InterviewRow key={item.id} item={item} />) : <Empty>Chưa có lịch phỏng vấn.</Empty>}
       </section>
     </div>
@@ -264,11 +265,12 @@ export function QuanLyTinNhaTuyenDungPage() {
 }
 
 export function TaoTinNhaTuyenDungPage() {
+  const navigate = useNavigate()
   const data = useEmployerData()
   const [form, setForm] = useState<any>(null)
   useEffect(() => { if (data.company?.id && !form) setForm(newJob(data.company.id)) }, [data.company?.id])
   if (data.loading || !form) return <Page title="Tạo tin tuyển dụng" desc="Đang tải..."><div className="ntd-panel">Đang tải...</div></Page>
-  return <Page title="Tạo tin tuyển dụng" desc="Soạn tin tuyển dụng đầy đủ mô tả, yêu cầu, quyền lợi và kỹ năng."><section className="ntd-panel"><JobForm job={form} setJob={setForm} skills={data.skills ?? []} onSubmit={async (payload: any) => { await api('/tintuyendung', { method: 'POST', body: JSON.stringify(payload) }); location.href = '/nha-tuyen-dung/quan-ly-tin' }} /></section></Page>
+  return <Page title="Tạo tin tuyển dụng" desc="Soạn tin tuyển dụng đầy đủ mô tả, yêu cầu, quyền lợi và kỹ năng."><section className="ntd-panel"><JobForm job={form} setJob={setForm} skills={data.skills ?? []} onSubmit={async (payload: any) => { await api('/tintuyendung', { method: 'POST', body: JSON.stringify(payload) }); navigate('/nha-tuyen-dung/quan-ly-tin') }} /></section></Page>
 }
 
 function newJob(companyId?: string) {

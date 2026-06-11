@@ -177,10 +177,29 @@ export default function DashboardShell({ vaiTro }: Props) {
         .then((companies: NhaTuyenDung[]) => {
           if (!active) return
           const company = (companies ?? []).find(item => refId(item.maNguoiDung) === nguoiDung.id)
-          setEmployerGate(getEmployerGate(company))
+          const nextGate = getEmployerGate(company)
+          setEmployerGate(prev =>
+            prev
+              && prev.status === nextGate.status
+              && prev.allowed === nextGate.allowed
+              && prev.message === nextGate.message
+              && prev.cta === nextGate.cta
+              ? prev
+              : nextGate,
+          )
         })
         .catch(() => {
-          if (active) setEmployerGate(getEmployerGate(null))
+          if (!active) return
+          const nextGate = getEmployerGate(null)
+          setEmployerGate(prev =>
+            prev
+              && prev.status === nextGate.status
+              && prev.allowed === nextGate.allowed
+              && prev.message === nextGate.message
+              && prev.cta === nextGate.cta
+              ? prev
+              : nextGate,
+          )
         })
     }
     taiCongTy()

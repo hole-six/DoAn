@@ -7,14 +7,17 @@ const RECONNECT_EVENT = 'reconnect'
 const CONNECT_ERROR_EVENT = 'connect_error'
 
 let socket: Socket | null = null
+let socketToken: string | null = null
 
 export function khoiTaoSocket(token: string): Socket {
-  if (socket?.connected) return socket
+  if (socket && socketToken === token) return socket
 
   if (socket) {
     socket.disconnect()
     socket = null
   }
+
+  socketToken = token
 
   socket = io(SOCKET_URL, {
     auth: { token },
@@ -46,6 +49,7 @@ export function khoiTaoSocket(token: string): Socket {
 export function ngatketnoisocket() {
   socket?.disconnect()
   socket = null
+  socketToken = null
 }
 
 export function laySocket(): Socket | null {
