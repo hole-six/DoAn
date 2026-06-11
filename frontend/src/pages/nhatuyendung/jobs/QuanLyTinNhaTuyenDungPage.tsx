@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Edit3, Eye, Plus, Power, Search, Trash2, X } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
@@ -16,6 +17,7 @@ const inputCls = 'min-h-10 w-full rounded-xl border border-slate-200 bg-white px
 
 export default function QuanLyTinNhaTuyenDungPage() {
   const data = useEmployerData()
+  const navigate = useNavigate()
   const [editing, setEditing] = useState<Partial<TinTuyenDung> | null | undefined>(undefined)
   const congTyDaDuyet = data.company?.trangThaiDuyet === 'da_duyet'
   const { confirm, ConfirmDialogComponent } = useConfirm()
@@ -126,14 +128,14 @@ export default function QuanLyTinNhaTuyenDungPage() {
                 </p>
               </div>
               <div className="ntd-list-actions">
-              <ButtonGroup>
-                <Button icon={<Eye size={15} />} onClick={() => { window.location.href = `/viec-lam/${job.id}` }}>Xem tin</Button>
-                <Button icon={<Edit3 size={15} />} disabled={['dang_mo', 'tam_dong', 'het_han'].includes(job.trangThai ?? '')} onClick={() => setEditing(job)}>Sửa</Button>
-                <Button icon={<Power size={15} />} disabled={!['dang_mo', 'tam_dong'].includes(job.trangThai ?? '')} onClick={() => void setStatus(job, job.trangThai === 'dang_mo' ? 'tam-dong' : 'mo-lai')}>
-                  {job.trangThai === 'dang_mo' ? 'Tạm đóng' : 'Mở lại'}
-                </Button>
-                <Button variant="danger" icon={<Trash2 size={15} />} onClick={() => void remove(job)}>Xóa</Button>
-              </ButtonGroup>
+                <ButtonGroup>
+                  <Button icon={<Eye size={15} />} onClick={() => navigate(`/viec-lam/${job.id}`)}>Xem tin</Button>
+                  <Button icon={<Edit3 size={15} />} disabled={['dang_mo', 'tam_dong', 'het_han'].includes(job.trangThai ?? '')} onClick={() => setEditing(job)}>Sửa</Button>
+                  <Button icon={<Power size={15} />} disabled={!['dang_mo', 'tam_dong'].includes(job.trangThai ?? '')} onClick={() => void setStatus(job, job.trangThai === 'dang_mo' ? 'tam-dong' : 'mo-lai')}>
+                    {job.trangThai === 'dang_mo' ? 'Tạm đóng' : 'Mở lại'}
+                  </Button>
+                  <Button variant="danger" icon={<Trash2 size={15} />} onClick={() => void remove(job)}>Xóa</Button>
+                </ButtonGroup>
               </div>
             </article>
           )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có tin phù hợp bộ lọc.' : 'Chưa có tin tuyển dụng.'}</EmptyState>}
@@ -145,4 +147,3 @@ export default function QuanLyTinNhaTuyenDungPage() {
     </Page>
   )
 }
-
