@@ -9,6 +9,7 @@ import { NhaTuyenDung } from '../nhatuyendung/nhatuyendung.mohinh.js'
 import { layNguoiDungTuAccessToken } from '../xacthuc/xacthuc.dichvu.js'
 import { damBaoTrangThaiTinTuyenDung } from '../workflow/trangthai.dichvu.js'
 import { dieuKhienTinTuyenDung } from './tintuyendung.dieukhien.js'
+import { dichVuTinTuyenDung } from './tintuyendung.dichvu.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
 
 const TRANG_THAI_KHOA_SUA = new Set(['dang_mo', 'tam_dong', 'het_han'])
@@ -32,6 +33,42 @@ const taiAnhTin = multer({
 
 async function layCongTyTheoNguoiDung(maNguoiDung: string) {
   return NhaTuyenDung.findUnique({ where: { maNguoiDung }, select: { id: true, trangThaiDuyet: true } })
+}
+
+async function layNguoiDungNeuCo(authorization?: string) {
+  try {
+    return await layNguoiDungTuAccessToken(authorization)
+  } catch {
+    return null
+  }
+}
+
+async function taoBoLocTruyCapDanhSachTin(query: Record<string, unknown>, authorization?: string) {
+  const nguoiDung = await layNguoiDungNeuCo(authorization)
+  if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien') return { ...query, cheDo: 'cong_khai' }
+  if (nguoiDung.vaiTro === 'admin') return { ...query, cheDo: 'admin' }
+
+  const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
+  return {
+    ...query,
+    cheDo: 'nha_tuyen_dung',
+    maNhaTuyenDungSoHuu: congTy?.id ? String(congTy.id) : '',
+  }
+}
+
+async function coQuyenXemTin(maTin: string, authorization?: string) {
+  const tin = await dichVuTinTuyenDung.layTheoMa(maTin) as any
+  const nguoiDung = await layNguoiDungNeuCo(authorization)
+
+  if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien') {
+    return { tin, hopLe: tin.trangThai === 'dang_mo' && tin.nhaTuyenDung?.trangThaiDuyet === 'da_duyet' }
+  }
+
+  if (nguoiDung.vaiTro === 'admin') return { tin, hopLe: true }
+
+  const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
+  const laChuTin = congTy?.id ? String(congTy.id) === String(tin.maNhaTuyenDung) : false
+  return { tin, hopLe: laChuTin || (tin.trangThai === 'dang_mo' && tin.nhaTuyenDung?.trangThaiDuyet === 'da_duyet') }
 }
 
 const damBaoQuyenTaoTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) => {
@@ -109,8 +146,17 @@ const damBaoQuyenSuaXoaTin = batLoiBatDongBo(async (yeuCau, _phanHoi, tiepTheo) 
 
 export const dinhTuyenTinTuyenDung = Router()
 
-dinhTuyenTinTuyenDung.get('/', dieuKhienTinTuyenDung.layDanhSach)
-dinhTuyenTinTuyenDung.get('/:ma', dieuKhienTinTuyenDung.layChiTiet)
+dinhTuyenTinTuyenDung.get('/', batLoiBatDongBo(async (yeuCau, phanHoi) => {
+  const boLoc = await taoBoLocTruyCapDanhSachTin(yeuCau.query as Record<string, unknown>, yeuCau.headers.authorization)
+  const duLieu = await dichVuTinTuyenDung.layDanhSach(boLoc)
+  return phanHoi.json({ duLieu })
+}))
+dinhTuyenTinTuyenDung.get('/:ma', batLoiBatDongBo(async (yeuCau, phanHoi) => {
+  const ma = String(yeuCau.params.ma ?? '')
+  const { tin, hopLe } = await coQuyenXemTin(ma, yeuCau.headers.authorization)
+  if (!hopLe) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
+  return phanHoi.json({ duLieu: tin })
+}))
 dinhTuyenTinTuyenDung.use(yeuCauDangNhap)
 dinhTuyenTinTuyenDung.post('/upload-anh', yeuCauVaiTro(['nha_tuyen_dung', 'admin']), taiAnhTin.single('anh'), (yeuCau, phanHoi) => {
   if (!yeuCau.file) return phanHoi.status(400).json({ thongBao: 'Chưa có file ảnh tin tuyển dụng' })

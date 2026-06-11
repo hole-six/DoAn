@@ -121,7 +121,7 @@ export function useSearchSuggestions(params: {
         if (requestIdRef.current !== myRequestId) return
 
         const nextGroups: SuggestionGroups = asGroups({
-          jobs: rankSuggestions((jobsRes.duLieu ?? []).map((job: any) => ({
+          jobs: rankSuggestions((jobsRes.duLieu ?? []).filter((job: any) => job?.trangThai === 'dang_mo' && job?.nhaTuyenDung?.trangThaiDuyet === 'da_duyet').map((job: any) => ({
             id: String(job.id ?? job._id ?? job.tieuDe),
             type: 'job' as const,
             title: String(job.tieuDe ?? 'Tin tuyển dụng'),
@@ -130,7 +130,7 @@ export function useSearchSuggestions(params: {
             queryValue: String(job.tieuDe ?? ''),
             href: job.id ? `/viec-lam/${job.id}` : undefined,
           })), keyword, 5),
-          companies: rankSuggestions((companiesRes.duLieu ?? []).map((company: any) => ({
+          companies: rankSuggestions((companiesRes.duLieu ?? []).filter((company: any) => company?.trangThaiDuyet === 'da_duyet').map((company: any) => ({
             id: String(company.id ?? company._id ?? company.tenCongTy),
             type: 'company' as const,
             title: String(company.tenCongTy ?? 'Công ty'),

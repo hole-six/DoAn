@@ -346,8 +346,8 @@ export default function QuanLyNguoiDung() {
       </div>
 
       {form && (
-        <div className="fixed inset-0 z-[300] flex items-stretch justify-center bg-slate-900/50 p-0 backdrop-blur-md">
-          <form className="flex h-dvh w-full max-w-none flex-col gap-3.5 overflow-y-auto rounded-none border-0 bg-white p-4 shadow-none sm:p-6" onSubmit={luuNguoiDung}>
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 p-3 backdrop-blur-md sm:p-5">
+          <form className="flex max-h-[calc(100dvh-24px)] w-full max-w-5xl flex-col gap-3.5 overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.2)] sm:max-h-[calc(100dvh-40px)] sm:p-6 lg:p-7" onSubmit={luuNguoiDung}>
             <div className="relative flex items-start gap-3">
               <div className="min-w-0 flex-1">
                 <h2 className="break-words pr-12 text-2xl font-black leading-tight text-slate-950">{form.id ? 'Sửa người dùng' : 'Thêm người dùng'}</h2>
@@ -360,7 +360,7 @@ export default function QuanLyNguoiDung() {
 
             {loi && <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm font-extrabold text-rose-700">{loi}</div>}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               <label className={fieldClass}>Họ tên
                 <input className={inputClass} required value={form.hoTen} onChange={(event) => setForm({ ...form, hoTen: event.target.value })} />
               </label>

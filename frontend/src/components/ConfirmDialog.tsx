@@ -49,7 +49,7 @@ export function ConfirmDialog({
         className="fixed inset-0 z-[2147483646] bg-black/50 backdrop-blur-sm"
         onClick={onCancel}
       />
-      <div className="fixed left-1/2 top-1/2 z-[2147483647] w-[92vw] max-w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="fixed left-1/2 top-1/2 z-[2147483647] w-[92vw] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white p-5 shadow-2xl sm:p-6">
         <div className="mb-4 flex items-start gap-3">
           <div
             className="grid h-12 w-12 shrink-0 place-items-center rounded-full"
@@ -59,7 +59,7 @@ export function ConfirmDialog({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="m-0 text-lg font-black text-slate-900">{title}</h3>
-            <p className="mt-1 text-sm font-medium leading-relaxed text-slate-600">{message}</p>
+            <p className="mt-1 break-words text-sm font-medium leading-relaxed text-slate-600">{message}</p>
           </div>
           <button
             onClick={onCancel}
@@ -70,11 +70,11 @@ export function ConfirmDialog({
             <AppIcon icon={X} size={18} />
           </button>
         </div>
-        <div className="mt-6 flex justify-end gap-2">
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             onClick={onCancel}
             type="button"
-            className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50 sm:w-auto sm:min-w-[110px]"
           >
             {cancelText}
           </button>
@@ -84,7 +84,7 @@ export function ConfirmDialog({
               onCancel()
             }}
             type="button"
-            className="inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-sm font-black text-white transition hover:brightness-95"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl px-4 text-sm font-black text-white transition hover:brightness-95 sm:w-auto sm:min-w-[120px]"
             style={{ backgroundColor: color.button }}
           >
             {confirmText}

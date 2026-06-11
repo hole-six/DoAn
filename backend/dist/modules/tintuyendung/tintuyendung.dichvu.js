@@ -102,7 +102,15 @@ async function layDayDu(where, many = false) {
 exports.dichVuTinTuyenDung = {
     async layDanhSach(boLoc = {}) {
         const danhSach = await layDayDu({}, true);
-        const danhSachChuanHoa = danhSach.map(chuanHoaTin);
+        const cheDo = String(boLoc.cheDo ?? 'admin');
+        const maNhaTuyenDungSoHuu = String(boLoc.maNhaTuyenDungSoHuu ?? '');
+        const danhSachChuanHoa = danhSach.map(chuanHoaTin).filter((item) => {
+            if (cheDo === 'cong_khai')
+                return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet';
+            if (cheDo === 'nha_tuyen_dung')
+                return maNhaTuyenDungSoHuu ? item.maNhaTuyenDung === maNhaTuyenDungSoHuu : false;
+            return true;
+        });
         const daLoc = (0, timkiem_js_1.locVaXepHangTheoTuKhoa)(danhSachChuanHoa, boLoc.tuKhoa, item => [
             item.tieuDe,
             item.nhaTuyenDung?.tenCongTy,

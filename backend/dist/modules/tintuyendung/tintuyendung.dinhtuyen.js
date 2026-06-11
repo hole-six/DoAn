@@ -15,6 +15,7 @@ const nhatuyendung_mohinh_js_1 = require("../nhatuyendung/nhatuyendung.mohinh.js
 const xacthuc_dichvu_js_1 = require("../xacthuc/xacthuc.dichvu.js");
 const trangthai_dichvu_js_1 = require("../workflow/trangthai.dichvu.js");
 const tintuyendung_dieukhien_js_1 = require("./tintuyendung.dieukhien.js");
+const tintuyendung_dichvu_js_1 = require("./tintuyendung.dichvu.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
 const TRANG_THAI_KHOA_SUA = new Set(['dang_mo', 'tam_dong', 'het_han']);
 const thuMucUpload = node_path_1.default.join(process.cwd(), 'uploads');
@@ -36,6 +37,39 @@ const taiAnhTin = (0, multer_1.default)({
 });
 async function layCongTyTheoNguoiDung(maNguoiDung) {
     return nhatuyendung_mohinh_js_1.NhaTuyenDung.findUnique({ where: { maNguoiDung }, select: { id: true, trangThaiDuyet: true } });
+}
+async function layNguoiDungNeuCo(authorization) {
+    try {
+        return await (0, xacthuc_dichvu_js_1.layNguoiDungTuAccessToken)(authorization);
+    }
+    catch {
+        return null;
+    }
+}
+async function taoBoLocTruyCapDanhSachTin(query, authorization) {
+    const nguoiDung = await layNguoiDungNeuCo(authorization);
+    if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien')
+        return { ...query, cheDo: 'cong_khai' };
+    if (nguoiDung.vaiTro === 'admin')
+        return { ...query, cheDo: 'admin' };
+    const congTy = await layCongTyTheoNguoiDung(nguoiDung.id);
+    return {
+        ...query,
+        cheDo: 'nha_tuyen_dung',
+        maNhaTuyenDungSoHuu: congTy?.id ? String(congTy.id) : '',
+    };
+}
+async function coQuyenXemTin(maTin, authorization) {
+    const tin = await tintuyendung_dichvu_js_1.dichVuTinTuyenDung.layTheoMa(maTin);
+    const nguoiDung = await layNguoiDungNeuCo(authorization);
+    if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien') {
+        return { tin, hopLe: tin.trangThai === 'dang_mo' && tin.nhaTuyenDung?.trangThaiDuyet === 'da_duyet' };
+    }
+    if (nguoiDung.vaiTro === 'admin')
+        return { tin, hopLe: true };
+    const congTy = await layCongTyTheoNguoiDung(nguoiDung.id);
+    const laChuTin = congTy?.id ? String(congTy.id) === String(tin.maNhaTuyenDung) : false;
+    return { tin, hopLe: laChuTin || (tin.trangThai === 'dang_mo' && tin.nhaTuyenDung?.trangThaiDuyet === 'da_duyet') };
 }
 const damBaoQuyenTaoTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, _phanHoi, tiepTheo) => {
     const nguoiDung = await (0, xacthuc_dichvu_js_1.layNguoiDungTuAccessToken)(yeuCau.headers.authorization);
@@ -95,8 +129,18 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
     tiepTheo();
 });
 exports.dinhTuyenTinTuyenDung = (0, express_1.Router)();
-exports.dinhTuyenTinTuyenDung.get('/', tintuyendung_dieukhien_js_1.dieuKhienTinTuyenDung.layDanhSach);
-exports.dinhTuyenTinTuyenDung.get('/:ma', tintuyendung_dieukhien_js_1.dieuKhienTinTuyenDung.layChiTiet);
+exports.dinhTuyenTinTuyenDung.get('/', (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+    const boLoc = await taoBoLocTruyCapDanhSachTin(yeuCau.query, yeuCau.headers.authorization);
+    const duLieu = await tintuyendung_dichvu_js_1.dichVuTinTuyenDung.layDanhSach(boLoc);
+    return phanHoi.json({ duLieu });
+}));
+exports.dinhTuyenTinTuyenDung.get('/:ma', (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+    const ma = String(yeuCau.params.ma ?? '');
+    const { tin, hopLe } = await coQuyenXemTin(ma, yeuCau.headers.authorization);
+    if (!hopLe)
+        throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng', 404);
+    return phanHoi.json({ duLieu: tin });
+}));
 exports.dinhTuyenTinTuyenDung.use(xacthuc_js_1.yeuCauDangNhap);
 exports.dinhTuyenTinTuyenDung.post('/upload-anh', (0, xacthuc_js_1.yeuCauVaiTro)(['nha_tuyen_dung', 'admin']), taiAnhTin.single('anh'), (yeuCau, phanHoi) => {
     if (!yeuCau.file)

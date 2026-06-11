@@ -36,6 +36,15 @@ export function getEmployerGate(company?: NhaTuyenDung | null): EmployerGateResu
     }
   }
 
+  if (company.trangThaiDuyet === 'da_duyet') {
+    return {
+      status: 'approved',
+      allowed: true,
+      message: 'Công ty đã được duyệt.',
+      cta: 'Đăng tin',
+    }
+  }
+
   const hasRequiredProfile = Boolean(
     text(company.maSoThue)
       && text(company.diaChi)
@@ -49,15 +58,6 @@ export function getEmployerGate(company?: NhaTuyenDung | null): EmployerGateResu
       allowed: false,
       message: 'Cần bổ sung mã số thuế, địa chỉ, logo và mô tả công ty trước khi gửi duyệt tuyển dụng.',
       cta: 'Bổ sung hồ sơ',
-    }
-  }
-
-  if (company.trangThaiDuyet === 'da_duyet') {
-    return {
-      status: 'approved',
-      allowed: true,
-      message: 'Công ty đã được duyệt.',
-      cta: 'Đăng tin',
     }
   }
 

@@ -2,25 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://effortit.site/</loc>
-    <lastmod>2026-06-11T03:47:35.139Z</lastmod>
+    <lastmod>2026-06-11T06:31:15.436Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://effortit.site/viec-lam</loc>
-    <lastmod>2026-06-11T03:47:35.140Z</lastmod>
+    <lastmod>2026-06-11T06:31:15.436Z</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://effortit.site/cong-ty</loc>
-    <lastmod>2026-06-11T03:47:35.140Z</lastmod>
+    <lastmod>2026-06-11T06:31:15.436Z</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://effortit.site/viec-lam/72c5c047-42b2-45a5-9de7-78d62774b102</loc>
+    <lastmod>2026-06-11T06:18:27.676Z</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://effortit.site/viec-lam/78139c2b-9020-4f30-9d32-8e349b0517f6</loc>
+    <lastmod>2026-06-11T06:18:30.835Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://effortit.site/viec-lam/506ae4b6-e133-4edd-a89c-90f3eecaf780</loc>
     <lastmod>2026-06-08T10:17:52.949Z</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://effortit.site/viec-lam/d685d6f5-918a-422e-92c1-d5a575121aab</loc>
+    <lastmod>2026-06-11T06:18:39.662Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
@@ -121,14 +139,14 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://effortit.site/cong-ty/7d6a85e9-0fe3-443d-aa2f-dacb3d4d50da</loc>
-    <lastmod>2026-06-08T09:06:50.341Z</lastmod>
+    <loc>https://effortit.site/cong-ty/8098a7c4-80cd-4ff9-ae2d-364239da7f6b</loc>
+    <lastmod>2026-06-11T06:27:52.569Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://effortit.site/cong-ty/eb093ac8-f627-4a66-bf73-97e5d6161645</loc>
-    <lastmod>2026-06-08T09:08:35.402Z</lastmod>
+    <loc>https://effortit.site/cong-ty/7d6a85e9-0fe3-443d-aa2f-dacb3d4d50da</loc>
+    <lastmod>2026-06-08T09:06:50.341Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -177,6 +195,12 @@
   <url>
     <loc>https://effortit.site/cong-ty/96307fbc-a11b-4fb7-861c-e200ff2e12e9</loc>
     <lastmod>2026-06-08T09:04:38.431Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://effortit.site/cong-ty/eb093ac8-f627-4a66-bf73-97e5d6161645</loc>
+    <lastmod>2026-06-08T09:08:35.402Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

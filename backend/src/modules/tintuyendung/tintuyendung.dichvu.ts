@@ -104,7 +104,13 @@ async function layDayDu(where: any, many = false) {
 export const dichVuTinTuyenDung = {
   async layDanhSach(boLoc: Record<string, unknown> = {}) {
     const danhSach = await layDayDu({}, true)
-    const danhSachChuanHoa = (danhSach as any[]).map(chuanHoaTin)
+    const cheDo = String(boLoc.cheDo ?? 'admin')
+    const maNhaTuyenDungSoHuu = String(boLoc.maNhaTuyenDungSoHuu ?? '')
+    const danhSachChuanHoa = (danhSach as any[]).map(chuanHoaTin).filter((item) => {
+      if (cheDo === 'cong_khai') return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet'
+      if (cheDo === 'nha_tuyen_dung') return maNhaTuyenDungSoHuu ? item.maNhaTuyenDung === maNhaTuyenDungSoHuu : false
+      return true
+    })
     const daLoc = locVaXepHangTheoTuKhoa(danhSachChuanHoa, boLoc.tuKhoa, item => [
       item.tieuDe,
       item.nhaTuyenDung?.tenCongTy,

@@ -57,9 +57,24 @@ export function useEmployerData() {
 
   useEffect(() => {
     void load()
-    return langNgheCapNhatCongTyNhaTuyenDung(() => {
+    const huyLangNghe = langNgheCapNhatCongTyNhaTuyenDung(() => {
       void load()
     })
+    const onFocus = () => { void load() }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void load()
+    }
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') void load()
+    }, 20000)
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      huyLangNghe()
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.clearInterval(intervalId)
+    }
   }, [])
 
   const updateCompany = (company?: NhaTuyenDung) => {

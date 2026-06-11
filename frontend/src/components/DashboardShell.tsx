@@ -187,9 +187,21 @@ export default function DashboardShell({ vaiTro }: Props) {
     const huyLangNghe = langNgheCapNhatCongTyNhaTuyenDung(() => {
       taiCongTy()
     })
+    const onFocus = () => { taiCongTy() }
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') taiCongTy()
+    }
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') taiCongTy()
+    }, 20000)
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisible)
     return () => {
       active = false
       huyLangNghe()
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.clearInterval(intervalId)
     }
   }, [vaiTro, nguoiDung?.id])
 
