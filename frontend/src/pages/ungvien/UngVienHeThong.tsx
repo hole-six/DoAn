@@ -364,8 +364,8 @@ function SectionEditor({ label, value, onChange }: any) {
         {value.map((item: any, i: number) => (
           <div key={i} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
             <input className={inputCls} placeholder="Tiêu đề" value={item.tieuDe ?? ''} onChange={e => onChange(value.map((x: any, idx: number) => idx === i ? { ...x, tieuDe: e.target.value } : x))} />
-            <input className={inputCls} placeholder="Don vi" value={item.donVi ?? ''} onChange={e => onChange(value.map((x: any, idx: number) => idx === i ? { ...x, donVi: e.target.value } : x))} />
-            <input className={inputCls} placeholder="Thoi gian" value={item.thoiGian ?? ''} onChange={e => onChange(value.map((x: any, idx: number) => idx === i ? { ...x, thoiGian: e.target.value } : x))} />
+            <input className={inputCls} placeholder="Đơn vị" value={item.donVi ?? ''} onChange={e => onChange(value.map((x: any, idx: number) => idx === i ? { ...x, donVi: e.target.value } : x))} />
+            <input className={inputCls} placeholder="Thời gian" value={item.thoiGian ?? ''} onChange={e => onChange(value.map((x: any, idx: number) => idx === i ? { ...x, thoiGian: e.target.value } : x))} />
             <button type="button" onClick={() => onChange(value.filter((_: any, idx: number) => idx !== i))} className="grid h-11 w-11 place-items-center rounded-xl border border-rose-200 text-rose-500 transition hover:bg-rose-50"><Trash2 size={15} /></button>
           </div>
         ))}
@@ -508,18 +508,18 @@ export function HoSoUngVienPage() {
       <ErrorBox message={error || data.error} />
       <CvStudio data={data} onReload={data.reload} />
       <Panel>
-        <PanelHead title="Thong tin ca nhan" />
+        <PanelHead title="Thông tin cá nhân" />
         <form onSubmit={saveProfile} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Vi tri mong muon"><input className={inputCls} value={profile.viTriMongMuon ?? ''} onChange={e => setProfile({ ...profile, viTriMongMuon: e.target.value })} /></Field>
+          <Field label="Vị trí mong muốn"><input className={inputCls} value={profile.viTriMongMuon ?? ''} onChange={e => setProfile({ ...profile, viTriMongMuon: e.target.value })} /></Field>
           <Field label="Địa chỉ"><input className={inputCls} value={profile.diaChi ?? ''} onChange={e => setProfile({ ...profile, diaChi: e.target.value })} /></Field>
           <Field label="Kinh nghiệm (năm)"><input className={inputCls} type="number" value={profile.kinhNghiem ?? 0} onChange={e => setProfile({ ...profile, kinhNghiem: Number(e.target.value) })} /></Field>
-          <Field label="Luong mong muon (VND)"><input className={inputCls} type="number" value={profile.mucLuongMongMuon ?? 0} onChange={e => setProfile({ ...profile, mucLuongMongMuon: Number(e.target.value) })} /></Field>
-          <Field label="Tom tat ban than" wide><textarea className={textareaCls} value={profile.tomTat ?? ''} onChange={e => setProfile({ ...profile, tomTat: e.target.value })} /></Field>
+          <Field label="Lương mong muốn (VND)"><input className={inputCls} type="number" value={profile.mucLuongMongMuon ?? 0} onChange={e => setProfile({ ...profile, mucLuongMongMuon: Number(e.target.value) })} /></Field>
+          <Field label="Tóm tắt bản thân" wide><textarea className={textareaCls} value={profile.tomTat ?? ''} onChange={e => setProfile({ ...profile, tomTat: e.target.value })} /></Field>
           <div className="flex justify-end md:col-span-2"><PrimaryBtn type="submit"><Save size={16} /> Lưu hồ sơ</PrimaryBtn></div>
         </form>
       </Panel>
       <Panel>
-        <PanelHead title="CV nang luc" />
+        <PanelHead title="CV năng lực" />
         {data.hoSo?.length ? (
           <div className="space-y-2">
             {data.hoSo.map((item: any) => (
@@ -554,10 +554,10 @@ function AppDrawer({ item, onClose }: { item: any; onClose: () => void }) {
     <Drawer onClose={onClose}>
       <ModalHead title="Chi tiết ứng tuyển" onClose={onClose} />
       <DetailGrid rows={[
-        ['Vi tri', item.tinTuyenDung?.tieuDe],
+        ['Vị trí', item.tinTuyenDung?.tieuDe],
         ['Công ty', item.tinTuyenDung?.nhaTuyenDung?.tenCongTy],
-        ['CV da dung', item.hoSoNangLuc?.tieuDe ?? '-'],
-        ['Diem khop', `${item.diemKhopKyNang ?? 0}%`],
+        ['CV đã dùng', item.hoSoNangLuc?.tieuDe ?? '-'],
+        ['Điểm khớp', `${item.diemKhopKyNang ?? 0}%`],
         ['Trạng thái', <Badge tone={toneUT(item.trangThai)}>{labelUT(item.trangThai)}</Badge>],
       ]} />
       {item.thuXinViec && <div className="mt-4 rounded-xl bg-slate-50 p-3"><strong className="text-sm font-black text-slate-700">Thư xin việc</strong><p className="mt-1 text-sm text-slate-600">{item.thuXinViec}</p></div>}

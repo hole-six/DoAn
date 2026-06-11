@@ -28,7 +28,7 @@ function Group(props: {
         >
           <strong>{item.title}</strong>
           {(item.subtitle || item.meta) && (
-            <span>{[item.subtitle, item.meta].filter(Boolean).join(' Â· ')}</span>
+            <span>{[item.subtitle, item.meta].filter(Boolean).join(' · ')}</span>
           )}
         </button>
       ))}

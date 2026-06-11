@@ -165,13 +165,13 @@ export const dichVuWorkflowUngTuyen = {
 
     async danhGiaHoSo(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: { trangThai: 'dang_xet_duyet' | 'tu_choi'; ghiChu?: string; giaiDoanTuChoi?: 'sang_loc' | 'phong_van' }) {
       const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
-      if (!['dang_xet_duyet', 'tu_choi'].includes(duLieu.trangThai)) throw new LoiUngDung('Tr?ng th?i ??nh gi? kh?ng h?p l?', 422, 'INVALID_REVIEW_STATUS')
-      if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('H? s? kh?ng c?n ? tr?ng th?i c? th? ??nh gi?', 409, 'INVALID_APPLICATION_STATE')
+      if (!['dang_xet_duyet', 'tu_choi'].includes(duLieu.trangThai)) throw new LoiUngDung('Trạng thái đánh giá không hợp lệ', 422, 'INVALID_REVIEW_STATUS')
+      if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Hồ sơ không còn ở trạng thái có thể đánh giá', 409, 'INVALID_APPLICATION_STATE')
       const ghiChu = duLieu.trangThai === 'tu_choi' ? `[tu_choi_${duLieu.giaiDoanTuChoi ?? 'sang_loc'}] ${duLieu.ghiChu ?? ''}`.trim() : duLieu.ghiChu
       const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, duLieu.trangThai, nguoiDung, ghiChu)
       const info = thongTinThongBao(hoSoMoi)
       if (duLieu.trangThai === 'tu_choi') {
-        if (info.maNguoiDungUngVien) await thongBaoHeThong({ maNguoiDung: info.maNguoiDungUngVien, tieuDe: 'H? s? ?ng tuy?n ch?a ph? h?p', noiDung: `${info.tenCongTy} ?? c?p nh?t k?t qu? h? s? v? tr? ${info.viTriUngTuyen}.`, lienKet: '/ung-vien/ung-tuyen', mucDoUuTien: 'cao' })
+        if (info.maNguoiDungUngVien) await thongBaoHeThong({ maNguoiDung: info.maNguoiDungUngVien, tieuDe: 'Hồ sơ ứng tuyển chưa phù hợp', noiDung: `${info.tenCongTy} đã cập nhật kết quả hồ sơ vị trí ${info.viTriUngTuyen}.`, lienKet: '/ung-vien/ung-tuyen', mucDoUuTien: 'cao' })
       } else if (info.maNguoiDungUngVien) {
         await thongBaoHoSoDangXetDuyet({
           maUngVien: info.maNguoiDungUngVien,
@@ -184,15 +184,15 @@ export const dichVuWorkflowUngTuyen = {
     },
     async moiPhongVan(nguoiDung: NguoiDungHienTai, maHoSoUngTuyen: string, duLieu: LichInput) {
       const { hoSo } = await damBaoHoSoThuocCongTy(maHoSoUngTuyen, nguoiDung)
-      if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Ch? c? th? m?i ph?ng v?n h? s? ?? xem ho?c ?ang x?t duy?t', 409, 'INVALID_APPLICATION_STATE')
+      if (!['da_xem', 'dang_xet_duyet'].includes(String(hoSo.trangThai ?? ''))) throw new LoiUngDung('Chỉ có thể mời phỏng vấn hồ sơ đã xem hoặc đang xét duyệt', 409, 'INVALID_APPLICATION_STATE')
       const lichCu = await prisma.lichPhongVan.findUnique({ where: { maHoSoUngTuyen } })
-      if (lichCu) throw new LoiUngDung('H? s? n?y ?? c? l?ch ph?ng v?n', 409, 'INTERVIEW_EXISTS')
+      if (lichCu) throw new LoiUngDung('Hồ sơ này đã có lịch phỏng vấn', 409, 'INTERVIEW_EXISTS')
       const thoiGianBatDau = chuanHoaDateTime(duLieu.thoiGianBatDau, 'thoiGianBatDau')
       const thoiGianKetThuc = chuanHoaDateTime(duLieu.thoiGianKetThuc, 'thoiGianKetThuc')
-      if (!thoiGianBatDau) throw new LoiUngDung('Thi?u th?i gian b?t ??u ph?ng v?n', 422, 'INVALID_DATETIME')
+      if (!thoiGianBatDau) throw new LoiUngDung('Thiếu thời gian bắt đầu phỏng vấn', 422, 'INVALID_DATETIME')
       damBaoKhoangThoiGianPhongVan(thoiGianBatDau, thoiGianKetThuc)
       const lich = await prisma.lichPhongVan.create({ data: { maHoSoUngTuyen, thoiGianBatDau, thoiGianKetThuc, diaChi: duLieu.diaChi, hinhThuc: duLieu.hinhThuc ?? 'online', linkHop: duLieu.linkHop, ghiChu: duLieu.ghiChu, trangThai: 'da_len_lich', ketQua: 'cho_ket_qua' } })
-      const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, 'moi_phong_van', nguoiDung, 'Nh? tuy?n d?ng m?i ph?ng v?n')
+      const hoSoMoi = await capNhatTrangThaiHoSo(hoSo, 'moi_phong_van', nguoiDung, 'Nhà tuyển dụng mời phỏng vấn')
       const info = thongTinThongBao(hoSoMoi)
       if (info.maNguoiDungUngVien) await thongBaoMoiPhongVan({ maUngVien: info.maNguoiDungUngVien, tenCongTy: info.tenCongTy, viTriUngTuyen: info.viTriUngTuyen, thoiGian: thoiGianBatDau, hinhThuc: duLieu.hinhThuc ?? 'online', diaChi: duLieu.diaChi ?? '', linkHop: duLieu.linkHop, maLichPhongVan: lich.id })
       return dichVuLichPhongVan.layTheoMa(lich.id)
@@ -222,7 +222,7 @@ export const dichVuWorkflowUngTuyen = {
     async capNhatLichPhongVan(nguoiDung: NguoiDungHienTai, maLichPhongVan: string, duLieu: LichInput) {
       const { lich, hoSo } = await layLichVaHoSo(maLichPhongVan)
       await damBaoHoSoThuocCongTy(id(hoSo), nguoiDung)
-      if (['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) throw new LoiUngDung('Kh?ng th? c?p nh?t l?ch ?? k?t th?c ho?c ?? h?y', 409, 'INVALID_INTERVIEW_STATE')
+      if (['hoan_thanh', 'da_huy'].includes(String(lich.trangThai ?? ''))) throw new LoiUngDung('Không thể cập nhật lịch đã kết thúc hoặc đã hủy', 409, 'INVALID_INTERVIEW_STATE')
       const thoiGianBatDau = chuanHoaDateTime(duLieu.thoiGianBatDau, 'thoiGianBatDau')
       const thoiGianKetThuc = chuanHoaDateTime(duLieu.thoiGianKetThuc, 'thoiGianKetThuc')
       damBaoKhoangThoiGianPhongVan(thoiGianBatDau ?? lich.thoiGianBatDau, thoiGianKetThuc ?? lich.thoiGianKetThuc ?? undefined)

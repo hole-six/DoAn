@@ -569,7 +569,7 @@ export function CongTyNhaTuyenDungPage() {
   const uploadLogo = async (file?: File) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setError('Ch? nh?n file ?nh')
+      setError('Chỉ nhận file ảnh')
       return
     }
     const previewUrl = URL.createObjectURL(file)
@@ -586,9 +586,9 @@ export function CongTyNhaTuyenDungPage() {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       })
       const response = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(response.thongBao ?? 'Upload logo th?t b?i')
+      if (!res.ok) throw new Error(response.thongBao ?? 'Upload logo thất bại')
       const nextLogo = response.duLieu?.duongDan ?? response.duLieu?.url
-      if (!nextLogo) throw new Error('Upload logo kh?ng tr? v? ???ng d?n')
+      if (!nextLogo) throw new Error('Upload logo không trả về đường dẫn')
       capNhatPhienBanTaiNguyen(nextLogo)
       setForm((prev: any) => ({ ...prev, logo: nextLogo }))
       if (form?.id) {
@@ -597,20 +597,20 @@ export function CongTyNhaTuyenDungPage() {
       }
       phatCapNhatCongTyNhaTuyenDung()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload logo th?t b?i')
+      setError(err instanceof Error ? err.message : 'Upload logo thất bại')
     } finally {
       setLogoPreview('')
       setUploading(false)
     }
   }
 
-  if (data.loading || !form) return <Page title="Th?ng tin c?ng ty" desc="?ang t?i..."><div className="ntd-panel">?ang t?i...</div></Page>
+  if (data.loading || !form) return <Page title="Thông tin công ty" desc="Đang tải..."><div className="ntd-panel">Đang tải...</div></Page>
 
   return (
-    <Page title="Th?ng tin c?ng ty" desc="C?p nh?t h? s? c?ng ty, logo, m? t?, quy m? v? website.">
+    <Page title="Thông tin công ty" desc="Cập nhật hồ sơ công ty, logo, mô tả, quy mô và website.">
       <ErrorBox message={error || data.error} />
       <form className="ntd-panel ntd-form" onSubmit={save}>
-        <Field label="Logo c?ng ty" wide>
+        <Field label="Logo công ty" wide>
           <div className="ntd-logo-upload">
             <div className="ntd-logo-preview">
               {logoPreview ? (
@@ -623,22 +623,22 @@ export function CongTyNhaTuyenDungPage() {
             </div>
             <div>
               <label className="ntd-upload-button">
-                <ImagePlus size={16} /> {uploading ? '?ang upload...' : 'Upload ?nh'}
+                <ImagePlus size={16} /> {uploading ? 'Đang upload...' : 'Upload ảnh'}
                 <input type="file" accept="image/*" disabled={uploading} onChange={e => void uploadLogo(e.target.files?.[0])} />
               </label>
-              <p>H? tr? JPG, PNG, WebP, SVG. T?i ?a 3MB.</p>
+              <p>Hỗ trợ JPG, PNG, WebP, SVG. Tối đa 3MB.</p>
             </div>
           </div>
         </Field>
-        <Field label="T?n c?ng ty"><input value={form.tenCongTy ?? ''} onChange={e => setForm({ ...form, tenCongTy: e.target.value })} /></Field>
-        <Field label="M? s? thu?"><input value={form.maSoThue ?? ''} onChange={e => setForm({ ...form, maSoThue: e.target.value })} /></Field>
-        <Field label="??a ch?"><input value={form.diaChi ?? ''} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field>
+        <Field label="Tên công ty"><input value={form.tenCongTy ?? ''} onChange={e => setForm({ ...form, tenCongTy: e.target.value })} /></Field>
+        <Field label="Mã số thuế"><input value={form.maSoThue ?? ''} onChange={e => setForm({ ...form, maSoThue: e.target.value })} /></Field>
+        <Field label="Địa chỉ"><input value={form.diaChi ?? ''} onChange={e => setForm({ ...form, diaChi: e.target.value })} /></Field>
         <Field label="Website"><input value={form.website ?? ''} onChange={e => setForm({ ...form, website: e.target.value })} /></Field>
         <Field label="Logo URL"><input value={form.logo ?? ''} onChange={e => setForm({ ...form, logo: e.target.value })} /></Field>
-        <Field label="Quy m?"><input type="number" value={form.quyMo ?? 0} onChange={e => setForm({ ...form, quyMo: Number(e.target.value) })} /></Field>
-        <Field label="Ng?nh"><input value={form.nganh ?? ''} onChange={e => setForm({ ...form, nganh: e.target.value })} /></Field>
-        <Field label="M? t?" wide><textarea value={form.moTa ?? ''} onChange={e => setForm({ ...form, moTa: e.target.value })} /></Field>
-        <div className="ntd-form-actions"><button className="primary-button"><Save size={16} /> L?u c?ng ty</button></div>
+        <Field label="Quy mô"><input type="number" value={form.quyMo ?? 0} onChange={e => setForm({ ...form, quyMo: Number(e.target.value) })} /></Field>
+        <Field label="Ngành"><input value={form.nganh ?? ''} onChange={e => setForm({ ...form, nganh: e.target.value })} /></Field>
+        <Field label="Mô tả" wide><textarea value={form.moTa ?? ''} onChange={e => setForm({ ...form, moTa: e.target.value })} /></Field>
+        <div className="ntd-form-actions"><button className="primary-button"><Save size={16} /> Lưu công ty</button></div>
       </form>
     </Page>
   )
