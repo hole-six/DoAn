@@ -19,10 +19,29 @@ type DuLieuCapNhatNguoiDung = Partial<{
   email: string
   matKhau: string
   hoTen: string
-  soDienThoai: string
+  soDienThoai: string | null
   vaiTro: 'ung_vien' | 'nha_tuyen_dung' | 'admin'
   trangThai: 'hoat_dong' | 'tam_khoa' | 'bi_khoa'
 }>
+
+function chuanHoaDuLieuNguoiDung(duLieu: DuLieuCapNhatNguoiDung) {
+  const duLieuDaChuanHoa = { ...duLieu }
+
+  if (typeof duLieuDaChuanHoa.email === 'string') {
+    duLieuDaChuanHoa.email = duLieuDaChuanHoa.email.toLowerCase().trim()
+  }
+
+  if (typeof duLieuDaChuanHoa.hoTen === 'string') {
+    duLieuDaChuanHoa.hoTen = duLieuDaChuanHoa.hoTen.trim()
+  }
+
+  if (typeof duLieuDaChuanHoa.soDienThoai === 'string') {
+    const soDienThoai = duLieuDaChuanHoa.soDienThoai.trim()
+    duLieuDaChuanHoa.soDienThoai = soDienThoai || null
+  }
+
+  return duLieuDaChuanHoa
+}
 
 function boMatKhau(nguoiDung: DuLieuNguoiDung) {
   return {
@@ -56,14 +75,14 @@ export const dichVuNguoiDung = {
   },
 
   async taoMoi(duLieuNhan: unknown) {
-    const duLieu = duLieuNhan as DuLieuCapNhatNguoiDung
+    const duLieu = chuanHoaDuLieuNguoiDung(duLieuNhan as DuLieuCapNhatNguoiDung)
     const email = duLieu.email?.toLowerCase().trim()
     if (!email || !duLieu.matKhau || !duLieu.hoTen) {
       throw new LoiUngDung('Thiếu thông tin tạo người dùng', 422)
     }
 
     const daTonTai = await NguoiDung.findUnique({ where: { email }, select: { id: true } })
-    if (daTonTai) throw new LoiUngDung('Email da ton tai', 409)
+    if (daTonTai) throw new LoiUngDung('Email đã tồn tại', 409)
 
     const nguoiDung = await NguoiDung.create({
       data: boUndefined(await bamMatKhauNeuCo({
@@ -78,7 +97,7 @@ export const dichVuNguoiDung = {
   },
 
   async capNhat(ma: string, duLieuNhan: unknown) {
-    const duLieu = duLieuNhan as DuLieuCapNhatNguoiDung
+    const duLieu = chuanHoaDuLieuNguoiDung(duLieuNhan as DuLieuCapNhatNguoiDung)
     const duLieuCapNhat = { ...duLieu }
 
     if (duLieuCapNhat.email) {
@@ -87,13 +106,32 @@ export const dichVuNguoiDung = {
         where: { email: duLieuCapNhat.email, id: { not: ma } },
         select: { id: true },
       })
-      if (trungEmail) throw new LoiUngDung('Email da duoc su dung boi tai khoan khac', 409)
+      if (trungEmail) throw new LoiUngDung('Email đã được sử dụng bởi tài khoản khác', 409)
     }
 
     if (!duLieuCapNhat.matKhau) delete duLieuCapNhat.matKhau
 
-    const hienTai = await NguoiDung.findUnique({ where: { id: ma }, select: { id: true } })
+    const hienTai = await NguoiDung.findUnique({
+      where: { id: ma },
+      select: { id: true, vaiTro: true, trangThai: true },
+    }) as Pick<DuLieuNguoiDung, 'id' | 'vaiTro' | 'trangThai'> | null
     if (!hienTai) throw new LoiUngDung('Không tìm thấy người dùng để cập nhật', 404)
+
+    const sapMatQuyenAdmin =
+      hienTai.vaiTro === 'admin' &&
+      (
+        duLieuCapNhat.vaiTro === 'ung_vien' ||
+        duLieuCapNhat.vaiTro === 'nha_tuyen_dung' ||
+        duLieuCapNhat.trangThai === 'tam_khoa' ||
+        duLieuCapNhat.trangThai === 'bi_khoa'
+      )
+
+    if (sapMatQuyenAdmin) {
+      const soAdmin = await NguoiDung.count({ where: { vaiTro: 'admin' } })
+      if (soAdmin <= 1) {
+        throw new LoiUngDung('Không thể thay đổi vai trò hoặc khóa admin cuối cùng của hệ thống', 409)
+      }
+    }
 
     const nguoiDung = await NguoiDung.update({
       where: { id: ma },

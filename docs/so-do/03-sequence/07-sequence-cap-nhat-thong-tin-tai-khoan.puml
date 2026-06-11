@@ -24,34 +24,49 @@ actor "Actor: Ứng viên / Nhà tuyển dụng / Quản trị viên" as Actor
 boundary "UI: cai-dat-tai-khoan" as UI
 boundary "UI: form-cap-nhat-tai-khoan" as Form
 control "Controller: NguoiDungController" as Controller
-entity "Entity: NguoiDung" as MainEntity
+entity "Entity: NguoiDung" as NguoiDung
+database "Local Storage" as Storage
 
 Actor -> UI : 1. Mở trang cài đặt tài khoản
 activate UI
-UI -> Form : 2. Hiển thị form-cap-nhat-tai-khoan
+UI -> Form : 2. Hiển thị form tài khoản và tùy chọn thông báo
 activate Form
-Actor -> Form : 3. Chỉnh sửa họ tên, số điện thoại, mật khẩu
-Form -> Controller : 4. PATCH /nguoidung/:ma
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra trùng email và dữ liệu nhập
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Hash mật khẩu nếu có và cập nhật tài khoản
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller --> Form : 9. Thông báo cập nhật thành công
-  Form --> UI : 10. Cập nhật giao diện
-  UI --> Actor : 11. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 9. Thông báo dữ liệu không hợp lệ
-  Form --> UI : 10. Hiển thị lỗi tại màn hình
-  UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
+group Cập nhật tài khoản
+  Actor -> Form : 3. Sửa họ tên, số điện thoại, mật khẩu mới
+  Form -> Controller : 4. PATCH /nguoidung/:ma
+  activate Controller
+  Controller -> NguoiDung : 5. Kiểm tra quyền cập nhật chính chủ / admin\nvà kiểm tra dữ liệu hợp lệ
+  activate NguoiDung
+  NguoiDung --> Controller : 6. Trả kết quả kiểm tra
+  deactivate NguoiDung
+
+  alt Dữ liệu hợp lệ
+    Controller -> NguoiDung : 7. Băm mật khẩu mới nếu có\nvà cập nhật NgườiDung
+    activate NguoiDung
+    NguoiDung --> Controller : 8. Trả dữ liệu đã cập nhật
+    deactivate NguoiDung
+    Controller --> Form : 9. Thông báo cập nhật thành công
+    Form -> Storage : 10. Đồng bộ lại phiên đăng nhập hiện tại
+    Storage --> Form : 11. Lưu xong
+    Form --> UI : 12. Cập nhật giao diện
+    UI --> Actor : 13. Hiển thị kết quả thành công
+  else Dữ liệu không hợp lệ
+    Controller --> Form : 9. Thông báo dữ liệu không hợp lệ
+    Form --> UI : 10. Hiển thị lỗi tại màn hình
+    UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
+  end
+  deactivate Controller
 end
-deactivate Controller
+
+group Lưu tùy chọn thông báo
+  Actor -> Form : 14. Bật/tắt các tùy chọn thông báo
+  Form -> Storage : 15. Lưu cấu hình thông báo cho phiên hiện tại
+  Storage --> Form : 16. Lưu xong
+  Form --> UI : 17. Cập nhật trạng thái
+  UI --> Actor : 18. Hiển thị lưu tùy chọn thành công
+end
+
 deactivate Form
 deactivate UI
 @enduml

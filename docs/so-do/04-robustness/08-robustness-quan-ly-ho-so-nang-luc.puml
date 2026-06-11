@@ -27,11 +27,14 @@ actor "Ứng viên\n(from Usecase Diagram)" as Actor
 
 together {
   boundary "ho-so-nang-luc" as UI
-  boundary "cv-studio" as Form
+  boundary "cv-studio" as CvStudio
 }
 
 together {
-  control "quan-ly-ho-so-nang-luc" as Controller
+  control "tao-sua-cv" as CvController
+  control "tai-len-cv-pdf" as UploadController
+  control "dat-cv-chinh" as MainCvController
+  control "xoa-cv" as DeleteController
 }
 
 together {
@@ -39,7 +42,13 @@ together {
 }
 
 Actor <--> UI
-UI <--> Form
-Form <--> Controller
-Controller <--> HoSoNangLuc
+UI <--> CvStudio
+CvStudio <--> CvController
+CvStudio <--> UploadController
+CvStudio <--> MainCvController
+CvStudio <--> DeleteController
+CvController <--> HoSoNangLuc
+UploadController <--> HoSoNangLuc
+MainCvController <--> HoSoNangLuc
+DeleteController <--> HoSoNangLuc
 @enduml

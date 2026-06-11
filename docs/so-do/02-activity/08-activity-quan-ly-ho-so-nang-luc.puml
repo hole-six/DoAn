@@ -10,22 +10,18 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
+
 start
 :Ứng viên đăng nhập, mở trang Hồ sơ năng lực;
-:Hệ thống tải thông tin cá nhân ứng viên và danh sách HoSoNangLuc;
+:Hệ thống tải danh sách HoSoNangLuc và dữ liệu CV hiện có;
+
 if (Đã có CV?) then (Có)
   :Hiển thị danh sách CV trình tạo và CV tải lên, đánh dấu CV chính và công khai;
 else (Không)
   :Hiển thị trạng thái chưa có CV;
 endif
 
-if (Chọn thao tác?) then (Cập nhật thông tin cá nhân)
-  :Sửa họ tên, số điện thoại, vị trí mong muốn, địa chỉ, tóm tắt;
-  :Nhấn "Lưu thông tin";
-  :Hệ thống kiểm tra và cập nhật thông tin NgườiDùng và ỨngViên;
-  :Hiển thị cập nhật thành công;
-
-elseif (Tạo hoặc sửa CV bằng trình tạo?) then (Trình tạo CV)
+if (Chọn thao tác?) then (Tạo hoặc sửa CV bằng trình tạo)
   :Nhấn "Tạo CV" hoặc chọn một CV trình tạo để sửa;
   fork
     :Nhập tiêu đề và thông tin hiển thị;
@@ -89,5 +85,6 @@ else (Xóa CV)
     :Đóng hộp xác nhận;
   endif
 endif
+
 stop
 @enduml

@@ -778,7 +778,7 @@ const UngVienNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/candidat
 const LichPhongVanNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/interviews/LichPhongVanNhaTuyenDungPage'))
 const CongTyNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/company/CongTyNhaTuyenDungPage'))
 const ThongBaoNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/notifications/ThongBaoNhaTuyenDungPage'))
-const BangGiaNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/pricing/BangGiaNhaTuyenDungPage'))
+const CaiDatNhaTuyenDungPage = lazy(() => import('./pages/nhatuyendung/DashboardNhaTuyenDung').then(module => ({ default: module.CaiDatNhaTuyenDungPage })))
 const DashboardQuanTriVien = lazy(() => import('./pages/quantrivien/DashboardQuanTriVien'))
 const QuanLyNguoiDung = lazy(() => import('./pages/quantrivien/QuanLyNguoiDung'))
 const QuanLyCongTyAdmin = lazy(() => import('./pages/quantrivien/congty/QuanLyCongTyAdmin'))
@@ -786,6 +786,7 @@ const DuyetTinTuyenDungAdmin = lazy(() => import('./pages/quantrivien/tintuyendu
 const QuanLyKyNangAdmin = lazy(() => import('./pages/quantrivien/kynang/QuanLyKyNangAdmin'))
 const QuanLyReviewCongTyAdmin = lazy(() => import('./pages/quantrivien/review/QuanLyReviewCongTyAdmin'))
 const ThongBaoAdminPage = lazy(() => import('./pages/quantrivien/thongbao/ThongBaoAdminPage'))
+const CaiDatAdminPage = lazy(() => import('./pages/quantrivien/CaiDatQuanTriPage'))
 const ChatUngVienPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatUngVienPage })))
 const ChatNhaTuyenDungPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatNhaTuyenDungPage })))
 const ChatAdminPage = lazy(() => import('./pages/chat/TrangChat').then(module => ({ default: module.ChatAdminPage })))
@@ -874,7 +875,7 @@ export default function UngDung() {
           <Route path="cong-ty" element={<CongTyNhaTuyenDungPage />} />
           <Route path="chat" element={<ChatNhaTuyenDungPage />} />
           <Route path="thong-bao" element={<ThongBaoNhaTuyenDungPage />} />
-          <Route path="bang-gia" element={<BangGiaNhaTuyenDungPage />} />
+          <Route path="cai-dat" element={<CaiDatNhaTuyenDungPage />} />
         </Route>
 
         {/* Dashboard quản trị viên */}
@@ -887,6 +888,7 @@ export default function UngDung() {
           <Route path="review" element={<QuanLyReviewCongTyAdmin />} />
           <Route path="chat" element={<ChatAdminPage />} />
           <Route path="thong-bao" element={<ThongBaoAdminPage />} />
+          <Route path="cai-dat" element={<CaiDatAdminPage />} />
         </Route>
 
         <Route path="*" element={<TrangDangXayDungPage ten="404 - Không tìm thấy" />} />

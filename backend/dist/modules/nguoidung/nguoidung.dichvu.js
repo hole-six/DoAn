@@ -8,6 +8,20 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
 const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const nguoidung_mohinh_js_1 = require("./nguoidung.mohinh.js");
+function chuanHoaDuLieuNguoiDung(duLieu) {
+    const duLieuDaChuanHoa = { ...duLieu };
+    if (typeof duLieuDaChuanHoa.email === 'string') {
+        duLieuDaChuanHoa.email = duLieuDaChuanHoa.email.toLowerCase().trim();
+    }
+    if (typeof duLieuDaChuanHoa.hoTen === 'string') {
+        duLieuDaChuanHoa.hoTen = duLieuDaChuanHoa.hoTen.trim();
+    }
+    if (typeof duLieuDaChuanHoa.soDienThoai === 'string') {
+        const soDienThoai = duLieuDaChuanHoa.soDienThoai.trim();
+        duLieuDaChuanHoa.soDienThoai = soDienThoai || null;
+    }
+    return duLieuDaChuanHoa;
+}
 function boMatKhau(nguoiDung) {
     return {
         id: String(nguoiDung.id),
@@ -38,14 +52,14 @@ exports.dichVuNguoiDung = {
         return boMatKhau(nguoiDung);
     },
     async taoMoi(duLieuNhan) {
-        const duLieu = duLieuNhan;
+        const duLieu = chuanHoaDuLieuNguoiDung(duLieuNhan);
         const email = duLieu.email?.toLowerCase().trim();
         if (!email || !duLieu.matKhau || !duLieu.hoTen) {
             throw new loiungdung_js_1.LoiUngDung('Thiếu thông tin tạo người dùng', 422);
         }
         const daTonTai = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { email }, select: { id: true } });
         if (daTonTai)
-            throw new loiungdung_js_1.LoiUngDung('Email da ton tai', 409);
+            throw new loiungdung_js_1.LoiUngDung('Email đã tồn tại', 409);
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.create({
             data: (0, prismaHelper_js_1.boUndefined)(await bamMatKhauNeuCo({
                 ...duLieu,
@@ -57,7 +71,7 @@ exports.dichVuNguoiDung = {
         return boMatKhau(nguoiDung);
     },
     async capNhat(ma, duLieuNhan) {
-        const duLieu = duLieuNhan;
+        const duLieu = chuanHoaDuLieuNguoiDung(duLieuNhan);
         const duLieuCapNhat = { ...duLieu };
         if (duLieuCapNhat.email) {
             duLieuCapNhat.email = duLieuCapNhat.email.toLowerCase().trim();
@@ -66,13 +80,27 @@ exports.dichVuNguoiDung = {
                 select: { id: true },
             });
             if (trungEmail)
-                throw new loiungdung_js_1.LoiUngDung('Email da duoc su dung boi tai khoan khac', 409);
+                throw new loiungdung_js_1.LoiUngDung('Email đã được sử dụng bởi tài khoản khác', 409);
         }
         if (!duLieuCapNhat.matKhau)
             delete duLieuCapNhat.matKhau;
-        const hienTai = await nguoidung_mohinh_js_1.NguoiDung.findUnique({ where: { id: ma }, select: { id: true } });
+        const hienTai = await nguoidung_mohinh_js_1.NguoiDung.findUnique({
+            where: { id: ma },
+            select: { id: true, vaiTro: true, trangThai: true },
+        });
         if (!hienTai)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy người dùng để cập nhật', 404);
+        const sapMatQuyenAdmin = hienTai.vaiTro === 'admin' &&
+            (duLieuCapNhat.vaiTro === 'ung_vien' ||
+                duLieuCapNhat.vaiTro === 'nha_tuyen_dung' ||
+                duLieuCapNhat.trangThai === 'tam_khoa' ||
+                duLieuCapNhat.trangThai === 'bi_khoa');
+        if (sapMatQuyenAdmin) {
+            const soAdmin = await nguoidung_mohinh_js_1.NguoiDung.count({ where: { vaiTro: 'admin' } });
+            if (soAdmin <= 1) {
+                throw new loiungdung_js_1.LoiUngDung('Không thể thay đổi vai trò hoặc khóa admin cuối cùng của hệ thống', 409);
+            }
+        }
         const nguoiDung = await nguoidung_mohinh_js_1.NguoiDung.update({
             where: { id: ma },
             data: (0, prismaHelper_js_1.boUndefined)(await bamMatKhauNeuCo(duLieuCapNhat)),

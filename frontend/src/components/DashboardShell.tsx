@@ -56,7 +56,7 @@ const menuNTD = [
   { to: '/nha-tuyen-dung/cong-ty', icon: Building2, label: 'Thông tin công ty' },
   { to: '/nha-tuyen-dung/chat', icon: MessageCircle, label: 'Tin nhắn' },
   { to: '/nha-tuyen-dung/thong-bao', icon: Bell, label: 'Thông báo' },
-  { to: '/nha-tuyen-dung/bang-gia', icon: Star, label: 'Bảng giá' },
+  { to: '/nha-tuyen-dung/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
 
 const menuAdmin = [
@@ -68,7 +68,7 @@ const menuAdmin = [
   { to: '/quan-tri/review', icon: UserCheck, label: 'Review công ty' },
   { to: '/quan-tri/chat', icon: MessageCircle, label: 'Tin nhắn & Hỗ trợ' },
   { to: '/quan-tri/thong-bao', icon: Bell, label: 'Thông báo' },
- 
+  { to: '/quan-tri/cai-dat', icon: Settings, label: 'Cài đặt' },
 ]
 
 const menuUngVienHienThi = [

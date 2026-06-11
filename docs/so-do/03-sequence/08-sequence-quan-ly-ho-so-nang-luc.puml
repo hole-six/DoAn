@@ -22,36 +22,78 @@ title Sơ đồ Quản lý hồ sơ năng lực
 
 actor "Actor: Ứng viên" as Actor
 boundary "UI: ho-so-nang-luc" as UI
-boundary "UI: cv-studio" as Form
+boundary "UI: cv-studio" as Studio
 control "Controller: HoSoNangLucController" as Controller
-entity "Entity: HoSoNangLuc" as MainEntity
+entity "Entity: HoSoNangLuc" as HoSoNangLuc
 
 Actor -> UI : 1. Mở hồ sơ năng lực
 activate UI
-UI -> Form : 2. Mở cv-studio
-activate Form
-Actor -> Form : 3. Tạo, chỉnh sửa, upload hoặc chọn CV chính
-Form -> Controller : 4. GET/POST/PATCH/DELETE /hosonangluc
-activate Controller
-Controller -> MainEntity : 5. Kiểm tra dữ liệu CV
-activate MainEntity
-MainEntity --> Controller : 6. return kết quả kiểm tra
-deactivate MainEntity
+UI -> Studio : 2. Hiển thị danh sách CV và cv-studio
+activate Studio
 
-alt Dữ liệu hợp lệ
-  Controller -> MainEntity : 7. Lưu hồ sơ năng lực (kèm anhDaiDien/fileCvPath)
-  activate MainEntity
-  MainEntity --> Controller : 8. return dữ liệu đã cập nhật
-  deactivate MainEntity
-  Controller --> Form : 9. Thông báo lưu CV thành công
-  Form --> UI : 10. Cập nhật giao diện
-  UI --> Actor : 11. Hiển thị kết quả thành công
-else Dữ liệu không hợp lệ
-  Controller --> Form : 9. Thông báo dữ liệu CV không hợp lệ
-  Form --> UI : 10. Hiển thị lỗi tại màn hình
-  UI --> Actor : 11. Yêu cầu kiểm tra lại thông tin
+alt Tạo hoặc sửa CV trình tạo
+  Actor -> Studio : 3. Nhập / chỉnh sửa nội dung CV
+  Studio -> Controller : 4. POST hoặc PATCH /hosonangluc
+  activate Controller
+  Controller -> HoSoNangLuc : 5. Kiểm tra tiêu đề,\ndữ liệu CV và trạng thái CV chính
+  activate HoSoNangLuc
+  HoSoNangLuc --> Controller : 6. Trả kết quả kiểm tra
+  deactivate HoSoNangLuc
+  alt Hợp lệ
+    Controller -> HoSoNangLuc : 7. Lưu HoSoNangLuc\nvà gỡ CV chính của các CV khác nếu cần
+    activate HoSoNangLuc
+    HoSoNangLuc --> Controller : 8. Trả dữ liệu đã lưu
+    deactivate HoSoNangLuc
+    Controller --> Studio : 9. Thông báo lưu CV thành công
+    Studio --> UI : 10. Cập nhật danh sách CV
+    UI --> Actor : 11. Hiển thị kết quả thành công
+  else Không hợp lệ
+    Controller --> Studio : 9. Thông báo dữ liệu CV không hợp lệ
+    Studio --> UI : 10. Hiển thị lỗi tại màn hình
+    UI --> Actor : 11. Yêu cầu kiểm tra lại CV
+  end
+  deactivate Controller
+
+else Tải lên CV PDF
+  Actor -> Studio : 3. Chọn file CV PDF
+  Studio -> Controller : 4. POST /hosonangluc/upload-file\nvà POST /hosonangluc
+  activate Controller
+  Controller -> HoSoNangLuc : 5. Kiểm tra định dạng, dung lượng,\ntrích xuất nội dung và tạo hồ sơ file_upload
+  activate HoSoNangLuc
+  HoSoNangLuc --> Controller : 6. Trả kết quả tạo hồ sơ
+  deactivate HoSoNangLuc
+  Controller --> Studio : 7. Thông báo tải CV thành công
+  Studio --> UI : 8. Cập nhật danh sách CV
+  UI --> Actor : 9. Hiển thị hồ sơ PDF mới
+  deactivate Controller
+
+else Đặt CV chính
+  Actor -> Studio : 3. Chọn một CV làm CV chính
+  Studio -> Controller : 4. PATCH /hosonangluc/:ma
+  activate Controller
+  Controller -> HoSoNangLuc : 5. Đặt CV được chọn làm CV chính\nvà gỡ CV chính của các CV còn lại
+  activate HoSoNangLuc
+  HoSoNangLuc --> Controller : 6. Trả dữ liệu đã cập nhật
+  deactivate HoSoNangLuc
+  Controller --> Studio : 7. Thông báo đặt CV chính thành công
+  Studio --> UI : 8. Cập nhật danh sách CV
+  UI --> Actor : 9. Hiển thị trạng thái CV chính mới
+  deactivate Controller
+
+else Xóa CV
+  Actor -> Studio : 3. Xác nhận xóa CV
+  Studio -> Controller : 4. DELETE /hosonangluc/:ma
+  activate Controller
+  Controller -> HoSoNangLuc : 5. Xóa hồ sơ năng lực đã chọn
+  activate HoSoNangLuc
+  HoSoNangLuc --> Controller : 6. Trả kết quả xóa
+  deactivate HoSoNangLuc
+  Controller --> Studio : 7. Thông báo xóa thành công
+  Studio --> UI : 8. Cập nhật danh sách CV
+  UI --> Actor : 9. Hiển thị đã xóa CV
+  deactivate Controller
 end
-deactivate Controller
-deactivate Form
+
+deactivate Studio
 deactivate UI
 @enduml

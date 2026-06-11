@@ -10,9 +10,11 @@ skinparam activity {
   DiamondBorderColor #222222
   BarColor #111111
 }
+
 start
 :Người dùng đã đăng nhập mở trang cài đặt tài khoản;
-:Hệ thống tải NgườiDùng hiện tại;
+:Hệ thống tải NgườiDùng hiện tại và tùy chọn thông báo;
+
 if (Tải dữ liệu thành công?) then (Đúng)
   fork
     :Cập nhật họ tên;
@@ -21,26 +23,39 @@ if (Tải dữ liệu thành công?) then (Đúng)
   fork again
     :Nhập mật khẩu mới nếu muốn đổi;
   end fork
+
   if (Muốn hủy?) then (Có)
     :Nhấn nút "Hủy" hoặc rời trang;
   else (Không)
-    :Nhấn nút "Lưu";
-    :Gửi PATCH /nguoidung/:ma với họ tên, số điện thoại và mật khẩu (nếu có);
-    :Hệ thống kiểm tra dữ liệu hợp lệ;
+    :Nhấn nút "Lưu tài khoản";
+    :Gửi PATCH /nguoidung/:ma với họ tên, số điện thoại và mật khẩu mới (nếu có);
+    :Hệ thống kiểm tra dữ liệu hợp lệ và quyền cập nhật chính chủ;
+
     if (Dữ liệu hợp lệ?) then (Đúng)
       if (Có nhập mật khẩu mới?) then (Có)
         :Băm mật khẩu mới;
       else (Không)
         :Bỏ qua trường mật khẩu;
       endif
+
       :Cập nhật NgườiDùng;
-      :Hiển thị thông báo cập nhật thành công;
+      :Đồng bộ lại phiên đăng nhập hiện tại;
+      :Hiển thị thông báo cập nhật tài khoản thành công;
     else (Sai)
       :Hiển thị thông báo lỗi;
     endif
   endif
+
+  if (Người dùng đổi tùy chọn thông báo?) then (Có)
+    :Bật/tắt email hệ thống, lịch phỏng vấn và trạng thái ứng tuyển;
+    :Nhấn nút "Lưu tùy chọn";
+    :Hệ thống lưu cấu hình thông báo cho phiên hiện tại;
+    :Hiển thị thông báo lưu tùy chọn thành công;
+  else (Không)
+  endif
 else (Sai)
   :Yêu cầu đăng nhập lại;
 endif
+
 stop
 @enduml

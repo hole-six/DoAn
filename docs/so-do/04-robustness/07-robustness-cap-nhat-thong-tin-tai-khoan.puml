@@ -31,15 +31,19 @@ together {
 }
 
 together {
-  control "cap-nhat-thong-tin-tai-khoan" as Controller
+  control "cap-nhat-thong-tin-tai-khoan" as AccountController
+  control "luu-tuy-chon-thong-bao" as SettingController
 }
 
 together {
   entity "NguoiDung" as NguoiDung
+  entity "LocalStorage" as LocalStorage
 }
 
 Actor <--> UI
 UI <--> Form
-Form <--> Controller
-Controller <--> NguoiDung
+Form <--> AccountController
+AccountController <--> NguoiDung
+Form <--> SettingController
+SettingController <--> LocalStorage
 @enduml
