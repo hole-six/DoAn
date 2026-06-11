@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Globe, Mail, MapPin, Phone, UserRound } from 'lucide-react'
+import { Mail, MapPin, Phone, UserRound } from 'lucide-react'
 import logoWeb from '../assets/logoweb.png'
 
 const danhMucKyNang = ['Frontend', 'Backend', 'DevOps', 'Data', 'Mobile', 'QA']
@@ -24,14 +24,6 @@ export default function Footer() {
             {danhMucKyNang.map(muc => (
               <span key={muc}>{muc}</span>
             ))}
-          </div>
-          <div className="footer-social-row">
-            <a href="https://effortit.site" aria-label="Website">
-              <Globe size={18} />
-            </a>
-            <a href="mailto:contact@effortit.site" aria-label="Email">
-              <Mail size={18} />
-            </a>
           </div>
         </div>
 
