@@ -4,6 +4,7 @@ import { Bookmark, Briefcase, Building2, Clock, Copy, DollarSign, FileText, Glob
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL, capNhatPhienBanTaiNguyen } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
+import { useSeo } from '../../lib/seo'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
 
@@ -176,6 +177,62 @@ export default function ChiTietViecLam() {
   const logo = imageUrl(congTy?.logo ?? viec?.nhaTuyenDung?.logo ?? logoDuPhong)
   const shareUrl = typeof window !== 'undefined' && viec ? `${window.location.origin}/viec-lam/${viec.id}` : ''
   const shareText = viec ? `${viec.tieuDe} tại ${tenCongTy}` : 'Việc làm ITJob'
+  const seoData = useMemo(() => {
+    if (!viec) return null
+    const moTaRutGon = (viec.moTa ?? viec.yeuCau ?? `Tuyển ${viec.tieuDe} tại ${tenCongTy}`)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220)
+    const schema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'JobPosting',
+      title: viec.tieuDe,
+      description: moTaRutGon,
+      datePosted: viec.ngayDang ? new Date(viec.ngayDang).toISOString() : new Date().toISOString(),
+      employmentType: viec.loaiHinh ?? 'FULL_TIME',
+      hiringOrganization: {
+        '@type': 'Organization',
+        name: tenCongTy,
+        sameAs: congTy?.website || 'https://effortit.site',
+        logo,
+      },
+      jobLocation: {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: viec.diaChi ?? congTy?.diaChi ?? 'Đà Nẵng',
+          addressCountry: 'VN',
+        },
+      },
+      directApply: true,
+    }
+
+    if (viec.hanNop) schema.validThrough = new Date(viec.hanNop).toISOString()
+    if (viec.luongMin || viec.luongMax) {
+      schema.baseSalary = {
+        '@type': 'MonetaryAmount',
+        currency: 'VND',
+        value: {
+          '@type': 'QuantitativeValue',
+          minValue: viec.luongMin ?? undefined,
+          maxValue: viec.luongMax ?? undefined,
+          unitText: 'MONTH',
+        },
+      }
+    }
+
+    return {
+      title: `${viec.tieuDe} tại ${tenCongTy} - Effort IT`,
+      description: `${viec.tieuDe} tại ${tenCongTy}${viec.diaChi ? `, ${viec.diaChi}` : ''}. ${moTaRutGon}`,
+      canonical: `/viec-lam/${viec.id}`,
+      keywords: [viec.tieuDe, tenCongTy, viec.diaChi, ...kyNang.slice(0, 5)].filter(Boolean).join(', '),
+      type: 'article' as const,
+      image: viec.anhDaiDien ? imageUrl(viec.anhDaiDien) : logo,
+      schema,
+    }
+  }, [congTy?.diaChi, congTy?.website, kyNang, logo, tenCongTy, viec])
+
+  useSeo(seoData)
 
   const ungTuyenNgay = async () => {
     const nguoiDung = layNguoiDung()

@@ -18,6 +18,7 @@ import './components/chat-notification.css'
 // ✨ Import Real-time Components
 import { PWAInstallPrompt } from './components/PWAInstallPrompt'
 import { OfflineIndicator } from './components/OfflineIndicator'
+import SeoRouteManager from './components/SeoRouteManager'
 import { khoiTaoSocket, ngatketnoisocket } from './lib/socket'
 import { dangKyPushSubscription, langNgheNotificationClick as langNghePushClick } from './lib/pushNotifications'
 import { ChatProvider } from './contexts/ChatContext'
@@ -816,6 +817,7 @@ export default function UngDung() {
 
   return (
     <BrowserRouter>
+      <SeoRouteManager />
       <ThongBaoProvider>
         <ChatProvider>
           {/* ✨ Real-time UI Components */}

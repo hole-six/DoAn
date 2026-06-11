@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Award, Briefcase, Globe, MapPin, Star, ThumbsUp, Users } from 'lucide-react'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { useSeo } from '../../lib/seo'
 import './congty-styles.css'
 
 const logoDuPhong = 'https://placehold.co/160x160/eaf2ff/2563eb?text=IT'
@@ -135,6 +136,46 @@ export default function HoSoCongTy() {
     if (!danhGia.length) return 0
     return Math.round((danhGia.reduce((sum, item) => sum + item.diem, 0) / danhGia.length) * 10) / 10
   }, [danhGia])
+
+  const seoData = useMemo(() => {
+    if (!congTy) return null
+    const moTaRutGon = (congTy.moTa || `${congTy.tenCongTy} là doanh nghiệp công nghệ đang tuyển dụng trên Effort IT.`)
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220)
+    const schema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: congTy.tenCongTy,
+      url: congTy.website || `https://effortit.site/cong-ty/${congTy.id}`,
+      logo: layUrlLogo(congTy.logo),
+      description: moTaRutGon,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: congTy.diaChi || 'Đà Nẵng',
+        addressCountry: 'VN',
+      },
+    }
+
+    if (danhGia.length > 0) {
+      schema.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: diemTrungBinh,
+        reviewCount: danhGia.length,
+      }
+    }
+
+    return {
+      title: `${congTy.tenCongTy} - Công ty công nghệ tuyển dụng trên Effort IT`,
+      description: `${congTy.tenCongTy}${congTy.diaChi ? ` tại ${congTy.diaChi}` : ''}. ${moTaRutGon}`,
+      canonical: `/cong-ty/${congTy.id}`,
+      keywords: [congTy.tenCongTy, congTy.nganh, congTy.diaChi, 'công ty IT Đà Nẵng'].filter(Boolean).join(', '),
+      image: layUrlLogo(congTy.logo),
+      schema,
+    }
+  }, [congTy, danhGia.length, diemTrungBinh])
+
+  useSeo(seoData)
 
   if (dangTai) return <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center' }}>Đang tải hồ sơ công ty...</main>
   if (loi || !congTy) return <main style={{ minHeight: '60vh', display: 'grid', placeItems: 'center', color: '#991b1b' }}>{loi || 'Không tìm thấy công ty'}</main>

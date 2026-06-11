@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Chan cac trang dashboard noi bo
+Disallow: /nha-tuyen-dung/
+Disallow: /ung-vien/
+Disallow: /quan-tri/
+Disallow: /dang-nhap
+Disallow: /dang-ky
+Disallow: /quen-mat-khau
+Disallow: /dat-lai-mat-khau
+
+Sitemap: https://effortit.site/sitemap.xml
