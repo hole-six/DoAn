@@ -26,6 +26,7 @@ import { ThongBaoProvider } from './contexts/ThongBaoContext'
 import { ThongBaoToastContainer } from './components/ThongBaoCenter'
 import { layAccessToken } from './lib/auth'
 import { API_URL, taoUrlTaiNguyen } from './lib/env'
+import { isPublicJobVisible } from './lib/jobVisibility'
 import { EmployerRecruitmentGate } from './pages/nhatuyendung/shared/EmployerRecruitmentGate'
 import {
   homeAiQuickPrompts,
@@ -56,20 +57,20 @@ function useTrangChuData() {
     async function load() {
       try {
         const [jobsRes, companiesRes] = await Promise.all([
-          fetch(`${API_URL}/tintuyendung`).then(res => res.json()),
+          fetch(`${API_URL}/tintuyendung`, { cache: 'no-store' }).then(res => res.json()),
           fetch(`${API_URL}/nhatuyendung`).then(res => res.json()),
         ])
         if (!active) return
         const rawJobs = jobsRes.duLieu ?? []
         const rawCompanies = companiesRes.duLieu ?? []
         const jobsByCompany = rawJobs.reduce((acc: Record<string, number>, job: any) => {
-          acc[job.maNhaTuyenDung] = (acc[job.maNhaTuyenDung] ?? 0) + (job.trangThai === 'dang_mo' ? 1 : 0)
+          acc[job.maNhaTuyenDung] = (acc[job.maNhaTuyenDung] ?? 0) + (isPublicJobVisible(job) ? 1 : 0)
           return acc
         }, {})
         setState({
           loading: false,
           jobs: rawJobs
-            .filter((job: any) => job.trangThai === 'dang_mo')
+            .filter((job: any) => isPublicJobVisible(job))
             .slice(0, 6)
             .map((job: any, index: number) => ({
               id: job.id,

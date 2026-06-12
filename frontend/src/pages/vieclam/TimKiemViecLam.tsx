@@ -7,6 +7,7 @@ import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { normalizeSkills } from '../../lib/skillDisplay'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -133,12 +134,12 @@ export default function TimKiemViecLam() {
 
   useEffect(() => {
     let active = true
-    fetch(`${API_URL}/tintuyendung`)
+    fetch(`${API_URL}/tintuyendung`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (!active) return
         const items = (data.duLieu ?? [])
-          .filter((job: any) => job.trangThai === 'dang_mo')
+          .filter((job: any) => isPublicJobVisible(job))
           .map((job: any, index: number) => ({
             id: job.id,
             tieuDe: job.tieuDe,

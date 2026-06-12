@@ -34,6 +34,19 @@ function normalizeDate(value) {
   return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString()
 }
 
+function isJobExpired(hanNop) {
+  if (!hanNop) return false
+  const parsed = new Date(hanNop)
+  return !Number.isNaN(parsed.getTime()) && parsed.getTime() < Date.now()
+}
+
+function isPublicJobVisible(job) {
+  return Boolean(job?.id)
+    && job?.trangThai === 'dang_mo'
+    && job?.nhaTuyenDung?.trangThaiDuyet === 'da_duyet'
+    && !isJobExpired(job?.hanNop)
+}
+
 function buildUrl(pathname, priority, changefreq, lastmod) {
   return {
     loc: `${siteUrl}${pathname}`,
@@ -57,7 +70,7 @@ async function buildEntries() {
     ])
 
     const jobEntries = jobs
-      .filter(item => item?.id && item?.trangThai === 'dang_mo')
+      .filter(item => isPublicJobVisible(item))
       .map(item => buildUrl(`/viec-lam/${item.id}`, '0.8', 'daily', item.ngayDang || item.updatedAt || item.ngayCapNhat))
 
     const companyEntries = companies
@@ -94,4 +107,3 @@ const entries = await buildEntries()
 fs.mkdirSync(publicDir, { recursive: true })
 fs.writeFileSync(outputPath, toXml(entries), 'utf8')
 console.log(`[sitemap] Đã tạo ${entries.length} URL tại ${outputPath}`)
-

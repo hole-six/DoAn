@@ -6,6 +6,7 @@ import Pagination from '../../components/Pagination'
 import SearchSuggestionPanel from '../../components/search/SearchSuggestionPanel'
 import { type SuggestionItem, useSearchSuggestions } from '../../components/search/useSearchSuggestions'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { normalizeSkills } from '../../lib/skillDisplay'
 import '../vieclam/vieclam-styles.css'
 import './congty-styles.css'
@@ -27,6 +28,10 @@ type TinTuyenDung = {
   id: string
   maNhaTuyenDung: string
   trangThai?: string
+  hanNop?: string
+  nhaTuyenDung?: {
+    trangThaiDuyet?: string
+  }
   kyNang?: unknown[]
 }
 
@@ -51,7 +56,7 @@ const nhanLoaiKyNang: Record<string, string> = {
 }
 
 function layJson(path: string) {
-  return fetch(`${API_URL}${path}`).then(async res => {
+  return fetch(`${API_URL}${path}`, { cache: 'no-store' }).then(async res => {
     const body = await res.json()
     if (!res.ok) throw new Error(body.thongBao ?? 'Không tải được dữ liệu')
     return body.duLieu
@@ -205,7 +210,7 @@ export default function DanhSachCongTy() {
     const companySkillTypeMap = new Map<string, Set<string>>()
     const approvedCompanyIds = new Set(companies.map(company => company.id))
 
-    jobs.filter(job => job.trangThai === 'dang_mo' && approvedCompanyIds.has(job.maNhaTuyenDung)).forEach(job => {
+    jobs.filter(job => isPublicJobVisible(job) && approvedCompanyIds.has(job.maNhaTuyenDung)).forEach(job => {
       jobCount.set(job.maNhaTuyenDung, (jobCount.get(job.maNhaTuyenDung) ?? 0) + 1)
       const companySkills = companySkillMap.get(job.maNhaTuyenDung) ?? new Set<string>()
       const companySkillTypes = companySkillTypeMap.get(job.maNhaTuyenDung) ?? new Set<string>()

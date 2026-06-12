@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { isPublicJobVisible } from '../../lib/jobVisibility'
 
 export type SuggestionType = 'job' | 'company' | 'skill'
 
@@ -113,7 +114,7 @@ export function useSearchSuggestions(params: {
       setLoading(true)
       try {
         const [jobsRes, companiesRes, skillsRes] = await Promise.all([
-          fetch(`${apiUrl}/tintuyendung?tuKhoa=${encodeURIComponent(keyword)}&limit=8`, { signal: controller.signal }).then(r => r.json()),
+          fetch(`${apiUrl}/tintuyendung?tuKhoa=${encodeURIComponent(keyword)}&limit=8`, { signal: controller.signal, cache: 'no-store' }).then(r => r.json()),
           fetch(`${apiUrl}/nhatuyendung?tuKhoa=${encodeURIComponent(keyword)}&limit=6`, { signal: controller.signal }).then(r => r.json()),
           fetch(`${apiUrl}/danhmuckynang?tuKhoa=${encodeURIComponent(keyword)}&limit=10`, { signal: controller.signal }).then(r => r.json()),
         ])
@@ -121,7 +122,7 @@ export function useSearchSuggestions(params: {
         if (requestIdRef.current !== myRequestId) return
 
         const nextGroups: SuggestionGroups = asGroups({
-          jobs: rankSuggestions((jobsRes.duLieu ?? []).filter((job: any) => job?.trangThai === 'dang_mo' && job?.nhaTuyenDung?.trangThaiDuyet === 'da_duyet').map((job: any) => ({
+          jobs: rankSuggestions((jobsRes.duLieu ?? []).filter((job: any) => isPublicJobVisible(job)).map((job: any) => ({
             id: String(job.id ?? job._id ?? job.tieuDe),
             type: 'job' as const,
             title: String(job.tieuDe ?? 'Tin tuyển dụng'),

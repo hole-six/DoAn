@@ -4,6 +4,7 @@ import { Bookmark, Briefcase, Building2, Clock, Copy, DollarSign, FileText, Glob
 import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL, capNhatPhienBanTaiNguyen } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
+import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { useSeo } from '../../lib/seo'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -63,7 +64,7 @@ type CongTy = {
 }
 
 function layJson(path: string) {
-  return fetch(`${API_URL}${path}`).then(async res => {
+  return fetch(`${API_URL}${path}`, { cache: 'no-store' }).then(async res => {
     const body = await res.json()
     if (!res.ok) throw new Error(body.thongBao ?? 'Không tải được dữ liệu')
     return body.duLieu
@@ -127,6 +128,18 @@ export default function ChiTietViecLam() {
   const [loi, setLoi] = useState('')
 
   useEffect(() => {
+    openedApplyRef.current = false
+    setDaUngTuyen(false)
+    setThongBaoUngTuyen('')
+    setDangUngTuyen(false)
+    setMoModalUngTuyen(false)
+    setDaLuu(false)
+    setThuXinViec('')
+    setCvDangChon('')
+    setFileCvMoi(null)
+  }, [id])
+
+  useEffect(() => {
     let active = true
     setDangTai(true)
     layJson(`/tintuyendung/${id}`)
@@ -139,7 +152,7 @@ export default function ChiTietViecLam() {
         setViec(job)
         setCongTy(company)
         setViecLienQuan((jobs ?? [])
-          .filter((item: TinTuyenDung) => item.id !== job.id && item.trangThai === 'dang_mo')
+          .filter((item: TinTuyenDung) => item.id !== job.id && isPublicJobVisible(item as any))
           .filter((item: TinTuyenDung) => item.maNhaTuyenDung === job.maNhaTuyenDung || item.capBac === job.capBac)
           .slice(0, 5))
         setLoi('')

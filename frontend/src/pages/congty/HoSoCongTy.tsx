@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Award, Briefcase, Globe, MapPin, Star, ThumbsUp, Users } from 'lucide-react'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
+import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { useSeo } from '../../lib/seo'
 import './congty-styles.css'
 
@@ -37,8 +38,12 @@ type TinTuyenDung = {
   luongMax?: number
   loaiHinh?: string
   capBac?: string
+  hanNop?: string
   trangThai?: string
   ngayDang?: string
+  nhaTuyenDung?: {
+    trangThaiDuyet?: string
+  }
   kyNang?: Array<{ tenKyNang?: string }>
 }
 
@@ -57,7 +62,7 @@ type DanhGia = {
 }
 
 function layJson(path: string) {
-  return fetch(`${API_URL}${path}`).then(async res => {
+  return fetch(`${API_URL}${path}`, { cache: 'no-store' }).then(async res => {
     const body = await res.json()
     if (!res.ok) throw new Error(body.thongBao ?? 'Không tải được dữ liệu')
     return body.duLieu
@@ -123,7 +128,7 @@ export default function HoSoCongTy() {
       .then(([company, jobs, reviews]) => {
         if (!active) return
         setCongTy(company)
-        setTinTuyenDung((jobs ?? []).filter((job: TinTuyenDung) => job.maNhaTuyenDung === company.id && job.trangThai === 'dang_mo'))
+        setTinTuyenDung((jobs ?? []).filter((job: TinTuyenDung) => job.maNhaTuyenDung === company.id && isPublicJobVisible(job)))
         setDanhGia((reviews ?? []).filter((review: DanhGia) => review.maNhaTuyenDung === company.id && review.daDuyet))
         setLoi('')
       })
