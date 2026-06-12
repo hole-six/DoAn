@@ -8,6 +8,21 @@ const timkiem_js_1 = require("../../dungchung/timkiem.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
+function daHetHan(hanNop) {
+    if (!hanNop)
+        return false;
+    return new Date(hanNop).getTime() < Date.now();
+}
+async function dongBoTinHetHan(where = {}) {
+    await tintuyendung_mohinh_js_1.TinTuyenDung.updateMany({
+        where: {
+            ...where,
+            trangThai: { in: ['dang_mo', 'tam_dong'] },
+            hanNop: { not: null, lt: new Date() },
+        },
+        data: { trangThai: 'het_han' },
+    });
+}
 async function layAdminIds() {
     const admins = await nguoidung_mohinh_js_1.NguoiDung.findMany({
         where: { vaiTro: 'admin', trangThai: 'hoat_dong' },
@@ -101,12 +116,13 @@ async function layDayDu(where, many = false) {
 }
 exports.dichVuTinTuyenDung = {
     async layDanhSach(boLoc = {}) {
+        await dongBoTinHetHan();
         const danhSach = await layDayDu({}, true);
         const cheDo = String(boLoc.cheDo ?? 'admin');
         const maNhaTuyenDungSoHuu = String(boLoc.maNhaTuyenDungSoHuu ?? '');
         const danhSachChuanHoa = danhSach.map(chuanHoaTin).filter((item) => {
             if (cheDo === 'cong_khai')
-                return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet';
+                return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet' && !daHetHan(item.hanNop);
             if (cheDo === 'nha_tuyen_dung')
                 return maNhaTuyenDungSoHuu ? item.maNhaTuyenDung === maNhaTuyenDungSoHuu : false;
             return true;
@@ -122,6 +138,7 @@ exports.dichVuTinTuyenDung = {
         return daLoc.slice(0, (0, timkiem_js_1.layLimit)(boLoc.limit, 50, 100));
     },
     async layTheoMa(ma) {
+        await dongBoTinHetHan({ id: ma });
         const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy tin tuyển dụng', 404);
@@ -150,6 +167,7 @@ exports.dichVuTinTuyenDung = {
                 });
             }
         }
+        await dongBoTinHetHan({ id: ketQua.id });
         const dayDu = await layDayDu({ id: ketQua.id });
         if (dayDu?.trangThai === 'cho_duyet')
             await guiThongBaoAdminTinCanDuyet(dayDu);
@@ -190,6 +208,7 @@ exports.dichVuTinTuyenDung = {
                 }
             }
         }
+        await dongBoTinHetHan({ id: ma });
         const ketQua = await layDayDu({ id: ma });
         if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
             await (0, thongbao_helper_js_1.thongBaoNhaTuyenDungKetQuaDuyetTin)({

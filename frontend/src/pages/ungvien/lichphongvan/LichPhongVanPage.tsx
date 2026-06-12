@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Building2, CalendarDays, Clock, ExternalLink, MapPin, Monitor, Search, X } from 'lucide-react'
+import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { DetailDrawer } from '../../../components/DetailDrawer'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
-import { formatDateTime } from '../../../lib/format'
-import { imageUrl } from '../../../lib/format'
+import { formatDateTime, imageUrl } from '../../../lib/format'
 import { interviewStatusLabel, toneForInterviewStatus } from '../../../lib/statusLabels'
 import { toast } from '../../../lib/toast'
 import type { LichPhongVan } from '../../../types/recruitment'
 import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/UngVienAtoms'
 import { useUngVienData } from '../shared/useUngVienData'
-import { ItvDetail } from './ItvDetail'
 import { Field, Textarea } from '../../quantrivien/shared/AdminFormControls'
+import { ItvDetail } from './ItvDetail'
 
 const inputCls = 'min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100'
 
@@ -40,68 +40,76 @@ function companyOf(item: LichPhongVan) {
   return item.hoSoUngTuyen?.tinTuyenDung?.nhaTuyenDung
 }
 
+function nhomLich(item: LichPhongVan) {
+  const start = new Date(item.thoiGianBatDau).getTime()
+  const now = Date.now()
+  const daKetThuc = ['hoan_thanh', 'da_huy'].includes(item.trangThai) || (Number.isFinite(start) && start < now)
+
+  if (['da_len_lich', 'doi_lich'].includes(item.trangThai) && !daKetThuc) {
+    return { key: 'can_phan_hoi', label: 'Cần phản hồi', tone: 'yellow' as const, order: 0 }
+  }
+
+  if (!daKetThuc) {
+    return { key: 'sap_toi', label: 'Sắp tới', tone: 'blue' as const, order: 1 }
+  }
+
+  return { key: 'da_ket_thuc', label: 'Đã hoàn thành hoặc đã hủy', tone: 'gray' as const, order: 2 }
+}
+
 function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: boolean; onOpen: () => void }) {
   const job = item.hoSoUngTuyen?.tinTuyenDung
   const company = companyOf(item)
   const diaDiem = item.hinhThuc === 'offline' ? item.diaChi : item.linkHop
+  const nhom = nhomLich(item)
 
   return (
-    <button
-      type="button"
+    <article
       onClick={onOpen}
-      className={`grid w-full min-w-0 gap-4 rounded-2xl border bg-white px-5 py-4 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md sm:grid-cols-[56px_minmax(0,1fr)_auto] sm:items-center ${active ? 'border-sky-400 bg-sky-50/60 shadow-sky-100' : 'border-slate-200'}`}
+      className={`grid w-full cursor-pointer gap-3 rounded-2xl border bg-white px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md lg:grid-cols-[minmax(0,1fr)_auto] ${active ? 'border-sky-400 bg-sky-50/60 shadow-sky-100' : 'border-slate-200'}`}
     >
-      {/* Logo */}
-      <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-        {company?.logo ? (
-          <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1.5" />
-        ) : (
-          <Building2 size={22} className="text-slate-400" />
-        )}
-      </span>
-
-      {/* Nội dung chính */}
-      <span className="min-w-0">
-        {/* Tên công ty */}
-        <p className="text-xs font-black uppercase tracking-widest text-sky-700">
-          {company?.tenCongTy ?? 'Nhà tuyển dụng'}
-        </p>
-        {/* Tiêu đề vị trí */}
-        <p className="mt-0.5 truncate text-base font-black text-slate-950">
-          {job?.tieuDe ?? 'Lịch phỏng vấn'}
-        </p>
-        {/* Badge trạng thái */}
-        <div className="mt-1.5">
-          <Badge tone={toneForInterviewStatus(item.trangThai)}>
-            {interviewStatusLabel[item.trangThai] ?? item.trangThai}
-          </Badge>
-        </div>
-        {/* Meta info */}
-        <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
-          <span className="inline-flex items-center gap-1.5">
-            <CalendarDays size={13} className="shrink-0 text-sky-600" />
-            {dateOnly(item.thoiGianBatDau)}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <Clock size={13} className="shrink-0 text-sky-600" />
-            {timeRange(item)}
-          </span>
-          {diaDiem && (
-            <span className="inline-flex max-w-[260px] items-center gap-1.5">
-              {item.hinhThuc === 'offline'
-                ? <MapPin size={13} className="shrink-0 text-sky-600" />
-                : <Monitor size={13} className="shrink-0 text-sky-600" />}
-              <span className="truncate">{diaDiem}</span>
-            </span>
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+          {company?.logo ? (
+            <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1" />
+          ) : (
+            <Building2 size={18} className="text-slate-400" />
           )}
-        </p>
-      </span>
+        </span>
 
-      {/* Nút chi tiết */}
-      <span className="hidden sm:flex">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-base font-black text-slate-950">{job?.tieuDe ?? 'Lịch phỏng vấn'}</p>
+            <Badge tone={nhom.tone}>{nhom.label}</Badge>
+            <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
+          </div>
+          <p className="mt-1 truncate text-sm font-bold uppercase tracking-[0.12em] text-sky-700">
+            {company?.tenCongTy ?? 'Nhà tuyển dụng'}
+          </p>
+          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <CalendarDays size={13} className="shrink-0 text-sky-600" />
+              {dateOnly(item.thoiGianBatDau)}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock size={13} className="shrink-0 text-sky-600" />
+              {timeRange(item)}
+            </span>
+            {diaDiem && (
+              <span className="inline-flex max-w-[320px] items-center gap-1.5">
+                {item.hinhThuc === 'offline'
+                  ? <MapPin size={13} className="shrink-0 text-sky-600" />
+                  : <Monitor size={13} className="shrink-0 text-sky-600" />}
+                <span className="truncate">{diaDiem}</span>
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end lg:self-center">
         <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />}>Chi tiết</Button>
-      </span>
-    </button>
+      </div>
+    </article>
   )
 }
 
@@ -121,7 +129,7 @@ export default function LichPhongVanPage() {
     const kw = tuKhoa.trim().toLowerCase()
     return data.lich.filter(item => {
       const khopKw = !kw
-        || (item.hoSoUngTuyen?.ungVien?.nguoiDung?.hoTen ?? '').toLowerCase().includes(kw)
+        || (item.hoSoUngTuyen?.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? '').toLowerCase().includes(kw)
         || (item.hoSoUngTuyen?.tinTuyenDung?.tieuDe ?? '').toLowerCase().includes(kw)
       const khopTrangThai = !locTrangThai || item.trangThai === locTrangThai
       return khopKw && khopTrangThai
@@ -137,27 +145,19 @@ export default function LichPhongVanPage() {
     }
   }, [lichDaBoLoc, queryLich])
 
-  const groups = useMemo(() => {
-    const now = Date.now()
-    const canPhanHoi: LichPhongVan[] = []
-    const sapToi: LichPhongVan[] = []
-    const daKetThuc: LichPhongVan[] = []
-
-    for (const item of lichDaBoLoc) {
-      const start = new Date(item.thoiGianBatDau).getTime()
-      const ended = ['hoan_thanh', 'da_huy'].includes(item.trangThai) || (Number.isFinite(start) && start < now)
-      if (['da_len_lich', 'doi_lich'].includes(item.trangThai) && !ended) canPhanHoi.push(item)
-      else if (!ended) sapToi.push(item)
-      else daKetThuc.push(item)
-    }
-
-    const sortByStart = (items: LichPhongVan[]) => [...items].sort((a, b) => new Date(a.thoiGianBatDau).getTime() - new Date(b.thoiGianBatDau).getTime())
-    return [
-      { key: 'can-phan-hoi', title: 'Cần phản hồi', desc: 'Những lịch cần bạn xác nhận hoặc trao đổi lại với nhà tuyển dụng.', items: sortByStart(canPhanHoi) },
-      { key: 'sap-toi', title: 'Sắp tới', desc: 'Các lịch đã rõ thời gian và đang chờ diễn ra.', items: sortByStart(sapToi) },
-      { key: 'da-ket-thuc', title: 'Đã hoàn thành hoặc đã hủy', desc: 'Lịch đã qua, đã hoàn thành hoặc không còn hiệu lực.', items: sortByStart(daKetThuc).reverse() },
-    ].filter(group => group.items.length)
+  const lichSapXep = useMemo(() => {
+    return [...lichDaBoLoc].sort((a, b) => {
+      const nhomA = nhomLich(a)
+      const nhomB = nhomLich(b)
+      if (nhomA.order !== nhomB.order) return nhomA.order - nhomB.order
+      const startA = new Date(a.thoiGianBatDau).getTime()
+      const startB = new Date(b.thoiGianBatDau).getTime()
+      if (nhomA.key === 'da_ket_thuc') return startB - startA
+      return startA - startB
+    })
   }, [lichDaBoLoc])
+
+  const phanTrang = usePhanTrang(lichSapXep)
 
   const confirm = async () => {
     if (!selected) return
@@ -229,27 +229,27 @@ export default function LichPhongVanPage() {
             ))}
           </select>
         </div>
-        {groups.length ? (
-          <div className="grid gap-6">
-            {groups.map(group => (
-              <div key={group.key}>
-                <div className="mb-3 flex items-center gap-3">
-                  <h3 className="text-sm font-black text-slate-700">{group.title}</h3>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-black text-slate-500">{group.items.length}</span>
-                </div>
-                <div className="grid gap-3">
-                  {group.items.map(item => (
-                    <InterviewCard key={idOf(item)} item={item} active={idOf(item) === queryLich || idOf(selected ?? {}) === idOf(item)} onOpen={() => setSelected(item)} />
-                  ))}
-                </div>
-              </div>
+
+        {lichSapXep.length ? (
+          <div className="grid gap-3">
+            {phanTrang.danhSachTrang.map(item => (
+              <InterviewCard
+                key={idOf(item)}
+                item={item}
+                active={idOf(item) === queryLich || idOf(selected ?? {}) === idOf(item)}
+                onOpen={() => setSelected(item)}
+              />
             ))}
           </div>
         ) : (
           <EmptyState>{tuKhoa || locTrangThai ? 'Không có lịch phỏng vấn phù hợp bộ lọc.' : 'Chưa có lịch phỏng vấn.'}</EmptyState>
         )}
+
+        <PhanTrang {...phanTrang} donVi="lịch" className="mt-4" />
       </Panel>
+
       {selected && <ItvDetail item={selected} onClose={() => setSelected(null)} onConfirm={() => void confirm()} onReschedule={openReschedule} />}
+
       {selected && rescheduleOpen && (
         <DetailDrawer
           title="Yêu cầu đổi lịch"
@@ -267,6 +267,7 @@ export default function LichPhongVanPage() {
           </Field>
         </DetailDrawer>
       )}
+
       <ConfirmDialogComponent />
     </Page>
   )

@@ -6,6 +6,22 @@ import { NguoiDung } from '../nguoidung/nguoidung.mohinh.js'
 import { thongBaoAdminTinTuyenDungCanDuyet, thongBaoNhaTuyenDungKetQuaDuyetTin } from '../thongbao/thongbao.helper.js'
 import { TinTuyenDung } from './tintuyendung.mohinh.js'
 
+function daHetHan(hanNop?: Date | string | null) {
+  if (!hanNop) return false
+  return new Date(hanNop).getTime() < Date.now()
+}
+
+async function dongBoTinHetHan(where: Record<string, unknown> = {}) {
+  await TinTuyenDung.updateMany({
+    where: {
+      ...where,
+      trangThai: { in: ['dang_mo', 'tam_dong'] },
+      hanNop: { not: null, lt: new Date() },
+    },
+    data: { trangThai: 'het_han' },
+  })
+}
+
 async function layAdminIds() {
   const admins = await NguoiDung.findMany({
     where: { vaiTro: 'admin', trangThai: 'hoat_dong' },
@@ -103,11 +119,12 @@ async function layDayDu(where: any, many = false) {
 
 export const dichVuTinTuyenDung = {
   async layDanhSach(boLoc: Record<string, unknown> = {}) {
+    await dongBoTinHetHan()
     const danhSach = await layDayDu({}, true)
     const cheDo = String(boLoc.cheDo ?? 'admin')
     const maNhaTuyenDungSoHuu = String(boLoc.maNhaTuyenDungSoHuu ?? '')
     const danhSachChuanHoa = (danhSach as any[]).map(chuanHoaTin).filter((item) => {
-      if (cheDo === 'cong_khai') return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet'
+      if (cheDo === 'cong_khai') return item.trangThai === 'dang_mo' && item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet' && !daHetHan(item.hanNop)
       if (cheDo === 'nha_tuyen_dung') return maNhaTuyenDungSoHuu ? item.maNhaTuyenDung === maNhaTuyenDungSoHuu : false
       return true
     })
@@ -123,6 +140,7 @@ export const dichVuTinTuyenDung = {
   },
 
   async layTheoMa(ma: string) {
+    await dongBoTinHetHan({ id: ma })
     const duLieu = await layDayDu({ id: ma })
     if (!duLieu) throw new LoiUngDung('Không tìm thấy tin tuyển dụng', 404)
     return chuanHoaTin(duLieu)
@@ -155,6 +173,7 @@ export const dichVuTinTuyenDung = {
       }
     }
     
+    await dongBoTinHetHan({ id: ketQua.id })
     const dayDu = await layDayDu({ id: ketQua.id }) as any
     if (dayDu?.trangThai === 'cho_duyet') await guiThongBaoAdminTinCanDuyet(dayDu)
     return chuanHoaTin(dayDu)
@@ -200,6 +219,7 @@ export const dichVuTinTuyenDung = {
       }
     }
     
+    await dongBoTinHetHan({ id: ma })
     const ketQua = await layDayDu({ id: ma }) as any
 
     if (hienTai.trangThai !== ketQua.trangThai && ['dang_mo', 'tu_choi'].includes(String(ketQua.trangThai))) {
