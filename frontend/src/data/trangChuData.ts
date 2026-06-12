@@ -8,7 +8,9 @@ export type HomeJob = {
   loaiViec: string
   kyNang: string[]
   badge: string | null
-  ngayDang: string
+  ngayDang?: string
+  hanNop?: string
+  hanNopConLai?: string
   featured: boolean
 }
 

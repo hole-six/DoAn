@@ -8,6 +8,7 @@ import { type SuggestionItem, useSearchSuggestions } from '../../components/sear
 import { apiCoXacThuc, duongDanTheoVaiTro, layNguoiDung } from '../../lib/auth'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import { isPublicJobVisible } from '../../lib/jobVisibility'
+import { formatJobDate, formatJobDateLine, formatJobDeadlineState } from '../../lib/jobPresentation'
 import { normalizeSkills } from '../../lib/skillDisplay'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -25,7 +26,11 @@ type ViecLamItem = {
   kyNang: Array<{ id: string; ten: string; loai: string }>
   moTa: string
   yeuCau: string
-  ngay: string
+  ngayDangRaw?: string
+  hanNopRaw?: string
+  ngayDang: string
+  hanNop: string
+  hanNopConLai: string
   featured: boolean
 }
 
@@ -153,7 +158,11 @@ export default function TimKiemViecLam() {
             kyNang: normalizeSkills(job.kyNang).slice(0, 8),
             moTa: job.moTa ?? '',
             yeuCau: job.yeuCau ?? '',
-            ngay: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
+            ngayDangRaw: job.ngayDang,
+            hanNopRaw: job.hanNop,
+            ngayDang: formatJobDate(job.ngayDang),
+            hanNop: formatJobDate(job.hanNop),
+            hanNopConLai: formatJobDeadlineState(job.hanNop),
             featured: index < 3,
           }))
         setViecLam(items)
@@ -554,7 +563,8 @@ export default function TimKiemViecLam() {
                   <strong>{job.congTy}</strong>
                   <p><MapPin size={14} /> {job.diaDiem}</p>
                   <p><DollarSign size={14} /> {job.luong}</p>
-                  <p><Briefcase size={14} /> {job.loai} · {job.capBac} · <Clock size={14} /> {job.ngay}</p>
+                  <p><Briefcase size={14} /> {job.loai} · {job.capBac}</p>
+                  <p><Clock size={14} /> {formatJobDateLine(job.ngayDangRaw, job.hanNopRaw)}</p>
                   <div className="jobs-real-skills">{job.kyNang.map(skill => <span key={skill.id}>{skill.ten}</span>)}</div>
                 </div>
                 <button onClick={() => void toggleSave(job.id)} title={isSaved ? 'Bỏ lưu' : 'Lưu việc'}>

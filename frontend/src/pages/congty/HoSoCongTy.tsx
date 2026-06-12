@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Award, Briefcase, Globe, MapPin, Star, ThumbsUp, Users } from 'lucide-react'
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import { isPublicJobVisible } from '../../lib/jobVisibility'
+import { formatJobDateLine } from '../../lib/jobPresentation'
 import { useSeo } from '../../lib/seo'
 import './congty-styles.css'
 
@@ -85,8 +86,8 @@ function CardViecLam({ tin, congTy }: { tin: TinTuyenDung; congTy: CongTy }) {
 
   return (
     <Link to={`/viec-lam/${tin.id}`} style={{ display: 'block', padding: '16px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: 'inherit' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-        <p style={{ fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>{tin.ngayDang ? new Date(tin.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng'}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: '#64748b', fontWeight: 600, lineHeight: 1.5 }}>{formatJobDateLine(tin.ngayDang, tin.hanNop)}</p>
         {tin.trangThai === 'dang_mo' && <span style={{ background: '#16a34a', color: '#fff', fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>ĐANG MỞ</span>}
       </div>
       <h4 style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4, marginBottom: 10, color: '#0b1c30' }}>{tin.tieuDe}</h4>

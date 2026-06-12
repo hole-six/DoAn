@@ -5,6 +5,7 @@ import { apiCoXacThuc, apiUploadCoXacThuc, duongDanTheoVaiTro, layNguoiDung } fr
 import { API_URL, capNhatPhienBanTaiNguyen } from '../../lib/env'
 import { imageUrl } from '../../lib/format'
 import { isPublicJobVisible } from '../../lib/jobVisibility'
+import { formatJobDateLine } from '../../lib/jobPresentation'
 import { useSeo } from '../../lib/seo'
 import { toast } from '../../lib/toast'
 import './vieclam-styles.css'
@@ -80,6 +81,10 @@ function formatQuyMo(quyMo?: number) {
   if (!quyMo) return 'Đang cập nhật'
   if (quyMo >= 1000) return `${quyMo.toLocaleString('vi-VN')}+ nhân viên`
   return `${quyMo} nhân viên`
+}
+
+function infoJobLine(item?: Pick<TinTuyenDung, 'ngayDang' | 'hanNop'> | null) {
+  return formatJobDateLine(item?.ngayDang, item?.hanNop)
 }
 
 function tachDong(value?: string) {
@@ -428,6 +433,7 @@ export default function ChiTietViecLam() {
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Briefcase size={13} /> {viec.loaiHinh ?? 'toan_thoi_gian'}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Clock size={13} /> {viec.capBac ?? 'junior'}</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><Users size={13} /> {viec.soLuong ?? 1} vị trí</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontWeight: 600 }}><Clock size={13} /> {infoJobLine(viec)}</span>
           </div>
           <div style={{ display: 'flex', gap: 0, marginTop: 8 }}>
             {[
@@ -551,6 +557,7 @@ export default function ChiTietViecLam() {
                 <Link key={item.id} to={`/viec-lam/${item.id}`} style={{ display: 'block', padding: '14px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: 'inherit' }}>
                   <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, color: '#0b1c30', lineHeight: 1.4 }}>{item.tieuDe}</h4>
                   <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{item.nhaTuyenDung?.tenCongTy ?? tenCongTy}</p>
+                  <p style={{ fontSize: 12, color: '#64748b', marginBottom: 8 }}>{infoJobLine(item)}</p>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#374151' }}>{item.diaChi ?? 'Đà Nẵng'}</span>
                     <span style={{ background: '#f3f4f6', borderRadius: 4, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: '#16a34a' }}>{formatLuong(item.luongMin, item.luongMax)}</span>

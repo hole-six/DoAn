@@ -27,6 +27,7 @@ import { ThongBaoToastContainer } from './components/ThongBaoCenter'
 import { layAccessToken } from './lib/auth'
 import { API_URL, taoUrlTaiNguyen } from './lib/env'
 import { isPublicJobVisible } from './lib/jobVisibility'
+import { formatJobDateLine, formatJobDeadlineState } from './lib/jobPresentation'
 import { EmployerRecruitmentGate } from './pages/nhatuyendung/shared/EmployerRecruitmentGate'
 import {
   homeAiQuickPrompts,
@@ -82,7 +83,9 @@ function useTrangChuData() {
               loaiViec: job.loaiHinh ?? 'toan_thoi_gian',
               kyNang: (job.kyNang ?? []).map((skill: any) => skill.tenKyNang ?? skill.maKyNang?.tenKyNang).filter(Boolean).slice(0, 4),
               badge: index < 2 ? 'HOT' : null,
-              ngayDang: job.ngayDang ? new Date(job.ngayDang).toLocaleDateString('vi-VN') : 'Mới đăng',
+              ngayDang: job.ngayDang,
+              hanNop: job.hanNop,
+              hanNopConLai: formatJobDeadlineState(job.hanNop),
               featured: index < 2,
             })),
           companies: rawCompanies
@@ -342,7 +345,7 @@ function SectionTinTuyenDung({ jobs }: { jobs?: HomeJob[] }) {
               </span>
             )}
 
-            <p className="vl-time">Đăng {tin.ngayDang}</p>
+            <p className="vl-time">{tin.hanNopConLai ? formatJobDateLine(tin.ngayDang, tin.hanNop) : `Đăng ${tin.ngayDang}`}</p>
             <h3 className="vl-title">{tin.tieuDe}</h3>
             <div className="vl-company">
               <img
