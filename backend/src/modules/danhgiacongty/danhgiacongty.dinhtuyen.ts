@@ -28,3 +28,4 @@ dinhTuyenDanhGiaCongTy.get('/:ma', dieuKhienDanhGiaCongTy.layChiTiet)
 dinhTuyenDanhGiaCongTy.post('/', yeuCauDangNhap, yeuCauVaiTro(['admin']), dieuKhienDanhGiaCongTy.taoMoi)
 dinhTuyenDanhGiaCongTy.patch('/:ma', yeuCauDangNhap, yeuCauVaiTro(['admin']), dieuKhienDanhGiaCongTy.capNhat)
 dinhTuyenDanhGiaCongTy.delete('/:ma', yeuCauDangNhap, yeuCauVaiTro(['admin']), dieuKhienDanhGiaCongTy.xoa)
+

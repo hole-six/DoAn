@@ -313,6 +313,7 @@ function SectionTitle({ title, desc }: { title: string; desc?: string }) {
 function UncontrolledTextItem({ value, placeholder, onCommit, onEnter }: { value: string; placeholder: string; onCommit: (value: string) => void; onEnter: (value: string) => void }) {
   const ref = useRef<HTMLTextAreaElement | null>(null)
   const draftRef = useRef(value)
+  const valueRef = useRef(value)
 
   const commit = (next = draftRef.current) => {
     onCommit(removeSoftBreaks(next))
@@ -326,18 +327,23 @@ function UncontrolledTextItem({ value, placeholder, onCommit, onEnter }: { value
   }
 
   useEffect(() => {
+    valueRef.current = value
+    draftRef.current = value
     const el = ref.current
     if (!el || document.activeElement === el) return
     const formatted = addSoftBreaks(value)
     if (el.value !== formatted) {
       el.value = formatted
-      draftRef.current = value
       resize()
     }
   }, [value])
 
+  // Chỉ commit khi unmount nếu người dùng đã thực sự thay đổi nội dung
   useEffect(() => () => {
-    onCommit(draftRef.current)
+    const cleaned = removeSoftBreaks(draftRef.current)
+    if (cleaned !== valueRef.current) {
+      onCommit(cleaned)
+    }
   }, [])
 
   return (
@@ -656,6 +662,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   const [dangDatCvChinh, setDangDatCvChinh] = useState('')
   const [cvDaXoa, setCvDaXoa] = useState<string[]>([])
   const [coThayDoiChuaLuu, setCoThayDoiChuaLuu] = useState(false)
+  const [dangTaoMoi, setDangTaoMoi] = useState(false)
   const [dangTaiAnhCv, setDangTaiAnhCv] = useState(false)
   const [dangTaiFileCv, setDangTaiFileCv] = useState(false)
   const [hienModalThieuHoSo, setHienModalThieuHoSo] = useState(false)
@@ -702,6 +709,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
 
   useEffect(() => {
     if (coThayDoiChuaLuu) return
+    if (dangTaoMoi) return  // đang tạo mới → không sync từ danh sách cũ
     const base = {
       ...emptyCv,
       hoTenHienThi: current.hoTen,
@@ -716,7 +724,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
       const main = selected ?? danhSachCvBuilder.find((item: any) => item.cvChinh) ?? danhSachCvBuilder[0]
       return main ? { ...base, ...main } : base
     })
-  }, [coThayDoiChuaLuu, danhSachCvBuilder, current.hoTen, current.email, current.soDienThoai, ungVien?.id, ungVien?.viTriMongMuon, ungVien?.diaChi, ungVien?.tomTat])
+  }, [coThayDoiChuaLuu, dangTaoMoi, danhSachCvBuilder, current.hoTen, current.email, current.soDienThoai, ungVien?.id, ungVien?.viTriMongMuon, ungVien?.diaChi, ungVien?.tomTat])
 
   async function docAnh(file?: File) {
     if (!file) return
@@ -782,6 +790,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
       const payload = { ...compactCv({ ...item, cvChinh: true }), maUngVien: data.ungVien.id, loaiHoSo: laHoSoFileUpload(item) ? 'file_upload' : 'builder' }
       const saved = await apiCoXacThuc(`/hosonangluc/${item.id}`, { method: 'PATCH', body: JSON.stringify(payload) })
       if (!laHoSoFileUpload(saved)) {
+        setDangTaoMoi(false)
         setCv({ ...emptyCv, ...compactCv(saved), id: saved.id, maUngVien: saved.maUngVien, cvChinh: Boolean(saved.cvChinh), congKhai: Boolean(saved.congKhai), loaiHoSo: 'builder' })
       }
       setCoThayDoiChuaLuu(false)
@@ -865,6 +874,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
       const payload = { ...compactCv(cvDaChuanHoa), maUngVien: data.ungVien.id, loaiHoSo: 'builder' }
       const saved = await apiCoXacThuc(`/hosonangluc${cv.id ? `/${cv.id}` : ''}`, { method: cv.id ? 'PATCH' : 'POST', body: JSON.stringify(payload) })
       setCv({ ...emptyCv, ...compactCv(saved), id: saved.id, maUngVien: saved.maUngVien, cvChinh: Boolean(saved.cvChinh), congKhai: Boolean(saved.congKhai), loaiHoSo: 'builder' })
+      setDangTaoMoi(false)
       setCoThayDoiChuaLuu(false)
       toast.success('Đã lưu CV Studio.')
       await onReload()
@@ -881,20 +891,24 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
 
   function xemCvDaLuu(item: CvData) {
     xacNhanBoQuaNhap(() => {
+      setDangTaoMoi(false)
       setCv(taoCvTuDaLuu(item))
       setCoThayDoiChuaLuu(false)
     })
   }
 
   function taiPdfCvDaLuu(item: CvData) {
-    flushSync(() => setCv(taoCvTuDaLuu(item)))
+    flushSync(() => {
+      setDangTaoMoi(false)
+      setCv(taoCvTuDaLuu(item))
+    })
     window.requestAnimationFrame(() => taiPdf(item))
   }
 
   function taoBanNhapMoi(): CvData {
     return {
       ...emptyCv,
-      tieuDe: `CV ${data.hoSo?.length ? data.hoSo.length + 1 : 1}`,
+      tieuDe: `CV ${danhSachCvBuilder.length ? danhSachCvBuilder.length + 1 : 1}`,
       hoTenHienThi: current.hoTen,
       chucDanh: ungVien.viTriMongMuon,
       soDienThoai: current.soDienThoai,
@@ -907,7 +921,12 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
   }
 
   function taoCvMoi() {
+    if (!data.ungVien?.id) {
+      setHienModalThieuHoSo(true)
+      return
+    }
     xacNhanBoQuaNhap(() => {
+      setDangTaoMoi(true)
       setCv(taoBanNhapMoi())
       setCoThayDoiChuaLuu(false)
     })
@@ -927,8 +946,13 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           if (cv.id === item.id) {
             const conLaiBuilder = conLai.filter((cvItem: CvData) => !laHoSoFileUpload(cvItem))
             const next = conLaiBuilder.find((cvItem: CvData) => cvItem.cvChinh) ?? conLaiBuilder[0]
-            if (next) setCv(taoCvTuDaLuu(next))
-            else setCv(taoBanNhapMoi())
+            if (next) {
+              setDangTaoMoi(false)
+              setCv(taoCvTuDaLuu(next))
+            } else {
+              setDangTaoMoi(true)
+              setCv(taoBanNhapMoi())
+            }
             setCoThayDoiChuaLuu(false)
           }
           toast.success('Đã xóa CV.')
