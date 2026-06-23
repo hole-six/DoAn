@@ -1,128 +1,103 @@
-import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import { boUndefined, coId, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
 import { prisma } from '../../cauhinh/prisma.js'
+import { LoiUngDung } from '../../dungchung/loiungdung.js'
+import { boUndefined } from '../../dungchung/prismaHelper.js'
 import { UngVien } from './ungvien.mohinh.js'
 
-function chuanHoaUngVien(taiLieu: any) {
-  const duLieu = taiLieu ?? {}
+// ─── helpers nội bộ ───────────────────────────────────────────────────────────
+
+/** Fetch NguoiDung cho danh sách ứng viên và trả về Map<maNguoiDung, nguoiDung> */
+async function layNguoiDungMap(rows: any[]) {
+  const ids = [...new Set(rows.map(r => r.maNguoiDung).filter(Boolean))]
+  if (!ids.length) return new Map<string, any>()
+  const nguoiDungs = await prisma.nguoiDung.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, hoTen: true, email: true, soDienThoai: true, trangThai: true },
+  })
+  return new Map(nguoiDungs.map(nd => [nd.id, nd]))
+}
+
+const includeKyNang = {
+  kyNangLienKet: {
+    include: {
+      kyNang: {
+        select: { id: true, tenKyNang: true, loaiKyNang: true },
+      },
+    },
+  },
+} as const
+
+function dinhDangUngVien(row: any, nguoiDungMap: Map<string, any>) {
+  const nd = nguoiDungMap.get(row.maNguoiDung)
   return {
-    id: String(duLieu.id ?? duLieu._id),
-    _id: String(duLieu.id ?? duLieu._id),
-    maNguoiDung: duLieu.maNguoiDung?._id ? String(duLieu.maNguoiDung._id) : String(duLieu.maNguoiDung),
-    nguoiDung: duLieu.maNguoiDung?._id
+    id: String(row.id),
+    _id: String(row.id),
+    maNguoiDung: String(row.maNguoiDung),
+    nguoiDung: nd
       ? {
-          id: String(duLieu.maNguoiDung._id),
-          hoTen: duLieu.maNguoiDung.hoTen,
-          email: duLieu.maNguoiDung.email,
-          soDienThoai: duLieu.maNguoiDung.soDienThoai,
-          trangThai: duLieu.maNguoiDung.trangThai,
+          id: String(nd.id),
+          hoTen: nd.hoTen,
+          email: nd.email,
+          soDienThoai: nd.soDienThoai,
+          trangThai: nd.trangThai,
         }
       : undefined,
-    ngaySinh: duLieu.ngaySinh,
-    gioiTinh: duLieu.gioiTinh,
-    diaChi: duLieu.diaChi,
-    anhDaiDien: duLieu.anhDaiDien,
-    tomTat: duLieu.tomTat,
-    kinhNghiem: duLieu.kinhNghiem,
-    viTriMongMuon: duLieu.viTriMongMuon,
-    mucLuongMongMuon: duLieu.mucLuongMongMuon,
+    ngaySinh: row.ngaySinh,
+    gioiTinh: row.gioiTinh,
+    diaChi: row.diaChi,
+    anhDaiDien: row.anhDaiDien,
+    tomTat: row.tomTat,
+    kinhNghiem: row.kinhNghiem,
+    viTriMongMuon: row.viTriMongMuon,
+    mucLuongMongMuon: row.mucLuongMongMuon,
     // ✅ Lấy từ bảng quan hệ UngVienKyNang
-    kyNang: (duLieu.kyNangLienKet ?? []).map((lienKet: any) => ({
+    kyNang: (row.kyNangLienKet ?? []).map((lienKet: any) => ({
       maKyNang: String(lienKet.kyNang?.id ?? lienKet.maKyNang),
       tenKyNang: lienKet.kyNang?.tenKyNang,
       loaiKyNang: lienKet.kyNang?.loaiKyNang,
       mucDo: lienKet.mucDo,
       soNamKinhNghiem: lienKet.soNamKinhNghiem,
     })),
-    ngayTao: duLieu.ngayTao,
-    ngayCapNhat: duLieu.ngayCapNhat,
+    ngayTao: row.ngayTao,
+    ngayCapNhat: row.ngayCapNhat,
   }
 }
 
-async function layDayDu(where: any, many = false) {
-  // ✅ Query với include để lấy relations
-  const rows = many
-    ? await UngVien.findMany({ 
-        where, 
-        orderBy: { ngayTao: 'desc' }, 
-        take: 200,
-        include: {
-          kyNangLienKet: {
-            include: {
-              kyNang: {
-                select: { id: true, tenKyNang: true, loaiKyNang: true }
-              }
-            }
-          }
-        }
-      })
-    : await UngVien.findMany({ 
-        where, 
-        take: 1,
-        include: {
-          kyNangLienKet: {
-            include: {
-              kyNang: {
-                select: { id: true, tenKyNang: true, loaiKyNang: true }
-              }
-            }
-          }
-        }
-      })
-  
-  // Hydrate NguoiDung
-  const hydrated = await ganNguoiDungChoUngVien(rows as any[])
-  return many ? hydrated : hydrated[0]
-}
+// ─── service ─────────────────────────────────────────────────────────────────
 
 export const dichVuUngVien = {
   async layDanhSach() {
-    const danhSach = await layDayDu({}, true)
-    return (danhSach as any[]).map(chuanHoaUngVien)
+    const rows = await UngVien.findMany({ orderBy: { ngayTao: 'desc' }, take: 200, include: includeKyNang })
+    const nguoiDungMap = await layNguoiDungMap(rows)
+    return rows.map(r => dinhDangUngVien(r, nguoiDungMap))
   },
 
   async layTheoMa(ma: string) {
-    const duLieu = await layDayDu({ id: ma })
-    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-    return chuanHoaUngVien(duLieu)
+    const row = await UngVien.findUnique({ where: { id: ma }, include: includeKyNang })
+    if (!row) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+    const nguoiDungMap = await layNguoiDungMap([row])
+    return dinhDangUngVien(row, nguoiDungMap)
   },
 
   async layTheoMaNguoiDung(maNguoiDung: string) {
-    const duLieu = await layDayDu({ maNguoiDung })
-    if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
-    return chuanHoaUngVien(duLieu)
+    const row = await UngVien.findUnique({ where: { maNguoiDung }, include: includeKyNang })
+    if (!row) throw new LoiUngDung('Không tìm thấy hồ sơ ứng viên', 404)
+    const nguoiDungMap = await layNguoiDungMap([row])
+    return dinhDangUngVien(row, nguoiDungMap)
   },
 
   async damBaoHoSoTheoNguoiDung(maNguoiDung: string) {
-    const hienTai = await UngVien.findUnique({ 
-      where: { maNguoiDung },
-      include: {
-        kyNangLienKet: {
-          include: {
-            kyNang: {
-              select: { id: true, tenKyNang: true, loaiKyNang: true }
-            }
-          }
-        }
-      }
-    })
-    if (hienTai) {
-      const [dayDu] = await ganNguoiDungChoUngVien([hienTai] as any[])
-      return chuanHoaUngVien(dayDu)
-    }
-    const daTao = await UngVien.create({ data: { maNguoiDung, kinhNghiem: 0 } })
-    const [dayDu] = await ganNguoiDungChoUngVien([daTao] as any[])
-    return chuanHoaUngVien(dayDu)
+    const hienTai = await UngVien.findUnique({ where: { maNguoiDung }, include: includeKyNang })
+    const row = hienTai ?? (await UngVien.create({ data: { maNguoiDung, kinhNghiem: 0 }, include: includeKyNang }))
+    const nguoiDungMap = await layNguoiDungMap([row])
+    return dinhDangUngVien(row, nguoiDungMap)
   },
 
   async taoMoi(duLieu: unknown) {
     const payload = duLieu as Record<string, any>
     const { kyNang, ...ungVienData } = payload
-    
-    // Tạo ứng viên
+
     const ketQua = await UngVien.create({ data: boUndefined(ungVienData) as any })
-    
-    // Tạo kỹ năng nếu có
+
     if (Array.isArray(kyNang) && kyNang.length > 0) {
       const kyNangData = kyNang
         .map(item => ({
@@ -132,15 +107,12 @@ export const dichVuUngVien = {
           soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
         }))
         .filter(item => item.maKyNang)
-      
+
       if (kyNangData.length > 0) {
-        await prisma.ungVienKyNang.createMany({ 
-          data: kyNangData,
-          skipDuplicates: true 
-        })
+        await prisma.ungVienKyNang.createMany({ data: kyNangData, skipDuplicates: true })
       }
     }
-    
+
     return this.layTheoMa(String(ketQua.id))
   },
 
@@ -154,16 +126,12 @@ export const dichVuUngVien = {
 
     const payload = duLieu as Record<string, any>
     const { kyNang, ...ungVienData } = payload
-    
-    // Cập nhật ứng viên
+
     await UngVien.update({ where: { id: ma }, data: boUndefined(ungVienData) as any })
-    
-    // Cập nhật kỹ năng nếu có
+
     if (kyNang !== undefined) {
-      // Xóa kỹ năng cũ
       await prisma.ungVienKyNang.deleteMany({ where: { maUngVien: ma } })
-      
-      // Thêm kỹ năng mới
+
       if (Array.isArray(kyNang) && kyNang.length > 0) {
         const kyNangData = kyNang
           .map(item => ({
@@ -173,16 +141,13 @@ export const dichVuUngVien = {
             soNamKinhNghiem: item?.soNamKinhNghiem != null ? Number(item.soNamKinhNghiem) : null,
           }))
           .filter(item => item.maKyNang)
-        
+
         if (kyNangData.length > 0) {
-          await prisma.ungVienKyNang.createMany({ 
-            data: kyNangData,
-            skipDuplicates: true 
-          })
+          await prisma.ungVienKyNang.createMany({ data: kyNangData, skipDuplicates: true })
         }
       }
     }
-    
+
     return this.layTheoMa(ma)
   },
 
@@ -195,6 +160,8 @@ export const dichVuUngVien = {
     }
 
     await UngVien.delete({ where: { id: ma } })
-    return chuanHoaUngVien(coId(hienTai))
+    // Trả về bản ghi đã xóa với cấu trúc chuẩn (không có nguoiDung / kyNang vì đã xóa)
+    const emptyMap = new Map<string, any>()
+    return dinhDangUngVien({ ...hienTai, kyNangLienKet: [] }, emptyMap)
   },
 }

@@ -1,26 +1,51 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import { boUndefined, coId, ganCongTyChoTin, ganNguoiDungChoUngVien } from '../../dungchung/prismaHelper.js'
+import { boUndefined, coId } from '../../dungchung/prismaHelper.js'
 import { prisma } from '../../cauhinh/prisma.js'
 import { thongBaoHeThong, thongBaoHoSoDuocXem, thongBaoHoSoMoiUngTuyen } from '../thongbao/thongbao.helper.js'
 import { HoSoUngTuyen } from './hosoungtuyen.mohinh.js'
 
+// ─── Hydrate: gắn dữ liệu UngVien+NguoiDung, TinTuyenDung+NhaTuyenDung, HoSoNangLuc ───
+
 async function hydrateUngTuyen(rows: any[]) {
-  const ungVienIds = [...new Set(rows.map(row => row.maUngVien).filter(Boolean))]
-  const tinIds = [...new Set(rows.map(row => row.maTinTuyenDung).filter(Boolean))]
-  const hoSoIds = [...new Set(rows.map(row => row.maHoSoNangLuc).filter(Boolean))]
+  const ungVienIds = [...new Set(rows.map(r => r.maUngVien).filter(Boolean))]
+  const tinIds = [...new Set(rows.map(r => r.maTinTuyenDung).filter(Boolean))]
+  const hoSoIds = [...new Set(rows.map(r => r.maHoSoNangLuc).filter(Boolean))]
 
   const [ungVienRows, tinRows, hoSoRows] = await Promise.all([
-    prisma.ungVien.findMany({ where: { id: { in: ungVienIds } } }),
-    prisma.tinTuyenDung.findMany({ where: { id: { in: tinIds } } }),
+    ungVienIds.length ? prisma.ungVien.findMany({ where: { id: { in: ungVienIds } } }) : Promise.resolve([]),
+    tinIds.length ? prisma.tinTuyenDung.findMany({ where: { id: { in: tinIds } } }) : Promise.resolve([]),
     hoSoIds.length ? prisma.hoSoNangLuc.findMany({ where: { id: { in: hoSoIds } } }) : Promise.resolve([]),
   ])
-  const [ungVienDayDu, tinDayDu] = await Promise.all([
-    ganNguoiDungChoUngVien(ungVienRows as any[]),
-    ganCongTyChoTin(tinRows as any[]),
+
+  // Lấy NguoiDung cho UngVien
+  const nguoiDungUngVienIds = [...new Set(ungVienRows.map(r => r.maNguoiDung).filter(Boolean))]
+  // Lấy NhaTuyenDung cho TinTuyenDung
+  const nhaTuyenDungIds = [...new Set(tinRows.map(r => r.maNhaTuyenDung).filter(Boolean))]
+
+  const [nguoiDungRows, nhaTuyenDungRows] = await Promise.all([
+    nguoiDungUngVienIds.length
+      ? prisma.nguoiDung.findMany({
+          where: { id: { in: nguoiDungUngVienIds } },
+          select: { id: true, hoTen: true, email: true, soDienThoai: true, trangThai: true },
+        })
+      : Promise.resolve([]),
+    nhaTuyenDungIds.length
+      ? prisma.nhaTuyenDung.findMany({
+          where: { id: { in: nhaTuyenDungIds } },
+          select: { id: true, maNguoiDung: true, tenCongTy: true, logo: true, trangThaiDuyet: true },
+        })
+      : Promise.resolve([]),
   ])
-  const ungVienMap = new Map(ungVienDayDu.map(row => [row.id, coId(row)]))
-  const tinMap = new Map(tinDayDu.map(row => [row.id, coId(row)]))
-  const hoSoMap = new Map(hoSoRows.map(row => [row.id, coId(row)]))
+
+  const nguoiDungMap = new Map(nguoiDungRows.map(r => [r.id, coId(r as any)]))
+  const nhaTuyenDungMap = new Map(nhaTuyenDungRows.map(r => [r.id, coId(r as any)]))
+
+  const ungVienDayDu = ungVienRows.map(r => coId({ ...r, maNguoiDung: nguoiDungMap.get(r.maNguoiDung) ?? r.maNguoiDung } as any))
+  const tinDayDu = tinRows.map(r => coId({ ...r, maNhaTuyenDung: nhaTuyenDungMap.get(r.maNhaTuyenDung) ?? r.maNhaTuyenDung } as any))
+
+  const ungVienMap = new Map(ungVienDayDu.map(r => [r.id, r]))
+  const tinMap = new Map(tinDayDu.map(r => [r.id, r]))
+  const hoSoMap = new Map(hoSoRows.map(r => [r.id, coId(r as any)]))
 
   return rows.map(row => coId({
     ...row,
@@ -34,15 +59,20 @@ export async function hydrateHoSoUngTuyenNoiBo(rows: any[]) {
   return hydrateUngTuyen(rows)
 }
 
+// ─── Map: chuẩn hóa output giữ nguyên field names cho frontend ───
+
 function chuanHoaUngTuyen(taiLieu: any) {
   const duLieu = taiLieu ?? {}
   const tin = duLieu.maTinTuyenDung
+  const ungVien = duLieu.maUngVien
+  const hoSo = duLieu.maHoSoNangLuc
+
   return {
     id: String(duLieu.id ?? duLieu._id),
     _id: String(duLieu.id ?? duLieu._id),
-    maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
-    maTinTuyenDung: tin?._id ? String(tin._id) : String(tin),
-    maHoSoNangLuc: duLieu.maHoSoNangLuc?._id ? String(duLieu.maHoSoNangLuc._id) : duLieu.maHoSoNangLuc ? String(duLieu.maHoSoNangLuc) : undefined,
+    maUngVien: ungVien?._id ? String(ungVien._id) : String(ungVien ?? ''),
+    maTinTuyenDung: tin?._id ? String(tin._id) : String(tin ?? ''),
+    maHoSoNangLuc: hoSo?._id ? String(hoSo._id) : hoSo ? String(hoSo) : undefined,
     tinTuyenDung: tin?._id
       ? {
           id: String(tin._id),
@@ -63,58 +93,58 @@ function chuanHoaUngTuyen(taiLieu: any) {
             : undefined,
         }
       : undefined,
-    ungVien: duLieu.maUngVien?._id
+    ungVien: ungVien?._id
       ? {
-          id: String(duLieu.maUngVien._id),
-          viTriMongMuon: duLieu.maUngVien.viTriMongMuon,
-          kinhNghiem: duLieu.maUngVien.kinhNghiem,
-          diaChi: duLieu.maUngVien.diaChi,
-          mucLuongMongMuon: duLieu.maUngVien.mucLuongMongMuon,
-          tomTat: duLieu.maUngVien.tomTat,
-          nguoiDung: duLieu.maUngVien.maNguoiDung?._id
+          id: String(ungVien._id),
+          viTriMongMuon: ungVien.viTriMongMuon,
+          kinhNghiem: ungVien.kinhNghiem,
+          diaChi: ungVien.diaChi,
+          mucLuongMongMuon: ungVien.mucLuongMongMuon,
+          tomTat: ungVien.tomTat,
+          nguoiDung: ungVien.maNguoiDung?._id
             ? {
-                id: String(duLieu.maUngVien.maNguoiDung._id),
-                hoTen: duLieu.maUngVien.maNguoiDung.hoTen,
-                email: duLieu.maUngVien.maNguoiDung.email,
-                soDienThoai: duLieu.maUngVien.maNguoiDung.soDienThoai,
+                id: String(ungVien.maNguoiDung._id),
+                hoTen: ungVien.maNguoiDung.hoTen,
+                email: ungVien.maNguoiDung.email,
+                soDienThoai: ungVien.maNguoiDung.soDienThoai,
               }
             : undefined,
         }
       : undefined,
-    hoSoNangLuc: duLieu.maHoSoNangLuc?._id
+    hoSoNangLuc: hoSo?._id
       ? {
-          id: String(duLieu.maHoSoNangLuc._id),
-          tieuDe: duLieu.maHoSoNangLuc.tieuDe,
-          loaiHoSo: duLieu.maHoSoNangLuc.loaiHoSo,
-          cvChinh: duLieu.maHoSoNangLuc.cvChinh,
-          congKhai: duLieu.maHoSoNangLuc.congKhai,
-          hoTenHienThi: duLieu.maHoSoNangLuc.hoTenHienThi,
-          chucDanh: duLieu.maHoSoNangLuc.chucDanh,
-          soDienThoai: duLieu.maHoSoNangLuc.soDienThoai,
-          emailLienHe: duLieu.maHoSoNangLuc.emailLienHe,
-          facebook: duLieu.maHoSoNangLuc.facebook,
-          github: duLieu.maHoSoNangLuc.github,
-          portfolioUrl: duLieu.maHoSoNangLuc.portfolioUrl,
-          diaDiem: duLieu.maHoSoNangLuc.diaDiem,
-          tomTatKinhNghiem: duLieu.maHoSoNangLuc.tomTatKinhNghiem,
-          kyNangMem: duLieu.maHoSoNangLuc.kyNangMem,
-          kyNangLapTrinh: duLieu.maHoSoNangLuc.kyNangLapTrinh,
-          hocVan: duLieu.maHoSoNangLuc.hocVan,
-          kinhNghiemLam: duLieu.maHoSoNangLuc.kinhNghiemLam,
-          chungChi: duLieu.maHoSoNangLuc.chungChi,
-          duAn: duLieu.maHoSoNangLuc.duAn,
-          baiVietKyThuat: duLieu.maHoSoNangLuc.baiVietKyThuat,
-          duAnChiTiet: duLieu.maHoSoNangLuc.duAnChiTiet,
-          fileCvTen: duLieu.maHoSoNangLuc.fileCvTen,
-          fileCvLoai: duLieu.maHoSoNangLuc.fileCvLoai,
-          fileCvData: duLieu.maHoSoNangLuc.fileCvData,
-          fileCvText: duLieu.maHoSoNangLuc.fileCvText,
-          anhDaiDien: duLieu.maHoSoNangLuc.anhDaiDien,
-          templateCv: duLieu.maHoSoNangLuc.templateCv,
-          mauChinh: duLieu.maHoSoNangLuc.mauChinh,
-          mauPhu: duLieu.maHoSoNangLuc.mauPhu,
-          font: duLieu.maHoSoNangLuc.font,
-          ngayCapNhat: duLieu.maHoSoNangLuc.ngayCapNhat,
+          id: String(hoSo._id),
+          tieuDe: hoSo.tieuDe,
+          loaiHoSo: hoSo.loaiHoSo,
+          cvChinh: hoSo.cvChinh,
+          congKhai: hoSo.congKhai,
+          hoTenHienThi: hoSo.hoTenHienThi,
+          chucDanh: hoSo.chucDanh,
+          soDienThoai: hoSo.soDienThoai,
+          emailLienHe: hoSo.emailLienHe,
+          facebook: hoSo.facebook,
+          github: hoSo.github,
+          portfolioUrl: hoSo.portfolioUrl,
+          diaDiem: hoSo.diaDiem,
+          tomTatKinhNghiem: hoSo.tomTatKinhNghiem,
+          kyNangMem: hoSo.kyNangMem,
+          kyNangLapTrinh: hoSo.kyNangLapTrinh,
+          hocVan: hoSo.hocVan,
+          kinhNghiemLam: hoSo.kinhNghiemLam,
+          chungChi: hoSo.chungChi,
+          duAn: hoSo.duAn,
+          baiVietKyThuat: hoSo.baiVietKyThuat,
+          duAnChiTiet: hoSo.duAnChiTiet,
+          fileCvTen: hoSo.fileCvTen,
+          fileCvLoai: hoSo.fileCvLoai,
+          fileCvData: hoSo.fileCvData,
+          fileCvText: hoSo.fileCvText,
+          anhDaiDien: hoSo.anhDaiDien,
+          templateCv: hoSo.templateCv,
+          mauChinh: hoSo.mauChinh,
+          mauPhu: hoSo.mauPhu,
+          font: hoSo.font,
+          ngayCapNhat: hoSo.ngayCapNhat,
         }
       : undefined,
     thuXinViec: duLieu.thuXinViec,
@@ -126,6 +156,8 @@ function chuanHoaUngTuyen(taiLieu: any) {
   }
 }
 
+// ─── Query helper ───
+
 async function layDayDu(where: any, many = false) {
   const rows = many
     ? await HoSoUngTuyen.findMany({ where, orderBy: { ngayNop: 'desc' }, take: 300 })
@@ -134,16 +166,20 @@ async function layDayDu(where: any, many = false) {
   return many ? hydrated : hydrated[0]
 }
 
+// ─── Service ───
+
 export const dichVuHoSoUngTuyen = {
   async layDanhSach() {
     const danhSach = await layDayDu({}, true)
     return (danhSach as any[]).map(chuanHoaUngTuyen)
   },
+
   async layTheoMa(ma: string) {
     const duLieu = await layDayDu({ id: ma })
     if (!duLieu) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404)
     return chuanHoaUngTuyen(duLieu)
   },
+
   async taoMoi(duLieu: unknown) {
     try {
       const ketQua = await HoSoUngTuyen.create({ data: boUndefined(duLieu as Record<string, any>) as any })
@@ -168,6 +204,7 @@ export const dichVuHoSoUngTuyen = {
       throw loi
     }
   },
+
   async capNhat(ma: string, duLieu: unknown) {
     const truocKhiCapNhat = await layDayDu({ id: ma }) as any
     if (!truocKhiCapNhat) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để cập nhật', 404)
@@ -180,9 +217,16 @@ export const dichVuHoSoUngTuyen = {
       const maNguoiDungUngVien = ketQuaChuanHoa.ungVien?.nguoiDung?.id
       const tenCongTy = ketQuaChuanHoa.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? 'Cong ty'
       const viTriUngTuyen = ketQuaChuanHoa.tinTuyenDung?.tieuDe ?? 'Vị trí ứng tuyển'
+
       if (trangThaiCu !== 'da_xem' && trangThaiMoi === 'da_xem' && maNguoiDungUngVien) {
-        await thongBaoHoSoDuocXem({ maUngVien: maNguoiDungUngVien, tenCongTy, viTriUngTuyen, maHoSoUngTuyen: ketQuaChuanHoa.id })
+        await thongBaoHoSoDuocXem({
+          maUngVien: maNguoiDungUngVien,
+          tenCongTy,
+          viTriUngTuyen,
+          maHoSoUngTuyen: ketQuaChuanHoa.id,
+        })
       }
+
       if (trangThaiCu !== trangThaiMoi && ['dat', 'tu_choi'].includes(trangThaiMoi) && maNguoiDungUngVien) {
         await thongBaoHeThong({
           maNguoiDung: maNguoiDungUngVien,
@@ -195,8 +239,10 @@ export const dichVuHoSoUngTuyen = {
     } catch (error) {
       console.error('Lỗi gửi thông báo cập nhật hồ sơ ứng tuyển:', error)
     }
+
     return ketQuaChuanHoa
   },
+
   async xoa(ma: string) {
     const hienTai = await layDayDu({ id: ma }) as any
     if (!hienTai) throw new LoiUngDung('Không tìm thấy hồ sơ ứng tuyển để xóa', 404)

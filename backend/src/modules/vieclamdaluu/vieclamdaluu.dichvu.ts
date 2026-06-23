@@ -1,47 +1,88 @@
 import { LoiUngDung } from '../../dungchung/loiungdung.js'
-import { coId, ganCongTyChoTin } from '../../dungchung/prismaHelper.js'
 import { prisma } from '../../cauhinh/prisma.js'
 import { TinTuyenDung } from '../tintuyendung/tintuyendung.mohinh.js'
 import { ViecLamDaLuu } from './vieclamdaluu.mohinh.js'
 
-function chuanHoa(taiLieu: any) {
-  const obj = taiLieu ?? {}
-  const tin = obj.maTinTuyenDung
+// ViecLamDaLuu không có Prisma relation đến TinTuyenDung trong schema,
+// nên join thủ công nhưng tập trung vào 1 query rõ ràng.
+
+function mapTinTuyenDung(tin: any) {
+  if (!tin) return undefined
   return {
-    id: String(obj.id ?? obj._id),
-    _id: String(obj.id ?? obj._id),
-    maNguoiDung: String(obj.maNguoiDung?._id ?? obj.maNguoiDung),
-    maTinTuyenDung: String(tin?._id ?? tin),
-    ngayLuu: obj.ngayLuu,
-    tinTuyenDung: tin?._id
+    id: tin.id,
+    tieuDe: tin.tieuDe,
+    trangThai: tin.trangThai,
+    diaChi: tin.diaChi,
+    luongMin: tin.luongMin,
+    luongMax: tin.luongMax,
+    hanNop: tin.hanNop,
+    ngayDang: tin.ngayDang,
+    nhaTuyenDung: tin.nhaTuyenDung
       ? {
-          id: String(tin._id),
-          tieuDe: tin.tieuDe,
-          trangThai: tin.trangThai,
-          diaChi: tin.diaChi,
-          luongMin: tin.luongMin,
-          luongMax: tin.luongMax,
-          hanNop: tin.hanNop,
-          ngayDang: tin.ngayDang,
-          nhaTuyenDung: tin.maNhaTuyenDung?._id
-            ? { id: String(tin.maNhaTuyenDung._id), tenCongTy: tin.maNhaTuyenDung.tenCongTy, logo: tin.maNhaTuyenDung.logo }
-            : undefined,
+          id: tin.nhaTuyenDung.id,
+          tenCongTy: tin.nhaTuyenDung.tenCongTy,
+          logo: tin.nhaTuyenDung.logo,
         }
       : undefined,
   }
 }
 
-async function hydrate(rows: any[]) {
-  const tinRows = await prisma.tinTuyenDung.findMany({ where: { id: { in: [...new Set(rows.map(row => row.maTinTuyenDung))] } } })
-  const tinDayDu = await ganCongTyChoTin(tinRows as any[])
-  const tinMap = new Map(tinDayDu.map(row => [row.id, coId(row)]))
-  return rows.map(row => coId({ ...row, maTinTuyenDung: tinMap.get(row.maTinTuyenDung) ?? row.maTinTuyenDung }))
+function mapViecLamDaLuu(row: any, tinMap: Map<string, any>) {
+  const tin = tinMap.get(row.maTinTuyenDung)
+  return {
+    id: row.id,
+    _id: row.id,
+    maNguoiDung: row.maNguoiDung,
+    maTinTuyenDung: row.maTinTuyenDung,
+    ngayLuu: row.ngayLuu,
+    tinTuyenDung: mapTinTuyenDung(tin),
+  }
+}
+
+async function layTinTuyenDungMap(maTinIds: string[]) {
+  const uniqueIds = [...new Set(maTinIds.filter(Boolean))]
+  if (!uniqueIds.length) return new Map<string, any>()
+
+  const tinRows = await prisma.tinTuyenDung.findMany({
+    where: { id: { in: uniqueIds } },
+    select: {
+      id: true,
+      tieuDe: true,
+      trangThai: true,
+      diaChi: true,
+      luongMin: true,
+      luongMax: true,
+      hanNop: true,
+      ngayDang: true,
+      maNhaTuyenDung: true,
+    },
+  })
+
+  const congTyIds = [...new Set(tinRows.map(t => t.maNhaTuyenDung).filter(Boolean))]
+  const congTyRows = congTyIds.length
+    ? await prisma.nhaTuyenDung.findMany({
+        where: { id: { in: congTyIds } },
+        select: { id: true, tenCongTy: true, logo: true },
+      })
+    : []
+  const congTyMap = new Map(congTyRows.map(c => [c.id, c]))
+
+  const tinDayDu = tinRows.map(tin => ({
+    ...tin,
+    nhaTuyenDung: congTyMap.get(tin.maNhaTuyenDung) ?? null,
+  }))
+  return new Map(tinDayDu.map(t => [t.id, t]))
 }
 
 export const dichVuViecLamDaLuu = {
   async layDanhSach(maNguoiDung: string) {
-    const rows = await ViecLamDaLuu.findMany({ where: { maNguoiDung }, orderBy: { ngayLuu: 'desc' }, take: 200 })
-    return (await hydrate(rows)).map(chuanHoa)
+    const rows = await ViecLamDaLuu.findMany({
+      where: { maNguoiDung },
+      orderBy: { ngayLuu: 'desc' },
+      take: 200,
+    })
+    const tinMap = await layTinTuyenDungMap(rows.map(r => r.maTinTuyenDung))
+    return rows.map(row => mapViecLamDaLuu(row, tinMap))
   },
 
   async luu(maNguoiDung: string, maTinTuyenDung: string) {
@@ -54,7 +95,10 @@ export const dichVuViecLamDaLuu = {
       create: { maNguoiDung, maTinTuyenDung, ngayLuu: new Date() },
     })
     const ketQua = await ViecLamDaLuu.findFirst({ where: { maNguoiDung, maTinTuyenDung } })
-    return chuanHoa((await hydrate(ketQua ? [ketQua] : []))[0])
+    if (!ketQua) throw new LoiUngDung('Không thể lưu việc làm', 500)
+
+    const tinMap = await layTinTuyenDungMap([maTinTuyenDung])
+    return mapViecLamDaLuu(ketQua, tinMap)
   },
 
   async boLuu(maNguoiDung: string, maTinTuyenDung: string) {
