@@ -69,15 +69,6 @@ type PreviewBlock = {
   node: ReactNode
 }
 
-function chunkItems<T>(items: T[], size: number) {
-  if (size <= 0) return [items]
-  const chunks: T[][] = []
-  for (let index = 0; index < items.length; index += size) {
-    chunks.push(items.slice(index, index + size))
-  }
-  return chunks
-}
-
 const emptyCv: CvData = {
   tieuDe: 'CV Fullstack Developer',
   hocVan: [],
@@ -795,7 +786,6 @@ function taoPreviewBlocks(cleanCv: CvData) {
 
   if (projects.length > 0) {
     projects.forEach((item, index) => {
-      const baseKey = `project-${index}`
       const thongTinCoBan = [
         ['Duration', item.thoiGian],
         ['Position', item.viTri],
@@ -810,38 +800,32 @@ function taoPreviewBlocks(cleanCv: CvData) {
         ['Work Location', item.diaDiem],
         ['Links', item.lienKet?.length ? <span>{item.lienKet.map(link => [link.nhan, link.url].filter(Boolean).join(': ')).join(' | ')}</span> : undefined],
       ].filter(([, value]) => Boolean(value)) as [string, ReactNode][]
-      const trachNhiemChunks = chunkItems((item.trachNhiem ?? []).filter(Boolean), 2)
-      let daDatSectionTitle = false
+      const trachNhiem = (item.trachNhiem ?? []).filter(Boolean)
+      const thongTinTongHop = [
+        ...thongTinCoBan,
+        ...thongTinCongNghe,
+        ...thongTinBoSung,
+      ]
 
-      const themProjectBlock = (suffix: string, children: ReactNode) => {
-        const sectionTitle = !daDatSectionTitle && index === 0 ? 'Experience by Projects' : undefined
-        blocks.push({
-          key: `${baseKey}-${suffix}`,
-          node: (
-            <CvSection title={sectionTitle}>
-              <div className="cv-project">
-                {item.tenDuAn && <h3>Project Name: {item.tenDuAn}</h3>}
-                {children}
-              </div>
-            </CvSection>
-          ),
-        })
-        daDatSectionTitle = true
-      }
-
-      if (thongTinCoBan.length > 0) themProjectBlock('summary', <InfoGrid rows={thongTinCoBan} />)
-      if (item.moTa) themProjectBlock('description', <InfoGrid rows={[['Description', item.moTa]]} />)
-      trachNhiemChunks.forEach((chunk, chunkIndex) => {
-        themProjectBlock(`responsibilities-${chunkIndex}`, (
-          <>
-            <p className="cv-subtitle">Responsibilities</p>
-            <ul className="cv-list">{chunk.map((responsibility, responsibilityIndex) => <li key={responsibilityIndex}>{responsibility}</li>)}</ul>
-          </>
-        ))
+      blocks.push({
+        key: `project-${index}`,
+        node: (
+          <CvSection title={index === 0 ? 'Experience by Projects' : undefined}>
+            <div className="cv-project">
+              {item.tenDuAn && <h3>Project Name: {item.tenDuAn}</h3>}
+              {thongTinCoBan.length > 0 && <InfoGrid rows={thongTinCoBan} />}
+              {item.moTa && <InfoGrid rows={[['Description', item.moTa]]} />}
+              {trachNhiem.length > 0 && (
+                <>
+                  <p className="cv-subtitle">Responsibilities</p>
+                  <ul className="cv-list">{trachNhiem.map((responsibility, responsibilityIndex) => <li key={responsibilityIndex}>{responsibility}</li>)}</ul>
+                </>
+              )}
+              {(thongTinCongNghe.length > 0 || thongTinBoSung.length > 0) && <InfoGrid rows={thongTinTongHop.slice(thongTinCoBan.length)} />}
+            </div>
+          </CvSection>
+        ),
       })
-      if (thongTinCongNghe.length > 0) themProjectBlock('stack', <InfoGrid rows={thongTinCongNghe} />)
-      if (thongTinBoSung.length > 0) themProjectBlock('extra', <InfoGrid rows={thongTinBoSung} />)
-      if (!daDatSectionTitle) themProjectBlock('title', <div />)
     })
   }
 
