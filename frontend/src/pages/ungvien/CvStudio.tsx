@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { flushSync } from 'react-dom'
-import { Brain, Download, Eye, FileUp, ImagePlus, Plus, Save, Sparkles, Trash2, X } from 'lucide-react'
+import { Download, Eye, FileUp, ImagePlus, Plus, Save, Sparkles, Trash2, X } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
 import { apiCoXacThuc, apiUploadCoXacThuc } from '../../lib/auth'
 import { capNhatPhienBanTaiNguyen, taoUrlTaiNguyen, xoaPhienBanTaiNguyen } from '../../lib/env'
@@ -136,8 +136,16 @@ function cleanText(value: unknown) {
   return typeof value === 'string' ? removeSoftBreaks(value).trim() : ''
 }
 
+function hasText(value: unknown) {
+  return cleanText(value).length > 0
+}
+
 function cleanTextList(value?: string[]) {
   return (value ?? []).map(cleanText).filter(Boolean)
+}
+
+function hasTextListContent(value?: string[]) {
+  return (value ?? []).some(item => hasText(item))
 }
 
 function cleanBasicItems(value?: CvItem[]) {
@@ -190,6 +198,112 @@ function cleanProjects(value?: ProjectDetail[]) {
 
 function cleanLinks(value?: LinkItem[]) {
   return (value ?? []).map(link => ({ nhan: cleanText(link.nhan), url: cleanText(link.url) })).filter(link => link.nhan || link.url)
+}
+
+function hasBasicItemContent(item?: CvItem) {
+  return Boolean(item && (hasText(item.tieuDe) || hasText(item.donVi) || hasText(item.thoiGian) || hasText(item.moTa)))
+}
+
+function hasBasicItemsContent(value?: CvItem[]) {
+  return (value ?? []).some(item => hasBasicItemContent(item))
+}
+
+function mergeBasicItem(item: CvItem | undefined, fallback: CvItem): CvItem {
+  return {
+    tieuDe: hasText(item?.tieuDe) ? cleanText(item?.tieuDe) : fallback.tieuDe,
+    donVi: hasText(item?.donVi) ? cleanText(item?.donVi) : fallback.donVi,
+    thoiGian: hasText(item?.thoiGian) ? cleanText(item?.thoiGian) : fallback.thoiGian,
+    moTa: hasText(item?.moTa) ? cleanText(item?.moTa) : fallback.moTa,
+  }
+}
+
+function fillBasicItems(value: CvItem[] | undefined, fallback: CvItem[]) {
+  if (!value?.length || !hasBasicItemsContent(value)) return fallback
+  return value.map((item, index) => {
+    const sample = fallback[index]
+    return sample ? mergeBasicItem(item, sample) : item
+  })
+}
+
+function hasSkillGroupContent(group?: SkillGroup) {
+  return Boolean(group && (hasText(group.nhom) || hasTextListContent(group.muc)))
+}
+
+function hasSkillGroupsContent(value?: SkillGroup[]) {
+  return (value ?? []).some(item => hasSkillGroupContent(item))
+}
+
+function fillSkillGroups(value: SkillGroup[] | undefined, fallback: SkillGroup[]) {
+  if (!value?.length || !hasSkillGroupsContent(value)) return fallback
+  return value.map((group, index) => {
+    const sample = fallback[index]
+    if (!sample) return group
+    return {
+      nhom: hasText(group?.nhom) ? cleanText(group?.nhom) : sample.nhom,
+      muc: hasTextListContent(group?.muc) ? cleanTextList(group?.muc) : sample.muc,
+    }
+  })
+}
+
+function hasLinkContent(link?: LinkItem) {
+  return Boolean(link && (hasText(link.nhan) || hasText(link.url)))
+}
+
+function hasLinksContent(value?: LinkItem[]) {
+  return (value ?? []).some(item => hasLinkContent(item))
+}
+
+function fillLinks(value: LinkItem[] | undefined, fallback: LinkItem[]) {
+  if (!value?.length || !hasLinksContent(value)) return fallback
+  return value.map((link, index) => {
+    const sample = fallback[index]
+    if (!sample) return link
+    return {
+      nhan: hasText(link?.nhan) ? cleanText(link?.nhan) : sample.nhan,
+      url: hasText(link?.url) ? cleanText(link?.url) : sample.url,
+    }
+  })
+}
+
+function hasProjectContent(project?: ProjectDetail) {
+  return Boolean(project && (
+    hasText(project.tenDuAn)
+    || hasText(project.thoiGian)
+    || hasText(project.viTri)
+    || hasText(project.moTa)
+    || hasTextListContent(project.trachNhiem)
+    || hasText(project.heDieuHanh)
+    || hasText(project.ngonNgu)
+    || hasText(project.framework)
+    || hasText(project.kyThuat)
+    || hasText(project.diaDiem)
+    || hasLinksContent(project.lienKet)
+  ))
+}
+
+function hasProjectsContent(value?: ProjectDetail[]) {
+  return (value ?? []).some(item => hasProjectContent(item))
+}
+
+function fillProjects(value: ProjectDetail[] | undefined, fallback: ProjectDetail[]) {
+  if (!value?.length || !hasProjectsContent(value)) return fallback
+  return value.map((project, index) => {
+    const sample = fallback[index]
+    if (!sample) return project
+    return {
+      tenDuAn: hasText(project?.tenDuAn) ? cleanText(project?.tenDuAn) : sample.tenDuAn,
+      thoiGian: hasText(project?.thoiGian) ? cleanText(project?.thoiGian) : sample.thoiGian,
+      viTri: hasText(project?.viTri) ? cleanText(project?.viTri) : sample.viTri,
+      moTa: hasText(project?.moTa) ? cleanText(project?.moTa) : sample.moTa,
+      trachNhiem: hasTextListContent(project?.trachNhiem) ? cleanTextList(project?.trachNhiem) : sample.trachNhiem,
+      heDieuHanh: hasText(project?.heDieuHanh) ? cleanText(project?.heDieuHanh) : sample.heDieuHanh,
+      ngonNgu: hasText(project?.ngonNgu) ? cleanText(project?.ngonNgu) : sample.ngonNgu,
+      framework: hasText(project?.framework) ? cleanText(project?.framework) : sample.framework,
+      kyThuat: hasText(project?.kyThuat) ? cleanText(project?.kyThuat) : sample.kyThuat,
+      diaDiem: hasText(project?.diaDiem) ? cleanText(project?.diaDiem) : sample.diaDiem,
+      lienKet: hasLinksContent(project?.lienKet) ? cleanLinks(project?.lienKet) : sample.lienKet,
+    }
+  })
 }
 
 function compactCv(cv: CvData): CvData {
@@ -436,7 +550,7 @@ function BasicItemsEditor({ title, value, onChange, onAiSuggest }: { title: stri
         <div className="flex gap-2">
           {onAiSuggest && (
             <button type="button" className={`${secondaryBtn} border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-50`} onClick={onAiSuggest}>
-              <Brain size={15} /> Gợi ý AI
+              <Sparkles size={15} /> Gợi ý
             </button>
           )}
           <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { tieuDe: '', donVi: '', thoiGian: '', moTa: '' }])}>
@@ -863,133 +977,132 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
     }
   }
 
-  function goiYAi() {
+  function dienGoiY() {
     const chucDanh = cv.chucDanh || 'Fullstack Developer'
     const ungVien = data.ungVien
+    const tomTatMau = [
+      `${chucDanh} với 2+ năm kinh nghiệm xây dựng ứng dụng web có kiến trúc rõ ràng, responsive và UX mượt mà.`,
+      'Thành thạo React/TypeScript ở frontend, Node.js/Express ở backend, MongoDB/PostgreSQL về database.',
+      'Có kinh nghiệm RESTful API, JWT authentication, RBAC, Socket.io realtime.',
+      'Ưu tiên code dễ bảo trì, test coverage cao, quy trình Git rõ ràng và phối hợp hiệu quả với team.',
+      'Tự học nhanh công nghệ mới, đọc tài liệu tiếng Anh thành thạo.',
+    ]
+    const kyNangMemMau = [
+      'Giao tiếp rõ ràng, chủ động phối hợp và hỗ trợ đội nhóm.',
+      'Tư duy logic, phân tích vấn đề và đưa ra giải pháp hiệu quả.',
+      'Học nhanh công nghệ mới, thích nghi tốt với thay đổi.',
+      'Làm việc có kế hoạch, quản lý thời gian tốt và chịu áp lực cao.',
+      'Tinh thần trách nhiệm, chủ động cải thiện quy trình làm việc.',
+    ]
+    const kyNangLapTrinhMau = [
+      { nhom: 'Frontend', muc: ['JavaScript (ES6+), TypeScript', 'ReactJS, NextJS, React Router, React Query', 'HTML5, CSS3, Tailwind CSS, Responsive Design', 'State Management (Context API, Zustand)', 'Performance Optimization, Code Splitting'] },
+      { nhom: 'Backend', muc: ['Node.js, Express.js, RESTful API Design', 'Authentication & Authorization (JWT, OAuth)', 'Database: MongoDB, PostgreSQL, Prisma ORM', 'Real-time: Socket.io, WebSocket'] },
+      { nhom: 'DevOps & Tools', muc: ['Git, GitHub, GitLab (Branching, PR, Code Review)', 'Docker, Docker Compose', 'Deployment: VPS, Vercel, AWS', 'CI/CD: GitHub Actions'] },
+      { nhom: 'Testing & Quality', muc: ['Unit Testing: Jest, Vitest', 'Debugging: Chrome DevTools, Postman', 'Code Quality: ESLint, Prettier'] },
+    ]
+    const hocVanMau = [
+      {
+        tieuDe: 'Cử nhân Công nghệ thông tin',
+        donVi: 'Đại học Đà Nẵng',
+        thoiGian: '2019 - 2023',
+        moTa: 'GPA: 3.5/4.0. Chuyên ngành Công nghệ phần mềm.',
+      },
+    ]
+    const kinhNghiemMau = [
+      {
+        tieuDe: chucDanh,
+        donVi: 'Công ty TNHH Công nghệ ABC',
+        thoiGian: '06/2023 - nay',
+        moTa: 'Phát triển và bảo trì ứng dụng web cho khách hàng trong và ngoài nước. Tham gia thiết kế hệ thống, review code và mentor junior developer.',
+      },
+      {
+        tieuDe: 'Junior Developer (Intern)',
+        donVi: 'Công ty Phần mềm XYZ',
+        thoiGian: '01/2023 - 05/2023',
+        moTa: 'Intern phát triển tính năng mới, fix bug và viết unit test cho dự án web.',
+      },
+    ]
+    const chungChiMau = [
+      {
+        tieuDe: 'AWS Certified Developer - Associate',
+        donVi: 'Amazon Web Services',
+        thoiGian: '2024',
+        moTa: 'Chứng chỉ phát triển và triển khai ứng dụng trên nền tảng AWS.',
+      },
+      {
+        tieuDe: 'JavaScript Algorithms and Data Structures',
+        donVi: 'freeCodeCamp',
+        thoiGian: '2023',
+        moTa: 'Hoàn thành 300+ giờ lập trình về thuật toán và cấu trúc dữ liệu.',
+      },
+    ]
+    const baiVietMau = [
+      { nhan: 'Tối ưu hiệu suất React App với Code Splitting', url: 'https://yourblog.com/optimize-react' },
+      { nhan: 'Xây dựng RESTful API chuẩn với Node.js', url: 'https://yourblog.com/restful-nodejs' },
+    ]
+    const duAnMau = [
+      {
+        tenDuAn: 'ITJob Recruitment Platform',
+        thoiGian: '01/2025 - nay',
+        viTri: chucDanh,
+        moTa: 'Hệ thống tuyển dụng CNTT toàn diện: tìm kiếm việc làm, ứng tuyển, quản lý CV, lịch phỏng vấn và chat realtime giữa ứng viên và nhà tuyển dụng.',
+        trachNhiem: [
+          'Thiết kế và xây dựng dashboard theo vai trò (ứng viên, nhà tuyển dụng, admin).',
+          'Phát triển CV Builder: tạo, chỉnh sửa, export PDF chuẩn A4.',
+          'Xây dựng luồng ứng tuyển hoàn chỉnh: tìm việc, lưu việc, nộp hồ sơ, theo dõi trạng thái.',
+          'Implement lịch phỏng vấn với xác nhận, đổi lịch và thông báo realtime (Socket.io).',
+          'Tối ưu responsive cho mobile, tablet, desktop.',
+          'Xây dựng search với filter phức tạp: kỹ năng, địa điểm, lương, kinh nghiệm.',
+        ],
+        heDieuHanh: 'Windows, Linux',
+        ngonNgu: 'TypeScript, JavaScript',
+        framework: 'ReactJS, Node.js, Express, Prisma ORM',
+        kyThuat: 'RESTful API, JWT, RBAC, Socket.io, MongoDB, PostgreSQL',
+        diaDiem: 'Đà Nẵng, Việt Nam',
+        lienKet: [
+          { nhan: 'Demo', url: 'https://effortit.site' },
+          { nhan: 'GitHub', url: 'https://github.com/yourusername/itjob' },
+        ],
+      },
+      {
+        tenDuAn: 'E-commerce Admin Dashboard',
+        thoiGian: '06/2024 - 12/2024',
+        viTri: 'Frontend Developer',
+        moTa: 'Dashboard quản lý thương mại điện tử: sản phẩm, đơn hàng, khách hàng và báo cáo thống kê.',
+        trachNhiem: [
+          'Xây dựng giao diện quản lý sản phẩm với CRUD, upload ảnh, quản lý variants.',
+          'Phát triển quản lý đơn hàng với filter, sort và export Excel.',
+          'Tạo charts (Line, Bar, Pie) hiển thị doanh thu, đơn hàng theo thời gian.',
+          'Tối ưu performance với code splitting và lazy loading.',
+        ],
+        heDieuHanh: 'Windows',
+        ngonNgu: 'TypeScript',
+        framework: 'ReactJS, Ant Design, Recharts',
+        kyThuat: 'RESTful API, React Query, Zustand',
+        diaDiem: 'Remote',
+        lienKet: [{ nhan: 'Demo', url: 'https://ecommerce-admin-demo.com' }],
+      },
+    ]
     capNhatCv(value => ({
       ...value,
-      // Thông tin cá nhân
-      hoTenHienThi: value.hoTenHienThi || ungVien?.hoTen || 'Nguyễn Văn A',
-      chucDanh: value.chucDanh || chucDanh,
-      soDienThoai: value.soDienThoai || ungVien?.soDienThoai || '0901234567',
-      emailLienHe: value.emailLienHe || ungVien?.email || 'candidate@email.com',
-      diaDiem: value.diaDiem || 'Đà Nẵng, Việt Nam',
-      github: value.github || 'github.com/yourusername',
-      portfolioUrl: value.portfolioUrl || 'yourportfolio.com',
-      // Tóm tắt
-      tomTatKinhNghiem: value.tomTatKinhNghiem.length ? value.tomTatKinhNghiem : [
-        `${chucDanh} với 2+ năm kinh nghiệm xây dựng ứng dụng web có kiến trúc rõ ràng, responsive và UX mượt mà.`,
-        'Thành thạo React/TypeScript ở frontend, Node.js/Express ở backend, MongoDB/PostgreSQL về database.',
-        'Có kinh nghiệm RESTful API, JWT authentication, RBAC, Socket.io realtime.',
-        'Ưu tiên code dễ bảo trì, test coverage cao, quy trình Git rõ ràng và phối hợp hiệu quả với team.',
-        'Tự học nhanh công nghệ mới, đọc tài liệu tiếng Anh thành thạo.',
-      ],
-      // Kỹ năng mềm
-      kyNangMem: value.kyNangMem.length ? value.kyNangMem : [
-        'Giao tiếp rõ ràng, chủ động phối hợp và hỗ trợ đội nhóm.',
-        'Tư duy logic, phân tích vấn đề và đưa ra giải pháp hiệu quả.',
-        'Học nhanh công nghệ mới, thích nghi tốt với thay đổi.',
-        'Làm việc có kế hoạch, quản lý thời gian tốt và chịu áp lực cao.',
-        'Tinh thần trách nhiệm, chủ động cải thiện quy trình làm việc.',
-      ],
-      // Kỹ năng lập trình
-      kyNangLapTrinh: value.kyNangLapTrinh.length ? value.kyNangLapTrinh : [
-        { nhom: 'Frontend', muc: ['JavaScript (ES6+), TypeScript', 'ReactJS, NextJS, React Router, React Query', 'HTML5, CSS3, Tailwind CSS, Responsive Design', 'State Management (Context API, Zustand)', 'Performance Optimization, Code Splitting'] },
-        { nhom: 'Backend', muc: ['Node.js, Express.js, RESTful API Design', 'Authentication & Authorization (JWT, OAuth)', 'Database: MongoDB, PostgreSQL, Prisma ORM', 'Real-time: Socket.io, WebSocket'] },
-        { nhom: 'DevOps & Tools', muc: ['Git, GitHub, GitLab (Branching, PR, Code Review)', 'Docker, Docker Compose', 'Deployment: VPS, Vercel, AWS', 'CI/CD: GitHub Actions'] },
-        { nhom: 'Testing & Quality', muc: ['Unit Testing: Jest, Vitest', 'Debugging: Chrome DevTools, Postman', 'Code Quality: ESLint, Prettier'] },
-      ],
-      // Học vấn
-      hocVan: value.hocVan.length ? value.hocVan : [
-        {
-          tieuDe: 'Cử nhân Công nghệ thông tin',
-          donVi: 'Đại học Đà Nẵng',
-          thoiGian: '2019 - 2023',
-          moTa: 'GPA: 3.5/4.0. Chuyên ngành Công nghệ phần mềm.',
-        },
-      ],
-      // Kinh nghiệm làm việc
-      kinhNghiemLam: value.kinhNghiemLam.length ? value.kinhNghiemLam : [
-        {
-          tieuDe: chucDanh,
-          donVi: 'Công ty TNHH Công nghệ ABC',
-          thoiGian: '06/2023 - nay',
-          moTa: 'Phát triển và bảo trì ứng dụng web cho khách hàng trong và ngoài nước. Tham gia thiết kế hệ thống, review code và mentor junior developer.',
-        },
-        {
-          tieuDe: 'Junior Developer (Intern)',
-          donVi: 'Công ty Phần mềm XYZ',
-          thoiGian: '01/2023 - 05/2023',
-          moTa: 'Intern phát triển tính năng mới, fix bug và viết unit test cho dự án web.',
-        },
-      ],
-      // Chứng chỉ
-      chungChi: value.chungChi.length ? value.chungChi : [
-        {
-          tieuDe: 'AWS Certified Developer - Associate',
-          donVi: 'Amazon Web Services',
-          thoiGian: '2024',
-          moTa: 'Chứng chỉ phát triển và triển khai ứng dụng trên nền tảng AWS.',
-        },
-        {
-          tieuDe: 'JavaScript Algorithms and Data Structures',
-          donVi: 'freeCodeCamp',
-          thoiGian: '2023',
-          moTa: 'Hoàn thành 300+ giờ lập trình về thuật toán và cấu trúc dữ liệu.',
-        },
-      ],
-      // Bài viết kỹ thuật
-      baiVietKyThuat: value.baiVietKyThuat.length ? value.baiVietKyThuat : [
-        { nhan: 'Tối ưu hiệu suất React App với Code Splitting', url: 'https://yourblog.com/optimize-react' },
-        { nhan: 'Xây dựng RESTful API chuẩn với Node.js', url: 'https://yourblog.com/restful-nodejs' },
-      ],
-      // Dự án chi tiết
-      duAnChiTiet: value.duAnChiTiet.length ? value.duAnChiTiet : [
-        {
-          tenDuAn: 'ITJob Recruitment Platform',
-          thoiGian: '01/2025 - nay',
-          viTri: chucDanh,
-          moTa: 'Hệ thống tuyển dụng CNTT toàn diện: tìm kiếm việc làm, ứng tuyển, quản lý CV, lịch phỏng vấn và chat realtime giữa ứng viên và nhà tuyển dụng.',
-          trachNhiem: [
-            'Thiết kế và xây dựng dashboard theo vai trò (ứng viên, nhà tuyển dụng, admin).',
-            'Phát triển CV Builder: tạo, chỉnh sửa, export PDF chuẩn A4.',
-            'Xây dựng luồng ứng tuyển hoàn chỉnh: tìm việc, lưu việc, nộp hồ sơ, theo dõi trạng thái.',
-            'Implement lịch phỏng vấn với xác nhận, đổi lịch và thông báo realtime (Socket.io).',
-            'Tối ưu responsive cho mobile, tablet, desktop.',
-            'Xây dựng search với filter phức tạp: kỹ năng, địa điểm, lương, kinh nghiệm.',
-          ],
-          heDieuHanh: 'Windows, Linux',
-          ngonNgu: 'TypeScript, JavaScript',
-          framework: 'ReactJS, Node.js, Express, Prisma ORM',
-          kyThuat: 'RESTful API, JWT, RBAC, Socket.io, MongoDB, PostgreSQL',
-          diaDiem: 'Đà Nẵng, Việt Nam',
-          lienKet: [
-            { nhan: 'Demo', url: 'https://effortit.site' },
-            { nhan: 'GitHub', url: 'https://github.com/yourusername/itjob' },
-          ],
-        },
-        {
-          tenDuAn: 'E-commerce Admin Dashboard',
-          thoiGian: '06/2024 - 12/2024',
-          viTri: 'Frontend Developer',
-          moTa: 'Dashboard quản lý thương mại điện tử: sản phẩm, đơn hàng, khách hàng và báo cáo thống kê.',
-          trachNhiem: [
-            'Xây dựng giao diện quản lý sản phẩm với CRUD, upload ảnh, quản lý variants.',
-            'Phát triển quản lý đơn hàng với filter, sort và export Excel.',
-            'Tạo charts (Line, Bar, Pie) hiển thị doanh thu, đơn hàng theo thời gian.',
-            'Tối ưu performance với code splitting và lazy loading.',
-          ],
-          heDieuHanh: 'Windows',
-          ngonNgu: 'TypeScript',
-          framework: 'ReactJS, Ant Design, Recharts',
-          kyThuat: 'RESTful API, React Query, Zustand',
-          diaDiem: 'Remote',
-          lienKet: [{ nhan: 'Demo', url: 'https://ecommerce-admin-demo.com' }],
-        },
-      ],
+      hoTenHienThi: hasText(value.hoTenHienThi) ? value.hoTenHienThi : (ungVien?.hoTen || 'Nguyễn Văn A'),
+      chucDanh: hasText(value.chucDanh) ? value.chucDanh : chucDanh,
+      soDienThoai: hasText(value.soDienThoai) ? value.soDienThoai : (ungVien?.soDienThoai || '0901234567'),
+      emailLienHe: hasText(value.emailLienHe) ? value.emailLienHe : (ungVien?.email || 'candidate@email.com'),
+      diaDiem: hasText(value.diaDiem) ? value.diaDiem : 'Đà Nẵng, Việt Nam',
+      github: hasText(value.github) ? value.github : 'github.com/yourusername',
+      portfolioUrl: hasText(value.portfolioUrl) ? value.portfolioUrl : 'yourportfolio.com',
+      tomTatKinhNghiem: hasTextListContent(value.tomTatKinhNghiem) ? value.tomTatKinhNghiem : tomTatMau,
+      kyNangMem: hasTextListContent(value.kyNangMem) ? value.kyNangMem : kyNangMemMau,
+      kyNangLapTrinh: fillSkillGroups(value.kyNangLapTrinh, kyNangLapTrinhMau),
+      hocVan: fillBasicItems(value.hocVan, hocVanMau),
+      kinhNghiemLam: fillBasicItems(value.kinhNghiemLam, kinhNghiemMau),
+      chungChi: fillBasicItems(value.chungChi, chungChiMau),
+      baiVietKyThuat: fillLinks(value.baiVietKyThuat, baiVietMau),
+      duAnChiTiet: fillProjects(value.duAnChiTiet, duAnMau),
     }))
     setCoThayDoiChuaLuu(true)
-    toast.success('Đã điền gợi ý AI đầy đủ. Hãy chỉnh sửa theo thông tin thực của bạn!')
+    toast.success('Đã điền gợi ý. Hãy chỉnh sửa lại theo thông tin thực của bạn.')
   }
 
   async function luuStudio() {
@@ -1324,7 +1437,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           <button type="button" className={primaryBtn} disabled={dangLuu || dangTaiAnhCv || dangTaiFileCv} onClick={luuStudio}><Save size={16} /> {dangLuu ? 'Đang lưu...' : 'Lưu CV'}</button>
           <button type="button" className={secondaryBtn} onClick={() => taiPdf()} disabled={!coNoiDungDeIn}><Download size={16} /> Tải PDF</button>
           <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()} disabled={dangTaiFileCv}><FileUp size={16} /> {dangTaiFileCv ? 'Đang upload...' : 'Upload PDF'}</button>
-          <button type="button" className={secondaryBtn} onClick={goiYAi}><Brain size={16} /> Gợi ý AI</button>
+          <button type="button" className={secondaryBtn} onClick={dienGoiY}><Sparkles size={16} /> Gợi ý</button>
           <button type="button" className={secondaryBtn} onClick={taoCvMoi}><Plus size={16} /> Tạo mới</button>
           <input id="cv-photo-upload" hidden type="file" accept="image/*" onChange={e => { void docAnh(e.target.files?.[0]); e.currentTarget.value = '' }} />
           <input id="cv-file-upload" hidden type="file" accept="application/pdf,.pdf" onChange={e => { void docFileCv(e.target.files?.[0]); e.currentTarget.value = '' }} />
@@ -1456,9 +1569,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           <CvTextList title="Experience Summary" value={cv.tomTatKinhNghiem} onChange={v => capNhatCv({ ...cv, tomTatKinhNghiem: v })} placeholder="Full-stack Web Developer focusing on building scalable web products..." />
           <CvTextList title="Soft Skills" value={cv.kyNangMem} onChange={v => capNhatCv({ ...cv, kyNangMem: v })} placeholder="Excellent communication, teamwork, fast learning..." />
           <SkillEditor value={cv.kyNangLapTrinh} onChange={v => capNhatCv({ ...cv, kyNangLapTrinh: v })} />
-          <BasicItemsEditor title="Kinh nghiệm làm việc" value={cv.kinhNghiemLam} onChange={v => capNhatCv({ ...cv, kinhNghiemLam: v })} onAiSuggest={goiYAi} />
-          <BasicItemsEditor title="Học vấn" value={cv.hocVan} onChange={v => capNhatCv({ ...cv, hocVan: v })} onAiSuggest={goiYAi} />
-          <BasicItemsEditor title="Chứng chỉ" value={cv.chungChi} onChange={v => capNhatCv({ ...cv, chungChi: v })} onAiSuggest={goiYAi} />
+          <BasicItemsEditor title="Kinh nghiệm làm việc" value={cv.kinhNghiemLam} onChange={v => capNhatCv({ ...cv, kinhNghiemLam: v })} onAiSuggest={dienGoiY} />
+          <BasicItemsEditor title="Học vấn" value={cv.hocVan} onChange={v => capNhatCv({ ...cv, hocVan: v })} onAiSuggest={dienGoiY} />
+          <BasicItemsEditor title="Chứng chỉ" value={cv.chungChi} onChange={v => capNhatCv({ ...cv, chungChi: v })} onAiSuggest={dienGoiY} />
           <ProjectEditor value={cv.duAnChiTiet} onChange={v => capNhatCv({ ...cv, duAnChiTiet: v })} />
         </div>
 
