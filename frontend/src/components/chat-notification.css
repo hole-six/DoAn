@@ -675,3 +675,91 @@
     font-size: 16px;
   }
 }
+
+@media (max-width: 768px) {
+  .notification-summary-head {
+    align-items: stretch;
+  }
+
+  .notification-summary-head > .ui-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .notification-filter-row {
+    margin-inline: -4px;
+    padding-inline: 4px;
+    scrollbar-width: none;
+  }
+
+  .notification-filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .notification-record {
+    align-items: stretch;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .notification-record-main {
+    order: 1;
+  }
+
+  .notification-record-actions {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    order: 2;
+    width: 100%;
+  }
+
+  .notification-record-actions .ui-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .notification-modal {
+    align-items: flex-end;
+    display: flex;
+    padding: 0;
+  }
+
+  .notification-modal-shell {
+    align-items: flex-end;
+    flex: 1;
+    max-width: none;
+  }
+
+  .notification-modal-card {
+    border-radius: 20px 20px 0 0;
+    max-height: min(86dvh, 100%);
+  }
+
+  .notification-modal-head,
+  .notification-modal-body,
+  .notification-modal-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .notification-modal-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-record-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-record {
+    padding: 14px;
+  }
+}
+
+.notification-record-actions > *:only-child {
+  grid-column: 1 / -1;
+}

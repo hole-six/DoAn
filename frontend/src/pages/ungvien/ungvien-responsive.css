@@ -796,3 +796,98 @@ html {
     min-width: 500px;
   }
 }
+
+@media (max-width: 768px) {
+  .cv-studio-shell {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .cv-studio-actions {
+    display: grid !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .cv-studio-actions > button,
+  .cv-studio-actions > a {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .cv-studio-actions > button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .cv-studio-builder-list > div:first-child,
+  .cv-studio-upload-list > div:first-child {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cv-studio-upload-card .min-w-0,
+  .cv-studio-builder-info,
+  .cv-studio-visibility-row {
+    min-width: 0;
+  }
+
+  .cv-studio-visibility-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+
+  .cv-studio-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cv-studio-preview-panel {
+    min-width: 0;
+  }
+
+  .cv-preview-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .cv-preview-scroll .cv-a4-preview {
+    min-width: 560px;
+  }
+
+  .uv-application-card,
+  .uv-interview-card {
+    align-items: start !important;
+    display: grid !important;
+    gap: 12px !important;
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .uv-application-meta span,
+  .uv-interview-meta span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .uv-application-action,
+  .uv-interview-action {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .uv-application-action .ui-btn,
+  .uv-interview-action .ui-btn {
+    min-height: 44px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cv-studio-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .cv-preview-scroll .cv-a4-preview {
+    min-width: 500px;
+  }
+}

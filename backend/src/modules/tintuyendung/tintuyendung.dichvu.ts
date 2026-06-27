@@ -168,7 +168,6 @@ export const dichVuTinTuyenDung = {
     const kyNang = tachDanhSach(boLoc.kyNang)
     const loaiKyNang = tachDanhSach(boLoc.loaiKyNang ?? boLoc.loai)
 
-    // Xây dựng where clause theo vai trò
     const where: any = {}
     if (cheDo === 'cong_khai') {
       where.trangThai = 'dang_mo'

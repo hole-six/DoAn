@@ -65,7 +65,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
   return (
     <article
       onClick={onOpen}
-      className={`flex cursor-pointer items-center gap-4 rounded-2xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md ${active ? 'border-sky-400 bg-sky-50/60' : 'border-slate-200'}`}
+      className={`uv-interview-card flex cursor-pointer items-center gap-4 rounded-2xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md ${active ? 'border-sky-400 bg-sky-50/60' : 'border-slate-200'}`}
     >
       {/* Logo */}
       <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
@@ -86,7 +86,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
         </div>
 
         {/* Dòng 2: công ty + meta inline */}
-        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
+        <div className="uv-interview-meta mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
           <span className="font-bold uppercase tracking-wide text-sky-700">{company?.tenCongTy ?? 'Nhà tuyển dụng'}</span>
           <span className="inline-flex items-center gap-1">
             <CalendarDays size={12} className="text-sky-500" />
@@ -108,7 +108,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
       </div>
 
       {/* Nút chi tiết */}
-      <div className="shrink-0" onClick={e => e.stopPropagation()}>
+      <div className="uv-interview-action shrink-0" onClick={e => e.stopPropagation()}>
         <Button size="sm" variant="secondary" icon={<ExternalLink size={13} />} onClick={onOpen}>Chi tiết</Button>
       </div>
     </article>

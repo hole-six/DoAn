@@ -949,3 +949,58 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+@media (max-width: 768px) {
+  .ntd-candidate-card,
+  .ntd-interview-card {
+    align-items: start !important;
+    display: grid !important;
+    gap: 12px !important;
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .ntd-candidate-card-actions,
+  .ntd-interview-card-actions {
+    display: grid !important;
+    gap: 8px !important;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .ntd-candidate-card-actions .ui-btn,
+  .ntd-interview-card-actions .ui-btn,
+  .candidate-drawer-tabs button {
+    min-height: 44px;
+  }
+
+  .ntd-candidate-card-actions .ui-btn,
+  .ntd-interview-card-actions .ui-btn {
+    width: 100%;
+  }
+
+  .candidate-drawer-profile {
+    grid-template-columns: 1fr !important;
+  }
+
+  .candidate-drawer-content object {
+    height: 56vh !important;
+    min-height: 360px !important;
+  }
+
+  .candidate-drawer-tabs button {
+    min-width: 132px;
+    white-space: normal;
+  }
+
+  .schedule-modal-form {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ntd-candidate-card-actions,
+  .ntd-interview-card-actions {
+    grid-template-columns: 1fr;
+  }
+}

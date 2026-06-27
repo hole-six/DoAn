@@ -120,7 +120,7 @@ export function ScheduleModal({
         </ButtonGroup>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="schedule-modal-form grid gap-3 sm:grid-cols-2">
         {errors.form && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-700 sm:col-span-2">{errors.form}</div>}
 
         <InterviewTimeRangePicker

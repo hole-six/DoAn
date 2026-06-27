@@ -78,3 +78,63 @@
   height: 1px;
   background: #e2e8f0;
 }
+
+.auth-page {
+  overflow-x: hidden;
+}
+
+.auth-shell {
+  width: 100%;
+}
+
+.auth-panel {
+  width: min(100%, 600px);
+}
+
+.auth-mobile-top {
+  flex-wrap: wrap;
+}
+
+.auth-mobile-top > * {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .auth-panel-wrap {
+    align-items: flex-start;
+    padding: 20px 14px 28px;
+  }
+
+  .auth-panel {
+    border-radius: 24px !important;
+    padding: 20px 16px !important;
+  }
+
+  .auth-panel h2 {
+    font-size: clamp(2rem, 7vw, 2.65rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .auth-panel input,
+  .auth-panel select,
+  .auth-panel textarea,
+  .auth-panel button {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .auth-mobile-top {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  .auth-mobile-top a {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .auth-role-switch--register {
+    grid-template-columns: 1fr !important;
+  }
+}

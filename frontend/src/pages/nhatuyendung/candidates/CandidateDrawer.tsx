@@ -299,8 +299,8 @@ export function CandidateDrawer({
         </div>
       )}
     >
-      <div className="grid gap-4">
-        <section className="grid gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-[84px_minmax(0,1fr)]">
+      <div className="candidate-drawer-content grid gap-4">
+        <section className="candidate-drawer-profile grid gap-4 rounded-xl border border-slate-200 p-4 sm:grid-cols-[84px_minmax(0,1fr)]">
           <img
             className="h-20 w-20 rounded-xl border border-slate-200 object-cover"
             src={imageUrl(cv?.anhDaiDien) || 'https://placehold.co/160x160/eaf2ff/075985?text=CV'}
@@ -319,7 +319,7 @@ export function CandidateDrawer({
           </div>
         </section>
 
-        <div className="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
+        <div className="candidate-drawer-tabs flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
           {[
             ['overview', 'Tổng quan'],
             ['cv', 'CV ứng viên'],
@@ -332,7 +332,7 @@ export function CandidateDrawer({
         </div>
 
         {tab === 'overview' && (
-          <section className="grid gap-3 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-700">
+          <section className="candidate-drawer-overview grid gap-3 rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-700">
             <p><strong>Vị trí:</strong> {item.tinTuyenDung?.tieuDe ?? '-'}</p>
             <p><strong>CV ứng tuyển:</strong> {cv?.tieuDe ?? 'Chưa gắn CV'}</p>
             <p><strong>Ngày nộp:</strong> {formatDateTime(item.ngayNop)}</p>

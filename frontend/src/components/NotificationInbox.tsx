@@ -91,10 +91,10 @@ export function NotificationInbox({ items, onReload }: Props) {
   }
 
   return (
-    <section className="grid gap-4">
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex min-w-0 gap-3">
+    <section className="notification-inbox grid gap-4">
+      <div className="notification-summary rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="notification-summary-head flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="notification-summary-copy flex min-w-0 gap-3">
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sky-50 text-sky-700">
               <Inbox size={22} />
             </span>
@@ -110,7 +110,7 @@ export function NotificationInbox({ items, onReload }: Props) {
           </Button>
         </div>
 
-        <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
+        <div className="notification-filter-row mt-5 flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map(({ key, label, icon: Icon }) => {
             const active = filter === key
             const count = key === 'all' ? items.length : filterCounts.get(key) ?? 0
@@ -138,7 +138,7 @@ export function NotificationInbox({ items, onReload }: Props) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="notification-list-shell rounded-2xl border border-slate-200 bg-white shadow-sm">
         {filteredItems.length === 0 ? (
           <div className="grid min-h-[260px] place-items-center p-8 text-center">
             <div>
@@ -154,7 +154,7 @@ export function NotificationInbox({ items, onReload }: Props) {
               return (
                 <article
                   key={id}
-                  className={`relative flex cursor-pointer items-start gap-3 px-5 py-3.5 transition hover:bg-slate-50 ${
+                  className={`notification-record relative flex cursor-pointer items-start gap-3 px-5 py-3.5 transition hover:bg-slate-50 ${
                     item.daDoc ? 'bg-white' : 'bg-sky-50/40'
                   }`}
                   onClick={() => setSelected(item)}
@@ -166,7 +166,7 @@ export function NotificationInbox({ items, onReload }: Props) {
                   {item.daDoc && <span className="mt-1.5 h-2 w-2 shrink-0" />}
 
                   {/* Nội dung */}
-                  <div className="min-w-0 flex-1">
+                  <div className="notification-record-main min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className={`text-sm font-black ${item.daDoc ? 'text-slate-700' : 'text-slate-950'}`}>
                         {item.tieuDe}
@@ -180,7 +180,7 @@ export function NotificationInbox({ items, onReload }: Props) {
                   </div>
 
                   {/* Actions nhỏ gọn */}
-                  <div className="flex shrink-0 items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                  <div className="notification-record-actions flex shrink-0 items-center gap-1.5" onClick={e => e.stopPropagation()}>
                     {item.lienKet && (
                       <Button size="sm" variant="primary" icon={<ExternalLink size={13} />} onClick={() => void openLink(item)}>
                         Xử lý
@@ -200,10 +200,10 @@ export function NotificationInbox({ items, onReload }: Props) {
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
-          <div className="mx-auto flex h-full max-w-2xl items-center">
-            <div className="max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <div className="flex items-start justify-between gap-4 border-b border-slate-100 p-5">
+        <div className="notification-modal fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
+          <div className="notification-modal-shell mx-auto flex h-full max-w-2xl items-center">
+            <div className="notification-modal-card max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="notification-modal-head flex items-start justify-between gap-4 border-b border-slate-100 p-5">
                 <div className="min-w-0">
                   <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-sky-700">
                     {priorityLabel((selected as any).mucDoUuTien)}
@@ -215,10 +215,10 @@ export function NotificationInbox({ items, onReload }: Props) {
                   <X size={18} />
                 </button>
               </div>
-              <div className="max-h-[55vh] overflow-y-auto p-5">
+              <div className="notification-modal-body max-h-[55vh] overflow-y-auto p-5">
                 <p className="whitespace-pre-wrap break-words text-base font-semibold leading-7 text-slate-700">{selected.noiDung}</p>
               </div>
-              <div className="flex flex-col gap-2 border-t border-slate-100 p-5 sm:flex-row sm:flex-wrap sm:justify-end">
+              <div className="notification-modal-actions flex flex-col gap-2 border-t border-slate-100 p-5 sm:flex-row sm:flex-wrap sm:justify-end">
                 {!selected.daDoc && (
                   <Button icon={<Check size={16} />} loading={busy === notificationId(selected)} onClick={() => void markRead(selected)}>
                     Đánh dấu đã đọc

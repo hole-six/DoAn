@@ -480,12 +480,22 @@ aside nav.grid.gap-1 a span {
     padding-bottom: max(28px, calc(28px + env(safe-area-inset-bottom))) !important;
   }
 
-  .dashboard-mobilebar > span {
+  .dashboard-mobilebar-title {
     min-width: 0;
-    max-width: 42vw;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    text-align: center;
+  }
+
+  .dashboard-mobilebar-actions {
+    min-width: 0;
+  }
+
+  .dashboard-mobilebar-link {
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .dashboard-shell-root[data-role="quantrivien"] .bottom-nav {
@@ -512,6 +522,54 @@ aside nav.grid.gap-1 a span {
   .uv-kpi-grid,
   .ntd-kpi-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-mobilebar {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .dashboard-mobilebar-actions {
+    gap: 8px;
+  }
+
+  .dashboard-mobilebar-link {
+    border-radius: 12px;
+  }
+
+  .detail-drawer__panel,
+  .uv-shared-drawer-card,
+  .ntd-shared-drawer-card {
+    max-width: 100%;
+  }
+
+  .detail-drawer__header,
+  .uv-shared-drawer-header,
+  .ntd-shared-drawer-header {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 14px 12px;
+  }
+
+  .detail-drawer__body,
+  .uv-shared-drawer-body,
+  .ntd-shared-drawer-body {
+    padding: 14px;
+  }
+
+  .detail-drawer__footer,
+  .uv-shared-drawer-footer,
+  .ntd-shared-drawer-footer {
+    padding: 14px;
+  }
+
+  .detail-drawer__footer > *,
+  .uv-shared-drawer-footer > *,
+  .ntd-shared-drawer-footer > * {
+    width: 100%;
   }
 }
 

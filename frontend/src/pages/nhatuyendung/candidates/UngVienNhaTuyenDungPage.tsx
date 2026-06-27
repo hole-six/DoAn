@@ -169,7 +169,7 @@ export default function UngVienNhaTuyenDungPage() {
           {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => (
             <article
               key={item.id}
-              className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
+              className="ntd-candidate-card flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
               onClick={() => setSelected(item)}
             >
               {/* Avatar chữ cái */}
@@ -205,7 +205,7 @@ export default function UngVienNhaTuyenDungPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex shrink-0 gap-2" onClick={event => event.stopPropagation()}>
+              <div className="ntd-candidate-card-actions flex shrink-0 gap-2" onClick={event => event.stopPropagation()}>
                 <Button size="sm" icon={<Search size={14} />} onClick={() => setSelected(item)}>Chi tiết</Button>
                 <Button
                   size="sm"

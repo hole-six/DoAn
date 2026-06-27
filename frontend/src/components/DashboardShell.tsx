@@ -85,6 +85,7 @@ void menuUngVien
 const menuMap = { ungvien: menuUngVienHienThi, nhatuyendung: menuNTD, quantrivien: menuAdmin }
 const nhanMap = { ungvien: 'Ứng viên', nhatuyendung: 'Nhà tuyển dụng', quantrivien: 'Quản trị viên' }
 const vaiTroCanCoMap = { ungvien: 'ung_vien', nhatuyendung: 'nha_tuyen_dung', quantrivien: 'admin' }
+const notificationPathMap = { ungvien: '/ung-vien/thong-bao', nhatuyendung: '/nha-tuyen-dung/thong-bao', quantrivien: '/quan-tri/thong-bao' }
 
 const shellTone: Record<VaiTro, string> = {
   ungvien: 'from-[#0e4d7d] to-[#1a6ba8]',
@@ -340,7 +341,7 @@ export default function DashboardShell({ vaiTro }: Props) {
         </aside>
 
         <div className="dashboard-content-shell flex min-w-0 flex-1 flex-col">
-          <div className="dashboard-mobilebar sticky top-0 z-[60] flex h-16 items-center justify-between border-b border-[#0e4d7d]/10 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden">
+          <div className="dashboard-mobilebar sticky top-0 z-[60] grid h-16 grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#0e4d7d]/10 bg-white/95 px-4 shadow-sm backdrop-blur lg:hidden">
             <button
               className={clsx('inline-flex h-11 w-11 items-center justify-center rounded-xl border bg-white', shell.mobileButton)}
               onClick={() => setOpen(!open)}
@@ -348,18 +349,22 @@ export default function DashboardShell({ vaiTro }: Props) {
             >
               <AppIcon icon={open ? X : Menu} size={22} />
             </button>
-            <span className="text-lg font-black text-slate-900">{nhanMap[vaiTro]}</span>
-            <div className="flex items-center gap-2.5">
-              <div className="relative">
-                <AppIcon icon={Bell} size={20} className="text-slate-700" />
+            <span className="dashboard-mobilebar-title text-lg font-black text-slate-900">{nhanMap[vaiTro]}</span>
+            <div className="dashboard-mobilebar-actions flex items-center justify-end gap-2">
+              <Link
+                to={notificationPathMap[vaiTro]}
+                className="dashboard-mobilebar-link relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 transition hover:border-sky-200 hover:text-sky-700"
+                aria-label="Mở thông báo"
+              >
+                <AppIcon icon={Bell} size={20} className="text-current" />
                 {soThongBao > 0 && (
                   <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9px] font-black text-white">
                     {Math.min(99, soThongBao)}
                   </span>
                 )}
-              </div>
+              </Link>
               {soTinNhan > 0 && (
-                <div className="relative">
+                <div className="dashboard-mobilebar-link relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700">
                   <AppIcon icon={MessageCircle} size={20} className="text-slate-700" />
                   <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-violet-500 px-1 text-[9px] font-black text-white">
                     {Math.min(99, soTinNhan)}

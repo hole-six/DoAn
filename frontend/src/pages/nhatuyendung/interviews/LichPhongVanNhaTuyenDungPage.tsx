@@ -118,7 +118,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
           {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => {
             const userId = candidateUserId(item)
             return (
-              <article key={item.id} className="ntd-list-card grid cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-sky-200 lg:grid-cols-[minmax(0,1fr)_auto]" onClick={() => setSelected(item)}>
+              <article key={item.id} className="ntd-interview-card ntd-list-card grid cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-sky-200 lg:grid-cols-[minmax(0,1fr)_auto]" onClick={() => setSelected(item)}>
                 <div className="ntd-list-main min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="truncate text-base font-black text-slate-950">{item.hoSoUngTuyen?.ungVien?.nguoiDung?.hoTen ?? 'Ứng viên'}</h2>
@@ -129,7 +129,7 @@ export default function LichPhongVanNhaTuyenDungPage() {
                   </p>
                   <p className="ntd-list-meta mt-1 text-sm font-semibold text-slate-500">{formatDateTime(item.thoiGianBatDau)} · {item.linkHop || item.diaChi || '-'}</p>
                 </div>
-                <div className="ntd-list-actions" onClick={event => event.stopPropagation()}>
+                <div className="ntd-interview-card-actions ntd-list-actions" onClick={event => event.stopPropagation()}>
                   <ButtonGroup>
                     <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!userId || !TRANG_THAI_LICH_DUOC_CHAT.includes(item.trangThai)} onClick={() => void openChat(item)}>
                       Nhắn ứng viên

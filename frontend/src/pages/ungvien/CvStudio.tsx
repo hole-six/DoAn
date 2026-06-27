@@ -1662,7 +1662,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
       </div>
 
       {danhSachCvBuilder.length > 0 && (
-        <div className="mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+        <div className="cv-studio-builder-list mb-5 rounded-2xl border border-slate-200 bg-slate-50 p-3">
           <div className="mb-2 flex items-center justify-between gap-3">
             <strong className="text-sm text-slate-900">CV tạo trong hệ thống</strong>
             <span className="text-xs font-bold text-slate-500">Những CV này có thể chỉnh sửa, preview và in PDF.</span>
@@ -1696,14 +1696,14 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
       )}
 
       {danhSachFileUpload.length > 0 && (
-        <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-3">
+        <div className="cv-studio-upload-list mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-3">
           <div className="mb-2 flex items-center justify-between gap-3">
             <strong className="text-sm text-slate-900">CV PDF đã upload</strong>
             <span className="text-xs font-bold text-slate-500">File upload chỉ xem hoặc tải, không chỉnh sửa trong CV builder.</span>
           </div>
           <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
             {danhSachFileUpload.map((item: CvData) => (
-              <article key={item.id} className="rounded-xl border border-blue-100 bg-white p-3">
+              <article key={item.id} className="cv-studio-upload-card rounded-xl border border-blue-100 bg-white p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-black text-slate-900">{item.tieuDe || item.fileCvTen || 'CV PDF'}</p>
@@ -1754,7 +1754,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
                   </button>
                 )}
               </div>
-              <div className="grid content-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="cv-studio-builder-info grid content-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
                 <div>
                   <p className="text-sm font-black text-slate-900">Luồng CV builder</p>
                   <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">
@@ -1776,7 +1776,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
               <input className={inputCls} placeholder="GitHub" value={cv.github ?? ''} onChange={e => capNhatCv({ ...cv, github: e.target.value })} />
               <input className={inputCls} placeholder="Portfolio" value={cv.portfolioUrl ?? ''} onChange={e => capNhatCv({ ...cv, portfolioUrl: e.target.value })} />
               <input className={inputCls} placeholder="Địa điểm" value={cv.diaDiem ?? ''} onChange={e => capNhatCv({ ...cv, diaDiem: e.target.value })} />
-              <div className="flex items-center gap-4 rounded-xl border border-slate-200 px-3">
+              <div className="cv-studio-visibility-row flex items-center gap-4 rounded-xl border border-slate-200 px-3">
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={cv.cvChinh} onChange={e => capNhatCv({ ...cv, cvChinh: e.target.checked })} /> CV chính</label>
                 <label className="flex items-center gap-2 text-sm font-bold text-slate-700"><input type="checkbox" checked={cv.congKhai} onChange={e => capNhatCv({ ...cv, congKhai: e.target.checked })} /> Công khai</label>
               </div>

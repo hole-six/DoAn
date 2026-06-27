@@ -99,7 +99,7 @@ export default function UngTuyenPage() {
             return (
               <article
                 key={item.id}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
+                className="uv-application-card flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
                 onClick={() => setSelected(item)}
               >
                 {/* Logo công ty */}
@@ -120,7 +120,7 @@ export default function UngTuyenPage() {
                       {applicationStatusLabel[item.trangThai]}
                     </Badge>
                   </div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
+                  <div className="uv-application-meta mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
                     {cty?.tenCongTy && (
                       <span className="flex items-center gap-1">
                         <Building2 size={11} /> {cty.tenCongTy}
@@ -141,7 +141,7 @@ export default function UngTuyenPage() {
                 </div>
 
                 {/* Nút xem */}
-                <div className="shrink-0" onClick={e => e.stopPropagation()}>
+                <div className="uv-application-action shrink-0" onClick={e => e.stopPropagation()}>
                   <Button size="sm" icon={<Eye size={14} />} onClick={() => setSelected(item)}>Xem</Button>
                 </div>
               </article>

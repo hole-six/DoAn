@@ -90,8 +90,8 @@ export default function DangKy() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#f4f7fb] text-slate-950">
-      <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
+    <main className="auth-page auth-page--register min-h-dvh bg-[#f4f7fb] text-slate-950">
+      <div className="auth-shell grid min-h-dvh lg:grid-cols-[minmax(0,1.05fr)_minmax(480px,0.95fr)]">
         <section className="relative hidden min-h-dvh overflow-hidden bg-[#020718] lg:block">
           <img className="absolute inset-0 h-full w-full object-cover opacity-70" src={dangKyImg} alt="Đăng ký Effort Job" />
           <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(2,7,24,0.96),rgba(3,22,52,0.82),rgba(2,7,24,0.58))]" />
@@ -122,9 +122,9 @@ export default function DangKy() {
           </div>
         </section>
 
-        <section className="flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
-          <div className="w-full max-w-[600px] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10">
-            <div className="mb-8 flex items-center justify-between gap-4 lg:hidden">
+        <section className="auth-panel-wrap flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 lg:px-10">
+          <div className="auth-panel w-full max-w-[600px] rounded-[2rem] border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10">
+            <div className="auth-mobile-top mb-8 flex items-center justify-between gap-4 lg:hidden">
               <Link to="/" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-black text-[#062a4d] shadow-sm transition hover:border-sky-200 hover:text-[#0b5c91]">
                 <ArrowLeft size={18} /> Trang chủ
               </Link>
