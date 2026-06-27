@@ -61,6 +61,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
   const company = companyOf(item)
   const diaDiem = item.hinhThuc === 'offline' ? item.diaChi : item.linkHop
   const nhom = nhomLich(item)
+  const statusLabel = interviewStatusLabel[item.trangThai] ?? item.trangThai
 
   return (
     <article
@@ -82,7 +83,7 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate text-sm font-black text-slate-950">{job?.tieuDe ?? 'Lịch phỏng vấn'}</p>
           <Badge tone={nhom.tone}>{nhom.label}</Badge>
-          <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
+          {statusLabel !== nhom.label && <Badge tone={toneForInterviewStatus(item.trangThai)}>{statusLabel}</Badge>}
         </div>
 
         {/* Dòng 2: công ty + meta inline */}
