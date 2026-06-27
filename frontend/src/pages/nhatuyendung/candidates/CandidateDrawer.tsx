@@ -5,7 +5,7 @@ import { Button, ButtonGroup } from '../../../components/ui/Button'
 import { taoUrlTaiNguyen } from '../../../lib/env'
 import { formatDateTime, imageUrl } from '../../../lib/format'
 import { employerApplicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
-import type { HoSoNangLuc, HoSoUngTuyen } from '../../../types/recruitment'
+import type { HoSoNangLuc, HoSoUngTuyen, LichSuHoSoUngTuyen } from '../../../types/recruitment'
 import { useChat } from '../../../contexts/ChatContext'
 import { Badge, Drawer } from '../shared/NtdAtoms'
 
@@ -94,6 +94,24 @@ function isPdfUpload(cv?: HoSoNangLuc) {
   const name = String(cv.fileCvTen ?? '').toLowerCase()
   const data = String(cv.fileCvData)
   return cv.loaiHoSo === 'file_upload' || type.includes('pdf') || name.endsWith('.pdf') || data.startsWith('data:application/pdf')
+}
+
+function historyStatusLabel(trangThai?: string) {
+  return employerApplicationStatusLabel[String(trangThai ?? '')] ?? String(trangThai ?? 'Cập nhật')
+}
+
+function historyActor(item: LichSuHoSoUngTuyen) {
+  return item.nguoiDung?.hoTen || item.nguoiDung?.email || 'Hệ thống'
+}
+
+function historyNote(ghiChu?: string) {
+  return String(ghiChu ?? '').replace(/^\[[^\]]+\]\s*/, '').trim()
+}
+
+function historySummary(item: LichSuHoSoUngTuyen) {
+  const moi = historyStatusLabel(item.trangThaiMoi)
+  if (!item.trangThaiCu || item.trangThaiCu === item.trangThaiMoi) return moi
+  return `${historyStatusLabel(item.trangThaiCu)} -> ${moi}`
 }
 
 function CvSection({ title, items }: { title: string; items: string[] }) {
@@ -234,6 +252,7 @@ export function CandidateDrawer({
   const canChat = Boolean(candidateUserId) && TRANG_THAI_CHAT.includes(item.trangThai as any)
   const builderContent = hasBuilderContent(cv)
   const pdfUpload = isPdfUpload(cv)
+  const lichSu = Array.isArray(item.lichSu) ? item.lichSu : []
 
   useEffect(() => {
     setAction(availableActions[0] ?? '')
@@ -400,9 +419,35 @@ export function CandidateDrawer({
         )}
 
         {tab === 'history' && (
-          <section className="rounded-xl border border-slate-200 p-4 text-sm font-semibold text-slate-700">
-            <p>Trạng thái hiện tại: <strong>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</strong></p>
-            <p className="mt-2">Nộp lúc: {formatDateTime(item.ngayNop)}</p>
+          <section className="rounded-xl border border-slate-200 p-4">
+            {lichSu.length > 0 ? (
+              <div className="grid gap-3">
+                {lichSu.map((muc, index) => {
+                  const ghiChu = historyNote(muc.ghiChu)
+                  return (
+                    <article key={muc.id || `${muc.trangThaiMoi}-${index}`} className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge tone={toneForApplicationStatus(muc.trangThaiMoi)}>{historyStatusLabel(muc.trangThaiMoi)}</Badge>
+                            <span className="text-xs font-bold uppercase tracking-wide text-slate-500">{historyActor(muc)}</span>
+                          </div>
+                          <p className="mt-2 break-words text-sm font-black text-slate-900">{historySummary(muc)}</p>
+                          {ghiChu && <p className="mt-2 whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-slate-600">{ghiChu}</p>}
+                        </div>
+                        <p className="text-xs font-bold text-slate-400">{formatDateTime(muc.thoiGian ?? muc.ngayTao)}</p>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="grid gap-2 text-sm font-semibold text-slate-700">
+                <p>Trạng thái hiện tại: <strong>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</strong></p>
+                <p>Nộp lúc: {formatDateTime(item.ngayNop)}</p>
+                <p className="text-slate-500">Hồ sơ này chưa có bản ghi lịch sử chi tiết.</p>
+              </div>
+            )}
           </section>
         )}
       </div>

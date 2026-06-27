@@ -96,6 +96,20 @@ export type TinTuyenDung = {
   kyNang?: Array<{ maKyNang?: string; tenKyNang?: string; loaiKyNang?: string; batBuoc?: boolean }>
 }
 
+export type LichSuHoSoUngTuyen = {
+  id: Id
+  _id?: Id
+  maHoSoUngTuyen: Id
+  trangThaiCu?: string
+  trangThaiMoi: string
+  ghiChu?: string
+  maNguoiDung?: Id
+  nguoiDung?: NguoiDungRef
+  thoiGian?: string
+  ngayTao?: string
+  ngayCapNhat?: string
+}
+
 export type HoSoUngTuyen = {
   id: Id
   _id?: Id
@@ -109,6 +123,9 @@ export type HoSoUngTuyen = {
   diemKhopKyNang?: number
   trangThai: string
   ngayNop?: string
+  ngayTao?: string
+  ngayCapNhat?: string
+  lichSu?: LichSuHoSoUngTuyen[]
 }
 
 export type DanhGiaCongTy = {

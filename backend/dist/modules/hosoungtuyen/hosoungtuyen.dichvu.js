@@ -8,25 +8,31 @@ const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const prisma_js_1 = require("../../cauhinh/prisma.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const hosoungtuyen_mohinh_js_1 = require("./hosoungtuyen.mohinh.js");
-// ─── Hydrate: gắn dữ liệu UngVien+NguoiDung, TinTuyenDung+NhaTuyenDung, HoSoNangLuc ───
 async function hydrateUngTuyen(rows) {
+    const ungTuyenIds = [...new Set(rows.map(r => r.id).filter(Boolean))];
     const ungVienIds = [...new Set(rows.map(r => r.maUngVien).filter(Boolean))];
     const tinIds = [...new Set(rows.map(r => r.maTinTuyenDung).filter(Boolean))];
     const hoSoIds = [...new Set(rows.map(r => r.maHoSoNangLuc).filter(Boolean))];
-    const [ungVienRows, tinRows, hoSoRows] = await Promise.all([
+    const [ungVienRows, tinRows, hoSoRows, lichSuRows] = await Promise.all([
         ungVienIds.length ? prisma_js_1.prisma.ungVien.findMany({ where: { id: { in: ungVienIds } } }) : Promise.resolve([]),
         tinIds.length ? prisma_js_1.prisma.tinTuyenDung.findMany({ where: { id: { in: tinIds } } }) : Promise.resolve([]),
         hoSoIds.length ? prisma_js_1.prisma.hoSoNangLuc.findMany({ where: { id: { in: hoSoIds } } }) : Promise.resolve([]),
+        ungTuyenIds.length
+            ? prisma_js_1.prisma.lichSuHoSoUngTuyen.findMany({
+                where: { maHoSoUngTuyen: { in: ungTuyenIds } },
+                orderBy: [{ thoiGian: 'desc' }, { ngayTao: 'desc' }],
+            })
+            : Promise.resolve([]),
     ]);
-    // Lấy NguoiDung cho UngVien
-    const nguoiDungUngVienIds = [...new Set(ungVienRows.map(r => r.maNguoiDung).filter(Boolean))];
-    // Lấy NhaTuyenDung cho TinTuyenDung
+    const nguoiDungIds = [
+        ...new Set([...ungVienRows.map(r => r.maNguoiDung), ...lichSuRows.map(r => r.maNguoiDung)].filter((value) => typeof value === 'string' && value.length > 0)),
+    ];
     const nhaTuyenDungIds = [...new Set(tinRows.map(r => r.maNhaTuyenDung).filter(Boolean))];
     const [nguoiDungRows, nhaTuyenDungRows] = await Promise.all([
-        nguoiDungUngVienIds.length
+        nguoiDungIds.length
             ? prisma_js_1.prisma.nguoiDung.findMany({
-                where: { id: { in: nguoiDungUngVienIds } },
-                select: { id: true, hoTen: true, email: true, soDienThoai: true, trangThai: true },
+                where: { id: { in: nguoiDungIds } },
+                select: { id: true, hoTen: true, email: true, soDienThoai: true, trangThai: true, vaiTro: true },
             })
             : Promise.resolve([]),
         nhaTuyenDungIds.length
@@ -43,25 +49,59 @@ async function hydrateUngTuyen(rows) {
     const ungVienMap = new Map(ungVienDayDu.map(r => [r.id, r]));
     const tinMap = new Map(tinDayDu.map(r => [r.id, r]));
     const hoSoMap = new Map(hoSoRows.map(r => [r.id, (0, prismaHelper_js_1.coId)(r)]));
+    const lichSuMap = new Map();
+    lichSuRows.forEach(row => {
+        const lichSu = (0, prismaHelper_js_1.coId)({
+            ...row,
+            maNguoiDung: row.maNguoiDung ? (nguoiDungMap.get(row.maNguoiDung) ?? row.maNguoiDung) : null,
+        });
+        const danhSach = lichSuMap.get(row.maHoSoUngTuyen) ?? [];
+        danhSach.push(lichSu);
+        lichSuMap.set(row.maHoSoUngTuyen, danhSach);
+    });
     return rows.map(row => (0, prismaHelper_js_1.coId)({
         ...row,
         maUngVien: ungVienMap.get(row.maUngVien) ?? row.maUngVien,
         maTinTuyenDung: tinMap.get(row.maTinTuyenDung) ?? row.maTinTuyenDung,
         maHoSoNangLuc: row.maHoSoNangLuc ? (hoSoMap.get(row.maHoSoNangLuc) ?? row.maHoSoNangLuc) : null,
+        lichSu: lichSuMap.get(row.id) ?? [],
     }));
 }
 async function hydrateHoSoUngTuyenNoiBo(rows) {
     return hydrateUngTuyen(rows);
 }
-// ─── Map: chuẩn hóa output giữ nguyên field names cho frontend ───
+function chuanHoaLichSu(muc, maHoSoUngTuyen) {
+    const nguoiDung = muc?.maNguoiDung?._id
+        ? {
+            id: String(muc.maNguoiDung._id),
+            hoTen: muc.maNguoiDung.hoTen,
+            email: muc.maNguoiDung.email,
+            soDienThoai: muc.maNguoiDung.soDienThoai,
+        }
+        : undefined;
+    return {
+        id: String(muc?.id ?? muc?._id ?? ''),
+        _id: String(muc?.id ?? muc?._id ?? ''),
+        maHoSoUngTuyen,
+        trangThaiCu: muc?.trangThaiCu ?? undefined,
+        trangThaiMoi: String(muc?.trangThaiMoi ?? ''),
+        ghiChu: muc?.ghiChu ?? undefined,
+        maNguoiDung: nguoiDung?.id ?? (muc?.maNguoiDung ? String(muc.maNguoiDung) : undefined),
+        nguoiDung,
+        thoiGian: muc?.thoiGian,
+        ngayTao: muc?.ngayTao,
+        ngayCapNhat: muc?.ngayCapNhat,
+    };
+}
 function chuanHoaUngTuyen(taiLieu) {
     const duLieu = taiLieu ?? {};
     const tin = duLieu.maTinTuyenDung;
     const ungVien = duLieu.maUngVien;
     const hoSo = duLieu.maHoSoNangLuc;
+    const maHoSoUngTuyen = String(duLieu.id ?? duLieu._id ?? '');
     return {
-        id: String(duLieu.id ?? duLieu._id),
-        _id: String(duLieu.id ?? duLieu._id),
+        id: maHoSoUngTuyen,
+        _id: maHoSoUngTuyen,
         maUngVien: ungVien?._id ? String(ungVien._id) : String(ungVien ?? ''),
         maTinTuyenDung: tin?._id ? String(tin._id) : String(tin ?? ''),
         maHoSoNangLuc: hoSo?._id ? String(hoSo._id) : hoSo ? String(hoSo) : undefined,
@@ -145,9 +185,9 @@ function chuanHoaUngTuyen(taiLieu) {
         ngayNop: duLieu.ngayNop,
         ngayTao: duLieu.ngayTao,
         ngayCapNhat: duLieu.ngayCapNhat,
+        lichSu: Array.isArray(duLieu.lichSu) ? duLieu.lichSu.map((muc) => chuanHoaLichSu(muc, maHoSoUngTuyen)) : [],
     };
 }
-// ─── Query helper ───
 async function layDayDu(where, many = false) {
     const rows = many
         ? await hosoungtuyen_mohinh_js_1.HoSoUngTuyen.findMany({ where, orderBy: { ngayNop: 'desc' }, take: 300 })
@@ -155,7 +195,6 @@ async function layDayDu(where, many = false) {
     const hydrated = await hydrateUngTuyen(rows);
     return many ? hydrated : hydrated[0];
 }
-// ─── Service ───
 exports.dichVuHoSoUngTuyen = {
     async layDanhSach() {
         const danhSach = await layDayDu({}, true);

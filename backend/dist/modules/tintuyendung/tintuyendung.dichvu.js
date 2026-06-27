@@ -8,11 +8,6 @@ const timkiem_js_1 = require("../../dungchung/timkiem.js");
 const nguoidung_mohinh_js_1 = require("../nguoidung/nguoidung.mohinh.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const tintuyendung_mohinh_js_1 = require("./tintuyendung.mohinh.js");
-function daHetHan(hanNop) {
-    if (!hanNop)
-        return false;
-    return new Date(hanNop).getTime() < Date.now();
-}
 async function dongBoTinHetHan(where = {}) {
     await tintuyendung_mohinh_js_1.TinTuyenDung.updateMany({
         where: {
@@ -165,7 +160,6 @@ exports.dichVuTinTuyenDung = {
         const loaiHinh = tachDanhSach(boLoc.loaiHinh);
         const kyNang = tachDanhSach(boLoc.kyNang);
         const loaiKyNang = tachDanhSach(boLoc.loaiKyNang ?? boLoc.loai);
-        // Xây dựng where clause theo vai trò
         const where = {};
         if (cheDo === 'cong_khai') {
             where.trangThai = 'dang_mo';
@@ -211,30 +205,89 @@ exports.dichVuTinTuyenDung = {
         ]);
         const tongTrang = Math.max(1, Math.ceil(tongSo / kichThuocTrang));
         const duLieu = rows.map(ganCongTyTuRelation).map(chuanHoaTin);
-        return { duLieu, tongSo, trang, kichThuocTrang, tongTrang };
-        /* const tatCa = await layDayDu(where, true)
-        const danhSachChuanHoa = (tatCa as any[]).map(chuanHoaTin).filter((item) => {
-          if (cheDo === 'cong_khai') return item.nhaTuyenDung?.trangThaiDuyet === 'da_duyet'
-          return true
-        })
-    
-        // Search với ranking
-        const daLoc = tuKhoa
-          ? locVaXepHangTheoTuKhoa(danhSachChuanHoa, tuKhoa, item => [
-              item.tieuDe,
-              item.nhaTuyenDung?.tenCongTy,
-              item.diaChi,
-              item.capBac,
-              item.loaiHinh,
-              ...(item.kyNang ?? []).flatMap((ky: any) => [ky.tenKyNang, ky.loaiKyNang]),
-            ])
-          : danhSachChuanHoa
-    
-        const tongSo = daLoc.length
-        const tongTrang = Math.max(1, Math.ceil(tongSo / kichThuocTrang))
-        const duLieu = daLoc.slice((trang - 1) * kichThuocTrang, trang * kichThuocTrang)
-    
-        return { duLieu, tongSo, trang, kichThuocTrang, tongTrang } */
+        // Tính facet: đếm số tin theo loaiKyNang, capBac, loaiHinh (không bị ảnh hưởng bởi filter hiện tại)
+        const whereFacet = {};
+        if (cheDo === 'cong_khai') {
+            whereFacet.trangThai = 'dang_mo';
+            whereFacet.hanNop = { gte: new Date() };
+            whereFacet.nhaTuyenDung = { trangThaiDuyet: 'da_duyet' };
+        }
+        else if (cheDo === 'nha_tuyen_dung' && maNhaTuyenDungSoHuu) {
+            whereFacet.maNhaTuyenDung = maNhaTuyenDungSoHuu;
+        }
+        if (dieuKienTimKiem)
+            whereFacet.OR = dieuKienTimKiem;
+        // Tính facet bằng aggregation thủ công thay vì groupBy (tránh lỗi null với Prisma)
+        const [kyNangFacetRows, capBacList, loaiHinhList] = await Promise.all([
+            prisma_js_1.prisma.tinTuyenDungKyNang.groupBy({
+                by: ['maKyNang'],
+                where: { tinTuyenDung: whereFacet },
+                _count: { maKyNang: true },
+            }),
+            tintuyendung_mohinh_js_1.TinTuyenDung.findMany({
+                where: whereFacet,
+                select: { capBac: true },
+            }),
+            tintuyendung_mohinh_js_1.TinTuyenDung.findMany({
+                where: whereFacet,
+                select: { loaiHinh: true },
+            }),
+        ]);
+        // Đếm capBac thủ công
+        const capBacCountMap = new Map();
+        for (const row of capBacList) {
+            if (!row.capBac)
+                continue;
+            capBacCountMap.set(row.capBac, (capBacCountMap.get(row.capBac) ?? 0) + 1);
+        }
+        const capBacFacetRows = [...capBacCountMap.entries()].map(([capBac, soLuong]) => ({ capBac, soLuong })).sort((a, b) => b.soLuong - a.soLuong);
+        // Đếm loaiHinh thủ công
+        const loaiHinhCountMap = new Map();
+        for (const row of loaiHinhList) {
+            if (!row.loaiHinh)
+                continue;
+            loaiHinhCountMap.set(row.loaiHinh, (loaiHinhCountMap.get(row.loaiHinh) ?? 0) + 1);
+        }
+        const loaiHinhFacetRows = [...loaiHinhCountMap.entries()].map(([loaiHinh, soLuong]) => ({ loaiHinh, soLuong })).sort((a, b) => b.soLuong - a.soLuong);
+        // Lấy tên kỹ năng và loại cho facet
+        const maKyNangList = kyNangFacetRows.map((r) => r.maKyNang);
+        const kyNangInfo = maKyNangList.length
+            ? await prisma_js_1.prisma.danhMucKyNang.findMany({
+                where: { id: { in: maKyNangList } },
+                select: { id: true, tenKyNang: true, loaiKyNang: true },
+            })
+            : [];
+        const kyNangMap = new Map(kyNangInfo.map((k) => [k.id, k]));
+        // Đếm số TIN duy nhất có loaiKyNang tương ứng
+        // (mỗi tin-kỹ năng là unique theo khóa chính, nên _count.maKyNang = số tin)
+        const tinTheoLoai = await prisma_js_1.prisma.tinTuyenDungKyNang.findMany({
+            where: { tinTuyenDung: whereFacet },
+            select: { maTinTuyenDung: true, kyNang: { select: { loaiKyNang: true } } },
+        });
+        const loaiKyNangTinMap = new Map();
+        for (const row of tinTheoLoai) {
+            const loai = row.kyNang?.loaiKyNang;
+            if (!loai)
+                continue;
+            if (!loaiKyNangTinMap.has(loai))
+                loaiKyNangTinMap.set(loai, new Set());
+            loaiKyNangTinMap.get(loai).add(row.maTinTuyenDung);
+        }
+        const boLocFacet = {
+            loaiKyNang: [...loaiKyNangTinMap.entries()]
+                .map(([loai, tinSet]) => ({ loai, soLuong: tinSet.size }))
+                .sort((a, b) => b.soLuong - a.soLuong),
+            kyNang: kyNangFacetRows
+                .map((r) => {
+                const info = kyNangMap.get(r.maKyNang);
+                return info ? { id: r.maKyNang, ten: info.tenKyNang, loai: info.loaiKyNang, soLuong: r._count.maKyNang } : null;
+            })
+                .filter(Boolean)
+                .sort((a, b) => b.soLuong - a.soLuong),
+            capBac: capBacFacetRows,
+            loaiHinh: loaiHinhFacetRows,
+        };
+        return { duLieu, tongSo, trang, kichThuocTrang, tongTrang, boLocFacet };
     },
     async layTheoMa(ma) {
         await dongBoTinHetHan({ id: ma });
