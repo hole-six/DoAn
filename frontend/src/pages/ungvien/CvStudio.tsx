@@ -658,7 +658,16 @@ function CvSection({ title, children }: { title: string; children: ReactNode }) 
 function InfoGrid({ rows }: { rows: [string, ReactNode][] }) {
   const visibleRows = rows.filter(([, value]) => Boolean(value))
   if (!visibleRows.length) return null
-  return <div className="cv-info-grid">{visibleRows.flatMap(([label, value]) => [<span key={`${label}-l`} className="cv-info-label">{label}</span>, <span key={`${label}-v`} className="min-w-0">: {value}</span>])}</div>
+  return (
+    <div className="cv-info-grid">
+      {visibleRows.map(([label, value]) => (
+        <div key={label} className="cv-info-row">
+          <div className="cv-info-label">{label}</div>
+          <div className="cv-info-value">: {value}</div>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default function CvStudio({ data, onReload }: { data: any; onReload: () => Promise<void> }) {
@@ -1174,6 +1183,8 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
         }
         .cv-section {
           margin-top: 6.5mm;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
         .cv-section h2 {
           margin: 0 0 2.5mm;
@@ -1189,6 +1200,8 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           font-size: 11pt;
           font-weight: 900;
           color: #111827;
+          break-after: avoid;
+          page-break-after: avoid;
         }
         .cv-list {
           margin: 0;
@@ -1198,15 +1211,20 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
         }
         .cv-list li {
           margin: 0.6mm 0;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
         .cv-paragraph {
           margin: 0 0 2.5mm;
           font-size: 11pt;
           line-height: 1.5;
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
         .cv-project {
           margin-bottom: 6.5mm;
           break-inside: avoid;
+          page-break-inside: avoid;
         }
         .cv-project h3 {
           margin: 0 0 2mm;
@@ -1220,15 +1238,27 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
         }
         .cv-info-grid {
           display: grid;
-          grid-template-columns: 35mm minmax(0, 1fr);
-          gap: 1.2mm 4mm;
+          gap: 1.2mm;
           margin-top: 2mm;
           font-size: 10.5pt;
           line-height: 1.5;
         }
+        .cv-info-row {
+          display: grid;
+          grid-template-columns: 35mm minmax(0, 1fr);
+          gap: 4mm;
+          align-items: start;
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
         .cv-info-label {
           font-weight: 900;
           color: #111827;
+        }
+        .cv-info-value {
+          min-width: 0;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         @media (max-width: 900px) {
           .cv-a4-preview {
