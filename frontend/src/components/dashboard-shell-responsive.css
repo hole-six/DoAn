@@ -532,26 +532,54 @@ aside nav.grid.gap-1 a span {
     padding-inline: 12px;
   }
 
+  .dashboard-mobilebar-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .dashboard-mobilebar-actions {
     gap: 8px;
+    min-width: 0;
   }
 
   .dashboard-mobilebar-link {
     border-radius: 12px;
+    flex: none;
+  }
+
+  .detail-drawer,
+  .uv-shared-drawer,
+  .ntd-shared-drawer {
+    align-items: flex-end;
+    display: flex;
   }
 
   .detail-drawer__panel,
   .uv-shared-drawer-card,
   .ntd-shared-drawer-card {
+    border-radius: 20px 20px 0 0;
+    height: auto;
+    margin-top: auto;
+    max-height: min(88dvh, calc(100dvh - 8px));
     max-width: 100%;
+    width: 100%;
   }
 
   .detail-drawer__header,
   .uv-shared-drawer-header,
   .ntd-shared-drawer-header {
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
     padding: 14px 14px 12px;
+  }
+
+  .detail-drawer__header .ui-btn,
+  .uv-shared-drawer-header .ui-btn,
+  .ntd-shared-drawer-header .ui-btn {
+    flex: none;
+    min-height: 40px;
   }
 
   .detail-drawer__body,
@@ -563,7 +591,11 @@ aside nav.grid.gap-1 a span {
   .detail-drawer__footer,
   .uv-shared-drawer-footer,
   .ntd-shared-drawer-footer {
-    padding: 14px;
+    background: #f8fafc;
+    bottom: 0;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    position: sticky;
+    z-index: 2;
   }
 
   .detail-drawer__footer > *,

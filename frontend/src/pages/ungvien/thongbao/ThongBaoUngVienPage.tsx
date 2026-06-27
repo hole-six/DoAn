@@ -6,11 +6,16 @@ import { useUngVienData } from '../shared/useUngVienData'
 
 export default function ThongBaoUngVienPage() {
   const data = useUngVienData()
+
   return (
     <Page
       title="Thông báo"
       desc="Inbox xử lý nhanh lịch phỏng vấn, hồ sơ, kết quả, tin nhắn và hệ thống."
-      action={<Button icon={<Bell size={16} />} onClick={() => void data.reload()}>Làm mới</Button>}
+      action={
+        <Button className="w-full sm:w-auto" icon={<Bell size={16} />} onClick={() => void data.reload()}>
+          Làm mới
+        </Button>
+      }
     >
       <ErrorState message={data.error} />
       <NotificationInbox items={data.thongBao} onReload={data.reload} />

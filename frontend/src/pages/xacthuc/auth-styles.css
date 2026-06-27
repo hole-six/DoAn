@@ -91,6 +91,38 @@
   width: min(100%, 600px);
 }
 
+.auth-page-runtime {
+  background: #f4f7fb !important;
+  display: block !important;
+  min-height: 100dvh;
+  overflow-x: clip;
+  width: 100%;
+}
+
+.auth-shell-runtime {
+  max-width: none;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.auth-shell-runtime > * {
+  min-width: 0;
+}
+
+.auth-visual-runtime,
+.auth-panel-wrap-runtime {
+  min-width: 0;
+}
+
+.auth-panel-wrap-runtime {
+  width: 100%;
+}
+
+.auth-panel-runtime {
+  margin-inline: auto;
+  max-width: 100%;
+}
+
 .auth-mobile-top {
   flex-wrap: wrap;
 }
@@ -100,12 +132,14 @@
 }
 
 @media (max-width: 640px) {
-  .auth-panel-wrap {
+  .auth-panel-wrap,
+  .auth-panel-wrap-runtime {
     align-items: flex-start;
     padding: 20px 14px 28px;
   }
 
-  .auth-panel {
+  .auth-panel,
+  .auth-panel-runtime {
     border-radius: 24px !important;
     padding: 20px 16px !important;
   }

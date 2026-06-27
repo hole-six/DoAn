@@ -12,7 +12,7 @@ export default function ThongBaoAdminPage() {
       title="Thông báo hệ thống"
       desc="Theo dõi duyệt công ty, tin tuyển dụng, chat hỗ trợ và các cảnh báo quan trọng."
       action={
-        <Button icon={<Bell size={16} />} loading={dangTai} onClick={() => void taiThongBao()}>
+        <Button className="w-full sm:w-auto" icon={<Bell size={16} />} loading={dangTai} onClick={() => void taiThongBao()}>
           Làm mới
         </Button>
       }

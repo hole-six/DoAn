@@ -912,15 +912,15 @@
   .dashboard-role-nhatuyendung .ntd-modal-card,
   .dashboard-role-nhatuyendung .ntd-drawer-card {
     border-radius: 18px 18px 0 0 !important;
-    max-height: calc(100dvh - 18px) !important;
-    padding-bottom: calc(168px + env(safe-area-inset-bottom)) !important;
+    max-height: min(88dvh, calc(100dvh - 10px)) !important;
+    padding-bottom: 0 !important;
     width: 100% !important;
   }
 
   .dashboard-role-nhatuyendung .ntd-shared-drawer-card {
     border-radius: 18px 18px 0 0 !important;
-    max-height: calc(100dvh - 18px) !important;
-    padding-bottom: calc(168px + env(safe-area-inset-bottom)) !important;
+    max-height: min(88dvh, calc(100dvh - 10px)) !important;
+    padding-bottom: 0 !important;
     width: 100% !important;
   }
 
@@ -932,8 +932,9 @@
   .dashboard-role-nhatuyendung .ntd-modal-card > footer,
   .dashboard-role-nhatuyendung .ntd-shared-drawer-footer {
     background: #f8fafc !important;
-    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    bottom: 0 !important;
     left: 0 !important;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom)) !important;
     position: sticky !important;
     right: 0 !important;
     z-index: 3 !important;
@@ -981,6 +982,37 @@
 
   .candidate-drawer-profile {
     grid-template-columns: 1fr !important;
+  }
+
+  .candidate-drawer-footer,
+  .candidate-drawer-action-row,
+  .candidate-drawer-file-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .candidate-drawer-action-button,
+  .candidate-drawer-download,
+  .candidate-drawer-file-actions > * {
+    width: 100%;
+  }
+
+  .candidate-drawer-tabs {
+    scrollbar-width: none;
+  }
+
+  .candidate-drawer-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .candidate-drawer-tabs button {
+    white-space: nowrap;
+  }
+
+  .candidate-drawer-overview p,
+  .candidate-drawer-content a,
+  .candidate-drawer-content p,
+  .candidate-drawer-content h3 {
+    overflow-wrap: anywhere;
   }
 
   .candidate-drawer-content object {

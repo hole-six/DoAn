@@ -105,12 +105,12 @@ export function NotificationInbox({ items, onReload }: Props) {
               </p>
             </div>
           </div>
-          <Button icon={<Check size={16} />} disabled={!unreadCount || busy === 'all'} loading={busy === 'all'} onClick={() => void markAllRead()}>
+          <Button className="notification-summary-action" icon={<Check size={16} />} disabled={!unreadCount || busy === 'all'} loading={busy === 'all'} onClick={() => void markAllRead()}>
             Đọc tất cả
           </Button>
         </div>
 
-        <div className="notification-filter-row mt-5 flex gap-2 overflow-x-auto pb-1">
+        <div className="notification-filter-row mt-5 flex gap-2 overflow-x-auto pb-1 pr-1">
           {FILTERS.map(({ key, label, icon: Icon }) => {
             const active = filter === key
             const count = key === 'all' ? items.length : filterCounts.get(key) ?? 0
@@ -119,7 +119,7 @@ export function NotificationInbox({ items, onReload }: Props) {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
+                className={`notification-filter-chip inline-flex min-h-11 shrink-0 items-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-black transition ${
                   active
                     ? 'notification-filter-active border-sky-700 bg-gradient-to-r from-sky-700 to-cyan-600 text-white shadow-[0_12px_24px_rgba(3,105,161,0.24)]'
                     : 'border-slate-200 bg-slate-50 text-slate-700 shadow-sm hover:border-sky-300 hover:bg-white hover:text-sky-800'
@@ -186,7 +186,9 @@ export function NotificationInbox({ items, onReload }: Props) {
                         Xử lý
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" icon={<Eye size={13} />} onClick={() => setSelected(item)} />
+                    <Button size="sm" variant="secondary" icon={<Eye size={13} />} onClick={() => setSelected(item)}>
+                      Xem
+                    </Button>
                   </div>
                 </article>
               )
@@ -200,9 +202,9 @@ export function NotificationInbox({ items, onReload }: Props) {
       )}
 
       {selected && (
-        <div className="notification-modal fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true">
-          <div className="notification-modal-shell mx-auto flex h-full max-w-2xl items-center">
-            <div className="notification-modal-card max-h-[calc(100vh-32px)] w-full overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="notification-modal fixed inset-0 z-[1000] bg-slate-950/45 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" onClick={() => setSelected(null)}>
+          <div className="notification-modal-shell mx-auto flex h-full max-w-2xl items-center" onClick={event => event.stopPropagation()}>
+            <div className="notification-modal-card flex max-h-[calc(100vh-32px)] w-full flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
               <div className="notification-modal-head flex items-start justify-between gap-4 border-b border-slate-100 p-5">
                 <div className="min-w-0">
                   <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-sky-700">
@@ -215,7 +217,7 @@ export function NotificationInbox({ items, onReload }: Props) {
                   <X size={18} />
                 </button>
               </div>
-              <div className="notification-modal-body max-h-[55vh] overflow-y-auto p-5">
+              <div className="notification-modal-body min-h-0 flex-1 overflow-y-auto p-5">
                 <p className="whitespace-pre-wrap break-words text-base font-semibold leading-7 text-slate-700">{selected.noiDung}</p>
               </div>
               <div className="notification-modal-actions flex flex-col gap-2 border-t border-slate-100 p-5 sm:flex-row sm:flex-wrap sm:justify-end">

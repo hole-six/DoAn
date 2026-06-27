@@ -265,16 +265,16 @@ export function CandidateDrawer({
       title="Chi tiết ứng viên"
       onClose={onClose}
       footer={(
-        <div className="grid gap-3">
+        <div className="candidate-drawer-footer grid gap-3">
           <ButtonGroup>
             <Button size="sm" variant="secondary" icon={<MessageCircle size={16} />} disabled={!canChat} onClick={() => void openChat()}>Chat</Button>
           </ButtonGroup>
           {availableActions.length > 0 && (
             <div className="grid gap-1.5">
               <label className="text-[11px] font-black uppercase tracking-wide text-slate-500">Hành động</label>
-              <div className="flex flex-wrap gap-2">
+              <div className="candidate-drawer-action-row grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <select
-                  className="min-h-10 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none"
+                  className="min-h-11 min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none"
                   value={action}
                   onChange={event => setAction(event.target.value as ActionKey)}
                 >
@@ -286,6 +286,7 @@ export function CandidateDrawer({
                 </select>
                 <Button
                   size="sm"
+                  className="candidate-drawer-action-button"
                   variant={action === 'reject_screening' || action === 'reject_interview' ? 'danger' : 'primary'}
                   icon={action === 'reject_screening' || action === 'reject_interview' ? <ThumbsDown size={16} /> : <ChevronRight size={16} />}
                   disabled={!action}
@@ -325,7 +326,7 @@ export function CandidateDrawer({
             ['cv', 'CV ứng viên'],
             ['history', 'Lịch sử'],
           ].map(([key, label]) => (
-            <button key={key} className={`min-h-10 min-w-28 flex-1 rounded-lg px-3 text-sm font-black ${tab === key ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500'}`} onClick={() => setTab(key as Tab)}>
+            <button key={key} className={`min-h-10 min-w-[8.5rem] shrink-0 rounded-lg px-3 text-sm font-black ${tab === key ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-500'}`} onClick={() => setTab(key as Tab)}>
               {label}
             </button>
           ))}

@@ -677,8 +677,28 @@
 }
 
 @media (max-width: 768px) {
+  .notification-inbox,
+  .notification-summary,
+  .notification-list-shell {
+    min-width: 0;
+    overflow: hidden;
+  }
+
   .notification-summary-head {
     align-items: stretch;
+  }
+
+  .notification-summary-copy {
+    align-items: flex-start;
+  }
+
+  .notification-summary-copy h2 {
+    font-size: clamp(1.5rem, 6vw, 1.875rem);
+    line-height: 1.1;
+  }
+
+  .notification-summary-copy p {
+    overflow-wrap: anywhere;
   }
 
   .notification-summary-head > .ui-btn {
@@ -690,6 +710,10 @@
     margin-inline: -4px;
     padding-inline: 4px;
     scrollbar-width: none;
+  }
+
+  .notification-filter-chip {
+    padding-inline: 14px;
   }
 
   .notification-filter-row::-webkit-scrollbar {
@@ -706,6 +730,11 @@
 
   .notification-record-main {
     order: 1;
+  }
+
+  .notification-record-main h3,
+  .notification-record-main p {
+    overflow-wrap: anywhere;
   }
 
   .notification-record-actions {
@@ -745,18 +774,50 @@
     padding-right: 16px;
   }
 
+  .notification-modal-head h3 {
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+
+  .notification-modal-body {
+    max-height: none;
+  }
+
   .notification-modal-actions {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    width: 100%;
+  }
+
+  .notification-modal-actions > * {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
+  .notification-summary {
+    padding: 16px;
+  }
+
+  .notification-summary-copy {
+    gap: 12px;
+  }
+
+  .notification-filter-chip {
+    font-size: 13px;
+    padding-inline: 12px;
+  }
+
   .notification-record-actions {
     grid-template-columns: 1fr;
   }
 
   .notification-record {
     padding: 14px;
+  }
+
+  .notification-modal-head {
+    gap: 12px;
+    padding-top: 16px;
   }
 }
 
