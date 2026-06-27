@@ -8,7 +8,6 @@ import { PhanTrang, usePhanTrang } from '../../components/PhanTrang'
 import { layAccessToken } from '../../lib/auth'
 import { API_URL } from '../../lib/env'
 import { toast } from '../../lib/toast'
-import './admin-styles.css'
 
 type VaiTro = 'ung_vien' | 'nha_tuyen_dung' | 'admin'
 type TrangThai = 'hoat_dong' | 'tam_khoa' | 'bi_khoa'
@@ -346,54 +345,70 @@ export default function QuanLyNguoiDung() {
       </div>
 
       {form && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-slate-900/50 p-3 backdrop-blur-md sm:p-5">
-          <form className="flex max-h-[calc(100dvh-24px)] w-full max-w-5xl flex-col gap-3.5 overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-4 shadow-[0_24px_80px_rgba(15,23,42,0.2)] sm:max-h-[calc(100dvh-40px)] sm:p-6 lg:p-7" onSubmit={luuNguoiDung}>
-            <div className="relative flex items-start gap-3">
-              <div className="min-w-0 flex-1">
-                <h2 className="break-words pr-12 text-2xl font-black leading-tight text-slate-950">{form.id ? 'Sửa người dùng' : 'Thêm người dùng'}</h2>
-                <p className="mt-2 max-w-2xl break-words pr-12 text-sm font-semibold leading-relaxed text-slate-500">{form.id ? 'Cập nhật thông tin tài khoản.' : 'Tạo tài khoản mới cho hệ thống.'}</p>
+        <div className="fixed inset-0 z-[300] bg-slate-900/50 backdrop-blur-sm" onClick={() => setForm(null)}>
+          <aside
+            className="absolute right-0 top-0 flex h-dvh w-full max-w-lg flex-col bg-white shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-5">
+              <div className="min-w-0">
+                <h2 className="text-lg font-black text-slate-950">{form.id ? 'Sửa người dùng' : 'Thêm người dùng'}</h2>
+                <p className="text-xs font-semibold text-slate-500">{form.id ? 'Cập nhật thông tin tài khoản.' : 'Tạo tài khoản mới cho hệ thống.'}</p>
               </div>
-              <button type="button" className="absolute right-0 top-0 z-20 inline-flex h-10 w-10 min-h-10 min-w-10 flex-none items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-0 text-slate-500" onClick={() => setForm(null)} aria-label="Đóng">
+              <button
+                type="button"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50"
+                onClick={() => setForm(null)}
+                aria-label="Đóng"
+              >
                 <AppIcon icon={X} size={16} />
               </button>
             </div>
 
-            {loi && <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm font-extrabold text-rose-700">{loi}</div>}
+            {/* Body */}
+            <form className="flex min-h-0 flex-1 flex-col" onSubmit={luuNguoiDung}>
+              <div className="flex-1 overflow-y-auto px-5 py-4">
+                {loi && <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm font-extrabold text-rose-700">{loi}</div>}
 
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <label className={fieldClass}>Họ tên
-                <input className={inputClass} required value={form.hoTen} onChange={(event) => setForm({ ...form, hoTen: event.target.value })} />
-              </label>
-              <label className={fieldClass}>Email
-                <input className={inputClass} required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
-              </label>
-              <label className={fieldClass}>Số điện thoại
-                <input className={inputClass} value={form.soDienThoai} onChange={(event) => setForm({ ...form, soDienThoai: event.target.value })} />
-              </label>
-              <label className={fieldClass}>Mật khẩu {form.id ? '(để trống = giữ nguyên)' : ''}
-                <input className={inputClass} required={!form.id} type="password" minLength={6} value={form.matKhau} onChange={(event) => setForm({ ...form, matKhau: event.target.value })} />
-              </label>
-              <label className={fieldClass}>Vai trò
-                <select className={inputClass} value={form.vaiTro} onChange={(event) => setForm({ ...form, vaiTro: event.target.value as VaiTro })}>
-                  <option value="admin">Quản trị viên</option>
-                  <option value="ung_vien">Ứng viên</option>
-                  <option value="nha_tuyen_dung">Nhà tuyển dụng</option>
-                </select>
-              </label>
-              <label className={fieldClass}>Trạng thái
-                <select className={inputClass} value={form.trangThai} onChange={(event) => setForm({ ...form, trangThai: event.target.value as TrangThai })}>
-                  <option value="hoat_dong">Hoạt động</option>
-                  <option value="tam_khoa">Tạm khóa</option>
-                  <option value="bi_khoa">Bị khóa</option>
-                </select>
-              </label>
-            </div>
+                <div className="grid gap-4">
+                  <label className={fieldClass}>Họ tên
+                    <input className={inputClass} required value={form.hoTen} onChange={e => setForm({ ...form, hoTen: e.target.value })} />
+                  </label>
+                  <label className={fieldClass}>Email
+                    <input className={inputClass} required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                  </label>
+                  <label className={fieldClass}>Số điện thoại
+                    <input className={inputClass} value={form.soDienThoai} onChange={e => setForm({ ...form, soDienThoai: e.target.value })} />
+                  </label>
+                  <label className={fieldClass}>
+                    Mật khẩu {form.id ? <span className="normal-case font-semibold text-slate-400">(để trống = giữ nguyên)</span> : ''}
+                    <input className={inputClass} required={!form.id} type="password" minLength={6} value={form.matKhau} onChange={e => setForm({ ...form, matKhau: e.target.value })} />
+                  </label>
+                  <label className={fieldClass}>Vai trò
+                    <select className={inputClass} value={form.vaiTro} onChange={e => setForm({ ...form, vaiTro: e.target.value as VaiTro })}>
+                      <option value="admin">Quản trị viên</option>
+                      <option value="ung_vien">Ứng viên</option>
+                      <option value="nha_tuyen_dung">Nhà tuyển dụng</option>
+                    </select>
+                  </label>
+                  <label className={fieldClass}>Trạng thái
+                    <select className={inputClass} value={form.trangThai} onChange={e => setForm({ ...form, trangThai: e.target.value as TrangThai })}>
+                      <option value="hoat_dong">Hoạt động</option>
+                      <option value="tam_khoa">Tạm khóa</option>
+                      <option value="bi_khoa">Bị khóa</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
 
-            <div className="grid gap-2 sm:flex sm:justify-end">
-              <button type="button" className={subtleBtn} onClick={() => setForm(null)}>Hủy</button>
-              <button type="submit" className={primaryBtn} disabled={dangLuu}>{dangLuu ? 'Đang lưu...' : 'Lưu người dùng'}</button>
-            </div>
-          </form>
+              {/* Footer */}
+              <div className="flex shrink-0 justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4">
+                <button type="button" className={subtleBtn} onClick={() => setForm(null)}>Hủy</button>
+                <button type="submit" className={primaryBtn} disabled={dangLuu}>{dangLuu ? 'Đang lưu...' : form.id ? 'Cập nhật' : 'Tạo người dùng'}</button>
+              </div>
+            </form>
+          </aside>
         </div>
       )}
       <ConfirmDialogComponent />

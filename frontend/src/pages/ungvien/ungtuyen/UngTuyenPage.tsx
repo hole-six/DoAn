@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
-import { Eye, Search, X } from 'lucide-react'
+import { Building2, CalendarDays, Eye, MapPin, Search, X } from 'lucide-react'
 import { useConfirm } from '../../../components/ConfirmDialog'
 import { DetailDrawer } from '../../../components/DetailDrawer'
 import { PhanTrang, usePhanTrang } from '../../../components/PhanTrang'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
-import { formatDateTime } from '../../../lib/format'
+import { formatDate, formatMoney } from '../../../lib/format'
 import { applicationStatusLabel, toneForApplicationStatus } from '../../../lib/statusLabels'
 import { toast } from '../../../lib/toast'
+import { taoUrlTaiNguyen } from '../../../lib/env'
 import type { HoSoUngTuyen } from '../../../types/recruitment'
-import { Badge, EmptyState, ErrorState, Page, Panel, Row } from '../shared/UngVienAtoms'
+import { Badge, EmptyState, ErrorState, Page, Panel } from '../shared/UngVienAtoms'
 import { useUngVienData } from '../shared/useUngVienData'
 import { AppDrawer } from './AppDrawer'
 import { Field, Textarea } from '../../quantrivien/shared/AdminFormControls'
@@ -88,18 +89,64 @@ export default function UngTuyenPage() {
           </select>
         </div>
         <div className="grid gap-2">
-          {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => (
-            <Row key={item.id} onClick={() => setSelected(item)}>
-              <div className="min-w-0">
-                <strong className="block truncate text-sm font-black text-slate-950">{item.tinTuyenDung?.tieuDe ?? '-'}</strong>
-                <p className="mt-1 truncate text-xs font-semibold text-slate-500">{item.tinTuyenDung?.nhaTuyenDung?.tenCongTy ?? '-'} · {formatDateTime(item.ngayNop)}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge tone={toneForApplicationStatus(item.trangThai)}>{applicationStatusLabel[item.trangThai]}</Badge>
-                <Button size="sm" icon={<Eye size={14} />}>Xem</Button>
-              </div>
-            </Row>
-          )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có hồ sơ phù hợp bộ lọc.' : 'Bạn chưa ứng tuyển vị trí nào.'}</EmptyState>}
+          {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => {
+            const cty = item.tinTuyenDung?.nhaTuyenDung
+            const logoUrl = taoUrlTaiNguyen(cty?.logo)
+            const luong = (item.tinTuyenDung?.luongMin || item.tinTuyenDung?.luongMax)
+              ? `${formatMoney(item.tinTuyenDung.luongMin)} - ${formatMoney(item.tinTuyenDung.luongMax)}`
+              : null
+
+            return (
+              <article
+                key={item.id}
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
+                onClick={() => setSelected(item)}
+              >
+                {/* Logo công ty */}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                  {logoUrl
+                    ? <img src={logoUrl} alt={cty?.tenCongTy} className="h-full w-full object-contain p-1" />
+                    : <Building2 size={22} className="text-slate-400" />
+                  }
+                </div>
+
+                {/* Thông tin chính */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <strong className="truncate text-sm font-black text-slate-900">
+                      {item.tinTuyenDung?.tieuDe ?? '-'}
+                    </strong>
+                    <Badge tone={toneForApplicationStatus(item.trangThai)}>
+                      {applicationStatusLabel[item.trangThai]}
+                    </Badge>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
+                    {cty?.tenCongTy && (
+                      <span className="flex items-center gap-1">
+                        <Building2 size={11} /> {cty.tenCongTy}
+                      </span>
+                    )}
+                    {item.tinTuyenDung?.diaChi && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={11} /> {item.tinTuyenDung.diaChi}
+                      </span>
+                    )}
+                    {luong && (
+                      <span className="font-bold text-emerald-700">{luong} VND</span>
+                    )}
+                    <span className="flex items-center gap-1 text-slate-400">
+                      <CalendarDays size={11} /> Nộp {formatDate(item.ngayNop)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Nút xem */}
+                <div className="shrink-0" onClick={e => e.stopPropagation()}>
+                  <Button size="sm" icon={<Eye size={14} />} onClick={() => setSelected(item)}>Xem</Button>
+                </div>
+              </article>
+            )
+          }) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có hồ sơ phù hợp bộ lọc.' : 'Bạn chưa ứng tuyển vị trí nào.'}</EmptyState>}
         </div>
         <PhanTrang {...phanTrang} donVi="hồ sơ" className="mt-4" />
       </Panel>

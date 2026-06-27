@@ -5,8 +5,6 @@ import logoWeb from '../assets/logodai.png'
 import { duongDanTheoVaiTro, layNguoiDung, xoaPhienDangNhap } from '../lib/auth'
 import AppIcon from './AppIcon'
 import { ThongBaoCenter } from './ThongBaoCenter'
-import './header.css'
-import './header-mobile-fix.css'
 
 const techLogos = [
   { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },

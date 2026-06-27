@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { Button } from '../../../components/ui/Button'
-import '../../nhatuyendung/ntd-styles.css'
 
 export function AdminPage({ title, desc, action, children }: { title: string; desc: string; action?: ReactNode; children: ReactNode }) {
   return (

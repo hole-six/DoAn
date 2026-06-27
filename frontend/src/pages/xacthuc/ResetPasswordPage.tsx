@@ -1,60 +1,56 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Lock, ShieldCheck } from 'lucide-react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import { API_URL } from '../../lib/env'
-import './auth-styles.css'
 import './forgot-password.css'
 import './reset-password.css'
 
 export default function ResetPasswordPage() {
-  const [params] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const token = params.get('token') ?? ''
+  const token = searchParams.get('token') ?? ''
+
   const [matKhau, setMatKhau] = useState('')
-  const [xacNhan, setXacNhan] = useState('')
+  const [xacNhanMatKhau, setXacNhanMatKhau] = useState('')
+  const [hienMatKhau, setHienMatKhau] = useState(false)
+  const [hienXacNhan, setHienXacNhan] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [validating, setValidating] = useState(Boolean(token))
-
-  const tokenKhongDung = useMemo(() => Boolean(error && !message), [error, message])
-
-  useEffect(() => {
-    if (!token) {
-      setError('Thiếu token đặt lại mật khẩu.')
-      setValidating(false)
-      return
-    }
-    fetch(`${API_URL}/xacthuc/dat-lai-mat-khau/${encodeURIComponent(token)}`)
-      .then(async response => {
-        const result = await response.json().catch(() => ({}))
-        if (!response.ok) throw new Error(result.thongBao ?? 'Token không hợp lệ hoặc đã hết hạn.')
-        setMessage(result.duLieu?.email ? `Đang đặt lại mật khẩu cho ${result.duLieu.email}.` : 'Token hợp lệ.')
-      })
-      .catch(err => setError(err instanceof Error ? err.message : 'Token không hợp lệ hoặc đã hết hạn.'))
-      .finally(() => setValidating(false))
-  }, [token])
+  const [thanhCong, setThanhCong] = useState(false)
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError('')
-    if (matKhau !== xacNhan) {
+    setMessage('')
+
+    if (matKhau.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự.')
+      return
+    }
+    if (matKhau !== xacNhanMatKhau) {
       setError('Mật khẩu xác nhận không khớp.')
       return
     }
+    if (!token) {
+      setError('Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch(`${API_URL}/xacthuc/dat-lai-mat-khau`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, matKhau }),
+        body: JSON.stringify({ token, matKhauMoi: matKhau }),
       })
       const result = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(result.thongBao ?? 'Không thể đặt lại mật khẩu.')
-      setMessage('Đặt lại mật khẩu thành công. Đang chuyển về đăng nhập...')
-      setTimeout(() => navigate('/dang-nhap'), 900)
+      setThanhCong(true)
+      setMessage(result.thongBao ?? 'Mật khẩu đã được đặt lại thành công.')
+      setTimeout(() => navigate('/dang-nhap'), 3000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể đặt lại mật khẩu.')
     } finally {
@@ -75,78 +71,82 @@ export default function ResetPasswordPage() {
 
         <div className="forgot-heading reset-heading">
           <span className="forgot-icon">
-            <ShieldCheck size={22} />
+            <KeyRound size={22} />
           </span>
           <p>Đặt lại mật khẩu</p>
-          <h1 id="reset-title">Tạo mật khẩu mới an toàn</h1>
-          <span>
-            Nhập mật khẩu mới cho tài khoản của bạn. Mật khẩu nên có ít nhất 6 ký tự và khác với các mật khẩu bạn đang dùng ở nơi khác.
-          </span>
+          <h1 id="reset-title">Tạo mật khẩu mới</h1>
+          <span>Nhập mật khẩu mới cho tài khoản của bạn. Mật khẩu phải có ít nhất 6 ký tự.</span>
         </div>
 
-        <div className="reset-info-grid">
-          <div className="reset-info-item">
-            <ShieldCheck size={18} />
-            <span>Token được kiểm tra trước khi cập nhật.</span>
+        {!token && (
+          <div className="forgot-alert forgot-alert-error">
+            <span>Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng <Link to="/quen-mat-khau">yêu cầu lại</Link>.</span>
           </div>
-          <div className="reset-info-item">
+        )}
+
+        {thanhCong ? (
+          <div className="forgot-alert forgot-alert-success">
             <CheckCircle2 size={18} />
-            <span>Link đặt lại sẽ tự vô hiệu sau khi dùng thành công.</span>
-          </div>
-        </div>
-
-        {validating ? (
-          <div className="forgot-alert reset-alert-neutral">
-            <span>Đang kiểm tra token đặt lại mật khẩu...</span>
+            <span>{message} Đang chuyển về trang đăng nhập...</span>
           </div>
         ) : (
           <form className="forgot-form reset-form" onSubmit={submit}>
-            <label htmlFor="reset-password">Mật khẩu mới</label>
-            <div className="forgot-input reset-input">
-              <Lock size={18} />
-              <input
-                id="reset-password"
-                type="password"
-                value={matKhau}
-                onChange={event => setMatKhau(event.target.value)}
-                placeholder="Nhập mật khẩu mới"
-                autoComplete="new-password"
-                minLength={6}
-                required
-                disabled={tokenKhongDung}
-              />
-            </div>
-
-            <label htmlFor="reset-confirm">Xác nhận mật khẩu</label>
-            <div className="forgot-input reset-input">
-              <Lock size={18} />
-              <input
-                id="reset-confirm"
-                type="password"
-                value={xacNhan}
-                onChange={event => setXacNhan(event.target.value)}
-                placeholder="Nhập lại mật khẩu mới"
-                autoComplete="new-password"
-                minLength={6}
-                required
-                disabled={tokenKhongDung}
-              />
-            </div>
-
-            {message && (
-              <div className="forgot-alert forgot-alert-success">
-                <CheckCircle2 size={18} />
-                <span>{message}</span>
+            <div>
+              <label htmlFor="reset-password">Mật khẩu mới</label>
+              <div className="forgot-input reset-input" style={{ gridTemplateColumns: '22px minmax(0,1fr) 22px' }}>
+                <KeyRound size={18} />
+                <input
+                  id="reset-password"
+                  type={hienMatKhau ? 'text' : 'password'}
+                  value={matKhau}
+                  onChange={e => setMatKhau(e.target.value)}
+                  placeholder="Ít nhất 6 ký tự"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setHienMatKhau(prev => !prev)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0 }}
+                  aria-label={hienMatKhau ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {hienMatKhau ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
-            )}
+            </div>
+
+            <div>
+              <label htmlFor="reset-confirm">Xác nhận mật khẩu</label>
+              <div className="forgot-input reset-input" style={{ gridTemplateColumns: '22px minmax(0,1fr) 22px' }}>
+                <ShieldCheck size={18} />
+                <input
+                  id="reset-confirm"
+                  type={hienXacNhan ? 'text' : 'password'}
+                  value={xacNhanMatKhau}
+                  onChange={e => setXacNhanMatKhau(e.target.value)}
+                  placeholder="Nhập lại mật khẩu mới"
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setHienXacNhan(prev => !prev)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0 }}
+                  aria-label={hienXacNhan ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                >
+                  {hienXacNhan ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
             {error && (
               <div className="forgot-alert forgot-alert-error">
                 <span>{error}</span>
               </div>
             )}
 
-            <button className="forgot-submit" disabled={loading || tokenKhongDung}>
-              {loading ? 'Đang cập nhật...' : 'Đặt lại mật khẩu'}
+            <button className="forgot-submit" disabled={loading || !token}>
+              {loading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
             </button>
           </form>
         )}

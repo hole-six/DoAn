@@ -51,4 +51,18 @@ export const dieuKhienUngVien = {
       thongBao: 'Xóa hồ sơ thành công'
     })
   }),
+
+  // Dashboard ứng viên
+  layDashboard: batLoiBatDongBo(async (yeuCau: Request, phanHoi: Response) => {
+    const maNguoiDung = (yeuCau as any).user?.id || (yeuCau as any).nguoiDung?.id
+    if (!maNguoiDung) {
+      return phanHoi.status(401).json({ 
+        thanhCong: false,
+        thongBao: 'Vui lòng đăng nhập để xem dashboard' 
+      })
+    }
+    
+    const duLieu = await dichVuUngVien.layDashboard(maNguoiDung)
+    return phanHoi.json({ duLieu })
+  }),
 }

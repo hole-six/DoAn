@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { CheckCircle, Settings } from 'lucide-react'
 import AppIcon from '../../components/AppIcon'
 import { apiCoXacThuc, layNguoiDung } from '../../lib/auth'
-import './admin-styles.css'
 
 const pageClass = 'mx-auto flex w-full min-w-0 max-w-[1400px] flex-col gap-3 pb-4 lg:gap-4'
 const panelClass = 'flex min-w-0 flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_10px_28px_rgba(15,23,42,0.06)] lg:p-5'

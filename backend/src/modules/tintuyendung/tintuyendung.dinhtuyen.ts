@@ -45,12 +45,22 @@ async function layNguoiDungNeuCo(authorization?: string) {
 
 async function taoBoLocTruyCapDanhSachTin(query: Record<string, unknown>, authorization?: string) {
   const nguoiDung = await layNguoiDungNeuCo(authorization)
-  if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien') return { ...query, cheDo: 'cong_khai' }
-  if (nguoiDung.vaiTro === 'admin') return { ...query, cheDo: 'admin' }
+  const base = {
+    tuKhoa: query.tuKhoa,
+    trang: query.trang,
+    kichThuocTrang: query.kichThuocTrang ?? query.soPhanTu ?? query.limit,
+    limit: query.limit,
+    capBac: query.capBac,
+    loaiHinh: query.loaiHinh,
+    kyNang: query.kyNang,
+    loaiKyNang: query.loaiKyNang ?? query.loai,
+  }
+  if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien') return { ...base, cheDo: 'cong_khai' }
+  if (nguoiDung.vaiTro === 'admin') return { ...base, cheDo: 'admin' }
 
   const congTy = await layCongTyTheoNguoiDung(nguoiDung.id)
   return {
-    ...query,
+    ...base,
     cheDo: 'nha_tuyen_dung',
     maNhaTuyenDungSoHuu: congTy?.id ? String(congTy.id) : '',
   }
@@ -148,8 +158,8 @@ export const dinhTuyenTinTuyenDung = Router()
 
 dinhTuyenTinTuyenDung.get('/', batLoiBatDongBo(async (yeuCau, phanHoi) => {
   const boLoc = await taoBoLocTruyCapDanhSachTin(yeuCau.query as Record<string, unknown>, yeuCau.headers.authorization)
-  const duLieu = await dichVuTinTuyenDung.layDanhSach(boLoc)
-  return phanHoi.json({ duLieu })
+  const ketQua = await dichVuTinTuyenDung.layDanhSach(boLoc)
+  return phanHoi.json(ketQua)
 }))
 dinhTuyenTinTuyenDung.get('/:ma', batLoiBatDongBo(async (yeuCau, phanHoi) => {
   const ma = String(yeuCau.params.ma ?? '')

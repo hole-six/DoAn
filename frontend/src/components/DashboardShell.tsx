@@ -29,8 +29,6 @@ import { EMPLOYER_RECRUITMENT_PATHS, getEmployerGate, refId, type EmployerGateRe
 import type { NhaTuyenDung } from '../types/recruitment'
 import AppIcon from './AppIcon'
 import BottomNav from './BottomNav'
-import './dashboard-shell.css'
-import './dashboard-shell-responsive.css'
 
 type VaiTro = 'ungvien' | 'nhatuyendung' | 'quantrivien'
 

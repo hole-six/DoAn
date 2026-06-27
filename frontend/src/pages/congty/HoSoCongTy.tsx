@@ -5,7 +5,6 @@ import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { formatJobDateLine } from '../../lib/jobPresentation'
 import { useSeo } from '../../lib/seo'
-import './congty-styles.css'
 
 const logoDuPhong = 'https://placehold.co/160x160/eaf2ff/2563eb?text=IT'
 const bannerDuPhong = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80'

@@ -1,0 +1,469 @@
+{
+  "info": {
+    "name": "EffortIT - Hệ thống tuyển dụng IT Đà Nẵng [FULL]",
+    "description": "API ĐẦY ĐỦ cho hệ thống quản lý tuyển dụng việc làm CNTT tại Đà Nẵng. Bao gồm toàn bộ chức năng: Xác thực, Ứng viên, Nhà tuyển dụng, Tin tuyển dụng, Hồ sơ năng lực (CV), Ứng tuyển, Lịch phỏng vấn, Thông báo, Tin nhắn, Đánh giá công ty, AI/Chatbot, Admin.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "EffortIT_Team"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "production_url",
+      "value": "https://api.effortit.site/api",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ungvien_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "nhatuyendung_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tintuyendung_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hosonangluc_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hosoungtuyen_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "lichphongvan_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "description": "Kiểm tra trạng thái hoạt động của API",
+      "item": [
+        {
+          "name": "Kiểm tra trạng thái API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/trangthai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "trangthai"
+              ]
+            },
+            "description": "Endpoint kiểm tra server có đang hoạt động hay không"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Xác thực",
+      "description": "Quản lý đăng nhập, đăng ký, quên mật khẩu",
+      "item": [
+        {
+          "name": "Đăng nhập",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.duLieu && jsonData.duLieu.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.duLieu.accessToken);",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.duLieu.refreshToken);",
+                  "        console.log('✅ Đã lưu access_token và refresh_token');",
+                  "    }",
+                  "    if (jsonData.duLieu && jsonData.duLieu.nguoiDung) {",
+                  "        pm.collectionVariables.set('user_id', jsonData.duLieu.nguoiDung.id);",
+                  "        console.log('✅ Đã lưu user_id');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ungvien@example.com\",\n  \"matKhau\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-nhap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-nhap"
+              ]
+            },
+            "description": "Đăng nhập với email và mật khẩu. Trả về access token và refresh token."
+          }
+        },
+        {
+          "name": "Đăng nhập Google OAuth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"google_id_token_from_oauth\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-nhap-google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-nhap-google"
+              ]
+            },
+            "description": "Đăng nhập bằng Google OAuth 2.0"
+          }
+        },
+        {
+          "name": "Làm mới token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.duLieu && jsonData.duLieu.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.duLieu.accessToken);",
+                  "        console.log('✅ Đã làm mới access_token');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"refreshToken\": \"{{refresh_token}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/xacthuc/lam-moi-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "lam-moi-token"
+              ]
+            },
+            "description": "Làm mới access token khi hết hạn bằng refresh token"
+          }
+        },
+        {
+          "name": "Quên mật khẩu - Gửi email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/xacthuc/quen-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "quen-mat-khau"
+              ]
+            },
+            "description": "Gửi email chứa link đặt lại mật khẩu"
+          }
+        },
+        {
+          "name": "Kiểm tra token đặt lại mật khẩu",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dat-lai-mat-khau/:token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dat-lai-mat-khau",
+                ":token"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": "reset_token_from_email"
+                }
+              ]
+            },
+            "description": "Kiểm tra token từ email có hợp lệ không"
+          }
+        },
+        {
+          "name": "Đặt lại mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset_token_from_email\",\n  \"matKhauMoi\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dat-lai-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dat-lai-mat-khau"
+              ]
+            },
+            "description": "Đặt mật khẩu mới với token từ email"
+          }
+        },
+        {
+          "name": "Lấy thông tin tài khoản hiện tại",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/toi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "toi"
+              ]
+            },
+            "description": "Lấy thông tin người dùng đang đăng nhập"
+          }
+        },
+        {
+          "name": "Đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-xuat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-xuat"
+              ]
+            },
+            "description": "Đăng xuất và xóa refresh token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Quản lý người dùng",
+      "description": "CRUD người dùng trong hệ thống",
+      "item": [
+        {
+          "name": "Lấy danh sách người dùng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung?trang=1&soPhanTu=20&tuKhoa=&vaiTro=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung"
+              ],
+              "query": [
+                {
+                  "key": "trang",
+                  "value": "1"
+                },
+                {
+                  "key": "soPhanTu",
+                  "value": "20"
+                },
+                {
+                  "key": "tuKhoa",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "vaiTro",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lấy chi tiết người dùng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tạo người dùng mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"matKhau\": \"123456\",\n  \"hoTen\": \"Nguyễn Văn A\",\n  \"vaiTro\": \"ung_vien\",\n  \"soDienThoai\": \"0901234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/nguoidung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cập nhật người dùng",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hoTen\": \"Nguyễn Văn B\",\n  \"soDienThoai\": \"0909999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/nguoidung/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xóa người dùng",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                "{{user_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

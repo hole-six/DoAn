@@ -167,22 +167,56 @@ export default function UngVienNhaTuyenDungPage() {
         </div>
         <div className="grid gap-2">
           {danhSachHienThi.length ? phanTrang.danhSachTrang.map(item => (
-            <article key={item.id} className="grid gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:-translate-y-0.5 hover:bg-slate-50 sm:grid-cols-[minmax(0,1fr)_auto_auto]" onClick={() => setSelected(item)}>
-              <span className="min-w-0">
-                <strong className="block truncate text-sm font-black text-slate-950">{item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'}</strong>
-                <span className="mt-1 block truncate text-xs font-semibold text-slate-500">{item.tinTuyenDung?.tieuDe ?? '-'}</span>
-                <span className="mt-1 flex flex-wrap gap-1 text-xs font-bold text-slate-500">
-                  {item.hoSoNangLuc?.tieuDe && <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5"><FileText size={12} /> {item.hoSoNangLuc.tieuDe}</span>}
-                  {item.hoSoNangLuc?.fileCvData && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-blue-700">Có file CV</span>}
+            <article
+              key={item.id}
+              className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-sky-300 hover:bg-slate-50"
+              onClick={() => setSelected(item)}
+            >
+              {/* Avatar chữ cái */}
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-100 to-blue-200 text-sm font-black text-sky-700">
+                {(item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'U').charAt(0).toUpperCase()}
+              </div>
+
+              {/* Thông tin chính */}
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <strong className="text-sm font-black text-slate-900">
+                    {item.hoSoNangLuc?.hoTenHienThi || item.ungVien?.nguoiDung?.hoTen || 'Ứng viên'}
+                  </strong>
+                  <Badge tone={toneForApplicationStatus(item.trangThai)}>
+                    {employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}
+                  </Badge>
+                </div>
+                <span className="mt-0.5 block truncate text-xs font-semibold text-slate-500">
+                  {item.tinTuyenDung?.tieuDe ?? '-'}
                 </span>
-              </span>
-              <Badge tone={toneForApplicationStatus(item.trangThai)}>{employerApplicationStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
-              <div className="flex flex-wrap gap-2" onClick={event => event.stopPropagation()}>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {item.hoSoNangLuc?.tieuDe && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                      <FileText size={11} /> {item.hoSoNangLuc.tieuDe}
+                    </span>
+                  )}
+                  {item.hoSoNangLuc?.fileCvData && (
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+                      Có file CV
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex shrink-0 gap-2" onClick={event => event.stopPropagation()}>
                 <Button size="sm" icon={<Search size={14} />} onClick={() => setSelected(item)}>Chi tiết</Button>
-                <Button size="sm" variant="secondary" icon={<MessageCircle size={15} />} disabled={!item.ungVien?.nguoiDung?.id || !TRANG_THAI_CHAT.includes(item.trangThai as any)} onClick={() => void openChat(item)}>Chat</Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  icon={<MessageCircle size={14} />}
+                  disabled={!item.ungVien?.nguoiDung?.id || !TRANG_THAI_CHAT.includes(item.trangThai as any)}
+                  onClick={() => void openChat(item)}
+                >Chat</Button>
               </div>
             </article>
-          )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có hồ sơ phù hợp bộ lọc.' : 'Bạn chưa ứng tuyển vị trí nào.'}</EmptyState>}
+          )) : <EmptyState>{tuKhoa || locTrangThai ? 'Không có hồ sơ phù hợp bộ lọc.' : 'Chưa có ứng viên nào.'}</EmptyState>}
         </div>
         <PhanTrang {...phanTrang} donVi="hồ sơ" className="mt-4" />
       </Panel>

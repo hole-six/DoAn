@@ -63,6 +63,7 @@ model NhaTuyenDung {
   ngayTao        DateTime        @default(now())
   ngayCapNhat    DateTime        @updatedAt
   danhGiaCongTy  DanhGiaCongTy[]
+  tinTuyenDungs  TinTuyenDung[]
 
   @@index([trangThaiDuyet])
   @@index([ngayTao])
@@ -97,27 +98,32 @@ model UngVienKyNang {
 }
 
 model TinTuyenDung {
-  id               String               @id @default(uuid()) @map("_id")
+  id               String    @id @default(uuid()) @map("_id")
   maNhaTuyenDung   String
   tieuDe           String
   yeuCauKinhNghiem String?
-  diaChi           String?              @default("Da Nang")
+  diaChi           String?   @default("Da Nang")
   luongMin         Float?
   luongMax         Float?
-  loaiHinh         String               @default("toan_thoi_gian")
-  capBac           String               @default("junior")
+  loaiHinh         String    @default("toan_thoi_gian")
+  capBac           String    @default("junior")
   anhDaiDien       String?
   hanNop           DateTime?
-  soLuong          Int                  @default(1)
+  soLuong          Int       @default(1)
   moTa             String
   yeuCau           String
   quyenLoi         String?
-  luotXem          Int                  @default(0)
-  trangThai        String               @default("cho_duyet")
+  luotXem          Int       @default(0)
+  trangThai        String    @default("cho_duyet")
   ngayDang         DateTime?
-  ngayTao          DateTime             @default(now())
-  ngayCapNhat      DateTime             @updatedAt
-  kyNangLienKet    TinTuyenDungKyNang[]
+  ngayTao          DateTime  @default(now())
+  ngayCapNhat      DateTime  @updatedAt
+
+  // Relations
+  nhaTuyenDung  NhaTuyenDung         @relation(fields: [maNhaTuyenDung], references: [id], onDelete: Cascade)
+  kyNangLienKet TinTuyenDungKyNang[]
+  hoSoUngTuyen  HoSoUngTuyen[]
+  viecLamDaLuu  ViecLamDaLuu[]
 
   @@index([maNhaTuyenDung])
   @@index([trangThai])
@@ -145,12 +151,13 @@ model TinTuyenDungKyNang {
 }
 
 model ViecLamDaLuu {
-  id             String   @id @default(uuid()) @map("_id")
+  id             String        @id @default(uuid()) @map("_id")
   maNguoiDung    String
   maTinTuyenDung String
-  ngayLuu        DateTime @default(now())
-  ngayTao        DateTime @default(now())
-  ngayCapNhat    DateTime @updatedAt
+  ngayLuu        DateTime      @default(now())
+  ngayTao        DateTime      @default(now())
+  ngayCapNhat    DateTime      @updatedAt
+  tinTuyenDung   TinTuyenDung  @relation(fields: [maTinTuyenDung], references: [id], onDelete: Cascade)
 
   @@unique([maNguoiDung, maTinTuyenDung])
   @@index([maNguoiDung])
@@ -204,19 +211,22 @@ model HoSoNangLuc {
 }
 
 model HoSoUngTuyen {
-  id             String               @id @default(uuid()) @map("_id")
+  id             String   @id @default(uuid()) @map("_id")
   maUngVien      String
   maTinTuyenDung String
   maHoSoNangLuc  String?
   thuXinViec     String?
-  diemKhopKyNang Float                @default(0)
-  trangThai      String               @default("da_nop")
-  ngayNop        DateTime             @default(now())
-  ngayTao        DateTime             @default(now())
-  ngayCapNhat    DateTime             @updatedAt
-  lichSu         LichSuHoSoUngTuyen[]
-  lichPhongVan   LichPhongVan?
-  danhGiaCongTy  DanhGiaCongTy?
+  diemKhopKyNang Float    @default(0)
+  trangThai      String   @default("da_nop")
+  ngayNop        DateTime @default(now())
+  ngayTao        DateTime @default(now())
+  ngayCapNhat    DateTime @updatedAt
+
+  // Relations
+  tinTuyenDung  TinTuyenDung         @relation(fields: [maTinTuyenDung], references: [id], onDelete: Cascade)
+  lichSu        LichSuHoSoUngTuyen[]
+  lichPhongVan  LichPhongVan?
+  danhGiaCongTy DanhGiaCongTy?
 
   @@unique([maUngVien, maTinTuyenDung])
   @@index([maUngVien])
@@ -245,19 +255,19 @@ model LichSuHoSoUngTuyen {
 }
 
 model LichPhongVan {
-  id              String            @id @default(uuid()) @map("_id")
-  maHoSoUngTuyen  String            @unique
+  id              String       @id @default(uuid()) @map("_id")
+  maHoSoUngTuyen  String       @unique
   thoiGianBatDau  DateTime
   thoiGianKetThuc DateTime?
   diaChi          String?
-  hinhThuc        String            @default("online")
+  hinhThuc        String       @default("online")
   linkHop         String?
   ghiChu          String?
-  trangThai       String            @default("da_len_lich")
-  ketQua          String            @default("cho_ket_qua")
-  ngayTao         DateTime          @default(now())
-  ngayCapNhat     DateTime          @updatedAt
-  hoSoUngTuyen    HoSoUngTuyen      @relation(fields: [maHoSoUngTuyen], references: [id], onDelete: Cascade)
+  trangThai       String       @default("da_len_lich")
+  ketQua          String       @default("cho_ket_qua")
+  ngayTao         DateTime     @default(now())
+  ngayCapNhat     DateTime     @updatedAt
+  hoSoUngTuyen    HoSoUngTuyen @relation(fields: [maHoSoUngTuyen], references: [id], onDelete: Cascade)
 
   @@index([thoiGianBatDau])
   @@index([trangThai])

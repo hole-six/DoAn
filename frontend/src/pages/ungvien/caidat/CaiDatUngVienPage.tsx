@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Mail, Save, Settings, ShieldCheck, UserRound } from 'lucide-react'
+import { Bell, Mail, Save, ShieldCheck, UserRound } from 'lucide-react'
 import { Button } from '../../../components/ui/Button'
 import { apiCoXacThuc } from '../../../lib/auth'
 import { toast } from '../../../lib/toast'
@@ -188,124 +188,172 @@ export default function CaiDatUngVienPage() {
   return (
     <Page
       title="Cài đặt tài khoản"
-      desc="Quản lý thông tin tài khoản, hồ sơ nghề nghiệp và tùy chọn thông báo của ứng viên."
-      action={<Button icon={<Settings size={16} />} onClick={() => void data.reload()}>Đồng bộ</Button>}
+      desc="Quản lý thông tin tài khoản, hồ sơ nghề nghiệp và tùy chọn thông báo."
     >
       <ErrorState message={data.error} />
 
-      <Panel
-        title="Tài khoản ứng viên"
-        action={
-          <Button variant="primary" loading={savingAccount} icon={<Save size={16} />} onClick={() => void saveAccount()}>
-            Lưu tài khoản
-          </Button>
-        }
-      >
-        <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sky-900">
-            <ShieldCheck size={28} />
-            <p className="mt-3 text-sm font-black">Đây là thông tin tài khoản gốc dùng chung cho đăng nhập, dashboard và các thao tác hệ thống.</p>
-            <div className="mt-4 grid gap-2 text-xs font-bold text-sky-800">
-              <p><strong>Email:</strong> {data.current?.email ?? '-'}</p>
-              <p><strong>Vai trò:</strong> Ứng viên</p>
-              <p><strong>Trạng thái:</strong> {data.current?.trangThai ?? '-'}</p>
+      {/* Panel tài khoản */}
+      <Panel>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-sky-50 text-sky-700">
+              <ShieldCheck size={20} />
+            </span>
+            <div>
+              <h2 className="text-base font-black text-slate-900">Tài khoản</h2>
+              <p className="text-xs font-semibold text-slate-500">Thông tin đăng nhập và mật khẩu</p>
             </div>
           </div>
+          <Button variant="primary" size="sm" loading={savingAccount} icon={<Save size={14} />} onClick={() => void saveAccount()}>
+            Lưu
+          </Button>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="grid gap-1.5">
-              <span className="text-sm font-black text-slate-700">Họ tên *</span>
-              <input className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold outline-none focus:border-blue-500" value={accountForm.hoTen} onChange={event => updateAccount('hoTen', event.target.value)} />
-              <FieldError message={accountErrors.hoTen} />
-            </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Họ tên *</span>
+            <input
+              className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              value={accountForm.hoTen}
+              onChange={e => updateAccount('hoTen', e.target.value)}
+            />
+            <FieldError message={accountErrors.hoTen} />
+          </label>
 
-            <label className="grid gap-1.5">
-              <span className="text-sm font-black text-slate-700">Số điện thoại</span>
-              <input className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold outline-none focus:border-blue-500" value={accountForm.soDienThoai} onChange={event => updateAccount('soDienThoai', event.target.value)} />
-              <FieldError message={accountErrors.soDienThoai} />
-            </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Số điện thoại</span>
+            <input
+              className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              value={accountForm.soDienThoai}
+              onChange={e => updateAccount('soDienThoai', e.target.value)}
+            />
+            <FieldError message={accountErrors.soDienThoai} />
+          </label>
 
-            <label className="grid gap-1.5 sm:col-span-2">
-              <span className="text-sm font-black text-slate-700">Mật khẩu mới</span>
-              <input className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold outline-none focus:border-blue-500" type="password" value={accountForm.matKhau} onChange={event => updateAccount('matKhau', event.target.value)} placeholder="Để trống nếu không đổi mật khẩu" />
-              <FieldError message={accountErrors.matKhau} />
-            </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Mật khẩu mới</span>
+            <input
+              className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              type="password"
+              value={accountForm.matKhau}
+              onChange={e => updateAccount('matKhau', e.target.value)}
+              placeholder="Để trống nếu không đổi"
+            />
+            <FieldError message={accountErrors.matKhau} />
+          </label>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 sm:col-span-2">
-              <div className="flex items-center gap-2 text-slate-800">
-                <Mail size={16} />
-                <strong>Email đăng nhập:</strong>
-                <span>{data.current?.email ?? '-'}</span>
-              </div>
-              <p className="mt-2 text-xs font-bold text-slate-500">Email đang được giữ cố định để tránh ảnh hưởng đăng nhập và các liên kết xác thực hiện tại.</p>
+          <div className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Email</span>
+            <div className="flex min-h-11 items-center rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-500">
+              <Mail size={14} className="mr-2 shrink-0 text-slate-400" />
+              {data.current?.email ?? '-'}
             </div>
+            <p className="text-[11px] font-semibold text-slate-400">Email cố định, không thể thay đổi.</p>
           </div>
         </div>
       </Panel>
 
-      <Panel
-        title="Thông tin nghề nghiệp ứng viên"
-        action={
-          <Button variant="primary" loading={savingCareer} icon={<Save size={16} />} onClick={() => void saveCareer()}>
-            Lưu hồ sơ nghề nghiệp
+      {/* Panel nghề nghiệp */}
+      <Panel>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+              <UserRound size={20} />
+            </span>
+            <div>
+              <h2 className="text-base font-black text-slate-900">Mục tiêu nghề nghiệp</h2>
+              <p className="text-xs font-semibold text-slate-500">AI dùng thông tin này để gợi ý việc làm phù hợp khi chưa có CV</p>
+            </div>
+          </div>
+          <Button variant="primary" size="sm" loading={savingCareer} icon={<Save size={14} />} onClick={() => void saveCareer()}>
+            Lưu
           </Button>
-        }
-      >
-        <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sky-900">
-            <UserRound size={28} />
-            <p className="mt-3 text-sm font-black">Phần này chứa dữ liệu nghề nghiệp và nội dung dùng cho CV, ứng tuyển như vị trí mong muốn, địa chỉ và tóm tắt cá nhân.</p>
-          </div>
+        </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="grid gap-1.5">
-              <span className="text-sm font-black text-slate-700">Vị trí mong muốn</span>
-              <input className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold outline-none focus:border-blue-500" value={careerForm.viTriMongMuon} onChange={event => updateCareer('viTriMongMuon', event.target.value)} />
-              <FieldError message={careerErrors.viTriMongMuon} />
-            </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Vị trí mong muốn</span>
+            <input
+              className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              value={careerForm.viTriMongMuon}
+              onChange={e => updateCareer('viTriMongMuon', e.target.value)}
+              placeholder="VD: Frontend Developer"
+            />
+            <FieldError message={careerErrors.viTriMongMuon} />
+          </label>
 
-            <label className="grid gap-1.5">
-              <span className="text-sm font-black text-slate-700">Địa chỉ</span>
-              <input className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold outline-none focus:border-blue-500" value={careerForm.diaChi} onChange={event => updateCareer('diaChi', event.target.value)} />
-              <FieldError message={careerErrors.diaChi} />
-            </label>
+          <label className="grid gap-1.5">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Địa chỉ</span>
+            <input
+              className="min-h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              value={careerForm.diaChi}
+              onChange={e => updateCareer('diaChi', e.target.value)}
+              placeholder="VD: Đà Nẵng"
+            />
+            <FieldError message={careerErrors.diaChi} />
+          </label>
 
-            <label className="grid gap-1.5 sm:col-span-2">
-              <span className="text-sm font-black text-slate-700">Tóm tắt cá nhân</span>
-              <textarea className="min-h-28 rounded-xl border border-slate-300 p-3 text-sm font-semibold outline-none focus:border-blue-500" value={careerForm.tomTat} onChange={event => updateCareer('tomTat', event.target.value)} />
-              <FieldError message={careerErrors.tomTat} />
-            </label>
-          </div>
+          <label className="grid gap-1.5 sm:col-span-2">
+            <span className="text-xs font-black text-slate-600 uppercase tracking-wide">Tóm tắt cá nhân</span>
+            <textarea
+              className="min-h-28 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm font-semibold outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-100"
+              value={careerForm.tomTat}
+              onChange={e => updateCareer('tomTat', e.target.value)}
+              placeholder="Mô tả ngắn về bản thân, kinh nghiệm và mục tiêu nghề nghiệp..."
+            />
+            <FieldError message={careerErrors.tomTat} />
+          </label>
         </div>
       </Panel>
 
-      <Panel
-        title="Tùy chọn thông báo"
-        action={
-          <Button variant="secondary" loading={savingPrefs} icon={<Bell size={16} />} onClick={() => void savePrefs()}>
-            Lưu tùy chọn
+      {/* Panel thông báo */}
+      <Panel>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-50 text-amber-600">
+              <Bell size={20} />
+            </span>
+            <div>
+              <h2 className="text-base font-black text-slate-900">Tùy chọn thông báo</h2>
+              <p className="text-xs font-semibold text-slate-500">Chọn loại thông báo muốn nhận</p>
+            </div>
+          </div>
+          <Button variant="secondary" size="sm" loading={savingPrefs} icon={<Save size={14} />} onClick={() => void savePrefs()}>
+            Lưu
           </Button>
-        }
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          {[
-            ['email', 'Email hệ thống', 'Nhận các thông báo tổng hợp qua email khi hệ thống hỗ trợ.'],
-            ['interview', 'Lịch phỏng vấn', 'Nhận cảnh báo khi có lời mời, đổi lịch hoặc cập nhật kết quả phỏng vấn.'],
-            ['job', 'Trạng thái ứng tuyển', 'Nhận thông báo khi hồ sơ được xem, duyệt, từ chối hoặc có thay đổi mới.'],
-          ].map(([key, label, desc]) => (
-            <label key={key} className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <input
-                type="checkbox"
-                className="mt-1 h-4 w-4"
-                checked={prefs[key as keyof NotificationPrefs]}
-                onChange={event => setPrefs(prev => ({ ...prev, [key]: event.target.checked }))}
-              />
-              <span>
-                <strong className="block text-sm text-slate-900">{label}</strong>
-                <span className="mt-1 block text-xs font-semibold leading-relaxed text-slate-600">{desc}</span>
-              </span>
-            </label>
-          ))}
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-3">
+          {([
+            ['email', 'Email hệ thống', 'Thông báo tổng hợp qua email'],
+            ['interview', 'Lịch phỏng vấn', 'Lời mời, đổi lịch, kết quả phỏng vấn'],
+            ['job', 'Trạng thái ứng tuyển', 'Hồ sơ được xem, duyệt hoặc từ chối'],
+          ] as const).map(([key, label, desc]) => {
+            const checked = prefs[key as keyof NotificationPrefs]
+            return (
+              <label
+                key={key}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  checked ? 'border-sky-300 bg-sky-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                }`}
+              >
+                {/* Toggle */}
+                <div className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors ${checked ? 'bg-sky-600' : 'bg-slate-300'}`}>
+                  <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                  <input
+                    type="checkbox"
+                    className="absolute inset-0 opacity-0"
+                    checked={checked}
+                    onChange={e => setPrefs(prev => ({ ...prev, [key]: e.target.checked }))}
+                  />
+                </div>
+                <span>
+                  <strong className={`block text-sm font-black ${checked ? 'text-sky-900' : 'text-slate-700'}`}>{label}</strong>
+                  <span className="mt-0.5 block text-xs font-semibold leading-relaxed text-slate-500">{desc}</span>
+                </span>
+              </label>
+            )
+          })}
         </div>
       </Panel>
     </Page>

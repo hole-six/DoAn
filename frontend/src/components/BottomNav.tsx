@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { layNguoiDung } from '../lib/auth'
 import AppIcon from './AppIcon'
-import './bottom-nav.css'
 
 export default function BottomNav() {
   const nguoiDung = layNguoiDung()

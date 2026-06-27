@@ -428,14 +428,21 @@ function CvTextList({ title, value, onChange, placeholder }: { title: string; va
   )
 }
 
-function BasicItemsEditor({ title, value, onChange }: { title: string; value: CvItem[]; onChange: (v: CvItem[]) => void }) {
+function BasicItemsEditor({ title, value, onChange, onAiSuggest }: { title: string; value: CvItem[]; onChange: (v: CvItem[]) => void; onAiSuggest?: () => void }) {
   return (
     <div className={panelCls}>
       <div className="mb-3 flex items-center justify-between gap-3">
         <SectionTitle title={title} />
-        <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { tieuDe: '', donVi: '', thoiGian: '', moTa: '' }])}>
-          <Plus size={15} /> Thêm
-        </button>
+        <div className="flex gap-2">
+          {onAiSuggest && (
+            <button type="button" className={`${secondaryBtn} border-blue-200 text-blue-700 hover:border-blue-300 hover:bg-blue-50`} onClick={onAiSuggest}>
+              <Brain size={15} /> Gợi ý AI
+            </button>
+          )}
+          <button type="button" className={secondaryBtn} onClick={() => onChange([...value, { tieuDe: '', donVi: '', thoiGian: '', moTa: '' }])}>
+            <Plus size={15} /> Thêm
+          </button>
+        </div>
       </div>
       <div className="grid gap-3">
         {value.map((item, index) => (
@@ -829,37 +836,151 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
     return next
   }
 
+  async function taiXuongFilePdf(url: string, tenTep: string) {
+    try {
+      const response = await fetch(url)
+      if (!response.ok) throw new Error('Không tải được file')
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = tenTep.endsWith('.pdf') ? tenTep : `${tenTep}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      toast.error('Không thể tải file PDF. Hãy thử nút Xem PDF để mở trực tiếp.')
+    }
+  }
+
   function goiYAi() {
     const chucDanh = cv.chucDanh || 'Fullstack Developer'
+    const ungVien = data.ungVien
     capNhatCv(value => ({
       ...value,
+      // Thông tin cá nhân
+      hoTenHienThi: value.hoTenHienThi || ungVien?.hoTen || 'Nguyễn Văn A',
+      chucDanh: value.chucDanh || chucDanh,
+      soDienThoai: value.soDienThoai || ungVien?.soDienThoai || '0901234567',
+      emailLienHe: value.emailLienHe || ungVien?.email || 'candidate@email.com',
+      diaDiem: value.diaDiem || 'Đà Nẵng, Việt Nam',
+      github: value.github || 'github.com/yourusername',
+      portfolioUrl: value.portfolioUrl || 'yourportfolio.com',
+      // Tóm tắt
       tomTatKinhNghiem: value.tomTatKinhNghiem.length ? value.tomTatKinhNghiem : [
-        `${chucDanh} tập trung xây dựng sản phẩm web có kiến trúc rõ ràng, responsive tốt và trải nghiệm người dùng mượt.`,
-        'Có kinh nghiệm làm việc với frontend hiện đại, backend API, xác thực người dùng và tối ưu dữ liệu.',
-        'Ưu tiên code dễ bảo trì, quy trình Git rõ ràng và phối hợp tốt với team sản phẩm.',
+        `${chucDanh} với 2+ năm kinh nghiệm xây dựng ứng dụng web có kiến trúc rõ ràng, responsive và UX mượt mà.`,
+        'Thành thạo React/TypeScript ở frontend, Node.js/Express ở backend, MongoDB/PostgreSQL về database.',
+        'Có kinh nghiệm RESTful API, JWT authentication, RBAC, Socket.io realtime.',
+        'Ưu tiên code dễ bảo trì, test coverage cao, quy trình Git rõ ràng và phối hợp hiệu quả với team.',
+        'Tự học nhanh công nghệ mới, đọc tài liệu tiếng Anh thành thạo.',
       ],
-      kyNangMem: value.kyNangMem.length ? value.kyNangMem : ['Giao tiếp rõ ràng, chủ động phối hợp đội nhóm.', 'Tư duy logic, học nhanh công nghệ mới.', 'Làm việc có kế hoạch và chịu áp lực tốt.'],
+      // Kỹ năng mềm
+      kyNangMem: value.kyNangMem.length ? value.kyNangMem : [
+        'Giao tiếp rõ ràng, chủ động phối hợp và hỗ trợ đội nhóm.',
+        'Tư duy logic, phân tích vấn đề và đưa ra giải pháp hiệu quả.',
+        'Học nhanh công nghệ mới, thích nghi tốt với thay đổi.',
+        'Làm việc có kế hoạch, quản lý thời gian tốt và chịu áp lực cao.',
+        'Tinh thần trách nhiệm, chủ động cải thiện quy trình làm việc.',
+      ],
+      // Kỹ năng lập trình
       kyNangLapTrinh: value.kyNangLapTrinh.length ? value.kyNangLapTrinh : [
-        { nhom: 'Frontend', muc: ['JavaScript, TypeScript, HTML, CSS.', 'ReactJS, NextJS, responsive UI, component architecture.'] },
-        { nhom: 'Backend', muc: ['Node.js, RESTful API, authentication & authorization.', 'Database design, role-based access control.'] },
-        { nhom: 'Tools', muc: ['Git, GitHub, deployment, VPS/hosting/domain.'] },
+        { nhom: 'Frontend', muc: ['JavaScript (ES6+), TypeScript', 'ReactJS, NextJS, React Router, React Query', 'HTML5, CSS3, Tailwind CSS, Responsive Design', 'State Management (Context API, Zustand)', 'Performance Optimization, Code Splitting'] },
+        { nhom: 'Backend', muc: ['Node.js, Express.js, RESTful API Design', 'Authentication & Authorization (JWT, OAuth)', 'Database: MongoDB, PostgreSQL, Prisma ORM', 'Real-time: Socket.io, WebSocket'] },
+        { nhom: 'DevOps & Tools', muc: ['Git, GitHub, GitLab (Branching, PR, Code Review)', 'Docker, Docker Compose', 'Deployment: VPS, Vercel, AWS', 'CI/CD: GitHub Actions'] },
+        { nhom: 'Testing & Quality', muc: ['Unit Testing: Jest, Vitest', 'Debugging: Chrome DevTools, Postman', 'Code Quality: ESLint, Prettier'] },
       ],
+      // Học vấn
+      hocVan: value.hocVan.length ? value.hocVan : [
+        {
+          tieuDe: 'Cử nhân Công nghệ thông tin',
+          donVi: 'Đại học Đà Nẵng',
+          thoiGian: '2019 - 2023',
+          moTa: 'GPA: 3.5/4.0. Chuyên ngành Công nghệ phần mềm.',
+        },
+      ],
+      // Kinh nghiệm làm việc
+      kinhNghiemLam: value.kinhNghiemLam.length ? value.kinhNghiemLam : [
+        {
+          tieuDe: chucDanh,
+          donVi: 'Công ty TNHH Công nghệ ABC',
+          thoiGian: '06/2023 - nay',
+          moTa: 'Phát triển và bảo trì ứng dụng web cho khách hàng trong và ngoài nước. Tham gia thiết kế hệ thống, review code và mentor junior developer.',
+        },
+        {
+          tieuDe: 'Junior Developer (Intern)',
+          donVi: 'Công ty Phần mềm XYZ',
+          thoiGian: '01/2023 - 05/2023',
+          moTa: 'Intern phát triển tính năng mới, fix bug và viết unit test cho dự án web.',
+        },
+      ],
+      // Chứng chỉ
+      chungChi: value.chungChi.length ? value.chungChi : [
+        {
+          tieuDe: 'AWS Certified Developer - Associate',
+          donVi: 'Amazon Web Services',
+          thoiGian: '2024',
+          moTa: 'Chứng chỉ phát triển và triển khai ứng dụng trên nền tảng AWS.',
+        },
+        {
+          tieuDe: 'JavaScript Algorithms and Data Structures',
+          donVi: 'freeCodeCamp',
+          thoiGian: '2023',
+          moTa: 'Hoàn thành 300+ giờ lập trình về thuật toán và cấu trúc dữ liệu.',
+        },
+      ],
+      // Bài viết kỹ thuật
+      baiVietKyThuat: value.baiVietKyThuat.length ? value.baiVietKyThuat : [
+        { nhan: 'Tối ưu hiệu suất React App với Code Splitting', url: 'https://yourblog.com/optimize-react' },
+        { nhan: 'Xây dựng RESTful API chuẩn với Node.js', url: 'https://yourblog.com/restful-nodejs' },
+      ],
+      // Dự án chi tiết
       duAnChiTiet: value.duAnChiTiet.length ? value.duAnChiTiet : [
         {
           tenDuAn: 'ITJob Recruitment Platform',
-          thoiGian: '2025 - nay',
+          thoiGian: '01/2025 - nay',
           viTri: chucDanh,
-          moTa: 'Hệ thống tuyển dụng CNTT cho ứng viên, nhà tuyển dụng và quản trị viên.',
-          trachNhiem: ['Xây dựng dashboard theo vai trò.', 'Thiết kế luồng ứng tuyển, CV, portfolio và lịch phỏng vấn.', 'Tối ưu responsive và trải nghiệm người dùng.'],
+          moTa: 'Hệ thống tuyển dụng CNTT toàn diện: tìm kiếm việc làm, ứng tuyển, quản lý CV, lịch phỏng vấn và chat realtime giữa ứng viên và nhà tuyển dụng.',
+          trachNhiem: [
+            'Thiết kế và xây dựng dashboard theo vai trò (ứng viên, nhà tuyển dụng, admin).',
+            'Phát triển CV Builder: tạo, chỉnh sửa, export PDF chuẩn A4.',
+            'Xây dựng luồng ứng tuyển hoàn chỉnh: tìm việc, lưu việc, nộp hồ sơ, theo dõi trạng thái.',
+            'Implement lịch phỏng vấn với xác nhận, đổi lịch và thông báo realtime (Socket.io).',
+            'Tối ưu responsive cho mobile, tablet, desktop.',
+            'Xây dựng search với filter phức tạp: kỹ năng, địa điểm, lương, kinh nghiệm.',
+          ],
           heDieuHanh: 'Windows, Linux',
           ngonNgu: 'TypeScript, JavaScript',
-          framework: 'ReactJS, Node.js, Express, MongoDB',
-          kyThuat: 'RESTful API, JWT, RBAC, Tailwind CSS',
+          framework: 'ReactJS, Node.js, Express, Prisma ORM',
+          kyThuat: 'RESTful API, JWT, RBAC, Socket.io, MongoDB, PostgreSQL',
           diaDiem: 'Đà Nẵng, Việt Nam',
+          lienKet: [
+            { nhan: 'Demo', url: 'https://effortit.site' },
+            { nhan: 'GitHub', url: 'https://github.com/yourusername/itjob' },
+          ],
+        },
+        {
+          tenDuAn: 'E-commerce Admin Dashboard',
+          thoiGian: '06/2024 - 12/2024',
+          viTri: 'Frontend Developer',
+          moTa: 'Dashboard quản lý thương mại điện tử: sản phẩm, đơn hàng, khách hàng và báo cáo thống kê.',
+          trachNhiem: [
+            'Xây dựng giao diện quản lý sản phẩm với CRUD, upload ảnh, quản lý variants.',
+            'Phát triển quản lý đơn hàng với filter, sort và export Excel.',
+            'Tạo charts (Line, Bar, Pie) hiển thị doanh thu, đơn hàng theo thời gian.',
+            'Tối ưu performance với code splitting và lazy loading.',
+          ],
+          heDieuHanh: 'Windows',
+          ngonNgu: 'TypeScript',
+          framework: 'ReactJS, Ant Design, Recharts',
+          kyThuat: 'RESTful API, React Query, Zustand',
+          diaDiem: 'Remote',
+          lienKet: [{ nhan: 'Demo', url: 'https://ecommerce-admin-demo.com' }],
         },
       ],
     }))
-    toast.success('Đã gợi ý nội dung CV IT.')
+    setCoThayDoiChuaLuu(true)
+    toast.success('Đã điền gợi ý AI đầy đủ. Hãy chỉnh sửa theo thông tin thực của bạn!')
   }
 
   async function luuStudio() {
@@ -1157,8 +1278,8 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           }
         }
       `}</style>
-      <div className="cv-studio-top mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+      <div className="cv-studio-top mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0b5c91]">CV Studio</p>
           <div className="mt-1 flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-black text-slate-950">Tạo CV IT theo chuẩn A4</h2>
@@ -1169,7 +1290,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           </div>
           <p className="mt-1 max-w-3xl text-sm font-semibold text-slate-500">Nhập đủ thông tin như mẫu CV trong `index.html`: thông tin cá nhân, summary, kỹ năng, học vấn, bài viết kỹ thuật và kinh nghiệm theo dự án.</p>
         </div>
-        <div className="cv-studio-actions flex flex-wrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
+        <div className="cv-studio-actions flex shrink-0 flex-nowrap items-center justify-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
           <button type="button" className={primaryBtn} disabled={dangLuu || dangTaiAnhCv || dangTaiFileCv} onClick={luuStudio}><Save size={16} /> {dangLuu ? 'Đang lưu...' : 'Lưu CV'}</button>
           <button type="button" className={secondaryBtn} onClick={() => taiPdf()} disabled={!coNoiDungDeIn}><Download size={16} /> Tải PDF</button>
           <button type="button" className={secondaryBtn} onClick={() => document.getElementById('cv-file-upload')?.click()} disabled={dangTaiFileCv}><FileUp size={16} /> {dangTaiFileCv ? 'Đang upload...' : 'Upload PDF'}</button>
@@ -1233,9 +1354,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" className={smallBtn} disabled={!item.fileCvData} onClick={() => item.fileCvData && window.open(taoUrlTaiNguyen(item.fileCvData), '_blank', 'noopener,noreferrer')}><Eye size={14} /> Xem PDF</button>
                   {item.fileCvData && (
-                    <a className={smallBtn} href={taoUrlTaiNguyen(item.fileCvData)} download={item.fileCvTen || 'cv.pdf'}>
+                    <button type="button" className={smallBtn} onClick={() => void taiXuongFilePdf(taoUrlTaiNguyen(item.fileCvData!), item.fileCvTen || 'cv.pdf')}>
                       <Download size={14} /> Tải PDF
-                    </a>
+                    </button>
                   )}
                   {!item.cvChinh && (
                     <button
@@ -1305,9 +1426,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           <CvTextList title="Experience Summary" value={cv.tomTatKinhNghiem} onChange={v => capNhatCv({ ...cv, tomTatKinhNghiem: v })} placeholder="Full-stack Web Developer focusing on building scalable web products..." />
           <CvTextList title="Soft Skills" value={cv.kyNangMem} onChange={v => capNhatCv({ ...cv, kyNangMem: v })} placeholder="Excellent communication, teamwork, fast learning..." />
           <SkillEditor value={cv.kyNangLapTrinh} onChange={v => capNhatCv({ ...cv, kyNangLapTrinh: v })} />
-          <BasicItemsEditor title="Kinh nghiệm làm việc" value={cv.kinhNghiemLam} onChange={v => capNhatCv({ ...cv, kinhNghiemLam: v })} />
-          <BasicItemsEditor title="Học vấn" value={cv.hocVan} onChange={v => capNhatCv({ ...cv, hocVan: v })} />
-          <BasicItemsEditor title="Chứng chỉ" value={cv.chungChi} onChange={v => capNhatCv({ ...cv, chungChi: v })} />
+          <BasicItemsEditor title="Kinh nghiệm làm việc" value={cv.kinhNghiemLam} onChange={v => capNhatCv({ ...cv, kinhNghiemLam: v })} onAiSuggest={goiYAi} />
+          <BasicItemsEditor title="Học vấn" value={cv.hocVan} onChange={v => capNhatCv({ ...cv, hocVan: v })} onAiSuggest={goiYAi} />
+          <BasicItemsEditor title="Chứng chỉ" value={cv.chungChi} onChange={v => capNhatCv({ ...cv, chungChi: v })} onAiSuggest={goiYAi} />
           <ProjectEditor value={cv.duAnChiTiet} onChange={v => capNhatCv({ ...cv, duAnChiTiet: v })} />
         </div>
 

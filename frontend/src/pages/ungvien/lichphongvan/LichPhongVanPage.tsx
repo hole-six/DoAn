@@ -65,49 +65,51 @@ function InterviewCard({ item, active, onOpen }: { item: LichPhongVan; active?: 
   return (
     <article
       onClick={onOpen}
-      className={`grid w-full cursor-pointer gap-3 rounded-2xl border bg-white px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md lg:grid-cols-[minmax(0,1fr)_auto] ${active ? 'border-sky-400 bg-sky-50/60 shadow-sky-100' : 'border-slate-200'}`}
+      className={`flex cursor-pointer items-center gap-4 rounded-2xl border bg-white px-4 py-3 text-left shadow-sm transition hover:border-sky-300 hover:shadow-md ${active ? 'border-sky-400 bg-sky-50/60' : 'border-slate-200'}`}
     >
-      <div className="flex min-w-0 items-start gap-3">
-        <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-          {company?.logo ? (
-            <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1" />
-          ) : (
-            <Building2 size={18} className="text-slate-400" />
-          )}
-        </span>
+      {/* Logo */}
+      <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+        {company?.logo ? (
+          <img src={imageUrl(company.logo)} alt={company.tenCongTy ?? 'Logo'} className="h-full w-full object-contain p-1" />
+        ) : (
+          <Building2 size={20} className="text-slate-400" />
+        )}
+      </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate text-base font-black text-slate-950">{job?.tieuDe ?? 'Lịch phỏng vấn'}</p>
-            <Badge tone={nhom.tone}>{nhom.label}</Badge>
-            <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
-          </div>
-          <p className="mt-1 truncate text-sm font-bold uppercase tracking-[0.12em] text-sky-700">
-            {company?.tenCongTy ?? 'Nhà tuyển dụng'}
-          </p>
-          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold text-slate-500">
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarDays size={13} className="shrink-0 text-sky-600" />
-              {dateOnly(item.thoiGianBatDau)}
+      {/* Thông tin chính */}
+      <div className="min-w-0 flex-1">
+        {/* Dòng 1: tiêu đề + badges */}
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate text-sm font-black text-slate-950">{job?.tieuDe ?? 'Lịch phỏng vấn'}</p>
+          <Badge tone={nhom.tone}>{nhom.label}</Badge>
+          <Badge tone={toneForInterviewStatus(item.trangThai)}>{interviewStatusLabel[item.trangThai] ?? item.trangThai}</Badge>
+        </div>
+
+        {/* Dòng 2: công ty + meta inline */}
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs font-semibold text-slate-500">
+          <span className="font-bold uppercase tracking-wide text-sky-700">{company?.tenCongTy ?? 'Nhà tuyển dụng'}</span>
+          <span className="inline-flex items-center gap-1">
+            <CalendarDays size={12} className="text-sky-500" />
+            {dateOnly(item.thoiGianBatDau)}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Clock size={12} className="text-sky-500" />
+            {timeRange(item)}
+          </span>
+          {diaDiem && (
+            <span className="inline-flex max-w-[260px] items-center gap-1">
+              {item.hinhThuc === 'offline'
+                ? <MapPin size={12} className="shrink-0 text-sky-500" />
+                : <Monitor size={12} className="shrink-0 text-sky-500" />}
+              <span className="truncate">{diaDiem}</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={13} className="shrink-0 text-sky-600" />
-              {timeRange(item)}
-            </span>
-            {diaDiem && (
-              <span className="inline-flex max-w-[320px] items-center gap-1.5">
-                {item.hinhThuc === 'offline'
-                  ? <MapPin size={13} className="shrink-0 text-sky-600" />
-                  : <Monitor size={13} className="shrink-0 text-sky-600" />}
-                <span className="truncate">{diaDiem}</span>
-              </span>
-            )}
-          </p>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-end lg:self-center">
-        <Button size="sm" variant="secondary" icon={<ExternalLink size={14} />}>Chi tiết</Button>
+      {/* Nút chi tiết */}
+      <div className="shrink-0" onClick={e => e.stopPropagation()}>
+        <Button size="sm" variant="secondary" icon={<ExternalLink size={13} />} onClick={onOpen}>Chi tiết</Button>
       </div>
     </article>
   )

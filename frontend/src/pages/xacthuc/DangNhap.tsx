@@ -6,7 +6,6 @@ import logoWeb from '../../assets/logoweb.png'
 import dangNhapImg from '../../assets/dangnhap.png'
 import { duongDanTheoVaiTro, luuPhienDangNhap } from '../../lib/auth'
 import { API_URL, GOOGLE_CLIENT_ID } from '../../lib/env'
-import './auth-styles.css'
 
 const inputWrap =
   'mt-2 flex h-14 items-center overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm transition focus-within:border-[#0b5c91] focus-within:ring-4 focus-within:ring-[#0b5c91]/10'

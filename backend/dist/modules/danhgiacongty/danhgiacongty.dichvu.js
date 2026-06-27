@@ -2,57 +2,75 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dichVuDanhGiaCongTy = void 0;
 const loiungdung_js_1 = require("../../dungchung/loiungdung.js");
-const prismaHelper_js_1 = require("../../dungchung/prismaHelper.js");
 const prisma_js_1 = require("../../cauhinh/prisma.js");
 const hosoungtuyen_dichvu_js_1 = require("../hosoungtuyen/hosoungtuyen.dichvu.js");
 const danhgiacongty_mohinh_js_1 = require("./danhgiacongty.mohinh.js");
-function id(value) {
+function idOf(value) {
     return String(value?._id ?? value?.id ?? value ?? '');
 }
-async function hydrate(rows) {
-    const [ungVienRows, congTyRows, hoSoRows] = await Promise.all([
-        prisma_js_1.prisma.ungVien.findMany({ where: { id: { in: [...new Set(rows.map(row => row.maUngVien).filter(Boolean))] } } }),
-        prisma_js_1.prisma.nhaTuyenDung.findMany({ where: { id: { in: [...new Set(rows.map(row => row.maNhaTuyenDung).filter(Boolean))] } } }),
-        prisma_js_1.prisma.hoSoUngTuyen.findMany({ where: { id: { in: [...new Set(rows.map(row => row.maHoSoUngTuyen).filter(Boolean))] } } }),
-    ]);
-    const ungVienDayDu = await (0, prismaHelper_js_1.ganNguoiDungChoUngVien)(ungVienRows);
-    const ungVienMap = new Map(ungVienDayDu.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
-    const congTyMap = new Map(congTyRows.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
-    const hoSoMap = new Map(hoSoRows.map(row => [row.id, (0, prismaHelper_js_1.coId)(row)]));
-    return rows.map(row => (0, prismaHelper_js_1.coId)({
-        ...row,
-        maUngVien: ungVienMap.get(row.maUngVien) ?? row.maUngVien,
-        maNhaTuyenDung: congTyMap.get(row.maNhaTuyenDung) ?? row.maNhaTuyenDung,
-        maHoSoUngTuyen: row.maHoSoUngTuyen ? (hoSoMap.get(row.maHoSoUngTuyen) ?? row.maHoSoUngTuyen) : null,
-    }));
+// Include cho ungVien và nhaTuyenDung (UngVien không có relation nguoiDung trong schema)
+const includeDefault = {
+    ungVien: {
+        select: {
+            id: true,
+            viTriMongMuon: true,
+            maNguoiDung: true,
+        },
+    },
+    nhaTuyenDung: {
+        select: { id: true, tenCongTy: true, logo: true },
+    },
+    hoSoUngTuyen: {
+        select: { id: true, trangThai: true },
+    },
+};
+// Fetch nguoiDung cho danh sách ungVien (UngVien.maNguoiDung -> NguoiDung)
+async function ganNguoiDungVaoUngVien(rows) {
+    const maNguoiDungIds = [...new Set(rows.map(r => r.ungVien?.maNguoiDung).filter(Boolean))];
+    if (!maNguoiDungIds.length)
+        return new Map();
+    const nguoiDungRows = await prisma_js_1.prisma.nguoiDung.findMany({
+        where: { id: { in: maNguoiDungIds } },
+        select: { id: true, hoTen: true, email: true },
+    });
+    return new Map(nguoiDungRows.map(nd => [nd.id, nd]));
 }
-function chuanHoaDanhGia(taiLieu) {
-    const duLieu = taiLieu ?? {};
+function mapDanhGia(row, nguoiDungMap) {
+    if (!row)
+        return row;
+    const nguoiDung = row.ungVien?.maNguoiDung ? nguoiDungMap.get(row.ungVien.maNguoiDung) : undefined;
     return {
-        id: String(duLieu.id ?? duLieu._id),
-        _id: String(duLieu.id ?? duLieu._id),
-        maUngVien: duLieu.maUngVien?._id ? String(duLieu.maUngVien._id) : String(duLieu.maUngVien),
-        maNhaTuyenDung: duLieu.maNhaTuyenDung?._id ? String(duLieu.maNhaTuyenDung._id) : String(duLieu.maNhaTuyenDung),
-        maHoSoUngTuyen: duLieu.maHoSoUngTuyen?._id ? String(duLieu.maHoSoUngTuyen._id) : duLieu.maHoSoUngTuyen ? String(duLieu.maHoSoUngTuyen) : undefined,
-        ungVien: duLieu.maUngVien?._id
+        id: row.id,
+        _id: row.id,
+        maUngVien: row.maUngVien,
+        maNhaTuyenDung: row.maNhaTuyenDung,
+        maHoSoUngTuyen: row.maHoSoUngTuyen ?? undefined,
+        ungVien: row.ungVien
             ? {
-                id: String(duLieu.maUngVien._id),
-                maNguoiDung: duLieu.maUngVien.maNguoiDung?._id ? String(duLieu.maUngVien.maNguoiDung._id) : String(duLieu.maUngVien.maNguoiDung),
-                hoTen: duLieu.maUngVien.maNguoiDung?.hoTen,
-                email: duLieu.maUngVien.maNguoiDung?.email,
-                viTriMongMuon: duLieu.maUngVien.viTriMongMuon,
+                id: row.ungVien.id,
+                viTriMongMuon: row.ungVien.viTriMongMuon,
+                hoTen: nguoiDung?.hoTen,
+                email: nguoiDung?.email,
             }
             : undefined,
-        nhaTuyenDung: duLieu.maNhaTuyenDung?._id
-            ? { id: String(duLieu.maNhaTuyenDung._id), tenCongTy: duLieu.maNhaTuyenDung.tenCongTy, logo: duLieu.maNhaTuyenDung.logo }
+        nhaTuyenDung: row.nhaTuyenDung
+            ? {
+                id: row.nhaTuyenDung.id,
+                tenCongTy: row.nhaTuyenDung.tenCongTy,
+                logo: row.nhaTuyenDung.logo,
+            }
             : undefined,
-        diem: duLieu.diem,
-        noiDung: duLieu.noiDung,
-        anDanh: duLieu.anDanh,
-        daDuyet: duLieu.daDuyet,
-        ngayTao: duLieu.ngayTao,
-        ngayCapNhat: duLieu.ngayCapNhat,
+        diem: row.diem,
+        noiDung: row.noiDung,
+        anDanh: row.anDanh,
+        daDuyet: row.daDuyet,
+        ngayTao: row.ngayTao,
+        ngayCapNhat: row.ngayCapNhat,
     };
+}
+async function mapNhieu(rows) {
+    const nguoiDungMap = await ganNguoiDungVaoUngVien(rows);
+    return rows.map(row => mapDanhGia(row, nguoiDungMap));
 }
 async function layUngVienCuaNguoiDung(nguoiDung) {
     if (nguoiDung.vaiTro !== 'ung_vien')
@@ -60,12 +78,12 @@ async function layUngVienCuaNguoiDung(nguoiDung) {
     const ungVien = await prisma_js_1.prisma.ungVien.findUnique({ where: { maNguoiDung: nguoiDung.id } });
     if (!ungVien)
         throw new loiungdung_js_1.LoiUngDung('Bạn cần tạo hồ sơ ứng viên trước khi đánh giá công ty', 422, 'CANDIDATE_PROFILE_REQUIRED');
-    return (0, prismaHelper_js_1.coId)(ungVien);
+    return ungVien;
 }
-async function damBaoDaCoKetQuaPhongVan(hoSo) {
+async function damBaoDaCoKetQuaPhongVan(maHoSoUngTuyen) {
     const lichPhongVan = await prisma_js_1.prisma.lichPhongVan.findFirst({
         where: {
-            maHoSoUngTuyen: id(hoSo),
+            maHoSoUngTuyen,
             trangThai: 'hoan_thanh',
             ketQua: { in: ['dat', 'khong_dat'] },
         },
@@ -75,51 +93,61 @@ async function damBaoDaCoKetQuaPhongVan(hoSo) {
         throw new loiungdung_js_1.LoiUngDung('Bạn chỉ có thể đánh giá công ty sau khi phỏng vấn hoàn tất và đã có kết quả.', 409, 'REVIEW_REQUIRES_INTERVIEW_RESULT');
     }
 }
-async function layDanhGiaDayDu(where, many = false) {
-    const rows = many
-        ? await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findMany({ where, orderBy: { ngayTao: 'desc' }, take: 300 })
-        : await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findMany({ where, take: 1 });
-    const hydrated = await hydrate(rows);
-    return many ? hydrated : hydrated[0];
-}
 exports.dichVuDanhGiaCongTy = {
     async layDanhSach() {
-        const danhSach = await layDanhGiaDayDu({}, true);
-        return danhSach.map(chuanHoaDanhGia);
+        const rows = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findMany({
+            orderBy: { ngayTao: 'desc' },
+            take: 300,
+            include: includeDefault,
+        });
+        return mapNhieu(rows);
     },
     async layCuaUngVien(nguoiDung) {
         const ungVien = await layUngVienCuaNguoiDung(nguoiDung);
-        const danhSach = await layDanhGiaDayDu({ maUngVien: id(ungVien) }, true);
-        return danhSach.map(chuanHoaDanhGia);
+        const rows = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findMany({
+            where: { maUngVien: ungVien.id },
+            orderBy: { ngayTao: 'desc' },
+            take: 300,
+            include: includeDefault,
+        });
+        return mapNhieu(rows);
     },
     async layTheoMa(ma) {
-        const duLieu = await layDanhGiaDayDu({ id: ma });
-        if (!duLieu)
+        const row = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findUnique({ where: { id: ma }, include: includeDefault });
+        if (!row)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty', 404);
-        return chuanHoaDanhGia(duLieu);
+        return mapNhieu([row]).then(list => list[0]);
     },
     async taoMoi(duLieu) {
         const ketQua = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.create({ data: duLieu });
-        return this.layTheoMa(String(ketQua.id));
+        return this.layTheoMa(ketQua.id);
     },
     async taoTuHoSo(nguoiDung, maHoSoUngTuyen, duLieu) {
         const ungVien = await layUngVienCuaNguoiDung(nguoiDung);
         const hoSo = await (0, hosoungtuyen_dichvu_js_1.layHoSoUngTuyenDayDuNoiBo)(maHoSoUngTuyen);
         if (!hoSo)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy hồ sơ ứng tuyển', 404, 'APPLICATION_NOT_FOUND');
-        if (id(hoSo.maUngVien) !== id(ungVien))
+        if (idOf(hoSo.maUngVien) !== ungVien.id)
             throw new loiungdung_js_1.LoiUngDung('Bạn không có quyền đánh giá từ hồ sơ ứng tuyển này', 403, 'FORBIDDEN');
-        await damBaoDaCoKetQuaPhongVan(hoSo);
-        const maNhaTuyenDung = id(hoSo.maTinTuyenDung?.maNhaTuyenDung);
+        await damBaoDaCoKetQuaPhongVan(maHoSoUngTuyen);
+        const maNhaTuyenDung = idOf(hoSo.maTinTuyenDung?.maNhaTuyenDung);
         if (!maNhaTuyenDung)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy công ty của hồ sơ ứng tuyển', 404, 'COMPANY_NOT_FOUND');
         const daCoDanhGia = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findFirst({ where: { maHoSoUngTuyen }, select: { id: true } });
         if (daCoDanhGia)
             throw new loiungdung_js_1.LoiUngDung('Bạn đã đánh giá công ty từ hồ sơ ứng tuyển này.', 409, 'REVIEW_ALREADY_EXISTS');
         const ketQua = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.create({
-            data: { maUngVien: id(ungVien), maNhaTuyenDung, maHoSoUngTuyen, diem: duLieu.diem, noiDung: duLieu.noiDung, anDanh: duLieu.anDanh ?? false, daDuyet: false },
+            data: {
+                maUngVien: ungVien.id,
+                maNhaTuyenDung,
+                maHoSoUngTuyen,
+                diem: duLieu.diem,
+                noiDung: duLieu.noiDung,
+                anDanh: duLieu.anDanh ?? false,
+                daDuyet: false,
+            },
         });
-        return this.layTheoMa(id(ketQua));
+        return this.layTheoMa(ketQua.id);
     },
     async capNhat(ma, duLieu) {
         const hienTai = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findUnique({ where: { id: ma }, select: { id: true } });
@@ -129,10 +157,11 @@ exports.dichVuDanhGiaCongTy = {
         return this.layTheoMa(ma);
     },
     async xoa(ma) {
-        const ketQua = await layDanhGiaDayDu({ id: ma });
-        if (!ketQua)
+        const row = await danhgiacongty_mohinh_js_1.DanhGiaCongTy.findUnique({ where: { id: ma }, include: includeDefault });
+        if (!row)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy đánh giá công ty để xóa', 404);
         await danhgiacongty_mohinh_js_1.DanhGiaCongTy.delete({ where: { id: ma } });
-        return chuanHoaDanhGia(ketQua);
+        const mapped = await mapNhieu([row]);
+        return mapped[0];
     },
 };

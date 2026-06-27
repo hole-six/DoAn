@@ -164,4 +164,156 @@ export const dichVuUngVien = {
     const emptyMap = new Map<string, any>()
     return dinhDangUngVien({ ...hienTai, kyNangLienKet: [] }, emptyMap)
   },
+
+  async layDashboard(maNguoiDung: string) {
+    // 1. Lấy thông tin ứng viên
+    const ungVien = await UngVien.findUnique({ where: { maNguoiDung } })
+    
+    // Nếu không có ungVien, trả về dữ liệu rỗng
+    if (!ungVien) {
+      return {
+        thongKe: {
+          daUngTuyen: 0,
+          lichPhongVan: 0,
+          viecDaLuu: 0,
+          thongBaoMoi: 0
+        },
+        hoSoUngTuyen: [],
+        lichPhongVan: [],
+        hoSo: {
+          doHoanThien: 20,
+          luotXem: 0
+        }
+      }
+    }
+
+    // 2. Thống kê hồ sơ ứng tuyển
+    const hoSoUngTuyen = await prisma.hoSoUngTuyen.findMany({
+      where: { maUngVien: ungVien.id },
+      orderBy: { ngayNop: 'desc' },
+      take: 3,
+      include: {
+        tinTuyenDung: {
+          include: {
+            nhaTuyenDung: {
+              select: { tenCongTy: true }
+            }
+          }
+        },
+        lichSu: {
+          orderBy: { thoiGian: 'desc' },  // ✅ Sửa: ngayThayDoi -> thoiGian
+          take: 1
+        }
+      }
+    })
+
+    const tongHoSoUngTuyen = await prisma.hoSoUngTuyen.count({
+      where: { maUngVien: ungVien.id }
+    })
+
+    // 3. Lịch phỏng vấn sắp tới
+    const lichPhongVan = await prisma.lichPhongVan.findMany({
+      where: {
+        hoSoUngTuyen: {
+          maUngVien: ungVien.id
+        },
+        thoiGianBatDau: {
+          gte: new Date()
+        }
+      },
+      orderBy: { thoiGianBatDau: 'asc' },
+      take: 2,
+      include: {
+        hoSoUngTuyen: {
+          include: {
+            tinTuyenDung: {
+              include: {
+                nhaTuyenDung: {
+                  select: { tenCongTy: true }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const tongLichPhongVan = await prisma.lichPhongVan.count({
+      where: {
+        hoSoUngTuyen: {
+          maUngVien: ungVien.id
+        },
+        thoiGianBatDau: {
+          gte: new Date()
+        }
+      }
+    })
+
+    // 4. Việc làm đã lưu
+    const tongViecDaLuu = await prisma.viecLamDaLuu.count({
+      where: { maNguoiDung }  // ✅ Sửa: maUngVien -> maNguoiDung
+    })
+
+    // 5. Thông báo mới
+    const tongThongBaoMoi = await prisma.thongBao.count({
+      where: {
+        maNguoiDung,
+        daDoc: false
+      }
+    })
+
+    // 6. Tính độ hoàn thiện hồ sơ
+    let doHoanThien = 20 // Đã tạo tài khoản
+    if (ungVien.anhDaiDien) doHoanThien += 10
+    if (ungVien.tomTat) doHoanThien += 15
+    if (ungVien.viTriMongMuon) doHoanThien += 15
+    if (ungVien.diaChi) doHoanThien += 10
+    if (ungVien.kinhNghiem && ungVien.kinhNghiem > 0) doHoanThien += 15
+    
+    const coKyNang = await prisma.ungVienKyNang.count({
+      where: { maUngVien: ungVien.id }
+    })
+    if (coKyNang > 0) doHoanThien += 15
+
+    // 7. Đếm số lượng CV đã tạo (thay vì lượt xem)
+    const soCV = await prisma.hoSoNangLuc.count({
+      where: { maUngVien: ungVien.id }
+    })
+
+    return {
+      thongKe: {
+        daUngTuyen: tongHoSoUngTuyen,
+        lichPhongVan: tongLichPhongVan,
+        viecDaLuu: tongViecDaLuu,
+        thongBaoMoi: tongThongBaoMoi
+      },
+      hoSoUngTuyen: hoSoUngTuyen.map(hs => {
+        // lichSu là array nên có thể truy cập trực tiếp
+        // Lấy trạng thái mới nhất từ lịch sử hoặc dùng trangThai hiện tại
+        const trangThaiMoiNhat = hs.lichSu.length > 0 
+          ? hs.lichSu[0].trangThaiMoi
+          : hs.trangThai
+        
+        return {
+          id: String(hs.id),
+          viTri: hs.tinTuyenDung.tieuDe || 'N/A',  // ✅ Bỏ ? vì đã include
+          congTy: hs.tinTuyenDung.nhaTuyenDung.tenCongTy || 'N/A',  // ✅ Bỏ ? vì đã include
+          trangThai: trangThaiMoiNhat || 'Đang xem xét',
+          ngay: hs.ngayNop ? new Date(hs.ngayNop).toLocaleDateString('vi-VN') : 'N/A'
+        }
+      }),
+      lichPhongVan: lichPhongVan.map(lv => ({
+        id: String(lv.id),
+        viTri: lv.hoSoUngTuyen.tinTuyenDung.tieuDe || 'N/A',  // ✅ Bỏ ? vì đã include
+        congTy: lv.hoSoUngTuyen.tinTuyenDung.nhaTuyenDung.tenCongTy || 'N/A',  // ✅ Bỏ ? vì đã include
+        ngay: lv.thoiGianBatDau ? new Date(lv.thoiGianBatDau).toLocaleDateString('vi-VN') : 'N/A',
+        gio: lv.thoiGianBatDau ? new Date(lv.thoiGianBatDau).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+        hinh: lv.linkHop ? 'Online (Google Meet)' : 'Tại văn phòng'
+      })),
+      hoSo: {
+        doHoanThien,
+        luotXem: soCV  // Số CV đã tạo thay vì lượt xem
+      }
+    }
+  }
 }

@@ -1,0 +1,2921 @@
+{
+  "info": {
+    "name": "EffortIT - API ĐẦY ĐỦ (100+ endpoints)",
+    "description": "Collection HOÀN CHỈNH cho hệ thống tuyển dụng CNTT Đà Nẵng",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "Kiểm tra trạng thái API",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/trangthai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "trangthai"
+              ]
+            },
+            "description": "Kiểm tra trạng thái API"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Xác thực",
+      "item": [
+        {
+          "name": "Đăng nhập",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-nhap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-nhap"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ungvien@example.com\",\n  \"matKhau\": \"123456\"\n}"
+            },
+            "description": "Đăng nhập"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.duLieu && jsonData.duLieu.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.duLieu.accessToken);",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.duLieu.refreshToken);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Đăng nhập Google",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-nhap-google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-nhap-google"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credential\": \"google_token\"\n}"
+            },
+            "description": "Đăng nhập Google"
+          }
+        },
+        {
+          "name": "Làm mới token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/lam-moi-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "lam-moi-token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "description": "Làm mới token"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.duLieu && jsonData.duLieu.accessToken) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.duLieu.accessToken);",
+                  "        pm.collectionVariables.set('refresh_token', jsonData.duLieu.refreshToken);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quên mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/quen-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "quen-mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "description": "Quên mật khẩu"
+          }
+        },
+        {
+          "name": "Kiểm tra token reset",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dat-lai-mat-khau/:token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dat-lai-mat-khau",
+                ":token"
+              ],
+              "variable": [
+                {
+                  "key": "token",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Kiểm tra token reset"
+          }
+        },
+        {
+          "name": "Đặt lại mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dat-lai-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dat-lai-mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"\",\n  \"matKhauMoi\": \"newpass123\"\n}"
+            },
+            "description": "Đặt lại mật khẩu"
+          }
+        },
+        {
+          "name": "Thông tin tài khoản hiện tại",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/toi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "toi"
+              ]
+            },
+            "description": "Thông tin tài khoản hiện tại"
+          }
+        },
+        {
+          "name": "Đăng xuất",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/xacthuc/dang-xuat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "xacthuc",
+                "dang-xuat"
+              ]
+            },
+            "description": "Đăng xuất"
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 Người dùng",
+      "item": [
+        {
+          "name": "Danh sách người dùng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung"
+              ]
+            },
+            "description": "Danh sách người dùng"
+          }
+        },
+        {
+          "name": "Chi tiết người dùng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết người dùng"
+          }
+        },
+        {
+          "name": "Tạo người dùng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nguoidung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new@example.com\",\n  \"matKhau\": \"123456\",\n  \"hoTen\": \"Nguyễn Văn A\",\n  \"vaiTro\": \"ung_vien\"\n}"
+            },
+            "description": "Tạo người dùng"
+          }
+        },
+        {
+          "name": "Cập nhật người dùng",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nguoidung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hoTen\": \"Nguyễn Văn B\"\n}"
+            },
+            "description": "Cập nhật người dùng"
+          }
+        },
+        {
+          "name": "Xóa người dùng",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nguoidung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nguoidung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa người dùng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💼 Ứng viên",
+      "item": [
+        {
+          "name": "Dashboard ứng viên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ungvien/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien",
+                "dashboard"
+              ]
+            },
+            "description": "Dashboard ứng viên"
+          }
+        },
+        {
+          "name": "Hồ sơ của tôi",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ungvien/toi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien",
+                "toi"
+              ]
+            },
+            "description": "Hồ sơ của tôi"
+          }
+        },
+        {
+          "name": "Danh sách ứng viên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ungvien?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien"
+              ]
+            },
+            "description": "Danh sách ứng viên"
+          }
+        },
+        {
+          "name": "Chi tiết ứng viên",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ungvien/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết ứng viên"
+          }
+        },
+        {
+          "name": "Tạo hồ sơ ứng viên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ungvien",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maNguoiDung\": \"\",\n  \"hoTen\": \"Nguyễn Văn A\",\n  \"ngaySinh\": \"1995-01-01\",\n  \"soDienThoai\": \"0901234567\"\n}"
+            },
+            "description": "Tạo hồ sơ ứng viên"
+          }
+        },
+        {
+          "name": "Cập nhật ứng viên",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ungvien/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieuDe\": \"Senior Developer\"\n}"
+            },
+            "description": "Cập nhật ứng viên"
+          }
+        },
+        {
+          "name": "Xóa ứng viên",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ungvien/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ungvien",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa ứng viên"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📄 Hồ sơ năng lực (CV)",
+      "item": [
+        {
+          "name": "Danh sách CV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosonangluc?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc"
+              ]
+            },
+            "description": "Danh sách CV"
+          }
+        },
+        {
+          "name": "Chi tiết CV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosonangluc/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết CV"
+          }
+        },
+        {
+          "name": "Tạo CV mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosonangluc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maUngVien\": \"\",\n  \"tieuDe\": \"Full Stack Developer CV\",\n  \"kyNang\": [\n    \"React\",\n    \"Node.js\"\n  ]\n}"
+            },
+            "description": "Tạo CV mới"
+          }
+        },
+        {
+          "name": "Cập nhật CV",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosonangluc/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieuDe\": \"Senior Full Stack Developer\"\n}"
+            },
+            "description": "Cập nhật CV"
+          }
+        },
+        {
+          "name": "Xóa CV",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosonangluc/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa CV"
+          }
+        },
+        {
+          "name": "Upload ảnh CV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "anh",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/hosonangluc/upload-anh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc",
+                "upload-anh"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload file CV (PDF)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "tep",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/hosonangluc/upload-file",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosonangluc",
+                "upload-file"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Nhà tuyển dụng",
+      "item": [
+        {
+          "name": "Danh sách công ty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung"
+              ]
+            },
+            "description": "Danh sách công ty"
+          }
+        },
+        {
+          "name": "Chi tiết công ty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết công ty"
+          }
+        },
+        {
+          "name": "Tạo công ty",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenCongTy\": \"ABC Tech\",\n  \"email\": \"contact@abc.com\",\n  \"diaChi\": \"Đà Nẵng\",\n  \"moTa\": \"Công ty CNTT\"\n}"
+            },
+            "description": "Tạo công ty"
+          }
+        },
+        {
+          "name": "Cập nhật công ty",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenCongTy\": \"ABC Technology\"\n}"
+            },
+            "description": "Cập nhật công ty"
+          }
+        },
+        {
+          "name": "Xóa công ty",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa công ty"
+          }
+        },
+        {
+          "name": "Upload logo công ty",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/nhatuyendung/upload-logo",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "nhatuyendung",
+                "upload-logo"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📢 Tin tuyển dụng",
+      "item": [
+        {
+          "name": "Danh sách tin tuyển dụng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung"
+              ]
+            },
+            "description": "Danh sách tin tuyển dụng"
+          }
+        },
+        {
+          "name": "Chi tiết tin tuyển dụng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết tin tuyển dụng"
+          }
+        },
+        {
+          "name": "Tạo tin tuyển dụng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieuDe\": \"Tuyển lập trình viên React\",\n  \"moTa\": \"Cần 2 năm kinh nghiệm\",\n  \"mucLuong\": \"15-20 triệu\"\n}"
+            },
+            "description": "Tạo tin tuyển dụng"
+          }
+        },
+        {
+          "name": "Cập nhật tin",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieuDe\": \"Tuyển Senior React Developer\"\n}"
+            },
+            "description": "Cập nhật tin"
+          }
+        },
+        {
+          "name": "Xóa tin",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa tin"
+          }
+        },
+        {
+          "name": "Admin duyệt tin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma/duyet",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma",
+                "duyet"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Admin duyệt tin"
+          }
+        },
+        {
+          "name": "Admin từ chối tin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma/tu-choi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma",
+                "tu-choi"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Admin từ chối tin"
+          }
+        },
+        {
+          "name": "Mở lại tin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma/mo-lai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma",
+                "mo-lai"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Mở lại tin"
+          }
+        },
+        {
+          "name": "Tạm đóng tin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/:ma/tam-dong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                ":ma",
+                "tam-dong"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Tạm đóng tin"
+          }
+        },
+        {
+          "name": "Upload ảnh tin tuyển dụng",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "anh",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/tintuyendung/upload-anh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tintuyendung",
+                "upload-anh"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Hồ sơ ứng tuyển",
+      "item": [
+        {
+          "name": "Danh sách hồ sơ ứng tuyển",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen"
+              ]
+            },
+            "description": "Danh sách hồ sơ ứng tuyển"
+          }
+        },
+        {
+          "name": "Chi tiết hồ sơ ứng tuyển",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết hồ sơ ứng tuyển"
+          }
+        },
+        {
+          "name": "Ứng tuyển (có CV)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/ung-tuyen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                "ung-tuyen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maTinTuyenDung\": \"\",\n  \"maHoSoNangLuc\": \"\",\n  \"thuXinViec\": \"Tôi rất quan tâm...\"\n}"
+            },
+            "description": "Ứng tuyển (có CV)"
+          }
+        },
+        {
+          "name": "Ứng tuyển nhanh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/ung-tuyen-nhanh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                "ung-tuyen-nhanh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maTinTuyenDung\": \"\",\n  \"thuXinViec\": \"Tôi muốn ứng tuyển...\"\n}"
+            },
+            "description": "Ứng tuyển nhanh"
+          }
+        },
+        {
+          "name": "Cập nhật hồ sơ ứng tuyển",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ghiChu\": \"Update thông tin\"\n}"
+            },
+            "description": "Cập nhật hồ sơ ứng tuyển"
+          }
+        },
+        {
+          "name": "Xóa hồ sơ ứng tuyển",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa hồ sơ ứng tuyển"
+          }
+        },
+        {
+          "name": "Rút hồ sơ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma/rut",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma",
+                "rut"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ghiChu\": \"Đã tìm được việc khác\"\n}"
+            },
+            "description": "Rút hồ sơ"
+          }
+        },
+        {
+          "name": "NTD xem hồ sơ",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma/xem",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma",
+                "xem"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "NTD xem hồ sơ"
+          }
+        },
+        {
+          "name": "NTD đánh giá hồ sơ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma/danh-gia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma",
+                "danh-gia"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trangThai\": \"tu_choi\",\n  \"ghiChu\": \"Không đủ kinh nghiệm\",\n  \"giaiDoanTuChoi\": \"soi_cv\"\n}"
+            },
+            "description": "NTD đánh giá hồ sơ"
+          }
+        },
+        {
+          "name": "NTD mời phỏng vấn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/hosoungtuyen/:ma/moi-phong-van",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hosoungtuyen",
+                ":ma",
+                "moi-phong-van"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"thoiGian\": \"2024-12-25T14:00:00\",\n  \"diaDiem\": \"Văn phòng công ty\",\n  \"hinhThuc\": \"truc_tiep\"\n}"
+            },
+            "description": "NTD mời phỏng vấn"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Lịch phỏng vấn",
+      "item": [
+        {
+          "name": "Danh sách lịch phỏng vấn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan"
+              ]
+            },
+            "description": "Danh sách lịch phỏng vấn"
+          }
+        },
+        {
+          "name": "Chi tiết lịch phỏng vấn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết lịch phỏng vấn"
+          }
+        },
+        {
+          "name": "Cập nhật lịch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diaDiem\": \"Văn phòng mới\"\n}"
+            },
+            "description": "Cập nhật lịch"
+          }
+        },
+        {
+          "name": "Xóa lịch phỏng vấn",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa lịch phỏng vấn"
+          }
+        },
+        {
+          "name": "Ứng viên xác nhận lịch",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma/xac-nhan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma",
+                "xac-nhan"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Ứng viên xác nhận lịch"
+          }
+        },
+        {
+          "name": "Ứng viên yêu cầu đổi lịch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma/doi-lich",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma",
+                "doi-lich"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ghiChu\": \"Tôi bận vào giờ đó\"\n}"
+            },
+            "description": "Ứng viên yêu cầu đổi lịch"
+          }
+        },
+        {
+          "name": "NTD cập nhật lịch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma/cap-nhat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma",
+                "cap-nhat"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"thoiGian\": \"2024-12-26T15:00:00\",\n  \"diaDiem\": \"Online qua Zoom\"\n}"
+            },
+            "description": "NTD cập nhật lịch"
+          }
+        },
+        {
+          "name": "NTD cập nhật kết quả phỏng vấn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma/hoan-thanh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma",
+                "hoan-thanh"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ketQua\": \"dat\",\n  \"ghiChu\": \"Ứng viên phù hợp\"\n}"
+            },
+            "description": "NTD cập nhật kết quả phỏng vấn"
+          }
+        },
+        {
+          "name": "Hủy lịch phỏng vấn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichphongvan/:ma/huy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichphongvan",
+                ":ma",
+                "huy"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ghiChu\": \"Lý do hủy\"\n}"
+            },
+            "description": "Hủy lịch phỏng vấn"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⭐ Việc làm đã lưu",
+      "item": [
+        {
+          "name": "Danh sách việc làm đã lưu",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/viec-lam-da-luu",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "viec-lam-da-luu"
+              ]
+            },
+            "description": "Danh sách việc làm đã lưu"
+          }
+        },
+        {
+          "name": "Lưu việc làm",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/viec-lam-da-luu/:maTinTuyenDung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "viec-lam-da-luu",
+                ":maTinTuyenDung"
+              ],
+              "variable": [
+                {
+                  "key": "maTinTuyenDung",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Lưu việc làm"
+          }
+        },
+        {
+          "name": "Bỏ lưu việc làm",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/viec-lam-da-luu/:maTinTuyenDung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "viec-lam-da-luu",
+                ":maTinTuyenDung"
+              ],
+              "variable": [
+                {
+                  "key": "maTinTuyenDung",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Bỏ lưu việc làm"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎯 Danh mục kỹ năng",
+      "item": [
+        {
+          "name": "Danh sách kỹ năng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhmuckynang?trang=1&soPhanTu=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhmuckynang"
+              ]
+            },
+            "description": "Danh sách kỹ năng"
+          }
+        },
+        {
+          "name": "Chi tiết kỹ năng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhmuckynang/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhmuckynang",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết kỹ năng"
+          }
+        },
+        {
+          "name": "Tạo kỹ năng mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danhmuckynang",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhmuckynang"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenKyNang\": \"React.js\",\n  \"loai\": \"framework\",\n  \"moTa\": \"Thư viện JavaScript\"\n}"
+            },
+            "description": "Tạo kỹ năng mới"
+          }
+        },
+        {
+          "name": "Cập nhật kỹ năng",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danhmuckynang/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhmuckynang",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenKyNang\": \"ReactJS\"\n}"
+            },
+            "description": "Cập nhật kỹ năng"
+          }
+        },
+        {
+          "name": "Xóa kỹ năng",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhmuckynang/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhmuckynang",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa kỹ năng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Thông báo",
+      "item": [
+        {
+          "name": "Danh sách thông báo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao"
+              ]
+            },
+            "description": "Danh sách thông báo"
+          }
+        },
+        {
+          "name": "Đếm thông báo chưa đọc",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao/dem-chua-doc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                "dem-chua-doc"
+              ]
+            },
+            "description": "Đếm thông báo chưa đọc"
+          }
+        },
+        {
+          "name": "Chi tiết thông báo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết thông báo"
+          }
+        },
+        {
+          "name": "Tạo thông báo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/thongbao",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieuDe\": \"Thông báo mới\",\n  \"noiDung\": \"Nội dung thông báo\",\n  \"loai\": \"he_thong\"\n}"
+            },
+            "description": "Tạo thông báo"
+          }
+        },
+        {
+          "name": "Cập nhật thông báo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/thongbao/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"daDoc\": true\n}"
+            },
+            "description": "Cập nhật thông báo"
+          }
+        },
+        {
+          "name": "Đánh dấu đã đọc",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao/:id/danh-dau-da-doc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                ":id",
+                "danh-dau-da-doc"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Đánh dấu đã đọc"
+          }
+        },
+        {
+          "name": "Đánh dấu tất cả đã đọc",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao/danh-dau-tat-ca-da-doc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                "danh-dau-tat-ca-da-doc"
+              ]
+            },
+            "description": "Đánh dấu tất cả đã đọc"
+          }
+        },
+        {
+          "name": "Xóa thông báo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/thongbao/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "thongbao",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa thông báo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Tin nhắn",
+      "item": [
+        {
+          "name": "Admin: Danh bạ liên hệ hỗ trợ",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/admin-support/contacts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "admin-support",
+                "contacts"
+              ]
+            },
+            "description": "Admin: Danh bạ liên hệ hỗ trợ"
+          }
+        },
+        {
+          "name": "Danh sách cuộc trò chuyện",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen"
+              ]
+            },
+            "description": "Danh sách cuộc trò chuyện"
+          }
+        },
+        {
+          "name": "Tạo/lấy cuộc trò chuyện",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nguoiNhanId\": \"\"\n}"
+            },
+            "description": "Tạo/lấy cuộc trò chuyện"
+          }
+        },
+        {
+          "name": "Chi tiết cuộc trò chuyện",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết cuộc trò chuyện"
+          }
+        },
+        {
+          "name": "Đánh dấu đã đọc",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen/:id/danh-dau-da-doc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen",
+                ":id",
+                "danh-dau-da-doc"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Đánh dấu đã đọc"
+          }
+        },
+        {
+          "name": "Danh sách nhóm cộng đồng",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/nhom-cong-dong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "nhom-cong-dong"
+              ]
+            },
+            "description": "Danh sách nhóm cộng đồng"
+          }
+        },
+        {
+          "name": "Tham gia nhóm",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/nhom-cong-dong/tham-gia/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "nhom-cong-dong",
+                "tham-gia",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Tham gia nhóm"
+          }
+        },
+        {
+          "name": "Danh sách tin nhắn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen/:id/tin-nhan?trang=1&soPhanTu=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen",
+                ":id",
+                "tin-nhan"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Danh sách tin nhắn"
+          }
+        },
+        {
+          "name": "Gửi tin nhắn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/cuoc-tro-chuyen/:id/tin-nhan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "cuoc-tro-chuyen",
+                ":id",
+                "tin-nhan"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"noiDung\": \"Xin chào\"\n}"
+            },
+            "description": "Gửi tin nhắn"
+          }
+        },
+        {
+          "name": "Xóa tin nhắn",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/tin-nhan/:maTinNhan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "tin-nhan",
+                ":maTinNhan"
+              ],
+              "variable": [
+                {
+                  "key": "maTinNhan",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa tin nhắn"
+          }
+        },
+        {
+          "name": "Thêm phản ứng tin nhắn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/tinnhan/tin-nhan/:maTinNhan/phan-ung",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "tinnhan",
+                "tin-nhan",
+                ":maTinNhan",
+                "phan-ung"
+              ],
+              "variable": [
+                {
+                  "key": "maTinNhan",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loaiPhanUng\": \"like\"\n}"
+            },
+            "description": "Thêm phản ứng tin nhắn"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⭐ Đánh giá công ty",
+      "item": [
+        {
+          "name": "Danh sách đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhgiacongty?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhgiacongty"
+              ]
+            },
+            "description": "Danh sách đánh giá"
+          }
+        },
+        {
+          "name": "Chi tiết đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhgiacongty/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhgiacongty",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết đánh giá"
+          }
+        },
+        {
+          "name": "Tạo đánh giá",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danhgiacongty",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhgiacongty"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maNhaTuyenDung\": \"\",\n  \"diemSo\": 4.5,\n  \"tieuDe\": \"Môi trường tốt\",\n  \"noiDung\": \"Đánh giá chi tiết...\"\n}"
+            },
+            "description": "Tạo đánh giá"
+          }
+        },
+        {
+          "name": "Cập nhật đánh giá",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/danhgiacongty/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhgiacongty",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diemSo\": 5.0\n}"
+            },
+            "description": "Cập nhật đánh giá"
+          }
+        },
+        {
+          "name": "Xóa đánh giá",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/danhgiacongty/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "danhgiacongty",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa đánh giá"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📜 Lịch sử hồ sơ ứng tuyển",
+      "item": [
+        {
+          "name": "Danh sách lịch sử",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichsuhosoungtuyen?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichsuhosoungtuyen"
+              ]
+            },
+            "description": "Danh sách lịch sử"
+          }
+        },
+        {
+          "name": "Chi tiết lịch sử",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichsuhosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichsuhosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết lịch sử"
+          }
+        },
+        {
+          "name": "Tạo lịch sử",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichsuhosoungtuyen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichsuhosoungtuyen"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maHoSoUngTuyen\": \"\",\n  \"trangThaiCu\": \"cho_duyet\",\n  \"trangThaiMoi\": \"dang_xet_duyet\"\n}"
+            },
+            "description": "Tạo lịch sử"
+          }
+        },
+        {
+          "name": "Cập nhật lịch sử",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/lichsuhosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichsuhosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ghiChu\": \"Cập nhật ghi chú\"\n}"
+            },
+            "description": "Cập nhật lịch sử"
+          }
+        },
+        {
+          "name": "Xóa lịch sử",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/lichsuhosoungtuyen/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "lichsuhosoungtuyen",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa lịch sử"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI / Chatbot",
+      "item": [
+        {
+          "name": "Chat với AI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/chatbot",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "chatbot"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Tôi muốn tìm việc làm React Developer ở Đà Nẵng\"\n}"
+            },
+            "description": "Chat với AI"
+          }
+        },
+        {
+          "name": "AI gợi ý việc làm phù hợp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/goi-y-viec-lam",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "goi-y-viec-lam"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maUngVien\": \"\",\n  \"soLuong\": 10\n}"
+            },
+            "description": "AI gợi ý việc làm phù hợp"
+          }
+        },
+        {
+          "name": "AI phân tích CV",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/phan-tich-cv",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "phan-tich-cv"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maHoSoNangLuc\": \"\"\n}"
+            },
+            "description": "AI phân tích CV"
+          }
+        },
+        {
+          "name": "AI tính điểm khớp kỹ năng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ai/khop-ky-nang",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ai",
+                "khop-ky-nang"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"maHoSoNangLuc\": \"\",\n  \"maTinTuyenDung\": \"\"\n}"
+            },
+            "description": "AI tính điểm khớp kỹ năng"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚠️ Cảnh báo quản trị",
+      "item": [
+        {
+          "name": "Danh sách cảnh báo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/canhbaoquantri?trang=1&soPhanTu=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "canhbaoquantri"
+              ]
+            },
+            "description": "Danh sách cảnh báo"
+          }
+        },
+        {
+          "name": "Chi tiết cảnh báo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/canhbaoquantri/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "canhbaoquantri",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Chi tiết cảnh báo"
+          }
+        },
+        {
+          "name": "Tạo cảnh báo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/canhbaoquantri",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "canhbaoquantri"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loai\": \"spam\",\n  \"doiTuong\": \"user\",\n  \"doiTuongId\": \"\",\n  \"noiDung\": \"Người dùng spam\"\n}"
+            },
+            "description": "Tạo cảnh báo"
+          }
+        },
+        {
+          "name": "Cập nhật cảnh báo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/canhbaoquantri/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "canhbaoquantri",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trangThai\": \"da_xu_ly\"\n}"
+            },
+            "description": "Cập nhật cảnh báo"
+          }
+        },
+        {
+          "name": "Xóa cảnh báo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/canhbaoquantri/:ma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "canhbaoquantri",
+                ":ma"
+              ],
+              "variable": [
+                {
+                  "key": "ma",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Xóa cảnh báo"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚀 Deploy / SEO",
+      "item": [
+        {
+          "name": "Sitemap XML cho Google",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/deploy/sitemap.xml",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "deploy",
+                "sitemap.xml"
+              ]
+            },
+            "description": "Sitemap XML cho Google"
+          }
+        }
+      ]
+    }
+  ]
+}

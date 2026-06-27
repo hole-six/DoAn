@@ -650,6 +650,89 @@ export const dichVuAi = {
     }
   },
 
+  async goiYDienCv(nguoiDung: NguoiDungHienTai, yeuCau: { loai: 'kinh_nghiem' | 'hoc_van' | 'chung_chi'; viTri?: string; kinhNghiem?: string }) {
+    const ungVien = await layUngVienCuaNguoiDung(nguoiDung)
+    
+    const { loai, viTri = '', kinhNghiem = '' } = yeuCau
+    let prompt = ''
+    
+    switch (loai) {
+      case 'kinh_nghiem':
+        prompt = `Bạn là chuyên gia HR. Hãy gợi ý 3 mục kinh nghiệm làm việc phù hợp cho vị trí "${viTri}" với mức kinh nghiệm "${kinhNghiem}".
+        
+Trả về JSON array có format:
+[
+  {
+    "tieuDe": "Senior Frontend Developer", 
+    "donVi": "ABC Technology", 
+    "thoiGian": "01/2022 - 12/2023",
+    "moTa": "Phát triển giao diện web responsive với ReactJS, quản lý team 3 người"
+  }
+]
+
+Chỉ trả về JSON, không giải thích thêm.`
+        break
+        
+      case 'hoc_van':
+        prompt = `Bạn là chuyên gia HR. Hãy gợi ý 3 mục học vấn phù hợp cho vị trí IT "${viTri}".
+        
+Trả về JSON array có format:
+[
+  {
+    "tieuDe": "Cử nhân Công nghệ thông tin", 
+    "donVi": "Đại học FPT", 
+    "thoiGian": "2018 - 2022",
+    "moTa": "Chuyên ngành Kỹ thuật phần mềm, GPA: 8.2/10"
+  }
+]
+
+Chỉ trả về JSON, không giải thích thêm.`
+        break
+        
+      case 'chung_chi':
+        prompt = `Bạn là chuyên gia HR. Hãy gợi ý 3 chứng chỉ phù hợp cho vị trí IT "${viTri}".
+        
+Trả về JSON array có format:
+[
+  {
+    "tieuDe": "AWS Solutions Architect Associate", 
+    "donVi": "Amazon Web Services", 
+    "thoiGian": "03/2023",
+    "moTa": "Chứng chỉ thiết kế giải pháp cloud trên AWS"
+  }
+]
+
+Chỉ trả về JSON, không giải thích thêm.`
+        break
+    }
+
+    try {
+      const text = await goiGemini(prompt, 'application/json')
+      const result = parseJsonGemini(text)
+      return { success: true, data: result.slice(0, 3) }
+    } catch (error) {
+      // Fallback data nếu Gemini lỗi
+      const fallbackData = {
+        kinh_nghiem: [
+          { tieuDe: "Developer", donVi: "Công ty IT", thoiGian: "01/2022 - 12/2023", moTa: "Phát triển ứng dụng web và mobile" },
+          { tieuDe: "Junior Developer", donVi: "Startup ABC", thoiGian: "06/2021 - 12/2021", moTa: "Hỗ trợ phát triển tính năng mới" },
+          { tieuDe: "Intern Developer", donVi: "Tech Company", thoiGian: "01/2021 - 05/2021", moTa: "Thực tập lập trình và học hỏi" }
+        ],
+        hoc_van: [
+          { tieuDe: "Cử nhân Công nghệ thông tin", donVi: "Đại học FPT", thoiGian: "2018 - 2022", moTa: "Chuyên ngành Kỹ thuật phần mềm" },
+          { tieuDe: "Cao đẳng Tin học", donVi: "Cao đẳng FPT", thoiGian: "2016 - 2019", moTa: "Lập trình ứng dụng" },
+          { tieuDe: "Khóa học lập trình", donVi: "Học viện Mindx", thoiGian: "2020", moTa: "Fullstack Web Development" }
+        ],
+        chung_chi: [
+          { tieuDe: "AWS Cloud Practitioner", donVi: "Amazon Web Services", thoiGian: "2023", moTa: "Chứng chỉ cloud computing cơ bản" },
+          { tieuDe: "IELTS 6.5", donVi: "IDP Education", thoiGian: "2022", moTa: "Chứng chỉ tiếng Anh quốc tế" },
+          { tieuDe: "Google Analytics", donVi: "Google", thoiGian: "2023", moTa: "Phân tích dữ liệu web" }
+        ]
+      }
+      return { success: false, data: fallbackData[loai] || [], error: 'Sử dụng dữ liệu mẫu do AI tạm thời không khả dụng' }
+    }
+  },
+
   async chatbot(cauHoi: string, lichSu?: unknown, boLoc?: unknown) {
     if (!cauHoi.trim()) throw new LoiUngDung('Thiếu nội dung câu hỏi', 422, 'QUESTION_REQUIRED')
     const jobMode = cauHoiLienQuanJob(cauHoi)

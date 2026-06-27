@@ -6,6 +6,7 @@ const xacthuc_js_1 = require("../../dungchung/xacthuc.js");
 const ungvien_dieukhien_js_1 = require("./ungvien.dieukhien.js");
 exports.dinhTuyenUngVien = (0, express_1.Router)();
 exports.dinhTuyenUngVien.use(xacthuc_js_1.yeuCauDangNhap);
+exports.dinhTuyenUngVien.get('/dashboard', ungvien_dieukhien_js_1.dieuKhienUngVien.layDashboard);
 exports.dinhTuyenUngVien.get('/toi', ungvien_dieukhien_js_1.dieuKhienUngVien.layHoSoCuaToi);
 exports.dinhTuyenUngVien.get('/', ungvien_dieukhien_js_1.dieuKhienUngVien.layDanhSach);
 exports.dinhTuyenUngVien.get('/:ma', ungvien_dieukhien_js_1.dieuKhienUngVien.layChiTiet);

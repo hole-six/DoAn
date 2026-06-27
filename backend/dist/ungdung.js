@@ -21,9 +21,14 @@ function taoUngDung() {
     ungDung.use((0, cacheNhe_js_1.cacheGetNgan)());
     ungDung.use((0, cacheNhe_js_1.xoaCacheSauGhi)());
     ungDung.use('/uploads', express_1.default.static(node_path_1.default.join(process.cwd(), 'uploads'), {
-        setHeaders: (phanHoi) => {
+        setHeaders: (phanHoi, duongDan) => {
             phanHoi.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
             phanHoi.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate');
+            // Cho phép download PDF trực tiếp từ browser
+            if (duongDan.endsWith('.pdf')) {
+                phanHoi.setHeader('Content-Type', 'application/pdf');
+                phanHoi.setHeader('Content-Disposition', 'inline');
+            }
         },
     }));
     ungDung.use('/api', apitong_js_1.apiTong);

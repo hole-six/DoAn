@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { clsx } from 'clsx'
 import { Button } from '../../../components/ui/Button'
 import type { Tone } from '../../../lib/statusLabels'
-import '../../nhatuyendung/ntd-styles.css'
 
 const toneClass: Record<Tone, string> = {
   blue: 'border-sky-200 bg-sky-50 text-sky-800',

@@ -8,8 +8,6 @@ import { type SuggestionItem, useSearchSuggestions } from '../../components/sear
 import { API_URL, taoUrlTaiNguyen } from '../../lib/env'
 import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { normalizeSkills } from '../../lib/skillDisplay'
-import '../vieclam/vieclam-styles.css'
-import './congty-styles.css'
 
 const logoDuPhong = 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=160&q=80'
 
@@ -135,8 +133,8 @@ function hienThiTiengViet(value?: string, fallback = '') {
 
 export default function DanhSachCongTy() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [tuKhoa, setTuKhoa] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [tuKhoa, setTuKhoa] = useState(searchParams.get('tuKhoa') ?? '')
   const [quyMoDangChon, setQuyMoDangChon] = useState<string[]>([])
   const [linhVucDangChon, setLinhVucDangChon] = useState<string[]>([])
   const [loaiKyNangDangChon, setLoaiKyNangDangChon] = useState<string[]>([])
@@ -343,6 +341,14 @@ export default function DanhSachCongTy() {
     setLoaiKyNangDangChon([])
     setKyNangDangChon([])
     setDanhGiaToiThieu(0)
+    setSearchParams(new URLSearchParams())
+  }
+
+  const submitSearch = () => {
+    setSearchActive(false)
+    const p = new URLSearchParams()
+    if (tuKhoa.trim()) p.set('tuKhoa', tuKhoa.trim())
+    setSearchParams(p)
   }
 
   const chonGoiY = (item: SuggestionItem) => {
@@ -352,7 +358,9 @@ export default function DanhSachCongTy() {
       navigate(item.href)
       return
     }
-    navigate(`/cong-ty?tuKhoa=${encodeURIComponent(item.queryValue)}`)
+    const p = new URLSearchParams()
+    p.set('tuKhoa', item.queryValue)
+    setSearchParams(p)
   }
 
   return (
@@ -372,19 +380,20 @@ export default function DanhSachCongTy() {
                 value={tuKhoa}
                 onChange={e => setTuKhoa(e.target.value)}
                 onFocus={() => setSearchActive(true)}
+                onKeyDown={e => { if (e.key === 'Enter') submitSearch() }}
               />
               {tuKhoa && (
                 <button
                   type="button"
                   className="search-clear-button"
                   aria-label="Xóa từ khóa tìm kiếm"
-                  onClick={() => setTuKhoa('')}
+                  onClick={() => { setTuKhoa(''); const p = new URLSearchParams(searchParams); p.delete('tuKhoa'); setSearchParams(p) }}
                 >
                   <X size={16} />
                 </button>
               )}
             </label>
-            <button className="primary-button" onClick={() => setSearchActive(false)}><Search size={17} /> Tìm kiếm</button>
+            <button className="primary-button" onClick={submitSearch}><Search size={17} /> Tìm kiếm</button>
             {searchActive && (
               <SearchSuggestionPanel
                 groups={groups}
@@ -515,7 +524,12 @@ export default function DanhSachCongTy() {
               const hot = ((pageHienTai - 1) * pageSize + index) < 3 || soViec >= 3
 
               return (
-                <article key={cty.id} className={`company-real-card${hot ? ' hot' : ''}`}>
+                <article 
+                  key={cty.id} 
+                  className={`company-real-card${hot ? ' hot' : ''}`}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/cong-ty/${cty.id}`)}
+                >
                   {hot && <span className="company-hot-badge"><Zap size={12} /> Hot</span>}
                   <div className="company-real-card-head">
                     <div className="company-real-logo">
@@ -538,7 +552,7 @@ export default function DanhSachCongTy() {
                   </div>
                   <div className="company-card-foot">
                     <span><Users size={14} /> {formatQuyMo(cty.quyMo)} nhân viên</span>
-                    <Link to={`/cong-ty/${cty.id}`}>{soViec} Việc làm <ArrowRight size={14} /></Link>
+                    <span style={{ color: 'var(--color-primary)', fontWeight: 500 }}>{soViec} Việc làm <ArrowRight size={14} /></span>
                   </div>
                 </article>
               )

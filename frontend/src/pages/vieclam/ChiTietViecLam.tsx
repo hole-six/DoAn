@@ -8,7 +8,6 @@ import { isPublicJobVisible } from '../../lib/jobVisibility'
 import { formatJobDateLine } from '../../lib/jobPresentation'
 import { useSeo } from '../../lib/seo'
 import { toast } from '../../lib/toast'
-import './vieclam-styles.css'
 
 const logoDuPhong = 'https://placehold.co/80x80/eaf2ff/2563eb?text=IT'
 

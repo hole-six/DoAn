@@ -85,7 +85,7 @@ export default function QuanLyKyNangAdmin() {
   }
 
   const openEdit = (item: AdminSkill) => {
-    setSelected(item)
+    setSelected(null)
     setEditing(item)
     setForm(toFormState(item))
     setFormOpen(true)

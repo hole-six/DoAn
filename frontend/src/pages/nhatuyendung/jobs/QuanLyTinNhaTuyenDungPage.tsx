@@ -129,7 +129,9 @@ export default function QuanLyTinNhaTuyenDungPage() {
               </div>
               <div className="ntd-list-actions">
                 <ButtonGroup>
-                  <Button icon={<Eye size={15} />} onClick={() => navigate(`/viec-lam/${job.id}`)}>Xem tin</Button>
+                  {job.trangThai === 'dang_mo' && (
+                    <Button icon={<Eye size={15} />} onClick={() => navigate(`/viec-lam/${job.id}`)}>Xem tin</Button>
+                  )}
                   <Button icon={<Edit3 size={15} />} disabled={['dang_mo', 'tam_dong', 'het_han'].includes(job.trangThai ?? '')} onClick={() => setEditing(job)}>Sửa</Button>
                   <Button icon={<Power size={15} />} disabled={!['dang_mo', 'tam_dong'].includes(job.trangThai ?? '')} onClick={() => void setStatus(job, job.trangThai === 'dang_mo' ? 'tam-dong' : 'mo-lai')}>
                     {job.trangThai === 'dang_mo' ? 'Tạm đóng' : 'Mở lại'}

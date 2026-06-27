@@ -31,6 +31,11 @@ dinhTuyenAi.post('/goi-y-viec-lam/gui-email', yeuCauVaiTro(['ung_vien']), batLoi
   phanHoi.json({ duLieu })
 }))
 
+dinhTuyenAi.post('/goi-y-cv', yeuCauVaiTro(['ung_vien']), batLoiBatDongBo(async (yeuCau, phanHoi) => {
+  const duLieu = await dichVuAi.goiYDienCv((yeuCau as any).nguoiDung, yeuCau.body)
+  phanHoi.json({ duLieu })
+}))
+
 dinhTuyenAi.get('/goi-y-viec-lam/admin/preview', yeuCauVaiTro(['admin']), batLoiBatDongBo(async (yeuCau, phanHoi) => {
   const duLieu = await dichVuAi.previewGuiEmailHangLoat({
     diemToiThieu: yeuCau.query?.diemToiThieu ? Number(yeuCau.query.diemToiThieu) : undefined,

@@ -1,5 +1,4 @@
 import type { SuggestionGroups, SuggestionItem } from './useSearchSuggestions'
-import './search-suggestion.css'
 
 type Props = {
   groups: SuggestionGroups

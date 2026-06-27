@@ -19,9 +19,14 @@ export function taoUngDung() {
   ungDung.use(
     '/uploads',
     express.static(path.join(process.cwd(), 'uploads'), {
-      setHeaders: (phanHoi) => {
+      setHeaders: (phanHoi, duongDan) => {
         phanHoi.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
         phanHoi.setHeader('Cache-Control', 'no-store, max-age=0, must-revalidate')
+        // Cho phép download PDF trực tiếp từ browser
+        if (duongDan.endsWith('.pdf')) {
+          phanHoi.setHeader('Content-Type', 'application/pdf')
+          phanHoi.setHeader('Content-Disposition', 'inline')
+        }
       },
     }),
   )

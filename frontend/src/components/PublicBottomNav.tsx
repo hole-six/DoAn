@@ -4,7 +4,6 @@ import { NavLink } from 'react-router-dom'
 import { clsx } from 'clsx'
 import { duongDanTheoVaiTro, layNguoiDung } from '../lib/auth'
 import AppIcon from './AppIcon'
-import './bottom-nav.css'
 
 export default function PublicBottomNav() {
   const [nguoiDung, setNguoiDung] = useState(layNguoiDung())

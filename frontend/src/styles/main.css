@@ -1,0 +1,57 @@
+/**
+ * EFFORTIT FRONTEND - MAIN STYLESHEET
+ * 
+ * Tổ chức CSS theo thứ tự:
+ * 1. Base styles (reset, variables, foundation)
+ * 2. Layout (header, footer, dashboard shell)
+ * 3. Components (buttons, inputs, cards)
+ * 4. Features (search, notifications, realtime)
+ * 5. Pages (home, auth, jobs, companies, dashboards)
+ */
+
+/* ===== BASE STYLES ===== */
+@import './base/variables.css';
+/* @import './base/reset.css'; */  /* Tạm comment vì chưa có */
+
+/* ===== LEGACY IMPORTS (Tạm thời giữ để không break) ===== */
+/* Root level CSS - Cần refactor sau */
+@import '../ungdung.css';
+@import '../nenchung.css';
+
+/* Component level CSS */
+@import '../components/bottom-nav.css';
+@import '../components/chat-notification.css';
+@import '../components/header.css';
+@import '../components/header-mobile-fix.css';
+@import '../components/dashboard-shell.css';
+@import '../components/dashboard-shell-responsive.css';
+@import '../components/search/search-suggestion.css';
+@import '../components/ui/button.css';
+
+/* Realtime features */
+@import '../realtime.css';
+
+/* Pages CSS */
+@import '../pages/trangchu/trangchu-styles.css';
+@import '../pages/xacthuc/auth-styles.css';
+@import '../pages/xacthuc/forgot-password.css';
+@import '../pages/xacthuc/reset-password.css';
+@import '../pages/vieclam/vieclam-styles.css';
+@import '../pages/congty/congty-styles.css';
+@import '../pages/ungvien/ungvien-styles.css';
+@import '../pages/ungvien/ungvien-responsive.css';
+@import '../pages/nhatuyendung/ntd-styles.css';
+@import '../pages/quantrivien/admin-styles.css';
+
+/* Global styles từ styles/global */
+@import './global/global-foundation.css';
+@import './global/mobile-interactions.css';
+
+/* ===== TODO: REFACTOR =====
+ * 
+ * Các CSS trên cần được tổ chức lại thành:
+ * - styles/layout/ (header, footer, navigation, dashboard)
+ * - styles/components/ (buttons, inputs, cards, modals)
+ * - styles/features/ (search, notifications, realtime)
+ * - styles/pages/ (home, auth, jobs, companies, candidate, employer, admin)
+ */

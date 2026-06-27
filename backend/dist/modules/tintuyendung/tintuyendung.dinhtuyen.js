@@ -48,13 +48,23 @@ async function layNguoiDungNeuCo(authorization) {
 }
 async function taoBoLocTruyCapDanhSachTin(query, authorization) {
     const nguoiDung = await layNguoiDungNeuCo(authorization);
+    const base = {
+        tuKhoa: query.tuKhoa,
+        trang: query.trang,
+        kichThuocTrang: query.kichThuocTrang ?? query.soPhanTu ?? query.limit,
+        limit: query.limit,
+        capBac: query.capBac,
+        loaiHinh: query.loaiHinh,
+        kyNang: query.kyNang,
+        loaiKyNang: query.loaiKyNang ?? query.loai,
+    };
     if (!nguoiDung || nguoiDung.vaiTro === 'ung_vien')
-        return { ...query, cheDo: 'cong_khai' };
+        return { ...base, cheDo: 'cong_khai' };
     if (nguoiDung.vaiTro === 'admin')
-        return { ...query, cheDo: 'admin' };
+        return { ...base, cheDo: 'admin' };
     const congTy = await layCongTyTheoNguoiDung(nguoiDung.id);
     return {
-        ...query,
+        ...base,
         cheDo: 'nha_tuyen_dung',
         maNhaTuyenDungSoHuu: congTy?.id ? String(congTy.id) : '',
     };
@@ -131,8 +141,8 @@ const damBaoQuyenSuaXoaTin = (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (ye
 exports.dinhTuyenTinTuyenDung = (0, express_1.Router)();
 exports.dinhTuyenTinTuyenDung.get('/', (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
     const boLoc = await taoBoLocTruyCapDanhSachTin(yeuCau.query, yeuCau.headers.authorization);
-    const duLieu = await tintuyendung_dichvu_js_1.dichVuTinTuyenDung.layDanhSach(boLoc);
-    return phanHoi.json({ duLieu });
+    const ketQua = await tintuyendung_dichvu_js_1.dichVuTinTuyenDung.layDanhSach(boLoc);
+    return phanHoi.json(ketQua);
 }));
 exports.dinhTuyenTinTuyenDung.get('/:ma', (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
     const ma = String(yeuCau.params.ma ?? '');

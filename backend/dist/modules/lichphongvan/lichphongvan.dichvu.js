@@ -8,39 +8,47 @@ const hosoungtuyen_dichvu_js_1 = require("../hosoungtuyen/hosoungtuyen.dichvu.js
 const prisma_js_1 = require("../../cauhinh/prisma.js");
 const thongbao_helper_js_1 = require("../thongbao/thongbao.helper.js");
 const lichphongvan_mohinh_js_1 = require("./lichphongvan.mohinh.js");
-function id(value) {
+// ─── Helpers ───
+function strId(value) {
     return String(value?._id ?? value?.id ?? value ?? '');
 }
+// ─── Hydrate: gắn HoSoUngTuyen đầy đủ vào mỗi lịch ───
 async function hydrateLich(rows) {
-    const ids = [...new Set(rows.map(row => id(row.maHoSoUngTuyen)).filter(Boolean))];
+    const ids = [...new Set(rows.map(row => strId(row.maHoSoUngTuyen)).filter(Boolean))];
     const hoSoRows = ids.length ? await prisma_js_1.prisma.hoSoUngTuyen.findMany({ where: { id: { in: ids } } }) : [];
     const hoSoDayDu = await (0, hosoungtuyen_dichvu_js_1.hydrateHoSoUngTuyenNoiBo)(hoSoRows);
     const hoSoMap = new Map(hoSoDayDu.map(row => [row.id, row]));
-    return rows.map(row => (0, prismaHelper_js_1.coId)({ ...row, maHoSoUngTuyen: hoSoMap.get(id(row.maHoSoUngTuyen)) ?? row.maHoSoUngTuyen }));
+    return rows.map(row => ({
+        ...row,
+        _id: row.id,
+        maHoSoUngTuyen: hoSoMap.get(strId(row.maHoSoUngTuyen)) ?? row.maHoSoUngTuyen,
+    }));
 }
-function chuanHoaLich(taiLieu) {
-    const duLieu = taiLieu ?? {};
+// ─── Map: chuẩn hóa output sau khi đã hydrate ───
+function mapLich(row) {
+    const duLieu = row ?? {};
     const ungTuyen = duLieu.maHoSoUngTuyen;
+    const isObject = ungTuyen && typeof ungTuyen === 'object';
     const tin = ungTuyen?.maTinTuyenDung;
     const ungVien = ungTuyen?.maUngVien;
     return {
         id: String(duLieu.id ?? duLieu._id),
         _id: String(duLieu.id ?? duLieu._id),
-        maHoSoUngTuyen: ungTuyen?._id ? String(ungTuyen._id) : String(ungTuyen),
-        hoSoUngTuyen: ungTuyen?._id
+        maHoSoUngTuyen: isObject ? String(ungTuyen._id ?? ungTuyen.id) : String(ungTuyen ?? ''),
+        hoSoUngTuyen: isObject
             ? {
-                id: String(ungTuyen._id),
+                id: String(ungTuyen._id ?? ungTuyen.id),
                 maUngVien: ungVien?._id ? String(ungVien._id) : ungVien ? String(ungVien) : undefined,
                 maTinTuyenDung: tin?._id ? String(tin._id) : tin ? String(tin) : undefined,
                 trangThai: ungTuyen.trangThai,
-                ungVien: ungVien?._id
+                ungVien: ungVien && typeof ungVien === 'object'
                     ? {
-                        id: String(ungVien._id),
+                        id: String(ungVien._id ?? ungVien.id),
                         viTriMongMuon: ungVien.viTriMongMuon,
                         kinhNghiem: ungVien.kinhNghiem,
-                        nguoiDung: ungVien.maNguoiDung?._id
+                        nguoiDung: ungVien.maNguoiDung && typeof ungVien.maNguoiDung === 'object'
                             ? {
-                                id: String(ungVien.maNguoiDung._id),
+                                id: String(ungVien.maNguoiDung._id ?? ungVien.maNguoiDung.id),
                                 hoTen: ungVien.maNguoiDung.hoTen,
                                 email: ungVien.maNguoiDung.email,
                                 soDienThoai: ungVien.maNguoiDung.soDienThoai,
@@ -48,12 +56,17 @@ function chuanHoaLich(taiLieu) {
                             : undefined,
                     }
                     : undefined,
-                tinTuyenDung: tin?._id
+                tinTuyenDung: tin && typeof tin === 'object'
                     ? {
-                        id: String(tin._id),
+                        id: String(tin._id ?? tin.id),
                         tieuDe: tin.tieuDe,
-                        nhaTuyenDung: tin.maNhaTuyenDung?._id
-                            ? { id: String(tin.maNhaTuyenDung._id), tenCongTy: tin.maNhaTuyenDung.tenCongTy }
+                        nhaTuyenDung: tin.maNhaTuyenDung && typeof tin.maNhaTuyenDung === 'object'
+                            ? {
+                                id: String(tin.maNhaTuyenDung._id ?? tin.maNhaTuyenDung.id),
+                                maNguoiDung: tin.maNhaTuyenDung.maNguoiDung ? String(tin.maNhaTuyenDung.maNguoiDung) : undefined,
+                                tenCongTy: tin.maNhaTuyenDung.tenCongTy,
+                                logo: tin.maNhaTuyenDung.logo,
+                            }
                             : undefined,
                     }
                     : undefined,
@@ -71,6 +84,7 @@ function chuanHoaLich(taiLieu) {
         ngayCapNhat: duLieu.ngayCapNhat,
     };
 }
+// ─── Query helper ───
 async function layDayDu(where, many = false) {
     const rows = many
         ? await lichphongvan_mohinh_js_1.LichPhongVan.findMany({ where, orderBy: { thoiGianBatDau: 'asc' }, take: 300 })
@@ -78,6 +92,7 @@ async function layDayDu(where, many = false) {
     const hydrated = await hydrateLich(rows);
     return many ? hydrated : hydrated[0];
 }
+// ─── Notification helpers ───
 async function guiThongBaoMoiPhongVanTuHoSo(hoSo, lich, duLieu) {
     const ungVien = hoSo?.maUngVien;
     const tin = hoSo?.maTinTuyenDung;
@@ -89,19 +104,20 @@ async function guiThongBaoMoiPhongVanTuHoSo(hoSo, lich, duLieu) {
         viTriUngTuyen: tin.tieuDe || 'Vị trí tuyển dụng',
         thoiGian: duLieu.thoiGianBatDau,
         diaChi: duLieu.diaChi || 'Chưa xác định',
-        maLichPhongVan: id(lich),
+        maLichPhongVan: strId(lich),
     });
 }
+// ─── Service ───
 exports.dichVuLichPhongVan = {
     async layDanhSach() {
         const danhSach = await layDayDu({}, true);
-        return danhSach.map(chuanHoaLich);
+        return danhSach.map(mapLich);
     },
     async layTheoMa(ma) {
         const duLieu = await layDayDu({ id: ma });
         if (!duLieu)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn', 404);
-        return chuanHoaLich(duLieu);
+        return mapLich(duLieu);
     },
     async taoMoi(duLieu) {
         const ketQua = await lichphongvan_mohinh_js_1.LichPhongVan.create({ data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
@@ -121,6 +137,7 @@ exports.dichVuLichPhongVan = {
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn để cập nhật', 404);
         const ketQua = await lichphongvan_mohinh_js_1.LichPhongVan.update({ where: { id: ma }, data: (0, prismaHelper_js_1.boUndefined)(duLieu) });
         const lichDayDu = await layDayDu({ id: ma });
+        // Thông báo thay đổi giờ phỏng vấn
         if (duLieu.thoiGianBatDau && lichCu.thoiGianBatDau.getTime() !== new Date(duLieu.thoiGianBatDau).getTime()) {
             try {
                 const hoSo = await (0, hosoungtuyen_dichvu_js_1.layHoSoUngTuyenDayDuNoiBo)(lichCu.maHoSoUngTuyen);
@@ -141,6 +158,7 @@ exports.dichVuLichPhongVan = {
                 console.error('Lỗi gửi thông báo thay đổi lịch:', error);
             }
         }
+        // Thông báo thay đổi trạng thái
         if (String(duLieu.trangThai ?? '') && String(duLieu.trangThai) !== String(lichCu.trangThai ?? '')) {
             try {
                 const hoSo = await (0, hosoungtuyen_dichvu_js_1.layHoSoUngTuyenDayDuNoiBo)(lichCu.maHoSoUngTuyen);
@@ -151,27 +169,46 @@ exports.dichVuLichPhongVan = {
                 const tenUngVien = ungVien?.maNguoiDung?.hoTen ?? 'Ứng viên';
                 const viTriUngTuyen = tin?.tieuDe || 'Vị trí tuyển dụng';
                 if (duLieu.trangThai === 'da_xac_nhan' && maNguoiDungNhaTuyenDung) {
-                    await (0, thongbao_helper_js_1.thongBaoUngVienChapNhanLich)({ maNhaTuyenDung: maNguoiDungNhaTuyenDung, tenUngVien, viTriUngTuyen, thoiGian: ketQua.thoiGianBatDau, maLichPhongVan: ma });
+                    await (0, thongbao_helper_js_1.thongBaoUngVienChapNhanLich)({
+                        maNhaTuyenDung: maNguoiDungNhaTuyenDung,
+                        tenUngVien,
+                        viTriUngTuyen,
+                        thoiGian: ketQua.thoiGianBatDau,
+                        maLichPhongVan: ma,
+                    });
                 }
                 if (duLieu.trangThai === 'da_huy' && maNguoiDungNhaTuyenDung) {
-                    await (0, thongbao_helper_js_1.thongBaoUngVienTuChoiLich)({ maNhaTuyenDung: maNguoiDungNhaTuyenDung, tenUngVien, viTriUngTuyen, lyDo: duLieu.ghiChu, maLichPhongVan: ma });
+                    await (0, thongbao_helper_js_1.thongBaoUngVienTuChoiLich)({
+                        maNhaTuyenDung: maNguoiDungNhaTuyenDung,
+                        tenUngVien,
+                        viTriUngTuyen,
+                        lyDo: duLieu.ghiChu,
+                        maLichPhongVan: ma,
+                    });
                 }
                 if (duLieu.trangThai === 'hoan_thanh' && duLieu.ketQua && maNguoiDungUngVien) {
-                    await (0, thongbao_helper_js_1.thongBaoKetQuaPhongVan)({ maUngVien: maNguoiDungUngVien, tenCongTy: tin?.maNhaTuyenDung?.tenCongTy || 'Công ty', viTriUngTuyen, ketQua: duLieu.ketQua, ghiChu: duLieu.ghiChu, maLichPhongVan: ma });
+                    await (0, thongbao_helper_js_1.thongBaoKetQuaPhongVan)({
+                        maUngVien: maNguoiDungUngVien,
+                        tenCongTy: tin?.maNhaTuyenDung?.tenCongTy || 'Công ty',
+                        viTriUngTuyen,
+                        ketQua: duLieu.ketQua,
+                        ghiChu: duLieu.ghiChu,
+                        maLichPhongVan: ma,
+                    });
                 }
             }
             catch (error) {
                 console.error('Lỗi gửi thông báo cập nhật lịch:', error);
             }
         }
-        return chuanHoaLich(lichDayDu);
+        return mapLich(lichDayDu);
     },
     async xoa(ma) {
         const ketQua = await layDayDu({ id: ma });
         if (!ketQua)
             throw new loiungdung_js_1.LoiUngDung('Không tìm thấy lịch phỏng vấn để xóa', 404);
         await lichphongvan_mohinh_js_1.LichPhongVan.delete({ where: { id: ma } });
-        return chuanHoaLich(ketQua);
+        return mapLich(ketQua);
     },
 };
 async function layLichPhongVanDayDuNoiBo(ma) {

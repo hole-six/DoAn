@@ -45,4 +45,16 @@ exports.dieuKhienUngVien = {
             thongBao: 'Xóa hồ sơ thành công'
         });
     }),
+    // Dashboard ứng viên
+    layDashboard: (0, batloibatdongbo_js_1.batLoiBatDongBo)(async (yeuCau, phanHoi) => {
+        const maNguoiDung = yeuCau.user?.id || yeuCau.nguoiDung?.id;
+        if (!maNguoiDung) {
+            return phanHoi.status(401).json({
+                thanhCong: false,
+                thongBao: 'Vui lòng đăng nhập để xem dashboard'
+            });
+        }
+        const duLieu = await ungvien_dichvu_js_1.dichVuUngVien.layDashboard(maNguoiDung);
+        return phanHoi.json({ duLieu });
+    }),
 };

@@ -154,33 +154,39 @@ export function NotificationInbox({ items, onReload }: Props) {
               return (
                 <article
                   key={id}
-                  className={`relative grid gap-3 p-4 transition hover:bg-slate-50 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5 ${
-                    item.daDoc ? 'bg-white' : 'bg-sky-50/50'
+                  className={`relative flex cursor-pointer items-start gap-3 px-5 py-3.5 transition hover:bg-slate-50 ${
+                    item.daDoc ? 'bg-white' : 'bg-sky-50/40'
                   }`}
+                  onClick={() => setSelected(item)}
                 >
-                  {!item.daDoc && <span className="absolute left-0 top-5 h-10 w-1 rounded-r-full bg-sky-600" />}
-                  <button type="button" className="min-w-0 text-left" onClick={() => setSelected(item)}>
+                  {/* Chấm chưa đọc */}
+                  {!item.daDoc && (
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-sky-600" />
+                  )}
+                  {item.daDoc && <span className="mt-1.5 h-2 w-2 shrink-0" />}
+
+                  {/* Nội dung */}
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="min-w-0 break-words text-base font-black text-slate-950">{item.tieuDe}</h3>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-black ${item.daDoc ? 'bg-slate-100 text-slate-500' : 'bg-sky-600 text-white'}`}>
-                        {item.daDoc ? 'Đã đọc' : 'Mới'}
-                      </span>
-                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-black text-amber-700">
-                        {priorityLabel((item as any).mucDoUuTien)}
-                      </span>
+                      <h3 className={`text-sm font-black ${item.daDoc ? 'text-slate-700' : 'text-slate-950'}`}>
+                        {item.tieuDe}
+                      </h3>
+                      {!item.daDoc && (
+                        <span className="rounded-full bg-sky-600 px-2 py-0.5 text-[10px] font-black text-white">Mới</span>
+                      )}
                     </div>
-                    <p className="mt-2 line-clamp-2 break-words text-sm font-semibold leading-6 text-slate-600">{item.noiDung}</p>
-                    <p className="mt-2 text-xs font-black uppercase tracking-wide text-slate-400">{formatDateTime(item.ngayTao)}</p>
-                  </button>
-                  <div className="flex flex-wrap gap-2 sm:justify-end">
-                    <Button size="sm" icon={<Eye size={15} />} onClick={() => setSelected(item)}>
-                      Xem chi tiết
-                    </Button>
+                    <p className="mt-0.5 line-clamp-1 text-xs font-semibold text-slate-500">{item.noiDung}</p>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-400">{formatDateTime(item.ngayTao)}</p>
+                  </div>
+
+                  {/* Actions nhỏ gọn */}
+                  <div className="flex shrink-0 items-center gap-1.5" onClick={e => e.stopPropagation()}>
                     {item.lienKet && (
-                      <Button size="sm" variant="primary" icon={<ExternalLink size={15} />} onClick={() => void openLink(item)}>
-                        Mở xử lý
+                      <Button size="sm" variant="primary" icon={<ExternalLink size={13} />} onClick={() => void openLink(item)}>
+                        Xử lý
                       </Button>
                     )}
+                    <Button size="sm" variant="ghost" icon={<Eye size={13} />} onClick={() => setSelected(item)} />
                   </div>
                 </article>
               )

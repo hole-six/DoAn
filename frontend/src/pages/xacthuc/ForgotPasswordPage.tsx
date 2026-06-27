@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Mail, ShieldCheck } from 'lucide-react'
 import logoWeb from '../../assets/logoweb.png'
 import { API_URL } from '../../lib/env'
-import './auth-styles.css'
-import './forgot-password.css'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

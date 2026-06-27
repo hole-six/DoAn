@@ -55,7 +55,7 @@ export function ItvDetail({ item, onClose, onConfirm, onReschedule }: { item: Li
           <Button size="sm" onClick={onClose}>Đóng</Button>
           <Button size="sm" variant="secondary" icon={<MessageCircle size={16} />} disabled={!canChat} onClick={() => void openChat()}>Nhắn nhà tuyển dụng</Button>
           <Button size="sm" variant="success" icon={<CalendarCheck size={16} />} disabled={item.trangThai !== 'da_len_lich'} onClick={onConfirm}>Xác nhận</Button>
-          <Button size="sm" variant="secondary" icon={<RefreshCw size={16} />} disabled={!['da_len_lich', 'da_xac_nhan'].includes(item.trangThai)} onClick={onReschedule}>Yêu cầu đổi lịch</Button>
+          <Button size="sm" variant="secondary" icon={<RefreshCw size={16} />} disabled={item.trangThai !== 'da_len_lich'} onClick={onReschedule}>Yêu cầu đổi lịch</Button>
         </ButtonGroup>
       )}
     >
