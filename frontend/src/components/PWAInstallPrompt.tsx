@@ -65,11 +65,11 @@ export function PWAInstallPrompt() {
             <AppIcon icon={Download} size={24} style={{ color: 'white' }} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 4 }}>Cai dat ung dung</div>
-            <div style={{ fontSize: 13, color: '#6b7280' }}>Truy cap nhanh hon va dung nhu mot app rieng.</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 4 }}>Cài đặt ứng dụng</div>
+            <div style={{ fontSize: 13, color: '#6b7280' }}>Truy cập nhanh hơn và sử dụng như một ứng dụng riêng.</div>
           </div>
           <button onClick={xuLyCaiDat} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            Cai dat
+            ài đặt
           </button>
           <button onClick={xuLyDong} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
             <AppIcon icon={X} size={20} style={{ color: '#9ca3af' }} />
