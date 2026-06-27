@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useLayoutEffect } from 'react'
 import { flushSync } from 'react-dom'
 import { Download, Eye, FileUp, ImagePlus, Plus, Save, Sparkles, Trash2, X } from 'lucide-react'
 import { useConfirm } from '../../components/ConfirmDialog'
@@ -61,6 +62,20 @@ type CvData = {
   ghiChuAi?: string
   cvChinh: boolean
   congKhai: boolean
+}
+
+type PreviewBlock = {
+  key: string
+  node: ReactNode
+}
+
+function chunkItems<T>(items: T[], size: number) {
+  if (size <= 0) return [items]
+  const chunks: T[][] = []
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size))
+  }
+  return chunks
 }
 
 const emptyCv: CvData = {
@@ -654,8 +669,7 @@ function ProjectEditor({ value, onChange }: { value: ProjectDetail[]; onChange: 
   )
 }
 
-function Preview({ cv }: { cv: CvData; data: any }) {
-  const cleanCv = compactCv(cv)
+function taoPreviewBlocks(cleanCv: CvData) {
   const hoTen = cleanCv.hoTenHienThi
   const title = cleanCv.chucDanh
   const experiences = cleanCv.kinhNghiemLam
@@ -672,101 +686,247 @@ function Preview({ cv }: { cv: CvData; data: any }) {
     ['Location', cleanCv.diaDiem],
   ].filter(([, value]) => Boolean(value))
   const hasSkills = cleanCv.kyNangMem.length > 0 || cleanCv.kyNangLapTrinh.length > 0
-
-  return (
-    <div className="cv-a4-preview mx-auto w-full max-w-[210mm] bg-white text-[#111827] shadow-[0_28px_80px_rgba(15,23,42,.16)]" style={{ minHeight: '297mm', fontFamily: 'Lexend, Segoe UI, Arial, sans-serif' }}>
-      <header className="cv-header">
-        <div className="min-w-0">
-          {hoTen && <h1>{hoTen}</h1>}
-          {title && <p className="cv-role">{title}</p>}
-        </div>
-      </header>
-
-      {(cleanCv.anhDaiDien || personalRows.length > 0) && (
-        <section className="cv-profile-row" style={{ gridTemplateColumns: cleanCv.anhDaiDien ? 'minmax(0, 2fr) minmax(0, 3fr)' : '1fr' }}>
-          {cleanCv.anhDaiDien && (
-            <div className="cv-photo-wrap">
-              <img className="cv-photo-img" src={taoUrlTaiNguyen(cleanCv.anhDaiDien)} alt={hoTen || 'Candidate'} />
+  const blocks: PreviewBlock[] = [
+    {
+      key: 'header',
+      node: (
+        <>
+          <header className="cv-header">
+            <div className="min-w-0">
+              {hoTen && <h1>{hoTen}</h1>}
+              {title && <p className="cv-role">{title}</p>}
             </div>
-          )}
-          {personalRows.length > 0 && (
-            <div className="cv-contact-grid">
-              {personalRows.map(([label, value]) => <p key={label}><strong>{label}:</strong> {value}</p>)}
-            </div>
-          )}
-        </section>
-      )}
+          </header>
 
-      {cleanCv.tomTatKinhNghiem.length > 0 && (
+          {(cleanCv.anhDaiDien || personalRows.length > 0) && (
+            <section className="cv-profile-row" style={{ gridTemplateColumns: cleanCv.anhDaiDien ? 'minmax(0, 2fr) minmax(0, 3fr)' : '1fr' }}>
+              {cleanCv.anhDaiDien && (
+                <div className="cv-photo-wrap">
+                  <img className="cv-photo-img" src={taoUrlTaiNguyen(cleanCv.anhDaiDien)} alt={hoTen || 'Candidate'} />
+                </div>
+              )}
+              {personalRows.length > 0 && (
+                <div className="cv-contact-grid">
+                  {personalRows.map(([label, value]) => <p key={label}><strong>{label}:</strong> {value}</p>)}
+                </div>
+              )}
+            </section>
+          )}
+        </>
+      ),
+    },
+  ]
+
+  if (cleanCv.tomTatKinhNghiem.length > 0) {
+    blocks.push({
+      key: 'summary',
+      node: (
         <CvSection title="Experience Summary">
           <ul className="cv-list">{cleanCv.tomTatKinhNghiem.map((item, i) => <li key={i}>{item}</li>)}</ul>
         </CvSection>
-      )}
+      ),
+    })
+  }
 
-      {hasSkills && (
-        <CvSection title="Skills">
-          {cleanCv.kyNangMem.length > 0 && (
-            <>
-              <p className="cv-subtitle">Soft Skills</p>
-              <ul className="cv-list">{cleanCv.kyNangMem.map((item, i) => <li key={i}>{item}</li>)}</ul>
-            </>
-          )}
-          {cleanCv.kyNangLapTrinh.map((group, i) => (
-            <div key={i} className="mt-2">
-              {group.nhom && <p className="cv-subtitle">{group.nhom}</p>}
-              {(group.muc ?? []).length > 0 && <ul className="cv-list">{(group.muc ?? []).map((item, idx) => <li key={idx}>{item}</li>)}</ul>}
-            </div>
-          ))}
-        </CvSection>
-      )}
+  if (hasSkills) {
+    let laBlockDauTienCuaKyNang = true
+    if (cleanCv.kyNangMem.length > 0) {
+      blocks.push({
+        key: 'skills-soft',
+        node: (
+          <CvSection title={laBlockDauTienCuaKyNang ? 'Skills' : undefined}>
+            <p className="cv-subtitle">Soft Skills</p>
+            <ul className="cv-list">{cleanCv.kyNangMem.map((item, i) => <li key={i}>{item}</li>)}</ul>
+          </CvSection>
+        ),
+      })
+      laBlockDauTienCuaKyNang = false
+    }
+    cleanCv.kyNangLapTrinh.forEach((group, index) => {
+      blocks.push({
+        key: `skills-group-${index}`,
+        node: (
+          <CvSection title={laBlockDauTienCuaKyNang ? 'Skills' : undefined}>
+            {group.nhom && <p className="cv-subtitle">{group.nhom}</p>}
+            {(group.muc ?? []).length > 0 && <ul className="cv-list">{(group.muc ?? []).map((item, idx) => <li key={idx}>{item}</li>)}</ul>}
+          </CvSection>
+        ),
+      })
+      laBlockDauTienCuaKyNang = false
+    })
+  }
 
-      {experiences.length > 0 && (
-        <CvSection title="Experience">
-          {experiences.map((item, i) => <p key={i} className="cv-paragraph">{item.tieuDe && <strong>{item.tieuDe}</strong>} {[item.donVi, item.thoiGian].filter(Boolean).join(' - ')}{item.moTa && <><br />{item.moTa}</>}</p>)}
-        </CvSection>
-      )}
+  if (experiences.length > 0) {
+    experiences.forEach((item, index) => {
+      blocks.push({
+        key: `experience-${index}`,
+        node: (
+          <CvSection title={index === 0 ? 'Experience' : undefined}>
+            <p className="cv-paragraph">{item.tieuDe && <strong>{item.tieuDe}</strong>} {[item.donVi, item.thoiGian].filter(Boolean).join(' - ')}{item.moTa && <><br />{item.moTa}</>}</p>
+          </CvSection>
+        ),
+      })
+    })
+  }
 
-      {cleanCv.hocVan.length > 0 && (
-        <CvSection title="Education">
-          {cleanCv.hocVan.map((item, i) => <p key={i} className="cv-paragraph">{item.tieuDe && <strong>{item.tieuDe}</strong>} {[item.donVi, item.thoiGian, item.moTa].filter(Boolean).join(' - ')}</p>)}
-        </CvSection>
-      )}
+  if (cleanCv.hocVan.length > 0) {
+    cleanCv.hocVan.forEach((item, index) => {
+      blocks.push({
+        key: `education-${index}`,
+        node: (
+          <CvSection title={index === 0 ? 'Education' : undefined}>
+            <p className="cv-paragraph">{item.tieuDe && <strong>{item.tieuDe}</strong>} {[item.donVi, item.thoiGian, item.moTa].filter(Boolean).join(' - ')}</p>
+          </CvSection>
+        ),
+      })
+    })
+  }
 
-      {cleanCv.baiVietKyThuat.length > 0 && (
+  if (cleanCv.baiVietKyThuat.length > 0) {
+    blocks.push({
+      key: 'technical-writing',
+      node: (
         <CvSection title="Blog / Technical Writing">
           <ul className="cv-list">{cleanCv.baiVietKyThuat.map((item, i) => <li key={i}>{[item.nhan, item.url].filter(Boolean).join(' - ')}</li>)}</ul>
         </CvSection>
-      )}
+      ),
+    })
+  }
 
-      {projects.length > 0 && (
-        <CvSection title="Experience by Projects">
-          {projects.map((item, i) => (
-            <div key={i} className="cv-project">
-              {item.tenDuAn && <h3>Project Name: {item.tenDuAn}</h3>}
-              <InfoGrid rows={[
-                ['Duration', item.thoiGian],
-                ['Position', item.viTri],
-                ['Description', item.moTa],
-              ]} />
-              {!!item.trachNhiem?.length && <InfoGrid rows={[['Responsibilities', <ul className="cv-list">{item.trachNhiem.map((r, idx) => <li key={idx}>{r}</li>)}</ul>]]} />}
-              <InfoGrid rows={[
-                ['OS', item.heDieuHanh],
-                ['Languages', item.ngonNgu],
-                ['Framework', item.framework],
-                ['Techniques', item.kyThuat],
-                ['Work Location', item.diaDiem],
-                ['Links', item.lienKet?.length ? <span>{item.lienKet.map(link => [link.nhan, link.url].filter(Boolean).join(': ')).join(' | ')}</span> : undefined],
-              ]} />
+  if (projects.length > 0) {
+    projects.forEach((item, index) => {
+      const baseKey = `project-${index}`
+      const thongTinCoBan = [
+        ['Duration', item.thoiGian],
+        ['Position', item.viTri],
+      ].filter(([, value]) => Boolean(value)) as [string, ReactNode][]
+      const thongTinCongNghe = [
+        ['OS', item.heDieuHanh],
+        ['Languages', item.ngonNgu],
+        ['Framework', item.framework],
+      ].filter(([, value]) => Boolean(value)) as [string, ReactNode][]
+      const thongTinBoSung = [
+        ['Techniques', item.kyThuat],
+        ['Work Location', item.diaDiem],
+        ['Links', item.lienKet?.length ? <span>{item.lienKet.map(link => [link.nhan, link.url].filter(Boolean).join(': ')).join(' | ')}</span> : undefined],
+      ].filter(([, value]) => Boolean(value)) as [string, ReactNode][]
+      const trachNhiemChunks = chunkItems((item.trachNhiem ?? []).filter(Boolean), 2)
+      let daDatSectionTitle = false
+
+      const themProjectBlock = (suffix: string, children: ReactNode) => {
+        const sectionTitle = !daDatSectionTitle && index === 0 ? 'Experience by Projects' : undefined
+        blocks.push({
+          key: `${baseKey}-${suffix}`,
+          node: (
+            <CvSection title={sectionTitle}>
+              <div className="cv-project">
+                {item.tenDuAn && <h3>Project Name: {item.tenDuAn}</h3>}
+                {children}
+              </div>
+            </CvSection>
+          ),
+        })
+        daDatSectionTitle = true
+      }
+
+      if (thongTinCoBan.length > 0) themProjectBlock('summary', <InfoGrid rows={thongTinCoBan} />)
+      if (item.moTa) themProjectBlock('description', <InfoGrid rows={[['Description', item.moTa]]} />)
+      trachNhiemChunks.forEach((chunk, chunkIndex) => {
+        themProjectBlock(`responsibilities-${chunkIndex}`, (
+          <>
+            <p className="cv-subtitle">Responsibilities</p>
+            <ul className="cv-list">{chunk.map((responsibility, responsibilityIndex) => <li key={responsibilityIndex}>{responsibility}</li>)}</ul>
+          </>
+        ))
+      })
+      if (thongTinCongNghe.length > 0) themProjectBlock('stack', <InfoGrid rows={thongTinCongNghe} />)
+      if (thongTinBoSung.length > 0) themProjectBlock('extra', <InfoGrid rows={thongTinBoSung} />)
+      if (!daDatSectionTitle) themProjectBlock('title', <div />)
+    })
+  }
+
+  return blocks
+}
+
+function Preview({ cv }: { cv: CvData; data: any }) {
+  const cleanCv = compactCv(cv)
+  const blocks = useMemo(() => taoPreviewBlocks(cleanCv), [cleanCv])
+  const blockMap = useMemo(() => new Map(blocks.map(block => [block.key, block.node])), [blocks])
+  const measureRef = useRef<HTMLDivElement | null>(null)
+  const [pages, setPages] = useState<string[][]>([])
+
+  useLayoutEffect(() => {
+    const host = measureRef.current
+    if (!host) return
+
+    const frame = window.requestAnimationFrame(() => {
+      const content = host.querySelector<HTMLElement>('[data-cv-measure-content]')
+      const blockEls = Array.from(host.querySelectorAll<HTMLElement>('[data-cv-block-key]'))
+      const maxHeight = Math.max((content?.clientHeight ?? 0) - 40, 0)
+      if (!blockEls.length || !maxHeight) {
+        setPages(blocks.length ? [blocks.map(block => block.key)] : [])
+        return
+      }
+
+      const nextPages: string[][] = []
+      let currentPage: string[] = []
+      let currentHeight = 0
+
+      for (const blockEl of blockEls) {
+        const key = blockEl.dataset.cvBlockKey
+        if (!key) continue
+        const blockHeight = Math.ceil(blockEl.getBoundingClientRect().height)
+        const shouldMoveToNextPage = currentPage.length > 0 && currentHeight + blockHeight > maxHeight
+
+        if (shouldMoveToNextPage) {
+          nextPages.push(currentPage)
+          currentPage = [key]
+          currentHeight = blockHeight
+          continue
+        }
+
+        currentPage.push(key)
+        currentHeight += blockHeight
+      }
+
+      if (currentPage.length) nextPages.push(currentPage)
+      const nextSignature = JSON.stringify(nextPages)
+      setPages(current => JSON.stringify(current) === nextSignature ? current : nextPages)
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [blocks])
+
+  const pagesToRender = pages.length ? pages : [blocks.map(block => block.key)]
+
+  return (
+    <>
+      <div ref={measureRef} className="cv-measure-root" aria-hidden="true">
+        <div className="cv-a4-sheet cv-a4-sheet--measure">
+          <div className="cv-a4-preview" style={{ fontFamily: 'Lexend, Segoe UI, Arial, sans-serif' }}>
+            <div className="cv-a4-content" data-cv-measure-content>
+              {blocks.map(block => <div key={block.key} className="cv-flow-block" data-cv-block-key={block.key}>{block.node}</div>)}
             </div>
-          ))}
-        </CvSection>
-      )}
-    </div>
+          </div>
+        </div>
+      </div>
+      <div className="cv-a4-stack">
+        {pagesToRender.map((pageKeys, pageIndex) => (
+          <div key={`page-${pageIndex}`} className="cv-a4-sheet">
+            <div className="cv-a4-preview" style={{ fontFamily: 'Lexend, Segoe UI, Arial, sans-serif' }}>
+              <div className="cv-a4-content">
+                {pageKeys.map(key => <div key={key} className="cv-flow-block">{blockMap.get(key)}</div>)}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
 
-function CvSection({ title, children }: { title: string; children: ReactNode }) {
-  return <section className="cv-section break-inside-avoid"><h2>{title}</h2>{children}</section>
+function CvSection({ title, children }: { title?: string; children: ReactNode }) {
+  return <section className={`cv-section break-inside-avoid${title ? '' : ' cv-section--continued'}`}>{title && <h2>{title}</h2>}{children}</section>
 }
 
 function InfoGrid({ rows }: { rows: [string, ReactNode][] }) {
@@ -1226,13 +1386,39 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
     <section className="cv-studio-shell rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_16px_46px_rgba(15,23,42,0.08)] sm:p-5">
       <style>{`
         #cv-print-root { display: none; }
+        .cv-a4-stack {
+          display: grid;
+          gap: 18px;
+        }
+        .cv-a4-sheet {
+          width: min(210mm, 100%);
+          min-height: 297mm;
+          margin: 0 auto;
+        }
         .cv-a4-preview {
+          box-sizing: border-box;
           min-height: 297mm;
           padding: 15mm 20mm;
           font-size: 11pt;
           line-height: 1.52;
           overflow-wrap: anywhere;
           word-break: break-word;
+          background: #fff;
+          box-shadow: 0 28px 80px rgba(15, 23, 42, 0.16);
+        }
+        .cv-a4-content {
+          min-height: calc(297mm - 30mm);
+        }
+        .cv-flow-block {
+          display: flow-root;
+        }
+        .cv-measure-root {
+          position: fixed;
+          top: 0;
+          left: -99999px;
+          visibility: hidden;
+          pointer-events: none;
+          z-index: -1;
         }
         .cv-header {
           display: flex;
@@ -1299,6 +1485,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           break-inside: avoid;
           page-break-inside: avoid;
         }
+        .cv-section--continued {
+          margin-top: 3mm;
+        }
         .cv-section h2 {
           margin: 0 0 2.5mm;
           color: #0f172a;
@@ -1335,7 +1524,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           page-break-inside: avoid;
         }
         .cv-project {
-          margin-bottom: 6.5mm;
+          margin-bottom: 0;
           break-inside: avoid;
           page-break-inside: avoid;
         }
@@ -1374,8 +1563,17 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           word-break: break-word;
         }
         @media (max-width: 900px) {
+          .cv-a4-sheet {
+            width: 100%;
+            min-height: auto;
+          }
           .cv-a4-preview {
+            min-height: auto;
             padding: 15mm 20mm;
+            box-shadow: 0 18px 46px rgba(15, 23, 42, 0.12);
+          }
+          .cv-a4-content {
+            min-height: auto;
           }
           .cv-header h1 {
             font-size: 28pt;
@@ -1390,6 +1588,7 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
           html, body { width: 210mm; min-height: 297mm; background: #fff !important; }
           body * { visibility: hidden !important; }
           #cv-print-root, #cv-print-root * { visibility: visible !important; }
+          #cv-print-root .cv-measure-root { display: none !important; }
           #cv-print-root {
             display: block !important;
             position: absolute !important;
@@ -1399,6 +1598,21 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
             background: #fff !important;
             z-index: 2147483647 !important;
           }
+          #cv-print-root .cv-a4-stack {
+            display: block !important;
+            gap: 0 !important;
+          }
+          #cv-print-root .cv-a4-sheet {
+            width: 210mm !important;
+            min-height: 297mm !important;
+            margin: 0 !important;
+            break-after: page;
+            page-break-after: always;
+          }
+          #cv-print-root .cv-a4-sheet:last-child {
+            break-after: auto;
+            page-break-after: auto;
+          }
           #cv-print-root .cv-a4-preview {
             width: 210mm !important;
             max-width: 210mm !important;
@@ -1406,6 +1620,9 @@ export default function CvStudio({ data, onReload }: { data: any; onReload: () =
             margin: 0 !important;
             padding: 18mm 18mm 20mm !important;
             box-shadow: none !important;
+          }
+          #cv-print-root .cv-a4-content {
+            min-height: calc(297mm - 38mm) !important;
           }
           #cv-print-root .cv-profile-row {
             grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
