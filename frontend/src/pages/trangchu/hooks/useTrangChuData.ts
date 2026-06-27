@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API_URL, taoUrlTaiNguyen } from '../../../lib/env'
 import { isPublicJobVisible } from '../../../lib/jobVisibility'
-import { formatJobDateLine, formatJobDeadlineState } from '../../../lib/jobPresentation'
+import { formatJobDeadlineState } from '../../../lib/jobPresentation'
 import type { HomeJob, HomeCompany } from '../../../data/trangChuData'
 
 export function useTrangChuData() {

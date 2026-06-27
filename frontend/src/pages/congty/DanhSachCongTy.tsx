@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowRight, Building2, Filter, MapPin, Search, SlidersHorizontal, Star, Users, X, Zap } from 'lucide-react'
 import congTyCongNgheBg from '../../assets/CongTyCongNGhe.png'
 import Pagination from '../../components/Pagination'
