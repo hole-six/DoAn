@@ -69,7 +69,7 @@ export function PWAInstallPrompt() {
             <div style={{ fontSize: 13, color: '#6b7280' }}>Truy cập nhanh hơn và sử dụng như một ứng dụng riêng.</div>
           </div>
           <button onClick={xuLyCaiDat} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            ài đặt
+            Cài đặt
           </button>
           <button onClick={xuLyDong} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4 }}>
             <AppIcon icon={X} size={20} style={{ color: '#9ca3af' }} />
